@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Credible Intervals, Computation &amp; the Verdict – The Quantitative Social Scientist</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../content/03-regression/index.html" rel="next">
+<link href="../../content/02-inference/bayesian-machinery.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-a6a8d579619ec60b6cc16f651ef3cf7e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-e06e5700cfc727e31a5c8bda3c8b1a89.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">The Quantitative Social Scientist</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/00-overture/index.html"> 
+<span class="menu-text">Curriculum</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/ml-track/index.html"> 
+<span class="menu-text">ML Track</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../appendices/math/index.html"> 
+<span class="menu-text">Appendices</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">How to use this</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://profsarthak.github.io/quant-social-scientist/" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/02-inference/index.html">II · Inference</a></li><li class="breadcrumb-item"><a href="../../content/02-inference/bayesian-worldview.html">Bayesian Inference</a></li><li class="breadcrumb-item"><a href="../../content/02-inference/credible-intervals-and-computation.html">Credible Intervals, Computation &amp; the Verdict</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Start here</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Quantitative Social Scientist</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to use this</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/what-quantitative-research-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Quantitative Social Science Actually Does</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/anatomy-of-a-study.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Anatomy of a Study</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/concepts-and-measurement.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Concepts &amp; Variables: The Problem of Measurement</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/variables-and-relationships.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Cast of Characters: Kinds of Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/research-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A Field Guide to Research Designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/credibility-and-failure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Makes Research Credible — and How It Fails</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/ethics-and-human-subjects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ethics and the Human-Subjects Frame</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Probability</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/what-probability-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Probability Actually Is</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/sample-spaces-and-axioms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sample Spaces, Events &amp; the Axioms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/counting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Counting: The Arithmetic of Possibility</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Probability &amp; Independence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/bayes-theorem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bayes’ Theorem: Updating Beliefs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/random-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random Variables (Discrete &amp; Continuous)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/expectation-and-variance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expectation &amp; Variance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/common-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Common Distributions and What They Model</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/covariance-and-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Joint Distributions, Covariance &amp; Correlation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/law-of-large-numbers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Law of Large Numbers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Describing Data</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/location-spread-shape.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Location, Spread &amp; Shape</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/exploratory-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory Data Analysis &amp; Visual Summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/messy-real-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Messy Real Data: What to Expect</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">II · Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">II · Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Classical Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-and-survey-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling &amp; Survey Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-distributions-clt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling Distributions &amp; the Central Limit Theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Estimation: From Sample to Best Guess</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Confidence Intervals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hypothesis Testing &amp; p-values</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical Power &amp; Sample Size</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/replication-crisis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Replication Crisis, Made Rigorous</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-worldview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bayesian Worldview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-machinery.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Machinery: Priors, Likelihoods, Posteriors</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/credible-intervals-and-computation.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Credible Intervals, Computation &amp; the Verdict</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">IV · Predictive Modelling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">IV · The Computational Turn: Predictive Modelling</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true">
+ <span class="menu-text">ML Track (separate)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ML Track (separate)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/math/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Mathematics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/computing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Computing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#the-credible-interval" id="toc-the-credible-interval" class="nav-link" data-scroll-target="#the-credible-interval">The credible interval</a></li>
+  <li><a href="#equal-tailed-vs-highest-posterior-density" id="toc-equal-tailed-vs-highest-posterior-density" class="nav-link" data-scroll-target="#equal-tailed-vs-highest-posterior-density">Equal-tailed vs highest-posterior-density</a>
+  <ul class="collapse">
+  <li><a href="#credible-vs-confidence-on-the-same-data" id="toc-credible-vs-confidence-on-the-same-data" class="nav-link" data-scroll-target="#credible-vs-confidence-on-the-same-data">Credible vs confidence, on the same data</a></li>
+  </ul></li>
+  <li><a href="#why-we-must-compute" id="toc-why-we-must-compute" class="nav-link" data-scroll-target="#why-we-must-compute">Why we must compute</a></li>
+  <li><a href="#mcmc-sampling-without-the-integral" id="toc-mcmc-sampling-without-the-integral" class="nav-link" data-scroll-target="#mcmc-sampling-without-the-integral">MCMC: sampling without the integral</a>
+  <ul class="collapse">
+  <li><a href="#watch-a-metropolis-sampler-work" id="toc-watch-a-metropolis-sampler-work" class="nav-link" data-scroll-target="#watch-a-metropolis-sampler-work">Watch a Metropolis sampler work</a></li>
+  </ul></li>
+  <li><a href="#summarising-with-samples" id="toc-summarising-with-samples" class="nav-link" data-scroll-target="#summarising-with-samples">Summarising with samples</a></li>
+  <li><a href="#diagnostics-did-the-walk-actually-work" id="toc-diagnostics-did-the-walk-actually-work" class="nav-link" data-scroll-target="#diagnostics-did-the-walk-actually-work">Diagnostics: did the walk actually work?</a></li>
+  <li><a href="#the-verdict-bayesian-vs-frequentist" id="toc-the-verdict-bayesian-vs-frequentist" class="nav-link" data-scroll-target="#the-verdict-bayesian-vs-frequentist">The verdict: Bayesian vs frequentist</a></li>
+  <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
+  <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
+  <li><a href="#appendix-the-full-mathematics" id="toc-appendix-the-full-mathematics" class="nav-link" data-scroll-target="#appendix-the-full-mathematics">Appendix · the full mathematics</a></li>
+  <li><a href="#connections" id="toc-connections" class="nav-link" data-scroll-target="#connections">Connections</a></li>
+  <li><a href="#study-with-notebooklm" id="toc-study-with-notebooklm" class="nav-link" data-scroll-target="#study-with-notebooklm">Study with NotebookLM</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/02-inference/index.html">II · Inference</a></li><li class="breadcrumb-item"><a href="../../content/02-inference/bayesian-worldview.html">Bayesian Inference</a></li><li class="breadcrumb-item"><a href="../../content/02-inference/credible-intervals-and-computation.html">Credible Intervals, Computation &amp; the Verdict</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Credible Intervals, Computation &amp; the Verdict</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">Reading the posterior, computing one when no formula exists, and an honest reckoning of Bayesian against frequentist.</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="lead-kernel">
+<p>A posterior is the whole answer — but you still have to <em>read</em> it, and for any realistic model you can’t even <em>write</em> it down in closed form. This entry does both: it shows how to summarise a posterior into the interval people actually wanted, how a clever random walk (MCMC) conjures that posterior without the impossible integral, and where, in the end, Bayesian and frequentist thinking each earn their keep.</p>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p>This is the last entry of Part II, and it closes two loops. First, it delivers the interval the <a href="../../content/02-inference/confidence-intervals.html">confidence interval</a> <em>couldn’t</em> — one you may legitimately read as “95% probability the parameter is in here.” Second, it confronts the wall raised in <a href="../../content/02-inference/bayesian-machinery.html">B2</a>: the denominator is an intractable integral, so how does anyone <em>do</em> Bayesian inference on a real problem? The answer — <strong>simulation</strong> — is the engine behind the entire modern Bayesian toolkit, and once you grasp its core trick the rest is detail. Then we step back and weigh the two paradigms honestly, because a quantitative social scientist should be <strong>bilingual</strong>, not partisan.</p>
+</section>
+<section id="the-credible-interval" class="level2">
+<h2 class="anchored" data-anchor-id="the-credible-interval">The credible interval</h2>
+<p>A <strong>credible interval</strong> is a range read straight off the posterior that contains a stated share of its probability mass — a 95% credible interval holds 95% of the posterior. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> And here is the pay-off the whole sub-chapter has been building toward:</p>
+<div class="callout callout-style-default callout-important callout-titled" title="What a Bayesian may say">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>What a Bayesian may say
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A <strong>frequentist cannot</strong> say “there is a 95% probability the true value lies in 1%–5%,” because to them the parameter is a fixed constant — the interval either contains it or doesn’t. A <strong>Bayesian can</strong> say exactly that, because the parameter <em>is</em> a random variable carrying a distribution. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
+</div>
+</div>
+<p>The credible interval describes <strong>post-data uncertainty about the specific parameter</strong> — your actual state of knowledge now — rather than the long-run behaviour of a procedure. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> Lambert’s running example: a 95% credible interval of <span class="math inline">0\% \le \text{RT} \le 4\%</span> for the proportion of red-tailed penguins is a <em>direct</em> statement that the true proportion is, with 95% probability, in that range. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> It is the interval everyone always <em>thought</em> they were getting.</p>
+</section>
+<section id="equal-tailed-vs-highest-posterior-density" class="level2">
+<h2 class="anchored" data-anchor-id="equal-tailed-vs-highest-posterior-density">Equal-tailed vs highest-posterior-density</h2>
+<p>There are two ways to carve a 95% region out of a posterior. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
+<ul>
+<li><strong>Equal-tailed (central) interval</strong> — trim the bottom 2.5% and top 2.5% of the mass; the interval runs between the 2.5th and 97.5th percentiles and is centred on the median.</li>
+<li><strong>Highest posterior density (HPD) interval</strong> — the set of values such that <em>every point inside has higher posterior density than every point outside.</em> It is the <em>shortest</em> region holding 95%, and for a multi-peaked posterior it can be <strong>non-contiguous.</strong></li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled" title="Lambert's treasure-hunting pirate">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Lambert’s treasure-hunting pirate
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A pirate hunts buried gold. A <strong>central</strong> interval forces him to dig one long contiguous stretch — say 1.5 km to 8.5 km of beach — <em>even where the gold is unlikely</em> in the middle. An <strong>HPD</strong> interval lets him dig only the truly promising patches — 1–3 km <em>and</em> 7–9 km — skipping the barren middle and saving enormous excavation cost. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> When the posterior is single-peaked and symmetric the two intervals coincide; when it is skewed or bimodal, HPD is sharper.</p>
+</div>
+</div>
+<section id="credible-vs-confidence-on-the-same-data" class="level3">
+<h3 class="anchored" data-anchor-id="credible-vs-confidence-on-the-same-data">Credible vs confidence, on the same data</h3>
+<p>Here is the contrast made concrete. We flip a coin 20 times, see 14 heads, and form <em>both</em> 95% intervals. The Bayesian posterior (flat prior) is <span class="math inline">\text{Beta}(15,7)</span>; its credible interval is shaded. The frequentist Wald interval sits just below. The numbers nearly coincide — but what they <em>claim</em> could not be more different.</p>
+<div id="cell-fig-credible-vs-confidence" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Show the figure code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> lgamma</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> beta_pdf(theta, a, b):</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    logB <span class="op">=</span> lgamma(a) <span class="op">+</span> lgamma(b) <span class="op">-</span> lgamma(a <span class="op">+</span> b)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.exp((a <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(theta) <span class="op">+</span> (b <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(<span class="dv">1</span> <span class="op">-</span> theta) <span class="op">-</span> logB)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>k, n <span class="op">=</span> <span class="dv">14</span>, <span class="dv">20</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>a_post, b_post <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> k, <span class="dv">1</span> <span class="op">+</span> (n <span class="op">-</span> k)          <span class="co"># flat prior Beta(1,1) -&gt; Beta(15,7)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> np.linspace(<span class="fl">1e-4</span>, <span class="dv">1</span> <span class="op">-</span> <span class="fl">1e-4</span>, <span class="dv">2000</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>post <span class="op">=</span> beta_pdf(theta, a_post, b_post)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 95% equal-tailed credible interval by numerical CDF</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>cdf <span class="op">=</span> np.cumsum(post) <span class="op">*</span> (theta[<span class="dv">1</span>] <span class="op">-</span> theta[<span class="dv">0</span>])</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>cdf <span class="op">/=</span> cdf[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>lo_c <span class="op">=</span> theta[np.searchsorted(cdf, <span class="fl">0.025</span>)]</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>hi_c <span class="op">=</span> theta[np.searchsorted(cdf, <span class="fl">0.975</span>)]</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Frequentist Wald 95% CI</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>phat <span class="op">=</span> k <span class="op">/</span> n</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>se <span class="op">=</span> np.sqrt(phat <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> phat) <span class="op">/</span> n)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>lo_f, hi_f <span class="op">=</span> phat <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se, phat <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.9</span>))</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>ax.plot(theta, post, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, lw<span class="op">=</span><span class="fl">2.2</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>ax.fill_between(theta, post, where<span class="op">=</span>(theta <span class="op">&gt;=</span> lo_c) <span class="op">&amp;</span> (theta <span class="op">&lt;=</span> hi_c),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>                color<span class="op">=</span><span class="st">"#1f3a5f"</span>, alpha<span class="op">=</span><span class="fl">0.25</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>ax.errorbar(phat, <span class="op">-</span><span class="fl">0.25</span>, xerr<span class="op">=</span>[[phat <span class="op">-</span> lo_f], [hi_f <span class="op">-</span> phat]], fmt<span class="op">=</span><span class="st">"o"</span>,</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"#c0392b"</span>, capsize<span class="op">=</span><span class="dv">4</span>, lw<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>ax.text(hi_c <span class="op">+</span> <span class="fl">0.01</span>, beta_pdf(<span class="fl">0.7</span>, a_post, b_post) <span class="op">*</span> <span class="fl">0.6</span>,</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"credible: [</span><span class="sc">{</span>lo_c<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>hi_c<span class="sc">:.2f}</span><span class="ss">]</span><span class="ch">\n</span><span class="ss">95% prob. θ in here"</span>,</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#1f3a5f"</span>, fontsize<span class="op">=</span><span class="fl">8.5</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>ax.text(hi_f <span class="op">+</span> <span class="fl">0.01</span>, <span class="op">-</span><span class="fl">0.25</span>, <span class="ss">f"confidence: [</span><span class="sc">{</span>lo_f<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>hi_f<span class="sc">:.2f}</span><span class="ss">]</span><span class="ch">\n</span><span class="ss">procedure covers 95%"</span>,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#c0392b"</span>, fontsize<span class="op">=</span><span class="fl">8.5</span>, va<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="fl">0.3</span>, <span class="fl">1.0</span>)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([])</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"θ — the coin's bias"</span>)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Same data, two intervals, two meanings"</span>)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-credible-vs-confidence" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-credible-vs-confidence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="credible-intervals-and-computation_files/figure-html/fig-credible-vs-confidence-output-1.png" width="656" height="365" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-credible-vs-confidence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Two 95% intervals for a coin’s bias from 14 heads in 20 flips. The blue curve is the Bayesian posterior Beta(15,7); the shaded band is its 95% credible interval — ‘95% probability θ is in here.’ The red bar is the frequentist Wald confidence interval — ‘95% of such intervals would cover the fixed θ.’ Nearly the same numbers; fundamentally different meanings.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The lesson of the picture: agreement on the <em>numbers</em> hides a chasm in <em>meaning</em>. The credible interval is a claim about the parameter; the confidence interval is a claim about the procedure. In this simple, flat-prior case they nearly match — but in small samples with real prior information, or in complex models, they diverge, and only one of them answers the question you actually asked.</p>
+</section>
+</section>
+<section id="why-we-must-compute" class="level2">
+<h2 class="anchored" data-anchor-id="why-we-must-compute">Why we must compute</h2>
+<p>For all but textbook models, the posterior has <strong>no closed form</strong>, because the normalising denominator <span class="math inline">p(\text{data}) = \int p(\text{data}\mid\theta)\,p(\theta)\,d\theta</span> is an integral over <em>every</em> parameter value — and in a multi-parameter model that is <strong>high-dimensional</strong>. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> Lambert’s recurring example: test scores across 100 schools can demand a <strong>200-dimensional integral</strong>, which no computer can solve exactly or even approximate by brute force. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> If we had to evaluate that denominator, applied Bayesian statistics would be dead in the water.</p>
+</section>
+<section id="mcmc-sampling-without-the-integral" class="level2">
+<h2 class="anchored" data-anchor-id="mcmc-sampling-without-the-integral">MCMC: sampling without the integral</h2>
+<p>The escape is <strong>Markov Chain Monte Carlo (MCMC)</strong> — instead of <em>computing</em> the posterior, <strong>draw samples from it</strong>, and let the cloud of samples stand in for the distribution. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> The magic is that you can do this <em>without ever computing the denominator.</em></p>
+<p>MCMC is a <strong>guided random walk</strong>: each new sample depends on the current one, and the walk is rigged so it lingers in regions of high posterior density. Over time the collected points <em>mirror the posterior’s shape.</em> <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> The simplest version is the <strong>Metropolis algorithm</strong>:</p>
+<ol type="1">
+<li><strong>Propose</strong> a step to a nearby location.</li>
+<li>If the posterior density there is <strong>higher</strong> (uphill), <strong>accept</strong> — always move toward more probable values.</li>
+<li>If it is <strong>lower</strong> (downhill), accept only <strong>with probability <span class="math inline">r</span></strong>, the ratio of the new density to the old. So the walk <em>usually</em> climbs but <em>occasionally</em> wanders down, which is what lets it explore the whole distribution instead of getting stuck on the peak. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled" title="Lambert's explorer in the fog">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Lambert’s explorer in the fog
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Imagine mapping a mountain range permanently shrouded in fog. You can’t photograph it from a satellite (you can’t see the whole posterior). But you <em>can</em> take local steps, recording your altitude and coordinates at each. Take enough steps — preferring uphill but sometimes slipping down — and your notebook reconstructs a full contour map of the range. That notebook is your set of MCMC samples. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
+</div>
+</div>
+<p>The crucial sleight of hand lives in step 3: because <span class="math inline">r</span> is a <strong>ratio</strong> of two posterior densities, the intractable denominator <span class="math inline">p(\text{data})</span> — identical top and bottom — <strong>cancels exactly.</strong> MCMC needs only the <em>unnormalised</em> product likelihood × prior, which we can always evaluate. (The algebra is in the appendix.)</p>
+<section id="watch-a-metropolis-sampler-work" class="level3">
+<h3 class="anchored" data-anchor-id="watch-a-metropolis-sampler-work">Watch a Metropolis sampler work</h3>
+<p>Below, a Metropolis sampler — knowing only the unnormalised target <span class="math inline">\theta^{14}(1-\theta)^6</span>, never the normaliser — recovers the <span class="math inline">\text{Beta}(15,7)</span> posterior from the figure above. The left panel is the <strong>trace</strong> (the walk’s path over time); the right is the <strong>histogram</strong> of its samples with the true posterior overlaid. The simulation never computed an integral.</p>
+<div id="cell-fig-metropolis" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Show the sampler code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> lgamma</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">20</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_target(t):                      <span class="co"># log of theta^14 (1-theta)^6, up to a constant</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t <span class="op">&lt;=</span> <span class="dv">0</span> <span class="kw">or</span> t <span class="op">&gt;=</span> <span class="dv">1</span>:</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">-</span>np.inf</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">14</span> <span class="op">*</span> np.log(t) <span class="op">+</span> <span class="dv">6</span> <span class="op">*</span> np.log(<span class="dv">1</span> <span class="op">-</span> t)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>n_steps, burn <span class="op">=</span> <span class="dv">8000</span>, <span class="dv">2000</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> np.empty(n_steps)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> <span class="fl">0.5</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>lt <span class="op">=</span> log_target(t)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_steps):</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    prop <span class="op">=</span> t <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.08</span>)      <span class="co"># propose a nearby step</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    lp <span class="op">=</span> log_target(prop)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> np.log(rng.random()) <span class="op">&lt;</span> lp <span class="op">-</span> lt:  <span class="co"># accept uphill always, downhill with prob r</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        t, lt <span class="op">=</span> prop, lp</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    samples[i] <span class="op">=</span> t</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>post <span class="op">=</span> samples[burn:]</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> beta_pdf(theta, a, b):</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    logB <span class="op">=</span> lgamma(a) <span class="op">+</span> lgamma(b) <span class="op">-</span> lgamma(a <span class="op">+</span> b)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.exp((a <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(theta) <span class="op">+</span> (b <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(<span class="dv">1</span> <span class="op">-</span> theta) <span class="op">-</span> logB)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>fig, (axT, axH) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">3.4</span>),</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>                               gridspec_kw<span class="op">=</span>{<span class="st">"width_ratios"</span>: [<span class="fl">1.5</span>, <span class="dv">1</span>]})</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>axT.plot(np.arange(burn), samples[:burn], color<span class="op">=</span><span class="st">"#9aa0a6"</span>, lw<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>axT.plot(np.arange(burn, n_steps), post, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, lw<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>axT.axvline(burn, color<span class="op">=</span><span class="st">"#c0392b"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>axT.text(burn <span class="op">+</span> <span class="dv">100</span>, <span class="fl">0.92</span>, <span class="st">"burn-in discarded"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>axT.set_title(<span class="st">"Trace: the 'fuzzy caterpillar'"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>axT.set_xlabel(<span class="st">"step"</span>)<span class="op">;</span> axT.set_ylabel(<span class="st">"θ"</span>)<span class="op">;</span> axT.set_ylim(<span class="fl">0.3</span>, <span class="fl">1.0</span>)</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="fl">0.3</span>, <span class="fl">1.0</span>, <span class="dv">300</span>)</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>axH.hist(post, bins<span class="op">=</span><span class="dv">40</span>, density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, alpha<span class="op">=</span><span class="fl">0.45</span>, orientation<span class="op">=</span><span class="st">"horizontal"</span>)</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>axH.plot(beta_pdf(xs, <span class="dv">15</span>, <span class="dv">7</span>), xs, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, lw<span class="op">=</span><span class="fl">2.0</span>)</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>axH.set_title(<span class="ss">f"Samples vs Beta(15,7)</span><span class="ch">\n</span><span class="ss">mean ≈ </span><span class="sc">{</span>post<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>axH.set_ylim(<span class="fl">0.3</span>, <span class="fl">1.0</span>)<span class="op">;</span> axH.set_yticks([])<span class="op">;</span> axH.set_xlabel(<span class="st">"density"</span>)</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-metropolis" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-metropolis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="credible-intervals-and-computation_files/figure-html/fig-metropolis-output-1.png" width="854" height="317" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-metropolis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: A Metropolis sampler recovering Beta(15,7) using only the unnormalised target. Left: the trace plot — a healthy ‘fuzzy caterpillar’ oscillating around a stable centre after a short burn-in (grey). Right: the histogram of post-burn-in samples matches the analytic posterior (blue curve) — the denominator was never computed.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The sampler’s mean <span class="math inline">\approx 0.68</span> recovers the analytic posterior mean <span class="math inline">15/22 = 0.682</span> — and it did so by <em>walking</em>, never by integrating. Scale this idea up (with smarter proposals like Hamiltonian Monte Carlo) and it handles the 200-dimensional models that defeat pen and paper.</p>
+</section>
+</section>
+<section id="summarising-with-samples" class="level2">
+<h2 class="anchored" data-anchor-id="summarising-with-samples">Summarising with samples</h2>
+<p>Once MCMC hands you thousands of draws, the <a href="../../content/01-foundations/law-of-large-numbers.html">Law of Large Numbers</a> does the rest — sample summaries approximate posterior summaries. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
+<ul>
+<li><strong>Posterior mean</strong> ≈ the average of the samples.</li>
+<li><strong>95% credible interval</strong> ≈ the 2.5th and 97.5th <strong>percentiles of the sorted samples</strong> — no formula, just counting. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+<li><strong>Posterior variance</strong> ≈ the variance of the samples.</li>
+</ul>
+<p>The posterior you couldn’t write down becomes a list of numbers you can summarise any way you like.</p>
+</section>
+<section id="diagnostics-did-the-walk-actually-work" class="level2">
+<h2 class="anchored" data-anchor-id="diagnostics-did-the-walk-actually-work">Diagnostics: did the walk actually work?</h2>
+<p>Because MCMC starts somewhere arbitrary and explores blindly, you must <em>check</em> that it found the real posterior. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
+<ul>
+<li><strong>Burn-in (warm-up).</strong> Early samples are contaminated by the random starting point, so discard them — often the first half of the chain — keeping only draws from the settled distribution. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+<li><strong>Trace plots.</strong> Plot the walk over time. A healthy chain is a <strong>“fuzzy caterpillar”</strong> — rapidly oscillating around a stable centre (the left panel above). A trace that drifts or sticks is a warning. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+<li><strong>Multiple chains — “Bob’s Bees.”</strong> Release <em>one</em> bee in a dark house and it may get stuck in a single room, fooling you into thinking it mapped the whole place. Release <strong>several bees from different starting points</strong>; if they all converge on the same regions, you can trust the map. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+<li><strong><span class="math inline">\hat R</span> (R-hat).</strong> The quantitative version of Bob’s Bees: it compares variation <em>within</em> chains to variation <em>between</em> chains. <strong>Convergence is signalled by <span class="math inline">\hat R \approx 1.0</span>;</strong> values much above 1 mean the chains disagree and haven’t converged. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+</ul>
+</section>
+<section id="the-verdict-bayesian-vs-frequentist" class="level2">
+<h2 class="anchored" data-anchor-id="the-verdict-bayesian-vs-frequentist">The verdict: Bayesian vs frequentist</h2>
+<p>Lambert’s closing stance is refreshingly even-handed — the two schools are <strong>different paths to the same goal</strong> of learning from noisy data. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
+<p><strong>Where Bayesian wins:</strong></p>
+<ul>
+<li><strong>Natural uncertainty statements.</strong> “95% probability the effect is positive” is what policymakers actually want, and it is a <em>direct</em> Bayesian output. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+<li><strong>Prior information.</strong> Past studies and expert knowledge enter the model <em>formally</em> rather than informally. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+<li><strong>Small samples.</strong> Bayesian inference stays coherent when frequentist <em>asymptotic</em> (large-<span class="math inline">n</span>) approximations break down. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+<li><strong>Flexibility.</strong> MCMC fits models of essentially arbitrary complexity — hierarchical, multilevel, custom — that have no closed-form frequentist solution. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+</ul>
+<p><strong>Where critics push back:</strong></p>
+<ul>
+<li><strong>Subjectivity.</strong> Choosing a prior strikes some as unscientific — though Lambert’s retort stands: frequentist model and test choices are <em>equally</em> subjective, just less visible. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+<li><strong>Computational cost.</strong> MCMC can be slow and demanding for big models. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled" title="Lambert's practical guidance: don't be a zealot">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Lambert’s practical guidance: don’t be a zealot
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Start simple — frequentist <strong>OLS or maximum likelihood</strong> to get an initial feel for the data — then <strong>build up</strong> to Bayesian models as complexity and the need for rigorous uncertainty quantification grow. And whatever you fit, treat <strong>posterior predictive checks</strong> (does data simulated from your fitted model resemble the real data?) as your <strong>“best friend.”</strong> <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
+</div>
+</div>
+<p>That is the right note to end Part II on: the tools are not tribes to join but instruments to choose between, by the job in front of you.</p>
+</section>
+<section id="common-pitfalls" class="level2">
+<h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
+<div class="callout callout-style-default callout-warning callout-titled" title="Where this goes wrong in practice">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Where this goes wrong in practice
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><p><strong>Calling a confidence interval a credible interval.</strong> Only the Bayesian interval licenses “95% probability the parameter is in here.” Don’t smuggle that reading into a frequentist CI. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p></li>
+<li><p><strong>Trusting un-diagnosed MCMC.</strong> A pretty number from a chain that never converged is fiction. Always check trace plots, run multiple chains, and confirm <span class="math inline">\hat R \approx 1</span>. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p></li>
+<li><p><strong>Forgetting burn-in.</strong> Including the arbitrary starting transient biases every summary. Discard the warm-up. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p></li>
+<li><p><strong>Using a central interval on a skewed or bimodal posterior.</strong> It can include low-density regions and exclude high-density ones; reach for HPD when the shape isn’t symmetric. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p></li>
+<li><p><strong>Becoming a zealot — either way.</strong> Bayesian isn’t automatically “better.” Match the method to the problem; start frequentist, escalate to Bayesian when the question demands it. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="from-the-sources" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Who says what">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Who says what
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Lambert, <em>A Student’s Guide to Bayesian Statistics</em></strong> — the whole entry: the credible interval and the “95% probability” contrast with the confidence interval (penguin example); equal-tailed vs HPD and the treasure-hunting pirate; the intractable denominator and the 200-dimensional integral; MCMC as a guided random walk, the Metropolis accept/reject rule, and the explorer-in-the-fog analogy; summarising the posterior from samples via the Law of Large Numbers; burn-in, the fuzzy-caterpillar trace, Bob’s Bees / multiple chains, and <span class="math inline">\hat R \approx 1</span>; the even-handed Bayesian-vs-frequentist verdict and the “start simple, don’t be a zealot, use posterior predictive checks” guidance.</li>
+<li><strong>Grinstead &amp; Snell, <em>Introduction to Probability</em></strong> — the Law of Large Numbers that justifies approximating posterior quantities by sample averages.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="appendix-the-full-mathematics" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="appendix-the-full-mathematics">Appendix · the full mathematics</h2>
+<div class="math-appendix">
+<p><strong>Why the denominator cancels (the heart of MCMC).</strong> The Metropolis acceptance ratio for a proposed move <span class="math inline">\theta \to \theta'</span> (with a symmetric proposal) is</p>
+<p><span class="math display">
+r = \frac{p(\theta'\mid \text{data})}{p(\theta\mid \text{data})}
+= \frac{\,p(\text{data}\mid\theta')\,p(\theta')\,/\,p(\text{data})\,}
+       {\,p(\text{data}\mid\theta)\,p(\theta)\,/\,p(\text{data})\,}
+= \frac{p(\text{data}\mid\theta')\,p(\theta')}{p(\text{data}\mid\theta)\,p(\theta)} .
+</span></p>
+<p>The intractable <span class="math inline">p(\text{data})</span> appears identically in numerator and denominator and <strong>cancels</strong> — so the sampler needs only the <em>unnormalised</em> posterior (likelihood × prior). Accept if <span class="math inline">r \ge 1</span>; otherwise accept with probability <span class="math inline">r</span> (in practice compare <span class="math inline">\log r</span> to <span class="math inline">\log u</span>, <span class="math inline">u\sim\text{U}(0,1)</span>, for numerical stability — exactly the <code>np.log(rng.random()) &lt; lp - lt</code> test in the code).</p>
+<p><strong>Why the chain targets the posterior.</strong> Metropolis satisfies <em>detailed balance</em> with respect to the posterior <span class="math inline">\pi</span>: <span class="math inline">\pi(\theta)\,T(\theta\to\theta') = \pi(\theta')\,T(\theta'\to\theta)</span>, which makes <span class="math inline">\pi</span> the chain’s <strong>stationary distribution.</strong> An ergodic chain then converges to <span class="math inline">\pi</span> regardless of start, so its long-run samples <em>are</em> posterior draws.</p>
+<p><strong>Monte Carlo error.</strong> For <span class="math inline">M</span> (roughly independent) posterior draws, a posterior mean estimate has standard error <span class="math inline">\approx \sigma_{\text{post}}/\sqrt{M}</span> — the same <span class="math inline">1/\sqrt{M}</span> law as everywhere else, so more samples buy more precision (slowly). Autocorrelation in the chain inflates this via the <em>effective sample size</em> <span class="math inline">M_{\text{eff}} &lt; M</span>.</p>
+<p><strong>Equal-tailed vs HPD, formally.</strong> The equal-tailed interval is <span class="math inline">[\,q_{0.025},\,q_{0.975}\,]</span> from the posterior quantile function. The 95% HPD is <span class="math inline">\{\theta : p(\theta\mid\text{data}) \ge c\}</span> for the largest <span class="math inline">c</span> with total mass <span class="math inline">0.95</span> — the shortest such region, and the level-set that gives the pirate his disconnected digging zones when the posterior is multimodal.</p>
+</div>
+</section>
+<section id="connections" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
+<ul>
+<li><strong>Builds on:</strong> <a href="../../content/02-inference/bayesian-machinery.html">the Bayesian machinery</a> (the intractable denominator that forces sampling), <a href="../../content/02-inference/bayesian-worldview.html">the Bayesian worldview</a> (the credible interval as the payoff of treating the parameter as random), <a href="../../content/02-inference/confidence-intervals.html">confidence intervals</a> (the frequentist foil), and <a href="../../content/01-foundations/law-of-large-numbers.html">the Law of Large Numbers</a> (why sample summaries approximate the posterior).</li>
+<li><strong>Closes:</strong> Part II. You now hold both inferential languages — the <a href="../../content/02-inference/index.html">Classical Toolkit</a> and the Bayesian alternative — and can choose between them by the problem, not by tribe.</li>
+<li><strong>Leads to:</strong> Bayesian and frequentist <a href="../../content/03-regression/index.html">regression</a> in Part III, the hierarchical and regularised models of <a href="../../content/04-predictive/index.html">Part IV</a> (where MCMC and weakly-informative priors are standard), and the uncertainty quantification behind every <a href="../../content/05-causal-inference/index.html">causal estimate</a>.</li>
+</ul>
+</section>
+<section id="study-with-notebooklm" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="study-with-notebooklm">Study with NotebookLM</h2>
+<p>Take these prompts to the source library to push past the synthesis above:</p>
+<ol type="1">
+<li>“Explain Lambert’s distinction between a credible interval and a confidence interval, and exactly what each one licenses you to say.”</li>
+<li>“Walk me through the equal-tailed versus highest-posterior-density interval using the treasure-hunting analogy.”</li>
+<li>“Explain the Metropolis algorithm step by step and the explorer-in-the-fog analogy, and show why the denominator cancels.”</li>
+<li>“What MCMC diagnostics does Lambert recommend — burn-in, trace plots, multiple chains, R-hat — and what does each catch?”</li>
+<li>“Summarise Lambert’s honest comparison of Bayesian and frequentist inference and his practical advice on when to use each.”</li>
+</ol>
+
+
+<!-- -->
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-lambert_bayes" class="csl-entry" role="listitem">
+Lambert, Ben. 2018. <em>A Student’s Guide to Bayesian Statistics</em>. SAGE Publications.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/profsarthak\.github\.io\/quant-social-scientist\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../content/02-inference/bayesian-machinery.html" class="pagination-link" aria-label="The Machinery: Priors, Likelihoods, Posteriors">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">The Machinery: Priors, Likelihoods, Posteriors</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../content/03-regression/index.html" class="pagination-link" aria-label="III · Statistical Modelling: Regression">
+        <span class="nav-page-text">III · Statistical Modelling: Regression</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Credible Intervals, Computation &amp; the Verdict"</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Reading the posterior, computing one when no formula exists, and an honest reckoning of Bayesian against frequentist."</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>A posterior is the whole answer — but you still have to *read* it, and for any realistic model you</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>can't even *write* it down in closed form. This entry does both: it shows how to summarise a</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>posterior into the interval people actually wanted, how a clever random walk (MCMC) conjures that</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>posterior without the impossible integral, and where, in the end, Bayesian and frequentist thinking</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>each earn their keep.</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>This is the last entry of Part II, and it closes two loops. First, it delivers the interval the</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">confidence interval</span><span class="co">](confidence-intervals.qmd)</span> *couldn't* — one you may legitimately read as "95%</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>probability the parameter is in here." Second, it confronts the wall raised in</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">B2</span><span class="co">](bayesian-machinery.qmd)</span>: the denominator is an intractable integral, so how does anyone *do*</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>Bayesian inference on a real problem? The answer — **simulation** — is the engine behind the entire</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>modern Bayesian toolkit, and once you grasp its core trick the rest is detail. Then we step back and</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>weigh the two paradigms honestly, because a quantitative social scientist should be **bilingual**,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>not partisan.</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="fu">## The credible interval</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>A **credible interval** is a range read straight off the posterior that contains a stated share of</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>its probability mass — a 95% credible interval holds 95% of the posterior. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> And here</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>is the pay-off the whole sub-chapter has been building toward:</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>::: {.callout-important title="What a Bayesian may say"}</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>A **frequentist cannot** say "there is a 95% probability the true value lies in 1%–5%," because to</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>them the parameter is a fixed constant — the interval either contains it or doesn't.</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>A **Bayesian can** say exactly that, because the parameter *is* a random variable carrying a</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>distribution. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>The credible interval describes **post-data uncertainty about the specific parameter** — your actual</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>state of knowledge now — rather than the long-run behaviour of a procedure. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>Lambert's running example: a 95% credible interval of $0\% \le \text{RT} \le 4\%$ for the proportion</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>of red-tailed penguins is a *direct* statement that the true proportion is, with 95% probability, in</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>that range. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> It is the interval everyone always *thought* they were getting.</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="fu">## Equal-tailed vs highest-posterior-density</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>There are two ways to carve a 95% region out of a posterior. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Equal-tailed (central) interval** — trim the bottom 2.5% and top 2.5% of the mass; the interval</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>  runs between the 2.5th and 97.5th percentiles and is centred on the median.</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Highest posterior density (HPD) interval** — the set of values such that *every point inside has</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>  higher posterior density than every point outside.* It is the *shortest* region holding 95%, and</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>  for a multi-peaked posterior it can be **non-contiguous.**</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Lambert's treasure-hunting pirate"}</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>A pirate hunts buried gold. A **central** interval forces him to dig one long contiguous stretch —</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>say 1.5 km to 8.5 km of beach — *even where the gold is unlikely* in the middle. An **HPD** interval</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>lets him dig only the truly promising patches — 1–3 km *and* 7–9 km — skipping the barren middle and</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>saving enormous excavation cost. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> When the posterior is single-peaked and symmetric</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>the two intervals coincide; when it is skewed or bimodal, HPD is sharper.</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="fu">### Credible vs confidence, on the same data</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>Here is the contrast made concrete. We flip a coin 20 times, see 14 heads, and form *both* 95%</span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>intervals. The Bayesian posterior (flat prior) is $\text{Beta}(15,7)$; its credible interval is</span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>shaded. The frequentist Wald interval sits just below. The numbers nearly coincide — but what they</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>*claim* could not be more different.</span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-credible-vs-confidence</span></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Two 95% intervals for a coin's bias from 14 heads in 20 flips. The blue curve is the Bayesian posterior Beta(15,7); the shaded band is its 95% credible interval — '95% probability θ is in here.' The red bar is the frequentist Wald confidence interval — '95% of such intervals would cover the fixed θ.' Nearly the same numbers; fundamentally different meanings."</span></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> lgamma</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> beta_pdf(theta, a, b):</span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>    logB <span class="op">=</span> lgamma(a) <span class="op">+</span> lgamma(b) <span class="op">-</span> lgamma(a <span class="op">+</span> b)</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.exp((a <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(theta) <span class="op">+</span> (b <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(<span class="dv">1</span> <span class="op">-</span> theta) <span class="op">-</span> logB)</span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>k, n <span class="op">=</span> <span class="dv">14</span>, <span class="dv">20</span></span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>a_post, b_post <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> k, <span class="dv">1</span> <span class="op">+</span> (n <span class="op">-</span> k)          <span class="co"># flat prior Beta(1,1) -&gt; Beta(15,7)</span></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> np.linspace(<span class="fl">1e-4</span>, <span class="dv">1</span> <span class="op">-</span> <span class="fl">1e-4</span>, <span class="dv">2000</span>)</span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>post <span class="op">=</span> beta_pdf(theta, a_post, b_post)</span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a><span class="co"># 95% equal-tailed credible interval by numerical CDF</span></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>cdf <span class="op">=</span> np.cumsum(post) <span class="op">*</span> (theta[<span class="dv">1</span>] <span class="op">-</span> theta[<span class="dv">0</span>])</span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>cdf <span class="op">/=</span> cdf[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>lo_c <span class="op">=</span> theta[np.searchsorted(cdf, <span class="fl">0.025</span>)]</span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>hi_c <span class="op">=</span> theta[np.searchsorted(cdf, <span class="fl">0.975</span>)]</span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a><span class="co"># Frequentist Wald 95% CI</span></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>phat <span class="op">=</span> k <span class="op">/</span> n</span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>se <span class="op">=</span> np.sqrt(phat <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> phat) <span class="op">/</span> n)</span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>lo_f, hi_f <span class="op">=</span> phat <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se, phat <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se</span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.9</span>))</span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>ax.plot(theta, post, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, lw<span class="op">=</span><span class="fl">2.2</span>)</span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>ax.fill_between(theta, post, where<span class="op">=</span>(theta <span class="op">&gt;=</span> lo_c) <span class="op">&amp;</span> (theta <span class="op">&lt;=</span> hi_c),</span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>                color<span class="op">=</span><span class="st">"#1f3a5f"</span>, alpha<span class="op">=</span><span class="fl">0.25</span>)</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>ax.errorbar(phat, <span class="op">-</span><span class="fl">0.25</span>, xerr<span class="op">=</span>[[phat <span class="op">-</span> lo_f], [hi_f <span class="op">-</span> phat]], fmt<span class="op">=</span><span class="st">"o"</span>,</span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"#c0392b"</span>, capsize<span class="op">=</span><span class="dv">4</span>, lw<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>ax.text(hi_c <span class="op">+</span> <span class="fl">0.01</span>, beta_pdf(<span class="fl">0.7</span>, a_post, b_post) <span class="op">*</span> <span class="fl">0.6</span>,</span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"credible: [</span><span class="sc">{</span>lo_c<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>hi_c<span class="sc">:.2f}</span><span class="ss">]</span><span class="ch">\n</span><span class="ss">95% prob. θ in here"</span>,</span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#1f3a5f"</span>, fontsize<span class="op">=</span><span class="fl">8.5</span>)</span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>ax.text(hi_f <span class="op">+</span> <span class="fl">0.01</span>, <span class="op">-</span><span class="fl">0.25</span>, <span class="ss">f"confidence: [</span><span class="sc">{</span>lo_f<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>hi_f<span class="sc">:.2f}</span><span class="ss">]</span><span class="ch">\n</span><span class="ss">procedure covers 95%"</span>,</span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#c0392b"</span>, fontsize<span class="op">=</span><span class="fl">8.5</span>, va<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="fl">0.3</span>, <span class="fl">1.0</span>)</span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([])</span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"θ — the coin's bias"</span>)</span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Same data, two intervals, two meanings"</span>)</span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a>The lesson of the picture: agreement on the *numbers* hides a chasm in *meaning*. The credible</span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a>interval is a claim about the parameter; the confidence interval is a claim about the procedure. In</span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a>this simple, flat-prior case they nearly match — but in small samples with real prior information,</span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a>or in complex models, they diverge, and only one of them answers the question you actually asked.</span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why we must compute</span></span>
+<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a>For all but textbook models, the posterior has **no closed form**, because the normalising</span>
+<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a>denominator $p(\text{data}) = \int p(\text{data}\mid\theta)\,p(\theta)\,d\theta$ is an integral over</span>
+<span id="cb3-129"><a href="#cb3-129" aria-hidden="true" tabindex="-1"></a>*every* parameter value — and in a multi-parameter model that is **high-dimensional**.</span>
+<span id="cb3-130"><a href="#cb3-130" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Lambert's recurring example: test scores across 100 schools can demand a</span>
+<span id="cb3-131"><a href="#cb3-131" aria-hidden="true" tabindex="-1"></a>**200-dimensional integral**, which no computer can solve exactly or even approximate by brute force.</span>
+<span id="cb3-132"><a href="#cb3-132" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> If we had to evaluate that denominator, applied Bayesian statistics would be dead in</span>
+<span id="cb3-133"><a href="#cb3-133" aria-hidden="true" tabindex="-1"></a>the water.</span>
+<span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a><span class="fu">## MCMC: sampling without the integral</span></span>
+<span id="cb3-136"><a href="#cb3-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-137"><a href="#cb3-137" aria-hidden="true" tabindex="-1"></a>The escape is **Markov Chain Monte Carlo (MCMC)** — instead of *computing* the posterior, **draw</span>
+<span id="cb3-138"><a href="#cb3-138" aria-hidden="true" tabindex="-1"></a>samples from it**, and let the cloud of samples stand in for the distribution. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> The</span>
+<span id="cb3-139"><a href="#cb3-139" aria-hidden="true" tabindex="-1"></a>magic is that you can do this *without ever computing the denominator.*</span>
+<span id="cb3-140"><a href="#cb3-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-141"><a href="#cb3-141" aria-hidden="true" tabindex="-1"></a>MCMC is a **guided random walk**: each new sample depends on the current one, and the walk is rigged</span>
+<span id="cb3-142"><a href="#cb3-142" aria-hidden="true" tabindex="-1"></a>so it lingers in regions of high posterior density. Over time the collected points *mirror the</span>
+<span id="cb3-143"><a href="#cb3-143" aria-hidden="true" tabindex="-1"></a>posterior's shape.* <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> The simplest version is the **Metropolis algorithm**:</span>
+<span id="cb3-144"><a href="#cb3-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-145"><a href="#cb3-145" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Propose** a step to a nearby location.</span>
+<span id="cb3-146"><a href="#cb3-146" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>If the posterior density there is **higher** (uphill), **accept** — always move toward more</span>
+<span id="cb3-147"><a href="#cb3-147" aria-hidden="true" tabindex="-1"></a>   probable values.</span>
+<span id="cb3-148"><a href="#cb3-148" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>If it is **lower** (downhill), accept only **with probability $r$**, the ratio of the new density</span>
+<span id="cb3-149"><a href="#cb3-149" aria-hidden="true" tabindex="-1"></a>   to the old. So the walk *usually* climbs but *occasionally* wanders down, which is what lets it</span>
+<span id="cb3-150"><a href="#cb3-150" aria-hidden="true" tabindex="-1"></a>   explore the whole distribution instead of getting stuck on the peak. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-151"><a href="#cb3-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-152"><a href="#cb3-152" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Lambert's explorer in the fog"}</span>
+<span id="cb3-153"><a href="#cb3-153" aria-hidden="true" tabindex="-1"></a>Imagine mapping a mountain range permanently shrouded in fog. You can't photograph it from a</span>
+<span id="cb3-154"><a href="#cb3-154" aria-hidden="true" tabindex="-1"></a>satellite (you can't see the whole posterior). But you *can* take local steps, recording your</span>
+<span id="cb3-155"><a href="#cb3-155" aria-hidden="true" tabindex="-1"></a>altitude and coordinates at each. Take enough steps — preferring uphill but sometimes slipping down</span>
+<span id="cb3-156"><a href="#cb3-156" aria-hidden="true" tabindex="-1"></a>— and your notebook reconstructs a full contour map of the range. That notebook is your set of MCMC</span>
+<span id="cb3-157"><a href="#cb3-157" aria-hidden="true" tabindex="-1"></a>samples. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-158"><a href="#cb3-158" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-159"><a href="#cb3-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-160"><a href="#cb3-160" aria-hidden="true" tabindex="-1"></a>The crucial sleight of hand lives in step 3: because $r$ is a **ratio** of two posterior densities,</span>
+<span id="cb3-161"><a href="#cb3-161" aria-hidden="true" tabindex="-1"></a>the intractable denominator $p(\text{data})$ — identical top and bottom — **cancels exactly.** MCMC</span>
+<span id="cb3-162"><a href="#cb3-162" aria-hidden="true" tabindex="-1"></a>needs only the *unnormalised* product likelihood × prior, which we can always evaluate. (The algebra</span>
+<span id="cb3-163"><a href="#cb3-163" aria-hidden="true" tabindex="-1"></a>is in the appendix.)</span>
+<span id="cb3-164"><a href="#cb3-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-165"><a href="#cb3-165" aria-hidden="true" tabindex="-1"></a><span class="fu">### Watch a Metropolis sampler work</span></span>
+<span id="cb3-166"><a href="#cb3-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-167"><a href="#cb3-167" aria-hidden="true" tabindex="-1"></a>Below, a Metropolis sampler — knowing only the unnormalised target $\theta^{14}(1-\theta)^6$, never</span>
+<span id="cb3-168"><a href="#cb3-168" aria-hidden="true" tabindex="-1"></a>the normaliser — recovers the $\text{Beta}(15,7)$ posterior from the figure above. The left panel is</span>
+<span id="cb3-169"><a href="#cb3-169" aria-hidden="true" tabindex="-1"></a>the **trace** (the walk's path over time); the right is the **histogram** of its samples with the</span>
+<span id="cb3-170"><a href="#cb3-170" aria-hidden="true" tabindex="-1"></a>true posterior overlaid. The simulation never computed an integral.</span>
+<span id="cb3-171"><a href="#cb3-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-174"><a href="#cb3-174" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb3-175"><a href="#cb3-175" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-metropolis</span></span>
+<span id="cb3-176"><a href="#cb3-176" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "A Metropolis sampler recovering Beta(15,7) using only the unnormalised target. Left: the trace plot — a healthy 'fuzzy caterpillar' oscillating around a stable centre after a short burn-in (grey). Right: the histogram of post-burn-in samples matches the analytic posterior (blue curve) — the denominator was never computed."</span></span>
+<span id="cb3-177"><a href="#cb3-177" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb3-178"><a href="#cb3-178" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the sampler code"</span></span>
+<span id="cb3-179"><a href="#cb3-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-180"><a href="#cb3-180" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-181"><a href="#cb3-181" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-182"><a href="#cb3-182" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> lgamma</span>
+<span id="cb3-183"><a href="#cb3-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-184"><a href="#cb3-184" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">20</span>)</span>
+<span id="cb3-185"><a href="#cb3-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-186"><a href="#cb3-186" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_target(t):                      <span class="co"># log of theta^14 (1-theta)^6, up to a constant</span></span>
+<span id="cb3-187"><a href="#cb3-187" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t <span class="op">&lt;=</span> <span class="dv">0</span> <span class="kw">or</span> t <span class="op">&gt;=</span> <span class="dv">1</span>:</span>
+<span id="cb3-188"><a href="#cb3-188" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">-</span>np.inf</span>
+<span id="cb3-189"><a href="#cb3-189" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">14</span> <span class="op">*</span> np.log(t) <span class="op">+</span> <span class="dv">6</span> <span class="op">*</span> np.log(<span class="dv">1</span> <span class="op">-</span> t)</span>
+<span id="cb3-190"><a href="#cb3-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-191"><a href="#cb3-191" aria-hidden="true" tabindex="-1"></a>n_steps, burn <span class="op">=</span> <span class="dv">8000</span>, <span class="dv">2000</span></span>
+<span id="cb3-192"><a href="#cb3-192" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> np.empty(n_steps)</span>
+<span id="cb3-193"><a href="#cb3-193" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> <span class="fl">0.5</span></span>
+<span id="cb3-194"><a href="#cb3-194" aria-hidden="true" tabindex="-1"></a>lt <span class="op">=</span> log_target(t)</span>
+<span id="cb3-195"><a href="#cb3-195" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_steps):</span>
+<span id="cb3-196"><a href="#cb3-196" aria-hidden="true" tabindex="-1"></a>    prop <span class="op">=</span> t <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.08</span>)      <span class="co"># propose a nearby step</span></span>
+<span id="cb3-197"><a href="#cb3-197" aria-hidden="true" tabindex="-1"></a>    lp <span class="op">=</span> log_target(prop)</span>
+<span id="cb3-198"><a href="#cb3-198" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> np.log(rng.random()) <span class="op">&lt;</span> lp <span class="op">-</span> lt:  <span class="co"># accept uphill always, downhill with prob r</span></span>
+<span id="cb3-199"><a href="#cb3-199" aria-hidden="true" tabindex="-1"></a>        t, lt <span class="op">=</span> prop, lp</span>
+<span id="cb3-200"><a href="#cb3-200" aria-hidden="true" tabindex="-1"></a>    samples[i] <span class="op">=</span> t</span>
+<span id="cb3-201"><a href="#cb3-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-202"><a href="#cb3-202" aria-hidden="true" tabindex="-1"></a>post <span class="op">=</span> samples[burn:]</span>
+<span id="cb3-203"><a href="#cb3-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-204"><a href="#cb3-204" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> beta_pdf(theta, a, b):</span>
+<span id="cb3-205"><a href="#cb3-205" aria-hidden="true" tabindex="-1"></a>    logB <span class="op">=</span> lgamma(a) <span class="op">+</span> lgamma(b) <span class="op">-</span> lgamma(a <span class="op">+</span> b)</span>
+<span id="cb3-206"><a href="#cb3-206" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.exp((a <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(theta) <span class="op">+</span> (b <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(<span class="dv">1</span> <span class="op">-</span> theta) <span class="op">-</span> logB)</span>
+<span id="cb3-207"><a href="#cb3-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-208"><a href="#cb3-208" aria-hidden="true" tabindex="-1"></a>fig, (axT, axH) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">3.4</span>),</span>
+<span id="cb3-209"><a href="#cb3-209" aria-hidden="true" tabindex="-1"></a>                               gridspec_kw<span class="op">=</span>{<span class="st">"width_ratios"</span>: [<span class="fl">1.5</span>, <span class="dv">1</span>]})</span>
+<span id="cb3-210"><a href="#cb3-210" aria-hidden="true" tabindex="-1"></a>axT.plot(np.arange(burn), samples[:burn], color<span class="op">=</span><span class="st">"#9aa0a6"</span>, lw<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb3-211"><a href="#cb3-211" aria-hidden="true" tabindex="-1"></a>axT.plot(np.arange(burn, n_steps), post, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, lw<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb3-212"><a href="#cb3-212" aria-hidden="true" tabindex="-1"></a>axT.axvline(burn, color<span class="op">=</span><span class="st">"#c0392b"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb3-213"><a href="#cb3-213" aria-hidden="true" tabindex="-1"></a>axT.text(burn <span class="op">+</span> <span class="dv">100</span>, <span class="fl">0.92</span>, <span class="st">"burn-in discarded"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb3-214"><a href="#cb3-214" aria-hidden="true" tabindex="-1"></a>axT.set_title(<span class="st">"Trace: the 'fuzzy caterpillar'"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb3-215"><a href="#cb3-215" aria-hidden="true" tabindex="-1"></a>axT.set_xlabel(<span class="st">"step"</span>)<span class="op">;</span> axT.set_ylabel(<span class="st">"θ"</span>)<span class="op">;</span> axT.set_ylim(<span class="fl">0.3</span>, <span class="fl">1.0</span>)</span>
+<span id="cb3-216"><a href="#cb3-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-217"><a href="#cb3-217" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="fl">0.3</span>, <span class="fl">1.0</span>, <span class="dv">300</span>)</span>
+<span id="cb3-218"><a href="#cb3-218" aria-hidden="true" tabindex="-1"></a>axH.hist(post, bins<span class="op">=</span><span class="dv">40</span>, density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, alpha<span class="op">=</span><span class="fl">0.45</span>, orientation<span class="op">=</span><span class="st">"horizontal"</span>)</span>
+<span id="cb3-219"><a href="#cb3-219" aria-hidden="true" tabindex="-1"></a>axH.plot(beta_pdf(xs, <span class="dv">15</span>, <span class="dv">7</span>), xs, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, lw<span class="op">=</span><span class="fl">2.0</span>)</span>
+<span id="cb3-220"><a href="#cb3-220" aria-hidden="true" tabindex="-1"></a>axH.set_title(<span class="ss">f"Samples vs Beta(15,7)</span><span class="ch">\n</span><span class="ss">mean ≈ </span><span class="sc">{</span>post<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb3-221"><a href="#cb3-221" aria-hidden="true" tabindex="-1"></a>axH.set_ylim(<span class="fl">0.3</span>, <span class="fl">1.0</span>)<span class="op">;</span> axH.set_yticks([])<span class="op">;</span> axH.set_xlabel(<span class="st">"density"</span>)</span>
+<span id="cb3-222"><a href="#cb3-222" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb3-223"><a href="#cb3-223" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb3-224"><a href="#cb3-224" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb3-225"><a href="#cb3-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-226"><a href="#cb3-226" aria-hidden="true" tabindex="-1"></a>The sampler's mean $\approx 0.68$ recovers the analytic posterior mean $15/22 = 0.682$ — and it did</span>
+<span id="cb3-227"><a href="#cb3-227" aria-hidden="true" tabindex="-1"></a>so by *walking*, never by integrating. Scale this idea up (with smarter proposals like Hamiltonian</span>
+<span id="cb3-228"><a href="#cb3-228" aria-hidden="true" tabindex="-1"></a>Monte Carlo) and it handles the 200-dimensional models that defeat pen and paper.</span>
+<span id="cb3-229"><a href="#cb3-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-230"><a href="#cb3-230" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summarising with samples</span></span>
+<span id="cb3-231"><a href="#cb3-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-232"><a href="#cb3-232" aria-hidden="true" tabindex="-1"></a>Once MCMC hands you thousands of draws, the <span class="co">[</span><span class="ot">Law of Large Numbers</span><span class="co">](../01-foundations/law-of-large-numbers.qmd)</span></span>
+<span id="cb3-233"><a href="#cb3-233" aria-hidden="true" tabindex="-1"></a>does the rest — sample summaries approximate posterior summaries. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-234"><a href="#cb3-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-235"><a href="#cb3-235" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Posterior mean** ≈ the average of the samples.</span>
+<span id="cb3-236"><a href="#cb3-236" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**95% credible interval** ≈ the 2.5th and 97.5th **percentiles of the sorted samples** — no</span>
+<span id="cb3-237"><a href="#cb3-237" aria-hidden="true" tabindex="-1"></a>  formula, just counting. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-238"><a href="#cb3-238" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Posterior variance** ≈ the variance of the samples.</span>
+<span id="cb3-239"><a href="#cb3-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-240"><a href="#cb3-240" aria-hidden="true" tabindex="-1"></a>The posterior you couldn't write down becomes a list of numbers you can summarise any way you like.</span>
+<span id="cb3-241"><a href="#cb3-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-242"><a href="#cb3-242" aria-hidden="true" tabindex="-1"></a><span class="fu">## Diagnostics: did the walk actually work?</span></span>
+<span id="cb3-243"><a href="#cb3-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-244"><a href="#cb3-244" aria-hidden="true" tabindex="-1"></a>Because MCMC starts somewhere arbitrary and explores blindly, you must *check* that it found the real</span>
+<span id="cb3-245"><a href="#cb3-245" aria-hidden="true" tabindex="-1"></a>posterior. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-246"><a href="#cb3-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-247"><a href="#cb3-247" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Burn-in (warm-up).** Early samples are contaminated by the random starting point, so discard them</span>
+<span id="cb3-248"><a href="#cb3-248" aria-hidden="true" tabindex="-1"></a>  — often the first half of the chain — keeping only draws from the settled distribution.</span>
+<span id="cb3-249"><a href="#cb3-249" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-250"><a href="#cb3-250" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Trace plots.** Plot the walk over time. A healthy chain is a **"fuzzy caterpillar"** — rapidly</span>
+<span id="cb3-251"><a href="#cb3-251" aria-hidden="true" tabindex="-1"></a>  oscillating around a stable centre (the left panel above). A trace that drifts or sticks is a</span>
+<span id="cb3-252"><a href="#cb3-252" aria-hidden="true" tabindex="-1"></a>  warning. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-253"><a href="#cb3-253" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Multiple chains — "Bob's Bees."** Release *one* bee in a dark house and it may get stuck in a</span>
+<span id="cb3-254"><a href="#cb3-254" aria-hidden="true" tabindex="-1"></a>  single room, fooling you into thinking it mapped the whole place. Release **several bees from</span>
+<span id="cb3-255"><a href="#cb3-255" aria-hidden="true" tabindex="-1"></a>  different starting points**; if they all converge on the same regions, you can trust the map.</span>
+<span id="cb3-256"><a href="#cb3-256" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-257"><a href="#cb3-257" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**$\hat R$ (R-hat).** The quantitative version of Bob's Bees: it compares variation *within* chains</span>
+<span id="cb3-258"><a href="#cb3-258" aria-hidden="true" tabindex="-1"></a>  to variation *between* chains. **Convergence is signalled by $\hat R \approx 1.0$;** values much</span>
+<span id="cb3-259"><a href="#cb3-259" aria-hidden="true" tabindex="-1"></a>  above 1 mean the chains disagree and haven't converged. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-260"><a href="#cb3-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-261"><a href="#cb3-261" aria-hidden="true" tabindex="-1"></a><span class="fu">## The verdict: Bayesian vs frequentist</span></span>
+<span id="cb3-262"><a href="#cb3-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-263"><a href="#cb3-263" aria-hidden="true" tabindex="-1"></a>Lambert's closing stance is refreshingly even-handed — the two schools are **different paths to the</span>
+<span id="cb3-264"><a href="#cb3-264" aria-hidden="true" tabindex="-1"></a>same goal** of learning from noisy data. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-265"><a href="#cb3-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-266"><a href="#cb3-266" aria-hidden="true" tabindex="-1"></a>**Where Bayesian wins:**</span>
+<span id="cb3-267"><a href="#cb3-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-268"><a href="#cb3-268" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Natural uncertainty statements.** "95% probability the effect is positive" is what policymakers</span>
+<span id="cb3-269"><a href="#cb3-269" aria-hidden="true" tabindex="-1"></a>  actually want, and it is a *direct* Bayesian output. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-270"><a href="#cb3-270" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Prior information.** Past studies and expert knowledge enter the model *formally* rather than</span>
+<span id="cb3-271"><a href="#cb3-271" aria-hidden="true" tabindex="-1"></a>  informally. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-272"><a href="#cb3-272" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Small samples.** Bayesian inference stays coherent when frequentist *asymptotic* (large-$n$)</span>
+<span id="cb3-273"><a href="#cb3-273" aria-hidden="true" tabindex="-1"></a>  approximations break down. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-274"><a href="#cb3-274" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Flexibility.** MCMC fits models of essentially arbitrary complexity — hierarchical, multilevel,</span>
+<span id="cb3-275"><a href="#cb3-275" aria-hidden="true" tabindex="-1"></a>  custom — that have no closed-form frequentist solution. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-276"><a href="#cb3-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-277"><a href="#cb3-277" aria-hidden="true" tabindex="-1"></a>**Where critics push back:**</span>
+<span id="cb3-278"><a href="#cb3-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-279"><a href="#cb3-279" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Subjectivity.** Choosing a prior strikes some as unscientific — though Lambert's retort stands:</span>
+<span id="cb3-280"><a href="#cb3-280" aria-hidden="true" tabindex="-1"></a>  frequentist model and test choices are *equally* subjective, just less visible. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-281"><a href="#cb3-281" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Computational cost.** MCMC can be slow and demanding for big models. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-282"><a href="#cb3-282" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-283"><a href="#cb3-283" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Lambert's practical guidance: don't be a zealot"}</span>
+<span id="cb3-284"><a href="#cb3-284" aria-hidden="true" tabindex="-1"></a>Start simple — frequentist **OLS or maximum likelihood** to get an initial feel for the data — then</span>
+<span id="cb3-285"><a href="#cb3-285" aria-hidden="true" tabindex="-1"></a>**build up** to Bayesian models as complexity and the need for rigorous uncertainty quantification</span>
+<span id="cb3-286"><a href="#cb3-286" aria-hidden="true" tabindex="-1"></a>grow. And whatever you fit, treat **posterior predictive checks** (does data simulated from your</span>
+<span id="cb3-287"><a href="#cb3-287" aria-hidden="true" tabindex="-1"></a>fitted model resemble the real data?) as your **"best friend."** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-288"><a href="#cb3-288" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-289"><a href="#cb3-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-290"><a href="#cb3-290" aria-hidden="true" tabindex="-1"></a>That is the right note to end Part II on: the tools are not tribes to join but instruments to choose</span>
+<span id="cb3-291"><a href="#cb3-291" aria-hidden="true" tabindex="-1"></a>between, by the job in front of you.</span>
+<span id="cb3-292"><a href="#cb3-292" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-293"><a href="#cb3-293" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb3-294"><a href="#cb3-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-295"><a href="#cb3-295" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong in practice"}</span>
+<span id="cb3-296"><a href="#cb3-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-297"><a href="#cb3-297" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Calling a confidence interval a credible interval.** Only the Bayesian interval licenses "95%</span>
+<span id="cb3-298"><a href="#cb3-298" aria-hidden="true" tabindex="-1"></a>  probability the parameter is in here." Don't smuggle that reading into a frequentist CI.</span>
+<span id="cb3-299"><a href="#cb3-299" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-300"><a href="#cb3-300" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-301"><a href="#cb3-301" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Trusting un-diagnosed MCMC.** A pretty number from a chain that never converged is fiction.</span>
+<span id="cb3-302"><a href="#cb3-302" aria-hidden="true" tabindex="-1"></a>  Always check trace plots, run multiple chains, and confirm $\hat R \approx 1$. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-303"><a href="#cb3-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-304"><a href="#cb3-304" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting burn-in.** Including the arbitrary starting transient biases every summary. Discard</span>
+<span id="cb3-305"><a href="#cb3-305" aria-hidden="true" tabindex="-1"></a>  the warm-up. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-306"><a href="#cb3-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-307"><a href="#cb3-307" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using a central interval on a skewed or bimodal posterior.** It can include low-density regions</span>
+<span id="cb3-308"><a href="#cb3-308" aria-hidden="true" tabindex="-1"></a>  and exclude high-density ones; reach for HPD when the shape isn't symmetric. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-309"><a href="#cb3-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-310"><a href="#cb3-310" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Becoming a zealot — either way.** Bayesian isn't automatically "better." Match the method to the</span>
+<span id="cb3-311"><a href="#cb3-311" aria-hidden="true" tabindex="-1"></a>  problem; start frequentist, escalate to Bayesian when the question demands it. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb3-312"><a href="#cb3-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-313"><a href="#cb3-313" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-314"><a href="#cb3-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-315"><a href="#cb3-315" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb3-316"><a href="#cb3-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-317"><a href="#cb3-317" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb3-318"><a href="#cb3-318" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Lambert, *A Student's Guide to Bayesian Statistics*** — the whole entry: the credible interval</span>
+<span id="cb3-319"><a href="#cb3-319" aria-hidden="true" tabindex="-1"></a>  and the "95% probability" contrast with the confidence interval (penguin example); equal-tailed vs</span>
+<span id="cb3-320"><a href="#cb3-320" aria-hidden="true" tabindex="-1"></a>  HPD and the treasure-hunting pirate; the intractable denominator and the 200-dimensional integral;</span>
+<span id="cb3-321"><a href="#cb3-321" aria-hidden="true" tabindex="-1"></a>  MCMC as a guided random walk, the Metropolis accept/reject rule, and the explorer-in-the-fog</span>
+<span id="cb3-322"><a href="#cb3-322" aria-hidden="true" tabindex="-1"></a>  analogy; summarising the posterior from samples via the Law of Large Numbers; burn-in, the</span>
+<span id="cb3-323"><a href="#cb3-323" aria-hidden="true" tabindex="-1"></a>  fuzzy-caterpillar trace, Bob's Bees / multiple chains, and $\hat R \approx 1$; the even-handed</span>
+<span id="cb3-324"><a href="#cb3-324" aria-hidden="true" tabindex="-1"></a>  Bayesian-vs-frequentist verdict and the "start simple, don't be a zealot, use posterior predictive</span>
+<span id="cb3-325"><a href="#cb3-325" aria-hidden="true" tabindex="-1"></a>  checks" guidance.</span>
+<span id="cb3-326"><a href="#cb3-326" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Grinstead &amp; Snell, *Introduction to Probability*** — the Law of Large Numbers that justifies</span>
+<span id="cb3-327"><a href="#cb3-327" aria-hidden="true" tabindex="-1"></a>  approximating posterior quantities by sample averages.</span>
+<span id="cb3-328"><a href="#cb3-328" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-329"><a href="#cb3-329" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-330"><a href="#cb3-330" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the full mathematics {.unnumbered}</span></span>
+<span id="cb3-331"><a href="#cb3-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-332"><a href="#cb3-332" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb3-333"><a href="#cb3-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-334"><a href="#cb3-334" aria-hidden="true" tabindex="-1"></a>**Why the denominator cancels (the heart of MCMC).** The Metropolis acceptance ratio for a proposed</span>
+<span id="cb3-335"><a href="#cb3-335" aria-hidden="true" tabindex="-1"></a>move $\theta \to \theta'$ (with a symmetric proposal) is</span>
+<span id="cb3-336"><a href="#cb3-336" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-337"><a href="#cb3-337" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb3-338"><a href="#cb3-338" aria-hidden="true" tabindex="-1"></a>r = \frac{p(\theta'\mid \text{data})}{p(\theta\mid \text{data})}</span>
+<span id="cb3-339"><a href="#cb3-339" aria-hidden="true" tabindex="-1"></a>= \frac{\,p(\text{data}\mid\theta')\,p(\theta')\,/\,p(\text{data})\,}</span>
+<span id="cb3-340"><a href="#cb3-340" aria-hidden="true" tabindex="-1"></a>       {\,p(\text{data}\mid\theta)\,p(\theta)\,/\,p(\text{data})\,}</span>
+<span id="cb3-341"><a href="#cb3-341" aria-hidden="true" tabindex="-1"></a>= \frac{p(\text{data}\mid\theta')\,p(\theta')}{p(\text{data}\mid\theta)\,p(\theta)} .</span>
+<span id="cb3-342"><a href="#cb3-342" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb3-343"><a href="#cb3-343" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-344"><a href="#cb3-344" aria-hidden="true" tabindex="-1"></a>The intractable $p(\text{data})$ appears identically in numerator and denominator and **cancels** —</span>
+<span id="cb3-345"><a href="#cb3-345" aria-hidden="true" tabindex="-1"></a>so the sampler needs only the *unnormalised* posterior (likelihood × prior). Accept if $r \ge 1$;</span>
+<span id="cb3-346"><a href="#cb3-346" aria-hidden="true" tabindex="-1"></a>otherwise accept with probability $r$ (in practice compare $\log r$ to $\log u$, $u\sim\text{U}(0,1)$,</span>
+<span id="cb3-347"><a href="#cb3-347" aria-hidden="true" tabindex="-1"></a>for numerical stability — exactly the <span class="in">`np.log(rng.random()) &lt; lp - lt`</span> test in the code).</span>
+<span id="cb3-348"><a href="#cb3-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-349"><a href="#cb3-349" aria-hidden="true" tabindex="-1"></a>**Why the chain targets the posterior.** Metropolis satisfies *detailed balance* with respect to the</span>
+<span id="cb3-350"><a href="#cb3-350" aria-hidden="true" tabindex="-1"></a>posterior $\pi$: $\pi(\theta)\,T(\theta\to\theta') = \pi(\theta')\,T(\theta'\to\theta)$, which makes</span>
+<span id="cb3-351"><a href="#cb3-351" aria-hidden="true" tabindex="-1"></a>$\pi$ the chain's **stationary distribution.** An ergodic chain then converges to $\pi$ regardless of</span>
+<span id="cb3-352"><a href="#cb3-352" aria-hidden="true" tabindex="-1"></a>start, so its long-run samples *are* posterior draws.</span>
+<span id="cb3-353"><a href="#cb3-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-354"><a href="#cb3-354" aria-hidden="true" tabindex="-1"></a>**Monte Carlo error.** For $M$ (roughly independent) posterior draws, a posterior mean estimate has</span>
+<span id="cb3-355"><a href="#cb3-355" aria-hidden="true" tabindex="-1"></a>standard error $\approx \sigma_{\text{post}}/\sqrt{M}$ — the same $1/\sqrt{M}$ law as everywhere</span>
+<span id="cb3-356"><a href="#cb3-356" aria-hidden="true" tabindex="-1"></a>else, so more samples buy more precision (slowly). Autocorrelation in the chain inflates this via the</span>
+<span id="cb3-357"><a href="#cb3-357" aria-hidden="true" tabindex="-1"></a>*effective sample size* $M_{\text{eff}} &lt; M$.</span>
+<span id="cb3-358"><a href="#cb3-358" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-359"><a href="#cb3-359" aria-hidden="true" tabindex="-1"></a>**Equal-tailed vs HPD, formally.** The equal-tailed interval is $<span class="co">[</span><span class="ot">\,q_{0.025},\,q_{0.975}\,</span><span class="co">]</span>$ from</span>
+<span id="cb3-360"><a href="#cb3-360" aria-hidden="true" tabindex="-1"></a>the posterior quantile function. The 95% HPD is $<span class="sc">\{</span>\theta : p(\theta\mid\text{data}) \ge c<span class="sc">\}</span>$ for the</span>
+<span id="cb3-361"><a href="#cb3-361" aria-hidden="true" tabindex="-1"></a>largest $c$ with total mass $0.95$ — the shortest such region, and the level-set that gives the</span>
+<span id="cb3-362"><a href="#cb3-362" aria-hidden="true" tabindex="-1"></a>pirate his disconnected digging zones when the posterior is multimodal.</span>
+<span id="cb3-363"><a href="#cb3-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-364"><a href="#cb3-364" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-365"><a href="#cb3-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-366"><a href="#cb3-366" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb3-367"><a href="#cb3-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-368"><a href="#cb3-368" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Bayesian machinery</span><span class="co">](bayesian-machinery.qmd)</span> (the intractable denominator that</span>
+<span id="cb3-369"><a href="#cb3-369" aria-hidden="true" tabindex="-1"></a>  forces sampling), <span class="co">[</span><span class="ot">the Bayesian worldview</span><span class="co">](bayesian-worldview.qmd)</span> (the credible interval as the</span>
+<span id="cb3-370"><a href="#cb3-370" aria-hidden="true" tabindex="-1"></a>  payoff of treating the parameter as random), <span class="co">[</span><span class="ot">confidence intervals</span><span class="co">](confidence-intervals.qmd)</span> (the</span>
+<span id="cb3-371"><a href="#cb3-371" aria-hidden="true" tabindex="-1"></a>  frequentist foil), and <span class="co">[</span><span class="ot">the Law of Large Numbers</span><span class="co">](../01-foundations/law-of-large-numbers.qmd)</span> (why</span>
+<span id="cb3-372"><a href="#cb3-372" aria-hidden="true" tabindex="-1"></a>  sample summaries approximate the posterior).</span>
+<span id="cb3-373"><a href="#cb3-373" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Closes:** Part II. You now hold both inferential languages — the</span>
+<span id="cb3-374"><a href="#cb3-374" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Classical Toolkit</span><span class="co">](index.qmd)</span> and the Bayesian alternative — and can choose between them by the</span>
+<span id="cb3-375"><a href="#cb3-375" aria-hidden="true" tabindex="-1"></a>  problem, not by tribe.</span>
+<span id="cb3-376"><a href="#cb3-376" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** Bayesian and frequentist <span class="co">[</span><span class="ot">regression</span><span class="co">](../03-regression/index.qmd)</span> in Part III, the</span>
+<span id="cb3-377"><a href="#cb3-377" aria-hidden="true" tabindex="-1"></a>  hierarchical and regularised models of <span class="co">[</span><span class="ot">Part IV</span><span class="co">](../04-predictive/index.qmd)</span> (where MCMC and</span>
+<span id="cb3-378"><a href="#cb3-378" aria-hidden="true" tabindex="-1"></a>  weakly-informative priors are standard), and the uncertainty quantification behind every</span>
+<span id="cb3-379"><a href="#cb3-379" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">causal estimate</span><span class="co">](../05-causal-inference/index.qmd)</span>.</span>
+<span id="cb3-380"><a href="#cb3-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-381"><a href="#cb3-381" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
+<span id="cb3-382"><a href="#cb3-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-383"><a href="#cb3-383" aria-hidden="true" tabindex="-1"></a>Take these prompts to the source library to push past the synthesis above:</span>
+<span id="cb3-384"><a href="#cb3-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-385"><a href="#cb3-385" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"Explain Lambert's distinction between a credible interval and a confidence interval, and exactly</span>
+<span id="cb3-386"><a href="#cb3-386" aria-hidden="true" tabindex="-1"></a>   what each one licenses you to say."</span>
+<span id="cb3-387"><a href="#cb3-387" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"Walk me through the equal-tailed versus highest-posterior-density interval using the</span>
+<span id="cb3-388"><a href="#cb3-388" aria-hidden="true" tabindex="-1"></a>   treasure-hunting analogy."</span>
+<span id="cb3-389"><a href="#cb3-389" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"Explain the Metropolis algorithm step by step and the explorer-in-the-fog analogy, and show why</span>
+<span id="cb3-390"><a href="#cb3-390" aria-hidden="true" tabindex="-1"></a>   the denominator cancels."</span>
+<span id="cb3-391"><a href="#cb3-391" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"What MCMC diagnostics does Lambert recommend — burn-in, trace plots, multiple chains, R-hat — and</span>
+<span id="cb3-392"><a href="#cb3-392" aria-hidden="true" tabindex="-1"></a>   what does each catch?"</span>
+<span id="cb3-393"><a href="#cb3-393" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"Summarise Lambert's honest comparison of Bayesian and frequentist inference and his practical</span>
+<span id="cb3-394"><a href="#cb3-394" aria-hidden="true" tabindex="-1"></a>   advice on when to use each."</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

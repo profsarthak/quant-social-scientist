@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Hypothesis Testing &amp; p-values – The Quantitative Social Scientist</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../content/02-inference/statistical-power.html" rel="next">
+<link href="../../content/02-inference/confidence-intervals.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-a6a8d579619ec60b6cc16f651ef3cf7e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-e06e5700cfc727e31a5c8bda3c8b1a89.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">The Quantitative Social Scientist</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/00-overture/index.html"> 
+<span class="menu-text">Curriculum</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/ml-track/index.html"> 
+<span class="menu-text">ML Track</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../appendices/math/index.html"> 
+<span class="menu-text">Appendices</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">How to use this</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://profsarthak.github.io/quant-social-scientist/" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/02-inference/index.html">II · Inference</a></li><li class="breadcrumb-item"><a href="../../content/02-inference/sampling-and-survey-design.html">The Classical Toolkit</a></li><li class="breadcrumb-item"><a href="../../content/02-inference/hypothesis-testing.html">Hypothesis Testing &amp; p-values</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Start here</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Quantitative Social Scientist</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to use this</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/what-quantitative-research-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Quantitative Social Science Actually Does</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/anatomy-of-a-study.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Anatomy of a Study</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/concepts-and-measurement.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Concepts &amp; Variables: The Problem of Measurement</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/variables-and-relationships.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Cast of Characters: Kinds of Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/research-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A Field Guide to Research Designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/credibility-and-failure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Makes Research Credible — and How It Fails</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/ethics-and-human-subjects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ethics and the Human-Subjects Frame</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Probability</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/what-probability-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Probability Actually Is</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/sample-spaces-and-axioms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sample Spaces, Events &amp; the Axioms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/counting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Counting: The Arithmetic of Possibility</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Probability &amp; Independence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/bayes-theorem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bayes’ Theorem: Updating Beliefs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/random-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random Variables (Discrete &amp; Continuous)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/expectation-and-variance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expectation &amp; Variance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/common-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Common Distributions and What They Model</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/covariance-and-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Joint Distributions, Covariance &amp; Correlation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/law-of-large-numbers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Law of Large Numbers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Describing Data</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/location-spread-shape.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Location, Spread &amp; Shape</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/exploratory-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory Data Analysis &amp; Visual Summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/messy-real-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Messy Real Data: What to Expect</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">II · Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">II · Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">The Classical Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-and-survey-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling &amp; Survey Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-distributions-clt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling Distributions &amp; the Central Limit Theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Estimation: From Sample to Best Guess</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Confidence Intervals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/hypothesis-testing.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Hypothesis Testing &amp; p-values</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical Power &amp; Sample Size</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/replication-crisis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Replication Crisis, Made Rigorous</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-worldview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bayesian Worldview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-machinery.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Machinery: Priors, Likelihoods, Posteriors</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/credible-intervals-and-computation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Credible Intervals, Computation &amp; the Verdict</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">IV · Predictive Modelling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">IV · The Computational Turn: Predictive Modelling</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true">
+ <span class="menu-text">ML Track (separate)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ML Track (separate)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/math/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Mathematics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/computing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Computing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#the-logic-proof-by-contradiction" id="toc-the-logic-proof-by-contradiction" class="nav-link" data-scroll-target="#the-logic-proof-by-contradiction">The logic: proof by contradiction</a></li>
+  <li><a href="#the-test-statistic-a-surprise-meter" id="toc-the-test-statistic-a-surprise-meter" class="nav-link" data-scroll-target="#the-test-statistic-a-surprise-meter">The test statistic: a surprise meter</a></li>
+  <li><a href="#the-p-value-defined-exactly" id="toc-the-p-value-defined-exactly" class="nav-link" data-scroll-target="#the-p-value-defined-exactly">The p-value, defined exactly</a>
+  <ul class="collapse">
+  <li><a href="#the-p-value-as-an-area" id="toc-the-p-value-as-an-area" class="nav-link" data-scroll-target="#the-p-value-as-an-area">The p-value as an area</a></li>
+  <li><a href="#what-the-p-value-is-not" id="toc-what-the-p-value-is-not" class="nav-link" data-scroll-target="#what-the-p-value-is-not">What the p-value is <strong>not</strong></a></li>
+  </ul></li>
+  <li><a href="#the-decision-rule-α-and-the-two-errors" id="toc-the-decision-rule-α-and-the-two-errors" class="nav-link" data-scroll-target="#the-decision-rule-α-and-the-two-errors">The decision rule: α and the two errors</a></li>
+  <li><a href="#one-tailed-vs-two-tailed" id="toc-one-tailed-vs-two-tailed" class="nav-link" data-scroll-target="#one-tailed-vs-two-tailed">One-tailed vs two-tailed</a></li>
+  <li><a href="#the-workhorses-z--and-t-tests" id="toc-the-workhorses-z--and-t-tests" class="nav-link" data-scroll-target="#the-workhorses-z--and-t-tests">The workhorses: z- and t-tests</a></li>
+  <li><a href="#statistical-vs-practical-significance" id="toc-statistical-vs-practical-significance" class="nav-link" data-scroll-target="#statistical-vs-practical-significance">Statistical vs practical significance</a></li>
+  <li><a href="#the-duality-with-confidence-intervals" id="toc-the-duality-with-confidence-intervals" class="nav-link" data-scroll-target="#the-duality-with-confidence-intervals">The duality with confidence intervals</a></li>
+  <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
+  <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
+  <li><a href="#appendix-the-full-mathematics" id="toc-appendix-the-full-mathematics" class="nav-link" data-scroll-target="#appendix-the-full-mathematics">Appendix · the full mathematics</a></li>
+  <li><a href="#connections" id="toc-connections" class="nav-link" data-scroll-target="#connections">Connections</a></li>
+  <li><a href="#study-with-notebooklm" id="toc-study-with-notebooklm" class="nav-link" data-scroll-target="#study-with-notebooklm">Study with NotebookLM</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/02-inference/index.html">II · Inference</a></li><li class="breadcrumb-item"><a href="../../content/02-inference/sampling-and-survey-design.html">The Classical Toolkit</a></li><li class="breadcrumb-item"><a href="../../content/02-inference/hypothesis-testing.html">Hypothesis Testing &amp; p-values</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Hypothesis Testing &amp; p-values</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">The most used — and most misread — procedure in science: a careful proof by contradiction, and exactly what that little p means.</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="lead-kernel">
+<p>A hypothesis test asks one disciplined question: <em>if nothing were going on, how surprising would my data be?</em> The p-value measures that surprise. It is a genuinely useful number wrapped in a thick fog of misunderstanding — and clearing the fog is most of what it takes to use it well.</p>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p>Null hypothesis significance testing (NHST) is the most widely used statistical procedure in all of science. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span> It is also the most widely <em>abused</em>, and the gap between those two facts is the engine of the <a href="../../content/02-inference/replication-crisis.html">replication crisis</a>. The trouble is rarely the arithmetic; it is that the p-value answers a narrow, conditional question while researchers crave a broad, unconditional one — and the slippage between the two has corrupted whole literatures.</p>
+<p>So this entry does two things at once: it builds the testing machinery honestly, and it polices the single most consequential misreading in quantitative research. Get the <em>definition</em> of a p-value exactly right and most of the downstream sins become visible.</p>
+</section>
+<section id="the-logic-proof-by-contradiction" class="level2">
+<h2 class="anchored" data-anchor-id="the-logic-proof-by-contradiction">The logic: proof by contradiction</h2>
+<p>A hypothesis test is an argument by contradiction. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span> You set up two rival claims:</p>
+<ul>
+<li>The <strong>null hypothesis</strong> <span class="math inline">H_0</span> — the “nothing special is happening” baseline: no effect, no difference, no relationship. It exists <em>to be falsified</em>. <span class="citation" data-cites="martin_bridgmon">(<a href="#ref-martin_bridgmon" role="doc-biblioref">Martin and Bridgmon 2012</a>)</span></li>
+<li>The <strong>alternative hypothesis</strong> <span class="math inline">H_1</span> — the research hypothesis, the effect you suspect is real.</li>
+</ul>
+<p>You then <strong>assume the null is true</strong> and ask whether the data you actually collected is wildly inconsistent with that assumption. If the data would be bizarrely unlikely under “no effect,” you <strong>reject</strong> the null and take that as evidence for the alternative. <span class="citation" data-cites="martin_bridgmon">(<a href="#ref-martin_bridgmon" role="doc-biblioref">Martin and Bridgmon 2012</a>)</span> The asymmetry is deliberate and important: you never <em>prove</em> the null, you only <em>fail to reject</em> it — exactly as a court returns “not guilty,” not “innocent.”</p>
+</section>
+<section id="the-test-statistic-a-surprise-meter" class="level2">
+<h2 class="anchored" data-anchor-id="the-test-statistic-a-surprise-meter">The test statistic: a surprise meter</h2>
+<p>How do you measure “inconsistent with the null”? You compress the data into a single <strong>test statistic</strong> — one number summarising how far your result sits from what the null predicts. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span> Think of it as a <strong>surprise meter</strong>: the larger its magnitude, the more your data departs from the null’s expectation, and the more the null looks like the wrong model for your world. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span> A test statistic of 0.3 says “business as usual”; a 4.0 says “something is off.”</p>
+</section>
+<section id="the-p-value-defined-exactly" class="level2">
+<h2 class="anchored" data-anchor-id="the-p-value-defined-exactly">The p-value, defined exactly</h2>
+<p>Here is the definition, and every word earns its place:</p>
+<blockquote class="blockquote">
+<p>The <strong>p-value</strong> is the probability of obtaining a test statistic <strong>at least as extreme</strong> as the one observed, <strong>assuming the null hypothesis is true.</strong> <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span></p>
+</blockquote>
+<p>It is the tail area — the probability that <em>pure chance</em>, with no real effect operating, would produce a result as striking as yours or more so. A small p-value means your data sits far out in the tail where the null rarely ventures, so the null becomes hard to believe.</p>
+<section id="the-p-value-as-an-area" class="level3">
+<h3 class="anchored" data-anchor-id="the-p-value-as-an-area">The p-value as an area</h3>
+<p>That “tail area” is literal. Below is the sampling distribution of the test statistic <em>under the null</em> — the bell of results you’d see if nothing were going on. The observed statistic lands at <span class="math inline">\pm 2.1</span>, and the p-value is simply the shaded area beyond it in both tails.</p>
+<div id="cell-fig-pvalue-area" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Show the figure code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> NormalDist</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>nd <span class="op">=</span> NormalDist()</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>z_obs <span class="op">=</span> <span class="fl">2.1</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">600</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.array([nd.pdf(v) <span class="cf">for</span> v <span class="kw">in</span> x])</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>p_two <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> nd.cdf(z_obs))   <span class="co"># two-tailed p-value ≈ 0.0357</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.6</span>))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>ax.plot(x, y, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, lw<span class="op">=</span><span class="fl">1.8</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>ax.fill_between(x, y, where<span class="op">=</span>(x <span class="op">&gt;=</span>  z_obs), color<span class="op">=</span><span class="st">"#c0392b"</span>, alpha<span class="op">=</span><span class="fl">0.75</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>ax.fill_between(x, y, where<span class="op">=</span>(x <span class="op">&lt;=</span> <span class="op">-</span>z_obs), color<span class="op">=</span><span class="st">"#c0392b"</span>, alpha<span class="op">=</span><span class="fl">0.75</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>ax.axvline( z_obs, color<span class="op">=</span><span class="st">"#c0392b"</span>, lw<span class="op">=</span><span class="fl">1.0</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="op">-</span>z_obs, color<span class="op">=</span><span class="st">"#c0392b"</span>, lw<span class="op">=</span><span class="fl">1.0</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="ss">f"observed = +2.1"</span>, xy<span class="op">=</span>(z_obs, nd.pdf(z_obs)), xytext<span class="op">=</span>(<span class="fl">2.4</span>, <span class="fl">0.22</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>            fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="ss">f"p-value = shaded tail area ≈ </span><span class="sc">{</span>p_two<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Test statistic (standardized), under the null"</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([])</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-pvalue-area" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pvalue-area-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="hypothesis-testing_files/figure-html/fig-pvalue-area-output-1.png" width="662" height="336" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pvalue-area-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: The p-value is a tail area. Under the null, the test statistic follows the bell shown. An observed value of 2.1 (two-tailed) cuts off the shaded tails — their combined area, here about 0.036, is the p-value: the chance of a result this extreme if nothing were going on.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>If that shaded area is smaller than your pre-set threshold, you reject the null. The picture also makes the definition’s conditional vivid: the <em>entire bell</em> is drawn <strong>assuming the null is true</strong>. The p-value lives inside that assumption — which is exactly why it cannot, by itself, tell you whether the assumption holds.</p>
+</section>
+<section id="what-the-p-value-is-not" class="level3">
+<h3 class="anchored" data-anchor-id="what-the-p-value-is-not">What the p-value is <strong>not</strong></h3>
+<p>This is the most important list in Part II. The p-value is: <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></p>
+<ul>
+<li><strong>NOT the probability that the null is true.</strong> It is computed <em>assuming</em> the null; it cannot turn around and report the null’s probability. (<span class="math inline">\Pr(\text{data}\mid H_0)</span> is not <span class="math inline">\Pr(H_0\mid\text{data})</span> — flipping them is the <strong>transposed-conditional</strong> error, the same blunder as the <a href="../../content/01-foundations/bayes-theorem.html">base-rate fallacy</a>.) <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></li>
+<li><strong>NOT the probability your result was a fluke.</strong> Same transposition: it gives the odds of the <em>data</em> if the null holds, not the odds <em>favouring</em> the null given the data. <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></li>
+<li><strong>NOT a measure of effect size.</strong> A microscopic, meaningless effect can yield <span class="math inline">p&lt;0.001</span> if <span class="math inline">n</span> is huge. Small p <span class="math inline">\ne</span> big effect. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span></li>
+<li><strong>NOT the probability of replication</strong>, and a non-significant <span class="math inline">p&gt;0.05</span> does <strong>NOT</strong> mean “no effect” — it may just mean the study was <a href="../../content/02-inference/statistical-power.html">underpowered</a> to detect one. <em>Absence of evidence is not evidence of absence.</em> <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></li>
+</ul>
+</section>
+</section>
+<section id="the-decision-rule-α-and-the-two-errors" class="level2">
+<h2 class="anchored" data-anchor-id="the-decision-rule-α-and-the-two-errors">The decision rule: α and the two errors</h2>
+<p>To turn the continuous p-value into a decision, you fix a threshold in advance — the <strong>significance level <span class="math inline">\alpha</span></strong>, conventionally <span class="math inline">0.05</span> in social science. <span class="citation" data-cites="martin_bridgmon">(<a href="#ref-martin_bridgmon" role="doc-biblioref">Martin and Bridgmon 2012</a>)</span> <span class="math inline">\alpha</span> is a <strong>pre-committed error budget</strong>: it is the rate at which you are willing to reject a <em>true</em> null and cry wolf. Choosing it <em>before</em> seeing the data is what keeps the procedure honest.</p>
+<p>Because the verdict is probabilistic, two mistakes are possible: <span class="citation" data-cites="martin_bridgmon">(<a href="#ref-martin_bridgmon" role="doc-biblioref">Martin and Bridgmon 2012</a>)</span></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><span class="math inline">H_0</span> true</th>
+<th><span class="math inline">H_0</span> false</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Reject <span class="math inline">H_0</span></strong></td>
+<td><strong>Type I error</strong> (false positive), rate <span class="math inline">\alpha</span></td>
+<td>Correct — <strong>power</strong> <span class="math inline">= 1-\beta</span></td>
+</tr>
+<tr class="even">
+<td><strong>Fail to reject</strong></td>
+<td>Correct</td>
+<td><strong>Type II error</strong> (false negative), rate <span class="math inline">\beta</span></td>
+</tr>
+</tbody>
+</table>
+<p>A <strong>Type I error</strong> cries wolf — declaring a drug works when it doesn’t. A <strong>Type II error</strong> misses a real wolf — failing to notice a drug that genuinely works. <span class="citation" data-cites="martin_bridgmon">(<a href="#ref-martin_bridgmon" role="doc-biblioref">Martin and Bridgmon 2012</a>)</span> They trade off: tightening <span class="math inline">\alpha</span> to <span class="math inline">0.01</span> cuts false positives but <em>raises</em> the false-negative rate <span class="math inline">\beta</span>, costing you <a href="../../content/02-inference/statistical-power.html">power</a> — the subject of the next entry. <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></p>
+</section>
+<section id="one-tailed-vs-two-tailed" class="level2">
+<h2 class="anchored" data-anchor-id="one-tailed-vs-two-tailed">One-tailed vs two-tailed</h2>
+<p>A <strong>two-tailed</strong> test asks “is there an effect <em>in either direction</em>?” and splits the rejection region across both tails (the case drawn above). A <strong>one-tailed</strong> test stakes everything on a <em>direction</em> chosen in advance (“B beats A”) and puts the whole rejection region in one tail, making it easier to reach significance there. <span class="citation" data-cites="martin_bridgmon">(<a href="#ref-martin_bridgmon" role="doc-biblioref">Martin and Bridgmon 2012</a>)</span> The catch is non-negotiable: <strong>you must choose the direction before seeing the data.</strong> Switching to a one-tailed test <em>after</em> peeking, because it drags you under <span class="math inline">p&lt;0.05</span>, is a textbook form of <a href="../../content/02-inference/replication-crisis.html">p-hacking</a>. <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></p>
+</section>
+<section id="the-workhorses-z--and-t-tests" class="level2">
+<h2 class="anchored" data-anchor-id="the-workhorses-z--and-t-tests">The workhorses: z- and t-tests</h2>
+<p><strong>The z-test</strong> applies when the population standard deviation <span class="math inline">\sigma</span> is <em>known</em> — rare outside standardized-test norming. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span></p>
+<p><strong>The t-test</strong> is what you actually use: <span class="math inline">\sigma</span> is unknown, so you estimate it with the sample <span class="math inline">s</span>, and the statistic follows Student’s <a href="../../content/02-inference/confidence-intervals.html">t-distribution</a> with its uncertainty-absorbing fat tails. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span> The one-sample form is</p>
+<p><span class="math display">
+t = \frac{\bar y - \mu_0}{\operatorname{se}(\bar y)} = \frac{\bar y - \mu_0}{s/\sqrt n},
+</span></p>
+<p>the observed gap measured in standard errors. It comes in three flavours: <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span></p>
+<ul>
+<li><strong>One-sample</strong> — compare a sample mean to a fixed benchmark. <em>Does this class’s mean score differ from the district average of 105?</em></li>
+<li><strong>Two-sample (independent)</strong> — compare the means of two separate groups, with <span class="math display"> t = \frac{\bar X_1 - \bar X_2}{\sqrt{s_1^2/n_1 + s_2^2/n_2}}. </span> <em>Did the treatment group outscore the control group?</em></li>
+<li><strong>Paired (dependent)</strong> — compare the <em>same</em> units at two times, testing the mean of the differences. <em>Did participants’ weight change from pre-test to post-test?</em> Pairing strips out person-to-person variation and is far more powerful when it applies.</li>
+</ul>
+</section>
+<section id="statistical-vs-practical-significance" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-vs-practical-significance">Statistical vs practical significance</h2>
+<p>The deepest trap in the whole apparatus: a result can be <strong>statistically</strong> significant yet <strong>practically</strong> trivial. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span> Statistical significance is a binary yes/no about whether <span class="math inline">p&lt;\alpha</span>; <strong>practical (substantive) significance</strong> is about the <em>magnitude</em> and <em>real-world importance</em> of the effect. <span class="citation" data-cites="martin_bridgmon">(<a href="#ref-martin_bridgmon" role="doc-biblioref">Martin and Bridgmon 2012</a>)</span> Wooldridge’s example: a study of baseball salaries might find a statistically significant effect of “runs per year” (<span class="math inline">p&lt;0.05</span>), but if each extra run is worth only <strong>$10</strong>, the effect is economically meaningless. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> With a large enough <span class="math inline">n</span>, <em>everything</em> becomes significant; the question that matters is <em>how big</em>, not <em>whether</em>. Always report and interpret the effect size, not just the verdict.</p>
+</section>
+<section id="the-duality-with-confidence-intervals" class="level2">
+<h2 class="anchored" data-anchor-id="the-duality-with-confidence-intervals">The duality with confidence intervals</h2>
+<p>Testing and <a href="../../content/02-inference/confidence-intervals.html">interval estimation</a> are the same logic in two costumes. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> The bridge:</p>
+<blockquote class="blockquote">
+<p>If the null value falls <strong>outside</strong> the 95% confidence interval, you reject <span class="math inline">H_0</span> at the 5% level.</p>
+</blockquote>
+<p>So the scrap-rate interval <span class="math inline">[-2.28,\,-0.02]</span> — which excludes zero — <em>is</em> a rejection of “no effect” at 5%. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> The interval is strictly more informative than the test: it reports the <em>whole range</em> of effect sizes you can’t reject, not just a pass/fail. This is why a growing chorus urges <strong>reporting intervals and effect sizes over bare p-values</strong> — a reform we take up in the <a href="../../content/02-inference/replication-crisis.html">replication-crisis entry</a>.</p>
+</section>
+<section id="common-pitfalls" class="level2">
+<h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
+<div class="callout callout-style-default callout-warning callout-titled" title="Where this goes wrong in practice">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Where this goes wrong in practice
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><p><strong>Reading <span class="math inline">p</span> as “the probability the null is true” (or “the probability it’s a fluke”).</strong> The cardinal error — a transposed conditional. The p-value lives entirely <em>inside</em> the assumption that the null holds. <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></p></li>
+<li><p><strong>Reading a big p-value as proof of no effect.</strong> <span class="math inline">p&gt;0.05</span> can mean “no effect” <em>or</em> “too little data to see one.” Absence of evidence isn’t evidence of absence — check the <a href="../../content/02-inference/statistical-power.html">power</a>. <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></p></li>
+<li><p><strong>Confusing statistical with practical significance.</strong> A trivially small effect is “significant” at large <span class="math inline">n</span>; a large, important effect can be “non-significant” at small <span class="math inline">n</span>. The verdict is not the magnitude. <span class="citation" data-cites="bruce_practical wooldridge_intro">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>; <a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></p></li>
+<li><p><strong>Choosing one- vs two-tailed <em>after</em> seeing the data</strong>, or nudging <span class="math inline">\alpha</span> to fit the result. Both are p-hacking; both inflate false positives far above the nominal 5%. <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></p></li>
+<li><p><strong>Treating <span class="math inline">p = 0.049</span> and <span class="math inline">p = 0.051</span> as categorically different.</strong> The 0.05 line is a convention, not a law of nature. A p-value is continuous evidence, not a cliff edge. <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="from-the-sources" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Who says what">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Who says what
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Bruce &amp; Bruce, <em>Practical Statistics for Data Scientists</em></strong> — NHST as proof by contradiction; the test statistic as a surprise meter; the exact p-value definition; small-p-from-large-n; z- vs t-tests and the three t-test forms.</li>
+<li><strong>Reinhart, <em>Statistics Done Wrong</em></strong> — the catalogue of what a p-value is <em>not</em> (transposed conditional; not effect size; not replication probability); non-significance ≠ no effect; one- vs two-tailed switching and threshold-fiddling as p-hacking; the arbitrariness of 0.05.</li>
+<li><strong>Martin &amp; Bridgmon, <em>Quantitative &amp; Statistical Research Methods</em></strong> — <span class="math inline">H_0</span>/<span class="math inline">H_1</span> and the falsification logic; <span class="math inline">\alpha</span> as a pre-committed error rate; Type I/II errors and their trade-off; statistical vs practical significance.</li>
+<li><strong>Wooldridge, <em>Introductory Econometrics</em></strong> — the baseball-salary example of statistical-but-not- economic significance; the CI–test duality and the scrap-rate interval.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="appendix-the-full-mathematics" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="appendix-the-full-mathematics">Appendix · the full mathematics</h2>
+<div class="math-appendix">
+<p><strong>The one-sample t-test.</strong> Under <span class="math inline">H_0: \mu = \mu_0</span>, with <span class="math inline">X_i</span> i.i.d. and <span class="math inline">\sigma</span> estimated by <span class="math inline">s</span>, the statistic</p>
+<p><span class="math display">
+T = \frac{\bar X - \mu_0}{s/\sqrt n}
+</span></p>
+<p>follows a <span class="math inline">t</span>-distribution with <span class="math inline">n-1</span> degrees of freedom (exactly, if the <span class="math inline">X_i</span> are Normal; approximately otherwise, by the <a href="../../content/02-inference/sampling-distributions-clt.html">CLT</a>). The two-sided p-value is <span class="math inline">p = 2\,\Pr(t_{n-1} \ge |T_\text{obs}|)</span>.</p>
+<p><strong>Two-sample (Welch) form.</strong> For independent groups with possibly unequal variances,</p>
+<p><span class="math display">
+T = \frac{\bar X_1 - \bar X_2}{\sqrt{s_1^2/n_1 + s_2^2/n_2}},
+</span></p>
+<p>with Welch–Satterthwaite degrees of freedom. The denominator is the standard error <em>of the difference</em> — which is why two overlapping single-group intervals can still yield a significant <span class="math inline">T</span>: the SE of a difference is <strong>not</strong> the sum of the two separate SEs (see the <a href="../../content/02-inference/confidence-intervals.html">overlap fallacy</a>).</p>
+<p><strong>Paired form.</strong> Reduce to one sample by differencing: let <span class="math inline">D_i = X_i^{\text{post}} -
+X_i^{\text{pre}}</span> and run a one-sample test of <span class="math inline">\bar D</span> against 0. Because <span class="math inline">\operatorname{Var}(D) =
+\sigma_1^2 + \sigma_2^2 - 2\operatorname{Cov}(X^{\text{pre}}, X^{\text{post}})</span> and the within-person correlation is usually positive, pairing <em>shrinks</em> the standard error — the source of its extra power.</p>
+<p><strong>Why the CI–test duality holds.</strong> The 95% interval is exactly the set of null values <span class="math inline">\mu_0</span> that would <em>not</em> be rejected at the 5% level: <span class="math inline">|{\bar X - \mu_0}|/(s/\sqrt n) \le t_{n-1,0.975}</span> rearranges to <span class="math inline">\mu_0 \in [\bar X \pm t_{n-1,0.975}\, s/\sqrt n]</span>. Reject <span class="math inline">\iff</span> <span class="math inline">\mu_0</span> outside the interval.</p>
+</div>
+</section>
+<section id="connections" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
+<ul>
+<li><strong>Builds on:</strong> <a href="../../content/02-inference/confidence-intervals.html">confidence intervals</a> (its dual), <a href="../../content/02-inference/estimation.html">estimation</a> (the standard error in the denominator), <a href="../../content/02-inference/sampling-distributions-clt.html">sampling distributions &amp; the CLT</a> (the null distribution of the statistic), and the <a href="../../content/01-foundations/bayes-theorem.html">base-rate fallacy</a> (the transposed conditional that wrecks p-value interpretation).</li>
+<li><strong>Leads to:</strong> <a href="../../content/02-inference/statistical-power.html">statistical power</a> (the Type II / <span class="math inline">\beta</span> side of the table) and <a href="../../content/02-inference/replication-crisis.html">the replication crisis</a> (what happens when testing is abused at scale).</li>
+<li><strong>Reappears as:</strong> the t- and F-statistics on every <a href="../../content/03-regression/index.html">regression coefficient</a>, and the significance tests behind every <a href="../../content/05-causal-inference/index.html">causal estimate</a>.</li>
+</ul>
+</section>
+<section id="study-with-notebooklm" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="study-with-notebooklm">Study with NotebookLM</h2>
+<p>Take these prompts to the source library to push past the synthesis above:</p>
+<ol type="1">
+<li>“List every misinterpretation of the p-value that <em>Statistics Done Wrong</em> warns about, with the correct statement for each.”</li>
+<li>“Walk me through the two-sample t-test in <em>Practical Statistics for Data Scientists</em>, including when to use the pooled vs Welch version.”</li>
+<li>“Explain the difference between statistical and practical significance with the examples the sources give, and how large samples create the trap.”</li>
+<li>“What is the transposed-conditional error, and how does it connect the p-value misreading to Bayes’ theorem and base rates?”</li>
+<li>“Show me the full duality between confidence intervals and hypothesis tests, and why reporting intervals is often preferred.”</li>
+</ol>
+
+
+<!-- -->
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-bruce_practical" class="csl-entry" role="listitem">
+Bruce, Peter, Andrew Bruce, and Peter Gedeck. 2020. <em>Practical Statistics for Data Scientists</em>. 2nd ed. O’Reilly Media.
+</div>
+<div id="ref-martin_bridgmon" class="csl-entry" role="listitem">
+Martin, William E., and Krista D. Bridgmon. 2012. <em>Quantitative and Statistical Research Methods: From Hypothesis to Results</em>. Jossey-Bass.
+</div>
+<div id="ref-reinhart_swrong" class="csl-entry" role="listitem">
+Reinhart, Alex. 2015. <em>Statistics Done Wrong: The Woefully Complete Guide</em>. No Starch Press.
+</div>
+<div id="ref-wooldridge_intro" class="csl-entry" role="listitem">
+Wooldridge, Jeffrey M. 2019. <em>Introductory Econometrics: A Modern Approach</em>. 7th ed. Cengage Learning.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/profsarthak\.github\.io\/quant-social-scientist\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../content/02-inference/confidence-intervals.html" class="pagination-link" aria-label="Confidence Intervals">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Confidence Intervals</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../content/02-inference/statistical-power.html" class="pagination-link" aria-label="Statistical Power &amp; Sample Size">
+        <span class="nav-page-text">Statistical Power &amp; Sample Size</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Hypothesis Testing &amp; p-values"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "The most used — and most misread — procedure in science: a careful proof by contradiction, and exactly what that little p means."</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>A hypothesis test asks one disciplined question: *if nothing were going on, how surprising would my</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>data be?* The p-value measures that surprise. It is a genuinely useful number wrapped in a thick</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>fog of misunderstanding — and clearing the fog is most of what it takes to use it well.</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>Null hypothesis significance testing (NHST) is the most widely used statistical procedure in all of</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>science. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span> It is also the most widely *abused*, and the gap between those two facts</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>is the engine of the <span class="co">[</span><span class="ot">replication crisis</span><span class="co">](replication-crisis.qmd)</span>. The trouble is rarely the</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>arithmetic; it is that the p-value answers a narrow, conditional question while researchers crave a</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>broad, unconditional one — and the slippage between the two has corrupted whole literatures.</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>So this entry does two things at once: it builds the testing machinery honestly, and it polices the</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>single most consequential misreading in quantitative research. Get the *definition* of a p-value</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>exactly right and most of the downstream sins become visible.</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="fu">## The logic: proof by contradiction</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>A hypothesis test is an argument by contradiction. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span> You set up two rival claims:</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The **null hypothesis** $H_0$ — the "nothing special is happening" baseline: no effect, no</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  difference, no relationship. It exists *to be falsified*. <span class="co">[</span><span class="ot">@martin_bridgmon</span><span class="co">]</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The **alternative hypothesis** $H_1$ — the research hypothesis, the effect you suspect is real.</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>You then **assume the null is true** and ask whether the data you actually collected is wildly</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>inconsistent with that assumption. If the data would be bizarrely unlikely under "no effect," you</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>**reject** the null and take that as evidence for the alternative. <span class="co">[</span><span class="ot">@martin_bridgmon</span><span class="co">]</span> The asymmetry</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>is deliberate and important: you never *prove* the null, you only *fail to reject* it — exactly as a</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>court returns "not guilty," not "innocent."</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="fu">## The test statistic: a surprise meter</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>How do you measure "inconsistent with the null"? You compress the data into a single **test</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>statistic** — one number summarising how far your result sits from what the null predicts.</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span> Think of it as a **surprise meter**: the larger its magnitude, the more your data</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>departs from the null's expectation, and the more the null looks like the wrong model for your</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>world. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span> A test statistic of 0.3 says "business as usual"; a 4.0 says "something is</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>off."</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="fu">## The p-value, defined exactly</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>Here is the definition, and every word earns its place:</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; The **p-value** is the probability of obtaining a test statistic **at least as extreme** as the</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; one observed, **assuming the null hypothesis is true.** </span><span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>It is the tail area — the probability that *pure chance*, with no real effect operating, would</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>produce a result as striking as yours or more so. A small p-value means your data sits far out in</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>the tail where the null rarely ventures, so the null becomes hard to believe.</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="fu">### The p-value as an area</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>That "tail area" is literal. Below is the sampling distribution of the test statistic *under the</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>null* — the bell of results you'd see if nothing were going on. The observed statistic lands at</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>$\pm 2.1$, and the p-value is simply the shaded area beyond it in both tails.</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-pvalue-area</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "The p-value is a tail area. Under the null, the test statistic follows the bell shown. An observed value of 2.1 (two-tailed) cuts off the shaded tails — their combined area, here about 0.036, is the p-value: the chance of a result this extreme if nothing were going on."</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> NormalDist</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>nd <span class="op">=</span> NormalDist()</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>z_obs <span class="op">=</span> <span class="fl">2.1</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">600</span>)</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.array([nd.pdf(v) <span class="cf">for</span> v <span class="kw">in</span> x])</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>p_two <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> nd.cdf(z_obs))   <span class="co"># two-tailed p-value ≈ 0.0357</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.6</span>))</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>ax.plot(x, y, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, lw<span class="op">=</span><span class="fl">1.8</span>)</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>ax.fill_between(x, y, where<span class="op">=</span>(x <span class="op">&gt;=</span>  z_obs), color<span class="op">=</span><span class="st">"#c0392b"</span>, alpha<span class="op">=</span><span class="fl">0.75</span>)</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>ax.fill_between(x, y, where<span class="op">=</span>(x <span class="op">&lt;=</span> <span class="op">-</span>z_obs), color<span class="op">=</span><span class="st">"#c0392b"</span>, alpha<span class="op">=</span><span class="fl">0.75</span>)</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>ax.axvline( z_obs, color<span class="op">=</span><span class="st">"#c0392b"</span>, lw<span class="op">=</span><span class="fl">1.0</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="op">-</span>z_obs, color<span class="op">=</span><span class="st">"#c0392b"</span>, lw<span class="op">=</span><span class="fl">1.0</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="ss">f"observed = +2.1"</span>, xy<span class="op">=</span>(z_obs, nd.pdf(z_obs)), xytext<span class="op">=</span>(<span class="fl">2.4</span>, <span class="fl">0.22</span>),</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>            fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>,</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>))</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="ss">f"p-value = shaded tail area ≈ </span><span class="sc">{</span>p_two<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Test statistic (standardized), under the null"</span>)</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([])</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>If that shaded area is smaller than your pre-set threshold, you reject the null. The picture also</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>makes the definition's conditional vivid: the *entire bell* is drawn **assuming the null is true**.</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>The p-value lives inside that assumption — which is exactly why it cannot, by itself, tell you</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>whether the assumption holds.</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="fu">### What the p-value is **not**</span></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>This is the most important list in Part II. The p-value is: <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**NOT the probability that the null is true.** It is computed *assuming* the null; it cannot turn</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>  around and report the null's probability. ($\Pr(\text{data}\mid H_0)$ is not</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>  $\Pr(H_0\mid\text{data})$ — flipping them is the **transposed-conditional** error, the same</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>  blunder as the <span class="co">[</span><span class="ot">base-rate fallacy</span><span class="co">](../01-foundations/bayes-theorem.qmd)</span>.) <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**NOT the probability your result was a fluke.** Same transposition: it gives the odds of the</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>  *data* if the null holds, not the odds *favouring* the null given the data. <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**NOT a measure of effect size.** A microscopic, meaningless effect can yield $p&lt;0.001$ if $n$ is</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>  huge. Small p $\ne$ big effect. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**NOT the probability of replication**, and a non-significant $p&gt;0.05$ does **NOT** mean "no</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>  effect" — it may just mean the study was <span class="co">[</span><span class="ot">underpowered</span><span class="co">](statistical-power.qmd)</span> to detect one.</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>  *Absence of evidence is not evidence of absence.* <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="fu">## The decision rule: α and the two errors</span></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>To turn the continuous p-value into a decision, you fix a threshold in advance — the **significance</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>level $\alpha$**, conventionally $0.05$ in social science. <span class="co">[</span><span class="ot">@martin_bridgmon</span><span class="co">]</span> $\alpha$ is a</span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>**pre-committed error budget**: it is the rate at which you are willing to reject a *true* null and</span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>cry wolf. Choosing it *before* seeing the data is what keeps the procedure honest.</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>Because the verdict is probabilistic, two mistakes are possible: <span class="co">[</span><span class="ot">@martin_bridgmon</span><span class="co">]</span></span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>  <span class="pp">|</span> $H_0$ true <span class="pp">|</span> $H_0$ false <span class="pp">|</span></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Reject $H_0$** | **Type I error** (false positive), rate $\alpha$ | Correct — **power** $= 1-\beta$ <span class="pp">|</span></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Fail to reject** | Correct | **Type II error** (false negative), rate $\beta$ <span class="pp">|</span></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>A **Type I error** cries wolf — declaring a drug works when it doesn't. A **Type II error** misses a</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>real wolf — failing to notice a drug that genuinely works. <span class="co">[</span><span class="ot">@martin_bridgmon</span><span class="co">]</span> They trade off:</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>tightening $\alpha$ to $0.01$ cuts false positives but *raises* the false-negative rate $\beta$,</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>costing you <span class="co">[</span><span class="ot">power</span><span class="co">](statistical-power.qmd)</span> — the subject of the next entry. <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a><span class="fu">## One-tailed vs two-tailed</span></span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>A **two-tailed** test asks "is there an effect *in either direction*?" and splits the rejection</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>region across both tails (the case drawn above). A **one-tailed** test stakes everything on a</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>*direction* chosen in advance ("B beats A") and puts the whole rejection region in one tail, making</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>it easier to reach significance there. <span class="co">[</span><span class="ot">@martin_bridgmon</span><span class="co">]</span> The catch is non-negotiable: **you must</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>choose the direction before seeing the data.** Switching to a one-tailed test *after* peeking,</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>because it drags you under $p&lt;0.05$, is a textbook form of <span class="co">[</span><span class="ot">p-hacking</span><span class="co">](replication-crisis.qmd)</span>.</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a><span class="fu">## The workhorses: z- and t-tests</span></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>**The z-test** applies when the population standard deviation $\sigma$ is *known* — rare outside</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>standardized-test norming. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>**The t-test** is what you actually use: $\sigma$ is unknown, so you estimate it with the sample</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>$s$, and the statistic follows Student's <span class="co">[</span><span class="ot">t-distribution</span><span class="co">](confidence-intervals.qmd)</span> with its</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>uncertainty-absorbing fat tails. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span> The one-sample form is</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>t = \frac{\bar y - \mu_0}{\operatorname{se}(\bar y)} = \frac{\bar y - \mu_0}{s/\sqrt n},</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>the observed gap measured in standard errors. It comes in three flavours: <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**One-sample** — compare a sample mean to a fixed benchmark. *Does this class's mean score differ</span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>  from the district average of 105?*</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Two-sample (independent)** — compare the means of two separate groups, with</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>  $$ t = \frac{\bar X_1 - \bar X_2}{\sqrt{s_1^2/n_1 + s_2^2/n_2}}. $$</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>  *Did the treatment group outscore the control group?*</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Paired (dependent)** — compare the *same* units at two times, testing the mean of the</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>  differences. *Did participants' weight change from pre-test to post-test?* Pairing strips out</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>  person-to-person variation and is far more powerful when it applies.</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="fu">## Statistical vs practical significance</span></span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>The deepest trap in the whole apparatus: a result can be **statistically** significant yet</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>**practically** trivial. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span> Statistical significance is a binary yes/no about</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>whether $p&lt;\alpha$; **practical (substantive) significance** is about the *magnitude* and *real-world</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>importance* of the effect. <span class="co">[</span><span class="ot">@martin_bridgmon</span><span class="co">]</span> Wooldridge's example: a study of baseball salaries</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>might find a statistically significant effect of "runs per year" ($p&lt;0.05$), but if each extra run</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>is worth only **\$10**, the effect is economically meaningless. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> With a large</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>enough $n$, *everything* becomes significant; the question that matters is *how big*, not *whether*.</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>Always report and interpret the effect size, not just the verdict.</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a><span class="fu">## The duality with confidence intervals</span></span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>Testing and <span class="co">[</span><span class="ot">interval estimation</span><span class="co">](confidence-intervals.qmd)</span> are the same logic in two costumes.</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> The bridge:</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; If the null value falls **outside** the 95% confidence interval, you reject $H_0$ at the 5% level.</span></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>So the scrap-rate interval $<span class="co">[</span><span class="ot">-2.28,\,-0.02</span><span class="co">]</span>$ — which excludes zero — *is* a rejection of "no effect"</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>at 5%. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> The interval is strictly more informative than the test: it reports the</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>*whole range* of effect sizes you can't reject, not just a pass/fail. This is why a growing chorus</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>urges **reporting intervals and effect sizes over bare p-values** — a reform we take up in the</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">replication-crisis entry</span><span class="co">](replication-crisis.qmd)</span>.</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong in practice"}</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading $p$ as "the probability the null is true" (or "the probability it's a fluke").** The</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>  cardinal error — a transposed conditional. The p-value lives entirely *inside* the assumption that</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>  the null holds. <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a big p-value as proof of no effect.** $p&gt;0.05$ can mean "no effect" *or* "too little</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>  data to see one." Absence of evidence isn't evidence of absence — check the</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">power</span><span class="co">](statistical-power.qmd)</span>. <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing statistical with practical significance.** A trivially small effect is "significant"</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>  at large $n$; a large, important effect can be "non-significant" at small $n$. The verdict is not</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>  the magnitude. <span class="co">[</span><span class="ot">@bruce_practical; @wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Choosing one- vs two-tailed *after* seeing the data**, or nudging $\alpha$ to fit the result.</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>  Both are p-hacking; both inflate false positives far above the nominal 5%. <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating $p = 0.049$ and $p = 0.051$ as categorically different.** The 0.05 line is a</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>  convention, not a law of nature. A p-value is continuous evidence, not a cliff edge. <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bruce &amp; Bruce, *Practical Statistics for Data Scientists*** — NHST as proof by contradiction;</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>  the test statistic as a surprise meter; the exact p-value definition; small-p-from-large-n;</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>  z- vs t-tests and the three t-test forms.</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reinhart, *Statistics Done Wrong*** — the catalogue of what a p-value is *not* (transposed</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>  conditional; not effect size; not replication probability); non-significance ≠ no effect; one-</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>  vs two-tailed switching and threshold-fiddling as p-hacking; the arbitrariness of 0.05.</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Martin &amp; Bridgmon, *Quantitative &amp; Statistical Research Methods*** — $H_0$/$H_1$ and the</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>  falsification logic; $\alpha$ as a pre-committed error rate; Type I/II errors and their trade-off;</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>  statistical vs practical significance.</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — the baseball-salary example of statistical-but-not-</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>  economic significance; the CI–test duality and the scrap-rate interval.</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the full mathematics {.unnumbered}</span></span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>**The one-sample t-test.** Under $H_0: \mu = \mu_0$, with $X_i$ i.i.d. and $\sigma$ estimated by</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>$s$, the statistic</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>T = \frac{\bar X - \mu_0}{s/\sqrt n}</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>follows a $t$-distribution with $n-1$ degrees of freedom (exactly, if the $X_i$ are Normal;</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>approximately otherwise, by the <span class="co">[</span><span class="ot">CLT</span><span class="co">](sampling-distributions-clt.qmd)</span>). The two-sided p-value is</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>$p = 2\,\Pr(t_{n-1} \ge |T_\text{obs}|)$.</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>**Two-sample (Welch) form.** For independent groups with possibly unequal variances,</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>T = \frac{\bar X_1 - \bar X_2}{\sqrt{s_1^2/n_1 + s_2^2/n_2}},</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>with Welch–Satterthwaite degrees of freedom. The denominator is the standard error *of the</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>difference* — which is why two overlapping single-group intervals can still yield a significant</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>$T$: the SE of a difference is **not** the sum of the two separate SEs (see the</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">overlap fallacy</span><span class="co">](confidence-intervals.qmd)</span>).</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>**Paired form.** Reduce to one sample by differencing: let $D_i = X_i^{\text{post}} -</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>X_i^{\text{pre}}$ and run a one-sample test of $\bar D$ against 0. Because $\operatorname{Var}(D) =</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>\sigma_1^2 + \sigma_2^2 - 2\operatorname{Cov}(X^{\text{pre}}, X^{\text{post}})$ and the within-person</span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>correlation is usually positive, pairing *shrinks* the standard error — the source of its extra</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>power.</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>**Why the CI–test duality holds.** The 95% interval is exactly the set of null values $\mu_0$ that</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>would *not* be rejected at the 5% level: $|{\bar X - \mu_0}|/(s/\sqrt n) \le t_{n-1,0.975}$</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>rearranges to $\mu_0 \in <span class="co">[</span><span class="ot">\bar X \pm t_{n-1,0.975}\, s/\sqrt n</span><span class="co">]</span>$. Reject $\iff$ $\mu_0$ outside the</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>interval.</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">confidence intervals</span><span class="co">](confidence-intervals.qmd)</span> (its dual),</span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">estimation</span><span class="co">](estimation.qmd)</span> (the standard error in the denominator),</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">sampling distributions &amp; the CLT</span><span class="co">](sampling-distributions-clt.qmd)</span> (the null distribution of the</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>  statistic), and the <span class="co">[</span><span class="ot">base-rate fallacy</span><span class="co">](../01-foundations/bayes-theorem.qmd)</span> (the transposed</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>  conditional that wrecks p-value interpretation).</span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">statistical power</span><span class="co">](statistical-power.qmd)</span> (the Type II / $\beta$ side of the table)</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>  and <span class="co">[</span><span class="ot">the replication crisis</span><span class="co">](replication-crisis.qmd)</span> (what happens when testing is abused at</span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>  scale).</span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears as:** the t- and F-statistics on every <span class="co">[</span><span class="ot">regression coefficient</span><span class="co">](../03-regression/index.qmd)</span>,</span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>  and the significance tests behind every <span class="co">[</span><span class="ot">causal estimate</span><span class="co">](../05-causal-inference/index.qmd)</span>.</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>Take these prompts to the source library to push past the synthesis above:</span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"List every misinterpretation of the p-value that *Statistics Done Wrong* warns about, with the</span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>   correct statement for each."</span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"Walk me through the two-sample t-test in *Practical Statistics for Data Scientists*, including</span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a>   when to use the pooled vs Welch version."</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"Explain the difference between statistical and practical significance with the examples the</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>   sources give, and how large samples create the trap."</span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"What is the transposed-conditional error, and how does it connect the p-value misreading to</span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>   Bayes' theorem and base rates?"</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"Show me the full duality between confidence intervals and hypothesis tests, and why reporting</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>   intervals is often preferred."</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
