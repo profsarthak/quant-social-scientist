@@ -741,6 +741,7 @@ window.Quarto = {
   </ul></li>
   <li><a href="#testing-several-coefficients-at-once-the-f-test" id="toc-testing-several-coefficients-at-once-the-f-test" class="nav-link" data-scroll-target="#testing-several-coefficients-at-once-the-f-test">Testing several coefficients at once: the F-test</a></li>
   <li><a href="#statistical-vs-practical-significance-again" id="toc-statistical-vs-practical-significance-again" class="nav-link" data-scroll-target="#statistical-vs-practical-significance-again">Statistical vs practical significance — again</a></li>
+  <li><a href="#prediction-two-kinds-of-interval" id="toc-prediction-two-kinds-of-interval" class="nav-link" data-scroll-target="#prediction-two-kinds-of-interval">Prediction: two kinds of interval</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
   <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
@@ -875,6 +876,67 @@ F = \frac{(\text{SSR}_r - \text{SSR}_{ur})/q}{\text{SSR}_{ur}/(n-k-1)},
 <li><strong>Practical (economic) significance</strong> (the <em>magnitude</em> of <span class="math inline">\hat\beta_j</span>) asks whether the effect is <em>big enough to matter</em> — a question about <em>substance</em>.</li>
 </ul>
 <p>With a huge sample, a trivially small coefficient can be “highly significant” (<span class="math inline">t</span> enormous, effect meaningless); with a small sample, a large, important effect can be “insignificant.” <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> Always report and interpret the <strong>coefficient’s size in real units</strong>, not just its stars. A significant 0.2%-per-year effect and a significant 8%-per-year effect are both “significant” and worlds apart.</p>
+</section>
+<section id="prediction-two-kinds-of-interval" class="level2">
+<h2 class="anchored" data-anchor-id="prediction-two-kinds-of-interval">Prediction: two kinds of interval</h2>
+<p>Inference isn’t only about coefficients — often the goal is to <strong>predict <span class="math inline">y</span> for a new case</strong> with regressor values <span class="math inline">x_0</span>. The point prediction is just the fitted value, <span class="math inline">\hat y_0 = \hat\beta_0 +
+\hat\beta_1 x_{0}+\cdots</span>. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> But “how uncertain is that prediction?” has <strong>two different answers</strong>, and confusing them is a classic error:</p>
+<ul>
+<li>A <strong>confidence interval for the mean</strong>, <span class="math inline">E[y\mid x_0]</span> — the <em>average</em> outcome for everyone with characteristics <span class="math inline">x_0</span>. Its only uncertainty comes from the estimated coefficients, so it is <strong>narrow</strong> and shrinks toward zero as <span class="math inline">n\to\infty</span>.</li>
+<li>A <strong>prediction interval for a single new individual</strong> <span class="math inline">y_0</span> — that person’s <em>actual</em> outcome. It carries the coefficient uncertainty <strong>plus the irreducible scatter of individuals around the line</strong>, the error variance <span class="math inline">\sigma^2</span>. So it is <strong>much wider</strong> and does <strong>not</strong> vanish as <span class="math inline">n</span> grows: even with infinite data and a perfectly known line, individuals still scatter by <span class="math inline">\sigma</span>. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></li>
+</ul>
+<div id="cell-fig-prediction-bands" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Show the figure code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> NormalDist</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">2</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">60</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> rng.uniform(<span class="dv">0</span>, <span class="dv">10</span>, n)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">2.5</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> <span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.8</span> <span class="op">*</span> x <span class="op">+</span> rng.normal(<span class="dv">0</span>, sigma, n)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>xbar, Sxx <span class="op">=</span> x.mean(), np.<span class="bu">sum</span>((x <span class="op">-</span> x.mean()) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>b1 <span class="op">=</span> np.cov(x, y, bias<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">/</span> np.var(x)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>b0 <span class="op">=</span> y.mean() <span class="op">-</span> b1 <span class="op">*</span> xbar</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>resid <span class="op">=</span> y <span class="op">-</span> (b0 <span class="op">+</span> b1 <span class="op">*</span> x)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> np.sqrt(np.<span class="bu">sum</span>(resid <span class="op">**</span> <span class="dv">2</span>) <span class="op">/</span> (n <span class="op">-</span> <span class="dv">2</span>))            <span class="co"># estimated sigma</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>tcrit <span class="op">=</span> <span class="fl">1.96</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">100</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>se_mean <span class="op">=</span> s <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">/</span> n <span class="op">+</span> (xs <span class="op">-</span> xbar) <span class="op">**</span> <span class="dv">2</span> <span class="op">/</span> Sxx)        <span class="co"># SE of the mean prediction</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>se_pred <span class="op">=</span> s <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">+</span> <span class="dv">1</span> <span class="op">/</span> n <span class="op">+</span> (xs <span class="op">-</span> xbar) <span class="op">**</span> <span class="dv">2</span> <span class="op">/</span> Sxx)    <span class="co"># + 1 for an individual</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>fit <span class="op">=</span> b0 <span class="op">+</span> b1 <span class="op">*</span> xs</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.2</span>))</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>ax.scatter(x, y, s<span class="op">=</span><span class="dv">16</span>, color<span class="op">=</span><span class="st">"#9aa0a6"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, zorder<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>ax.fill_between(xs, fit <span class="op">-</span> tcrit <span class="op">*</span> se_pred, fit <span class="op">+</span> tcrit <span class="op">*</span> se_pred,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>                color<span class="op">=</span><span class="st">"#d98a29"</span>, alpha<span class="op">=</span><span class="fl">0.18</span>, label<span class="op">=</span><span class="st">"95% prediction interval (an individual)"</span>)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>ax.fill_between(xs, fit <span class="op">-</span> tcrit <span class="op">*</span> se_mean, fit <span class="op">+</span> tcrit <span class="op">*</span> se_mean,</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>                color<span class="op">=</span><span class="st">"#1f3a5f"</span>, alpha<span class="op">=</span><span class="fl">0.35</span>, label<span class="op">=</span><span class="st">"95</span><span class="sc">% c</span><span class="st">onfidence interval (the mean)"</span>)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, fit, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, lw<span class="op">=</span><span class="fl">2.2</span>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"x"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"y"</span>)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Confidence interval (mean) vs prediction interval (individual)"</span>)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-prediction-bands" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-prediction-bands-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="inference-for-regression_files/figure-html/fig-prediction-bands-output-1.png" width="662" height="394" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-prediction-bands-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Two intervals, two questions. The inner blue band is the 95% confidence interval for the mean outcome E[y|x] — narrow, and narrowest near the centre of the data. The outer band is the 95% prediction interval for a single new individual: far wider because it adds the irreducible person-to-person scatter (σ), which no amount of data removes. Predicting an average is easy; predicting a person is not.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The practical upshot: a regression can pin down an <strong>average</strong> tightly while still being nearly useless for forecasting any <strong>single</strong> outcome — the prediction band is wide because people are not their average. (For <a href="../../content/03-regression/functional-form.html">log-outcome models</a>, predicting the level needs a retransformation correction, since <span class="math inline">\exp</span> of the predicted log under-predicts the mean — the <a href="../../content/01-foundations/expectation-and-variance.html">Jensen</a> gap again.)</p>
 </section>
 <section id="common-pitfalls" class="level2">
 <h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
@@ -1425,236 +1487,299 @@ Wooldridge, Jeffrey M. 2019. <em>Introductory Econometrics: A Modern Approach</e
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Inference for Regression Coefficients"</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "A coefficient is an estimate — so attach a standard error, test it, and bound it, before you believe it."</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>A regression coefficient is a <span class="co">[</span><span class="ot">statistic</span><span class="co">](../02-inference/estimation.qmd)</span>, so it has a sampling</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>distribution: run the study again and it would land somewhere slightly different. Everything in this</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>entry — the standard error, the t-test, the confidence interval, the F-test — is the</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Part II inference machinery</span><span class="co">](../02-inference/index.qmd)</span> attached to $\hat\beta$. The discipline is</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>the same: never report a coefficient without its uncertainty.</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>The printout says the effect of education on log-wage is $0.092$. Is that *real*, or could a fresh</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>sample have produced $0$? You answer with the coefficient's **standard error** and the tests built on</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>it. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> This is where regression stops being description and becomes inference: every</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>"significant effect," every "we cannot reject," every error bar in an empirical paper is one of the</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>procedures below. And the <span class="co">[</span><span class="ot">statistical-vs-practical</span><span class="co">](../02-inference/hypothesis-testing.qmd)</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>distinction returns with a vengeance — with enough data, *everything* is significant.</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## The sampling distribution of a coefficient</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>To do exact inference at any sample size, Wooldridge adds one assumption to the</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Gauss–Markov five</span><span class="co">](gauss-markov-assumptions.qmd)</span>: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **MLR.6 (Normality):** the error $u$ is independent of the regressors and distributed</span></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; $\mathcal{N}(0, \sigma^2)$.</span></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>MLR.1–MLR.6 are the **Classical Linear Model**. Under them, each OLS estimator is Normally</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>distributed around the truth: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>\hat\beta_j \sim \mathcal{N}<span class="sc">\!</span>\big(\beta_j,\ \operatorname{Var}(\hat\beta_j)\big).</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>(Even without MLR.6, the <span class="co">[</span><span class="ot">CLT</span><span class="co">](../02-inference/sampling-distributions-clt.qmd)</span> delivers approximate</span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>Normality in large samples — which is why regression inference works so widely.) The **standard</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>error** $\operatorname{se}(\hat\beta_j)$ is the estimated standard deviation of this distribution,</span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>built from the <span class="co">[</span><span class="ot">variance formula</span><span class="co">](gauss-markov-assumptions.qmd)</span> with $\sigma^2$ replaced by its</span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>estimate $\hat\sigma^2$ (the SER squared). <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> The standard error is the whole ball</span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>game: it is what converts a point estimate into a claim.</span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="fu">## Testing a single coefficient: the t-test</span></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>To ask "could the true effect be zero?", test $H_0:\beta_j = 0$ with the **t-statistic** — the</span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>estimate measured in standard errors: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>t = \frac{\hat\beta_j}{\operatorname{se}(\hat\beta_j)}.</span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>If $|t|$ exceeds the critical value from the $t$-distribution with $n-k-1$ degrees of freedom, reject</span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>$H_0$ — the coefficient is **statistically significant**. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> The companion</span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>**confidence interval** gives the range of values you can't reject: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>\hat\beta_j \pm c\cdot\operatorname{se}(\hat\beta_j),</span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>with $c \approx 2$ for 95%. The interval and the test are <span class="co">[</span><span class="ot">duals</span><span class="co">](../02-inference/confidence-intervals.qmd)</span>:</span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>the coefficient is significant at 5% exactly when its 95% interval excludes zero.</span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Wooldridge's WAGE1 t-test"}</span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>In the log-wage regression ($n=526$), the education coefficient is $\hat\beta_{\text{educ}} = 0.092$</span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>with $\operatorname{se} = 0.007$. So $t = 0.092/0.007 \approx 13.1$ — vastly beyond any critical</span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>value. Education is *overwhelmingly* statistically significant: a sampling fluke essentially could not</span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>produce a $t$ of 13. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> (The 95% interval, $0.092 \pm 2(0.007) = <span class="co">[</span><span class="ot">0.078, 0.106</span><span class="co">]</span>$,</span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>nowhere near zero.)</span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="fu">### Significance is estimate ÷ standard error</span></span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>The t-statistic makes vivid that significance is *not* about the size of an effect but about its size</span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>*relative to its noise*. Below, two coefficients have the **identical** estimate ($0.5$); only their</span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>standard errors differ. The precise one is clearly significant; the noisy one can't be distinguished</span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>from zero — same number, opposite verdict.</span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-coef-se</span></span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Significance = estimate ÷ standard error. Both coefficients are estimated at 0.5. The precise estimate (blue, se = 0.10, t = 5) has a 95% interval far from zero — significant. The noisy estimate (orange, se = 0.35, t = 1.4) has an interval straddling zero — not significant. The point estimate is the same; the standard error decides."</span></span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> NormalDist</span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>est <span class="op">=</span> <span class="fl">0.5</span></span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="op">-</span><span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="dv">600</span>)</span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.7</span>))</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> se, color, label <span class="kw">in</span> [(<span class="fl">0.10</span>, <span class="st">"#1f3a5f"</span>, <span class="st">"se = 0.10  (t = 5.0, significant)"</span>),</span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>                         (<span class="fl">0.35</span>, <span class="st">"#d98a29"</span>, <span class="st">"se = 0.35  (t = 1.4, not significant)"</span>)]:</span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>    nd <span class="op">=</span> NormalDist(est, se)</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>    ax.plot(xs, [nd.pdf(v) <span class="cf">for</span> v <span class="kw">in</span> xs], color<span class="op">=</span>color, lw<span class="op">=</span><span class="fl">2.0</span>, label<span class="op">=</span>label)</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>    lo, hi <span class="op">=</span> est <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se, est <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se</span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="op">-</span><span class="fl">0.25</span> <span class="cf">if</span> se <span class="op">==</span> <span class="fl">0.10</span> <span class="cf">else</span> <span class="op">-</span><span class="fl">0.5</span></span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>    ax.errorbar(est, y, xerr<span class="op">=</span><span class="fl">1.96</span> <span class="op">*</span> se, fmt<span class="op">=</span><span class="st">"o"</span>, color<span class="op">=</span>color, capsize<span class="op">=</span><span class="dv">4</span>, lw<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.6</span>)</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.02</span>, ax.get_ylim()[<span class="dv">1</span>] <span class="op">*</span> <span class="fl">0.85</span>, <span class="st">"H₀: β = 0"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([])<span class="op">;</span> ax.set_xlabel(<span class="st">"coefficient value"</span>)</span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Same estimate (0.5), different precision, different verdict"</span>)</span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="fu">## Testing several coefficients at once: the F-test</span></span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>Some questions involve *groups* of coefficients: "do *any* of these four neighbourhood variables</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>matter?", "should this block of regressors be in the model at all?" Testing them one t-test at a time</span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>invites the <span class="co">[</span><span class="ot">multiple-comparisons</span><span class="co">](../02-inference/replication-crisis.qmd)</span> problem; the **F-test**</span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>asks the joint question in one shot. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> It compares a **restricted** model (the</span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>suspect coefficients forced to zero) against the **unrestricted** model (all included), via their</span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>residual sums of squares: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>F = \frac{(\text{SSR}_r - \text{SSR}_{ur})/q}{\text{SSR}_{ur}/(n-k-1)},</span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>where $q$ is the number of restrictions. The logic is pure</span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">ANOVA</span><span class="co">](../02-inference/comparing-groups.qmd)</span>: does dropping those regressors make the fit</span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>*significantly* worse? A special case — the **test of overall significance** — restricts *all* slopes</span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>to zero ($H_0:\beta_1=\cdots=\beta_k=0$), asking whether the model explains anything at all.</span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> (This F is what reproduces the <span class="co">[</span><span class="ot">ANOVA F-test</span><span class="co">](../02-inference/comparing-groups.qmd)</span></span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>when the regressors are group dummies — regression *contains* ANOVA.)</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="fu">## Statistical vs practical significance — again</span></span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>Wooldridge hammers the distinction, because regression makes it so easy to confuse:</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Statistical significance** (the t-stat / p-value) asks whether the effect is distinguishable from</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>  zero — a question about *noise*.</span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Practical (economic) significance** (the *magnitude* of $\hat\beta_j$) asks whether the effect is</span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>  *big enough to matter* — a question about *substance*.</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>With a huge sample, a trivially small coefficient can be "highly significant" ($t$ enormous, effect</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>meaningless); with a small sample, a large, important effect can be "insignificant."</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> Always report and interpret the **coefficient's size in real units**, not just its</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>stars. A significant 0.2%-per-year effect and a significant 8%-per-year effect are both "significant"</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>and worlds apart.</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading stars instead of magnitudes.** Significance is not importance. A tiny, precisely-estimated</span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>  effect is significant and may be useless; report the size and a confidence interval.</span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Mining many t-tests for the significant one.** Each coefficient at 5% has a 1-in-20 false-positive</span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>  rate; with many regressors, use the <span class="co">[</span><span class="ot">F-test</span><span class="co">](#testing-several-coefficients-at-once-the-f-test)</span> for</span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>  joint questions and pre-specify hypotheses. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Trusting standard errors when MLR.5 fails.** Heteroskedasticity or clustering makes the printed</span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>  SEs wrong (the coefficients are still fine). Use <span class="co">[</span><span class="ot">robust/clustered SEs</span><span class="co">](regression-diagnostics.qmd)</span>.</span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Interpreting a wide interval around zero as 'no effect.'** It may mean *underpowered*, not *null*</span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>  — the <span class="co">[</span><span class="ot">power</span><span class="co">](../02-inference/statistical-power.qmd)</span> lesson, in regression dress.</span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting inference assumes a valid model.** A perfect t-statistic on an</span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">endogenous</span><span class="co">](gauss-markov-assumptions.qmd)</span> coefficient precisely estimates a *biased* number.</span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>  Inference quantifies sampling noise, not specification error.</span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — MLR.6 normality and the Classical Linear Model; the</span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>  Normal sampling distribution of $\hat\beta_j$ and the standard error; the t-statistic</span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>  $t=\hat\beta_j/\operatorname{se}(\hat\beta_j)$, the $n-k-1$ degrees of freedom, and confidence</span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>  intervals; the WAGE1 example ($\hat\beta_{\text{educ}}=0.092$, $\operatorname{se}=0.007$,</span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>  $t\approx13.1$); the F-test for joint/exclusion restrictions and overall significance; the</span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>  statistical-vs-practical-significance distinction and the large-sample caution.</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>**From Normal to t.** Under the CLM, $(\hat\beta_j-\beta_j)/\operatorname{sd}(\hat\beta_j)$ is exactly</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>standard Normal. Replacing the unknown $\sigma$ in $\operatorname{sd}$ with the estimate $\hat\sigma$</span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>inflates the tails to a $t$ distribution with $n-k-1$ degrees of freedom — the same</span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">$\sigma$-is-estimated penalty</span><span class="co">](../02-inference/confidence-intervals.qmd)</span> as the one-sample t-test,</span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>now with $k+1$ parameters consumed instead of one.</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>**The F as a fit comparison.** Adding regressors can only lower (never raise) the SSR, so</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>$\text{SSR}_r \ge \text{SSR}_{ur}$. The numerator $(\text{SSR}_r-\text{SSR}_{ur})/q$ is the *average</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>improvement per restriction*; the denominator $\text{SSR}_{ur}/(n-k-1)$ estimates $\sigma^2$. Under</span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>$H_0$ both estimate the same noise, so $F\approx1$; a real contribution makes $F$ large.</span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>$F\sim F_{q,\,n-k-1}$ under the null.</span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>**t and F coincide for one restriction.** For $q=1$, $F = t^2$ exactly — the joint test of a single</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>coefficient is just the square of its t-test.</span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>**An R²-form of the overall F.** Dividing through by SST, the overall-significance F equals</span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>$\dfrac{R^2/k}{(1-R^2)/(n-k-1)}$ — large when the model explains a big share of variance relative to</span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>its degrees of freedom.</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Gauss–Markov assumptions</span><span class="co">](gauss-markov-assumptions.qmd)</span> (the variance formula</span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>  behind the SE; MLR.6 for exact normality), <span class="co">[</span><span class="ot">estimation</span><span class="co">](../02-inference/estimation.qmd)</span> (a</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>  coefficient is an estimator with a sampling distribution), and</span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">confidence intervals &amp; testing</span><span class="co">](../02-inference/hypothesis-testing.qmd)</span> (the t/F machinery, applied</span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>  to $\hat\beta$).</span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">functional form</span><span class="co">](functional-form.qmd)</span> (interpreting the coefficients you're now</span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>  testing) and <span class="co">[</span><span class="ot">diagnostics</span><span class="co">](regression-diagnostics.qmd)</span> (when the standard errors are wrong and how</span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  to fix them).</span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** every <span class="co">[</span><span class="ot">causal estimate</span><span class="co">](../05-causal-inference/index.qmd)</span>, each reported with a</span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>  standard error, a t-stat, and an interval generated exactly this way.</span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"Explain the sampling distribution of an OLS coefficient and what the standard error measures,</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>   using the Classical Linear Model assumptions."</span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"Walk through the t-test for a coefficient and the WAGE1 example (β̂ = 0.092, se = 0.007,</span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>   t = 13.1), and the matching confidence interval."</span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"What is the F-test for joint hypotheses, what is the restricted-vs-unrestricted formula, and what</span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>   is the test of overall significance?"</span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"Explain the difference between statistical and practical significance in regression, and why a</span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>   large sample makes everything significant."</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"Why does t² = F for a single restriction, and how does the overall F relate to R²?"</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Inference for Regression Coefficients"</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "A coefficient is an estimate — so attach a standard error, test it, and bound it, before you believe it."</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>A regression coefficient is a <span class="co">[</span><span class="ot">statistic</span><span class="co">](../02-inference/estimation.qmd)</span>, so it has a sampling</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>distribution: run the study again and it would land somewhere slightly different. Everything in this</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>entry — the standard error, the t-test, the confidence interval, the F-test — is the</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Part II inference machinery</span><span class="co">](../02-inference/index.qmd)</span> attached to $\hat\beta$. The discipline is</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>the same: never report a coefficient without its uncertainty.</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>The printout says the effect of education on log-wage is $0.092$. Is that *real*, or could a fresh</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>sample have produced $0$? You answer with the coefficient's **standard error** and the tests built on</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>it. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> This is where regression stops being description and becomes inference: every</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>"significant effect," every "we cannot reject," every error bar in an empirical paper is one of the</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>procedures below. And the <span class="co">[</span><span class="ot">statistical-vs-practical</span><span class="co">](../02-inference/hypothesis-testing.qmd)</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>distinction returns with a vengeance — with enough data, *everything* is significant.</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## The sampling distribution of a coefficient</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>To do exact inference at any sample size, Wooldridge adds one assumption to the</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Gauss–Markov five</span><span class="co">](gauss-markov-assumptions.qmd)</span>: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **MLR.6 (Normality):** the error $u$ is independent of the regressors and distributed</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; $\mathcal{N}(0, \sigma^2)$.</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>MLR.1–MLR.6 are the **Classical Linear Model**. Under them, each OLS estimator is Normally</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>distributed around the truth: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>\hat\beta_j \sim \mathcal{N}<span class="sc">\!</span>\big(\beta_j,\ \operatorname{Var}(\hat\beta_j)\big).</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>(Even without MLR.6, the <span class="co">[</span><span class="ot">CLT</span><span class="co">](../02-inference/sampling-distributions-clt.qmd)</span> delivers approximate</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>Normality in large samples — which is why regression inference works so widely.) The **standard</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>error** $\operatorname{se}(\hat\beta_j)$ is the estimated standard deviation of this distribution,</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>built from the <span class="co">[</span><span class="ot">variance formula</span><span class="co">](gauss-markov-assumptions.qmd)</span> with $\sigma^2$ replaced by its</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>estimate $\hat\sigma^2$ (the SER squared). <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> The standard error is the whole ball</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>game: it is what converts a point estimate into a claim.</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="fu">## Testing a single coefficient: the t-test</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>To ask "could the true effect be zero?", test $H_0:\beta_j = 0$ with the **t-statistic** — the</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>estimate measured in standard errors: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>t = \frac{\hat\beta_j}{\operatorname{se}(\hat\beta_j)}.</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>If $|t|$ exceeds the critical value from the $t$-distribution with $n-k-1$ degrees of freedom, reject</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>$H_0$ — the coefficient is **statistically significant**. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> The companion</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>**confidence interval** gives the range of values you can't reject: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>\hat\beta_j \pm c\cdot\operatorname{se}(\hat\beta_j),</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>with $c \approx 2$ for 95%. The interval and the test are <span class="co">[</span><span class="ot">duals</span><span class="co">](../02-inference/confidence-intervals.qmd)</span>:</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>the coefficient is significant at 5% exactly when its 95% interval excludes zero.</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Wooldridge's WAGE1 t-test"}</span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>In the log-wage regression ($n=526$), the education coefficient is $\hat\beta_{\text{educ}} = 0.092$</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>with $\operatorname{se} = 0.007$. So $t = 0.092/0.007 \approx 13.1$ — vastly beyond any critical</span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>value. Education is *overwhelmingly* statistically significant: a sampling fluke essentially could not</span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>produce a $t$ of 13. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> (The 95% interval, $0.092 \pm 2(0.007) = <span class="co">[</span><span class="ot">0.078, 0.106</span><span class="co">]</span>$,</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>nowhere near zero.)</span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a><span class="fu">### Significance is estimate ÷ standard error</span></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>The t-statistic makes vivid that significance is *not* about the size of an effect but about its size</span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>*relative to its noise*. Below, two coefficients have the **identical** estimate ($0.5$); only their</span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>standard errors differ. The precise one is clearly significant; the noisy one can't be distinguished</span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>from zero — same number, opposite verdict.</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-coef-se</span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Significance = estimate ÷ standard error. Both coefficients are estimated at 0.5. The precise estimate (blue, se = 0.10, t = 5) has a 95% interval far from zero — significant. The noisy estimate (orange, se = 0.35, t = 1.4) has an interval straddling zero — not significant. The point estimate is the same; the standard error decides."</span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> NormalDist</span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>est <span class="op">=</span> <span class="fl">0.5</span></span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="op">-</span><span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="dv">600</span>)</span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.7</span>))</span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> se, color, label <span class="kw">in</span> [(<span class="fl">0.10</span>, <span class="st">"#1f3a5f"</span>, <span class="st">"se = 0.10  (t = 5.0, significant)"</span>),</span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>                         (<span class="fl">0.35</span>, <span class="st">"#d98a29"</span>, <span class="st">"se = 0.35  (t = 1.4, not significant)"</span>)]:</span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>    nd <span class="op">=</span> NormalDist(est, se)</span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>    ax.plot(xs, [nd.pdf(v) <span class="cf">for</span> v <span class="kw">in</span> xs], color<span class="op">=</span>color, lw<span class="op">=</span><span class="fl">2.0</span>, label<span class="op">=</span>label)</span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>    lo, hi <span class="op">=</span> est <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se, est <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se</span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="op">-</span><span class="fl">0.25</span> <span class="cf">if</span> se <span class="op">==</span> <span class="fl">0.10</span> <span class="cf">else</span> <span class="op">-</span><span class="fl">0.5</span></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>    ax.errorbar(est, y, xerr<span class="op">=</span><span class="fl">1.96</span> <span class="op">*</span> se, fmt<span class="op">=</span><span class="st">"o"</span>, color<span class="op">=</span>color, capsize<span class="op">=</span><span class="dv">4</span>, lw<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.6</span>)</span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.02</span>, ax.get_ylim()[<span class="dv">1</span>] <span class="op">*</span> <span class="fl">0.85</span>, <span class="st">"H₀: β = 0"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([])<span class="op">;</span> ax.set_xlabel(<span class="st">"coefficient value"</span>)</span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Same estimate (0.5), different precision, different verdict"</span>)</span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a><span class="fu">## Testing several coefficients at once: the F-test</span></span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>Some questions involve *groups* of coefficients: "do *any* of these four neighbourhood variables</span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>matter?", "should this block of regressors be in the model at all?" Testing them one t-test at a time</span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>invites the <span class="co">[</span><span class="ot">multiple-comparisons</span><span class="co">](../02-inference/replication-crisis.qmd)</span> problem; the **F-test**</span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>asks the joint question in one shot. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> It compares a **restricted** model (the</span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a>suspect coefficients forced to zero) against the **unrestricted** model (all included), via their</span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a>residual sums of squares: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a>F = \frac{(\text{SSR}_r - \text{SSR}_{ur})/q}{\text{SSR}_{ur}/(n-k-1)},</span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a>where $q$ is the number of restrictions. The logic is pure</span>
+<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">ANOVA</span><span class="co">](../02-inference/comparing-groups.qmd)</span>: does dropping those regressors make the fit</span>
+<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a>*significantly* worse? A special case — the **test of overall significance** — restricts *all* slopes</span>
+<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a>to zero ($H_0:\beta_1=\cdots=\beta_k=0$), asking whether the model explains anything at all.</span>
+<span id="cb3-129"><a href="#cb3-129" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> (This F is what reproduces the <span class="co">[</span><span class="ot">ANOVA F-test</span><span class="co">](../02-inference/comparing-groups.qmd)</span></span>
+<span id="cb3-130"><a href="#cb3-130" aria-hidden="true" tabindex="-1"></a>when the regressors are group dummies — regression *contains* ANOVA.)</span>
+<span id="cb3-131"><a href="#cb3-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-132"><a href="#cb3-132" aria-hidden="true" tabindex="-1"></a><span class="fu">## Statistical vs practical significance — again</span></span>
+<span id="cb3-133"><a href="#cb3-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a>Wooldridge hammers the distinction, because regression makes it so easy to confuse:</span>
+<span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb3-136"><a href="#cb3-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-137"><a href="#cb3-137" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Statistical significance** (the t-stat / p-value) asks whether the effect is distinguishable from</span>
+<span id="cb3-138"><a href="#cb3-138" aria-hidden="true" tabindex="-1"></a>  zero — a question about *noise*.</span>
+<span id="cb3-139"><a href="#cb3-139" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Practical (economic) significance** (the *magnitude* of $\hat\beta_j$) asks whether the effect is</span>
+<span id="cb3-140"><a href="#cb3-140" aria-hidden="true" tabindex="-1"></a>  *big enough to matter* — a question about *substance*.</span>
+<span id="cb3-141"><a href="#cb3-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-142"><a href="#cb3-142" aria-hidden="true" tabindex="-1"></a>With a huge sample, a trivially small coefficient can be "highly significant" ($t$ enormous, effect</span>
+<span id="cb3-143"><a href="#cb3-143" aria-hidden="true" tabindex="-1"></a>meaningless); with a small sample, a large, important effect can be "insignificant."</span>
+<span id="cb3-144"><a href="#cb3-144" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> Always report and interpret the **coefficient's size in real units**, not just its</span>
+<span id="cb3-145"><a href="#cb3-145" aria-hidden="true" tabindex="-1"></a>stars. A significant 0.2%-per-year effect and a significant 8%-per-year effect are both "significant"</span>
+<span id="cb3-146"><a href="#cb3-146" aria-hidden="true" tabindex="-1"></a>and worlds apart.</span>
+<span id="cb3-147"><a href="#cb3-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-148"><a href="#cb3-148" aria-hidden="true" tabindex="-1"></a><span class="fu">## Prediction: two kinds of interval</span></span>
+<span id="cb3-149"><a href="#cb3-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-150"><a href="#cb3-150" aria-hidden="true" tabindex="-1"></a>Inference isn't only about coefficients — often the goal is to **predict $y$ for a new case** with</span>
+<span id="cb3-151"><a href="#cb3-151" aria-hidden="true" tabindex="-1"></a>regressor values $x_0$. The point prediction is just the fitted value, $\hat y_0 = \hat\beta_0 +</span>
+<span id="cb3-152"><a href="#cb3-152" aria-hidden="true" tabindex="-1"></a>\hat\beta_1 x_{0}+\cdots$. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> But "how uncertain is that prediction?" has **two</span>
+<span id="cb3-153"><a href="#cb3-153" aria-hidden="true" tabindex="-1"></a>different answers**, and confusing them is a classic error:</span>
+<span id="cb3-154"><a href="#cb3-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-155"><a href="#cb3-155" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A **confidence interval for the mean**, $E<span class="co">[</span><span class="ot">y\mid x_0</span><span class="co">]</span>$ — the *average* outcome for everyone with</span>
+<span id="cb3-156"><a href="#cb3-156" aria-hidden="true" tabindex="-1"></a>  characteristics $x_0$. Its only uncertainty comes from the estimated coefficients, so it is</span>
+<span id="cb3-157"><a href="#cb3-157" aria-hidden="true" tabindex="-1"></a>  **narrow** and shrinks toward zero as $n\to\infty$.</span>
+<span id="cb3-158"><a href="#cb3-158" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A **prediction interval for a single new individual** $y_0$ — that person's *actual* outcome. It</span>
+<span id="cb3-159"><a href="#cb3-159" aria-hidden="true" tabindex="-1"></a>  carries the coefficient uncertainty **plus the irreducible scatter of individuals around the line**,</span>
+<span id="cb3-160"><a href="#cb3-160" aria-hidden="true" tabindex="-1"></a>  the error variance $\sigma^2$. So it is **much wider** and does **not** vanish as $n$ grows: even with</span>
+<span id="cb3-161"><a href="#cb3-161" aria-hidden="true" tabindex="-1"></a>  infinite data and a perfectly known line, individuals still scatter by $\sigma$. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb3-162"><a href="#cb3-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-165"><a href="#cb3-165" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb3-166"><a href="#cb3-166" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-prediction-bands</span></span>
+<span id="cb3-167"><a href="#cb3-167" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Two intervals, two questions. The inner blue band is the 95% confidence interval for the mean outcome E[y|x] — narrow, and narrowest near the centre of the data. The outer band is the 95% prediction interval for a single new individual: far wider because it adds the irreducible person-to-person scatter (σ), which no amount of data removes. Predicting an average is easy; predicting a person is not."</span></span>
+<span id="cb3-168"><a href="#cb3-168" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb3-169"><a href="#cb3-169" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb3-170"><a href="#cb3-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-171"><a href="#cb3-171" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-172"><a href="#cb3-172" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-173"><a href="#cb3-173" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> NormalDist</span>
+<span id="cb3-174"><a href="#cb3-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-175"><a href="#cb3-175" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">2</span>)</span>
+<span id="cb3-176"><a href="#cb3-176" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">60</span></span>
+<span id="cb3-177"><a href="#cb3-177" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> rng.uniform(<span class="dv">0</span>, <span class="dv">10</span>, n)</span>
+<span id="cb3-178"><a href="#cb3-178" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">2.5</span></span>
+<span id="cb3-179"><a href="#cb3-179" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> <span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.8</span> <span class="op">*</span> x <span class="op">+</span> rng.normal(<span class="dv">0</span>, sigma, n)</span>
+<span id="cb3-180"><a href="#cb3-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-181"><a href="#cb3-181" aria-hidden="true" tabindex="-1"></a>xbar, Sxx <span class="op">=</span> x.mean(), np.<span class="bu">sum</span>((x <span class="op">-</span> x.mean()) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb3-182"><a href="#cb3-182" aria-hidden="true" tabindex="-1"></a>b1 <span class="op">=</span> np.cov(x, y, bias<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">/</span> np.var(x)</span>
+<span id="cb3-183"><a href="#cb3-183" aria-hidden="true" tabindex="-1"></a>b0 <span class="op">=</span> y.mean() <span class="op">-</span> b1 <span class="op">*</span> xbar</span>
+<span id="cb3-184"><a href="#cb3-184" aria-hidden="true" tabindex="-1"></a>resid <span class="op">=</span> y <span class="op">-</span> (b0 <span class="op">+</span> b1 <span class="op">*</span> x)</span>
+<span id="cb3-185"><a href="#cb3-185" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> np.sqrt(np.<span class="bu">sum</span>(resid <span class="op">**</span> <span class="dv">2</span>) <span class="op">/</span> (n <span class="op">-</span> <span class="dv">2</span>))            <span class="co"># estimated sigma</span></span>
+<span id="cb3-186"><a href="#cb3-186" aria-hidden="true" tabindex="-1"></a>tcrit <span class="op">=</span> <span class="fl">1.96</span></span>
+<span id="cb3-187"><a href="#cb3-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-188"><a href="#cb3-188" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">100</span>)</span>
+<span id="cb3-189"><a href="#cb3-189" aria-hidden="true" tabindex="-1"></a>se_mean <span class="op">=</span> s <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">/</span> n <span class="op">+</span> (xs <span class="op">-</span> xbar) <span class="op">**</span> <span class="dv">2</span> <span class="op">/</span> Sxx)        <span class="co"># SE of the mean prediction</span></span>
+<span id="cb3-190"><a href="#cb3-190" aria-hidden="true" tabindex="-1"></a>se_pred <span class="op">=</span> s <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">+</span> <span class="dv">1</span> <span class="op">/</span> n <span class="op">+</span> (xs <span class="op">-</span> xbar) <span class="op">**</span> <span class="dv">2</span> <span class="op">/</span> Sxx)    <span class="co"># + 1 for an individual</span></span>
+<span id="cb3-191"><a href="#cb3-191" aria-hidden="true" tabindex="-1"></a>fit <span class="op">=</span> b0 <span class="op">+</span> b1 <span class="op">*</span> xs</span>
+<span id="cb3-192"><a href="#cb3-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-193"><a href="#cb3-193" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.2</span>))</span>
+<span id="cb3-194"><a href="#cb3-194" aria-hidden="true" tabindex="-1"></a>ax.scatter(x, y, s<span class="op">=</span><span class="dv">16</span>, color<span class="op">=</span><span class="st">"#9aa0a6"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, zorder<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb3-195"><a href="#cb3-195" aria-hidden="true" tabindex="-1"></a>ax.fill_between(xs, fit <span class="op">-</span> tcrit <span class="op">*</span> se_pred, fit <span class="op">+</span> tcrit <span class="op">*</span> se_pred,</span>
+<span id="cb3-196"><a href="#cb3-196" aria-hidden="true" tabindex="-1"></a>                color<span class="op">=</span><span class="st">"#d98a29"</span>, alpha<span class="op">=</span><span class="fl">0.18</span>, label<span class="op">=</span><span class="st">"95% prediction interval (an individual)"</span>)</span>
+<span id="cb3-197"><a href="#cb3-197" aria-hidden="true" tabindex="-1"></a>ax.fill_between(xs, fit <span class="op">-</span> tcrit <span class="op">*</span> se_mean, fit <span class="op">+</span> tcrit <span class="op">*</span> se_mean,</span>
+<span id="cb3-198"><a href="#cb3-198" aria-hidden="true" tabindex="-1"></a>                color<span class="op">=</span><span class="st">"#1f3a5f"</span>, alpha<span class="op">=</span><span class="fl">0.35</span>, label<span class="op">=</span><span class="st">"95</span><span class="sc">% c</span><span class="st">onfidence interval (the mean)"</span>)</span>
+<span id="cb3-199"><a href="#cb3-199" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, fit, color<span class="op">=</span><span class="st">"#1f3a5f"</span>, lw<span class="op">=</span><span class="fl">2.2</span>)</span>
+<span id="cb3-200"><a href="#cb3-200" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"x"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"y"</span>)</span>
+<span id="cb3-201"><a href="#cb3-201" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Confidence interval (mean) vs prediction interval (individual)"</span>)</span>
+<span id="cb3-202"><a href="#cb3-202" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb3-203"><a href="#cb3-203" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb3-204"><a href="#cb3-204" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb3-205"><a href="#cb3-205" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb3-206"><a href="#cb3-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-207"><a href="#cb3-207" aria-hidden="true" tabindex="-1"></a>The practical upshot: a regression can pin down an **average** tightly while still being nearly useless</span>
+<span id="cb3-208"><a href="#cb3-208" aria-hidden="true" tabindex="-1"></a>for forecasting any **single** outcome — the prediction band is wide because people are not their</span>
+<span id="cb3-209"><a href="#cb3-209" aria-hidden="true" tabindex="-1"></a>average. (For <span class="co">[</span><span class="ot">log-outcome models</span><span class="co">](functional-form.qmd)</span>, predicting the level needs a retransformation</span>
+<span id="cb3-210"><a href="#cb3-210" aria-hidden="true" tabindex="-1"></a>correction, since $\exp$ of the predicted log under-predicts the mean — the</span>
+<span id="cb3-211"><a href="#cb3-211" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Jensen</span><span class="co">](../01-foundations/expectation-and-variance.qmd)</span> gap again.)</span>
+<span id="cb3-212"><a href="#cb3-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-213"><a href="#cb3-213" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb3-214"><a href="#cb3-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-215"><a href="#cb3-215" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb3-216"><a href="#cb3-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-217"><a href="#cb3-217" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading stars instead of magnitudes.** Significance is not importance. A tiny, precisely-estimated</span>
+<span id="cb3-218"><a href="#cb3-218" aria-hidden="true" tabindex="-1"></a>  effect is significant and may be useless; report the size and a confidence interval.</span>
+<span id="cb3-219"><a href="#cb3-219" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb3-220"><a href="#cb3-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-221"><a href="#cb3-221" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Mining many t-tests for the significant one.** Each coefficient at 5% has a 1-in-20 false-positive</span>
+<span id="cb3-222"><a href="#cb3-222" aria-hidden="true" tabindex="-1"></a>  rate; with many regressors, use the <span class="co">[</span><span class="ot">F-test</span><span class="co">](#testing-several-coefficients-at-once-the-f-test)</span> for</span>
+<span id="cb3-223"><a href="#cb3-223" aria-hidden="true" tabindex="-1"></a>  joint questions and pre-specify hypotheses. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb3-224"><a href="#cb3-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-225"><a href="#cb3-225" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Trusting standard errors when MLR.5 fails.** Heteroskedasticity or clustering makes the printed</span>
+<span id="cb3-226"><a href="#cb3-226" aria-hidden="true" tabindex="-1"></a>  SEs wrong (the coefficients are still fine). Use <span class="co">[</span><span class="ot">robust/clustered SEs</span><span class="co">](regression-diagnostics.qmd)</span>.</span>
+<span id="cb3-227"><a href="#cb3-227" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb3-228"><a href="#cb3-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-229"><a href="#cb3-229" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Interpreting a wide interval around zero as 'no effect.'** It may mean *underpowered*, not *null*</span>
+<span id="cb3-230"><a href="#cb3-230" aria-hidden="true" tabindex="-1"></a>  — the <span class="co">[</span><span class="ot">power</span><span class="co">](../02-inference/statistical-power.qmd)</span> lesson, in regression dress.</span>
+<span id="cb3-231"><a href="#cb3-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-232"><a href="#cb3-232" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting inference assumes a valid model.** A perfect t-statistic on an</span>
+<span id="cb3-233"><a href="#cb3-233" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">endogenous</span><span class="co">](gauss-markov-assumptions.qmd)</span> coefficient precisely estimates a *biased* number.</span>
+<span id="cb3-234"><a href="#cb3-234" aria-hidden="true" tabindex="-1"></a>  Inference quantifies sampling noise, not specification error.</span>
+<span id="cb3-235"><a href="#cb3-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-236"><a href="#cb3-236" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-237"><a href="#cb3-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-238"><a href="#cb3-238" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb3-239"><a href="#cb3-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-240"><a href="#cb3-240" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb3-241"><a href="#cb3-241" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — MLR.6 normality and the Classical Linear Model; the</span>
+<span id="cb3-242"><a href="#cb3-242" aria-hidden="true" tabindex="-1"></a>  Normal sampling distribution of $\hat\beta_j$ and the standard error; the t-statistic</span>
+<span id="cb3-243"><a href="#cb3-243" aria-hidden="true" tabindex="-1"></a>  $t=\hat\beta_j/\operatorname{se}(\hat\beta_j)$, the $n-k-1$ degrees of freedom, and confidence</span>
+<span id="cb3-244"><a href="#cb3-244" aria-hidden="true" tabindex="-1"></a>  intervals; the WAGE1 example ($\hat\beta_{\text{educ}}=0.092$, $\operatorname{se}=0.007$,</span>
+<span id="cb3-245"><a href="#cb3-245" aria-hidden="true" tabindex="-1"></a>  $t\approx13.1$); the F-test for joint/exclusion restrictions and overall significance; the</span>
+<span id="cb3-246"><a href="#cb3-246" aria-hidden="true" tabindex="-1"></a>  statistical-vs-practical-significance distinction and the large-sample caution.</span>
+<span id="cb3-247"><a href="#cb3-247" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-248"><a href="#cb3-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-249"><a href="#cb3-249" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb3-250"><a href="#cb3-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-251"><a href="#cb3-251" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb3-252"><a href="#cb3-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-253"><a href="#cb3-253" aria-hidden="true" tabindex="-1"></a>**From Normal to t.** Under the CLM, $(\hat\beta_j-\beta_j)/\operatorname{sd}(\hat\beta_j)$ is exactly</span>
+<span id="cb3-254"><a href="#cb3-254" aria-hidden="true" tabindex="-1"></a>standard Normal. Replacing the unknown $\sigma$ in $\operatorname{sd}$ with the estimate $\hat\sigma$</span>
+<span id="cb3-255"><a href="#cb3-255" aria-hidden="true" tabindex="-1"></a>inflates the tails to a $t$ distribution with $n-k-1$ degrees of freedom — the same</span>
+<span id="cb3-256"><a href="#cb3-256" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">$\sigma$-is-estimated penalty</span><span class="co">](../02-inference/confidence-intervals.qmd)</span> as the one-sample t-test,</span>
+<span id="cb3-257"><a href="#cb3-257" aria-hidden="true" tabindex="-1"></a>now with $k+1$ parameters consumed instead of one.</span>
+<span id="cb3-258"><a href="#cb3-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-259"><a href="#cb3-259" aria-hidden="true" tabindex="-1"></a>**The F as a fit comparison.** Adding regressors can only lower (never raise) the SSR, so</span>
+<span id="cb3-260"><a href="#cb3-260" aria-hidden="true" tabindex="-1"></a>$\text{SSR}_r \ge \text{SSR}_{ur}$. The numerator $(\text{SSR}_r-\text{SSR}_{ur})/q$ is the *average</span>
+<span id="cb3-261"><a href="#cb3-261" aria-hidden="true" tabindex="-1"></a>improvement per restriction*; the denominator $\text{SSR}_{ur}/(n-k-1)$ estimates $\sigma^2$. Under</span>
+<span id="cb3-262"><a href="#cb3-262" aria-hidden="true" tabindex="-1"></a>$H_0$ both estimate the same noise, so $F\approx1$; a real contribution makes $F$ large.</span>
+<span id="cb3-263"><a href="#cb3-263" aria-hidden="true" tabindex="-1"></a>$F\sim F_{q,\,n-k-1}$ under the null.</span>
+<span id="cb3-264"><a href="#cb3-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-265"><a href="#cb3-265" aria-hidden="true" tabindex="-1"></a>**t and F coincide for one restriction.** For $q=1$, $F = t^2$ exactly — the joint test of a single</span>
+<span id="cb3-266"><a href="#cb3-266" aria-hidden="true" tabindex="-1"></a>coefficient is just the square of its t-test.</span>
+<span id="cb3-267"><a href="#cb3-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-268"><a href="#cb3-268" aria-hidden="true" tabindex="-1"></a>**An R²-form of the overall F.** Dividing through by SST, the overall-significance F equals</span>
+<span id="cb3-269"><a href="#cb3-269" aria-hidden="true" tabindex="-1"></a>$\dfrac{R^2/k}{(1-R^2)/(n-k-1)}$ — large when the model explains a big share of variance relative to</span>
+<span id="cb3-270"><a href="#cb3-270" aria-hidden="true" tabindex="-1"></a>its degrees of freedom.</span>
+<span id="cb3-271"><a href="#cb3-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-272"><a href="#cb3-272" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb3-273"><a href="#cb3-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-274"><a href="#cb3-274" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb3-275"><a href="#cb3-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-276"><a href="#cb3-276" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Gauss–Markov assumptions</span><span class="co">](gauss-markov-assumptions.qmd)</span> (the variance formula</span>
+<span id="cb3-277"><a href="#cb3-277" aria-hidden="true" tabindex="-1"></a>  behind the SE; MLR.6 for exact normality), <span class="co">[</span><span class="ot">estimation</span><span class="co">](../02-inference/estimation.qmd)</span> (a</span>
+<span id="cb3-278"><a href="#cb3-278" aria-hidden="true" tabindex="-1"></a>  coefficient is an estimator with a sampling distribution), and</span>
+<span id="cb3-279"><a href="#cb3-279" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">confidence intervals &amp; testing</span><span class="co">](../02-inference/hypothesis-testing.qmd)</span> (the t/F machinery, applied</span>
+<span id="cb3-280"><a href="#cb3-280" aria-hidden="true" tabindex="-1"></a>  to $\hat\beta$).</span>
+<span id="cb3-281"><a href="#cb3-281" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">functional form</span><span class="co">](functional-form.qmd)</span> (interpreting the coefficients you're now</span>
+<span id="cb3-282"><a href="#cb3-282" aria-hidden="true" tabindex="-1"></a>  testing) and <span class="co">[</span><span class="ot">diagnostics</span><span class="co">](regression-diagnostics.qmd)</span> (when the standard errors are wrong and how</span>
+<span id="cb3-283"><a href="#cb3-283" aria-hidden="true" tabindex="-1"></a>  to fix them).</span>
+<span id="cb3-284"><a href="#cb3-284" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** every <span class="co">[</span><span class="ot">causal estimate</span><span class="co">](../05-causal-inference/index.qmd)</span>, each reported with a</span>
+<span id="cb3-285"><a href="#cb3-285" aria-hidden="true" tabindex="-1"></a>  standard error, a t-stat, and an interval generated exactly this way.</span>
+<span id="cb3-286"><a href="#cb3-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-287"><a href="#cb3-287" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
+<span id="cb3-288"><a href="#cb3-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-289"><a href="#cb3-289" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"Explain the sampling distribution of an OLS coefficient and what the standard error measures,</span>
+<span id="cb3-290"><a href="#cb3-290" aria-hidden="true" tabindex="-1"></a>   using the Classical Linear Model assumptions."</span>
+<span id="cb3-291"><a href="#cb3-291" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"Walk through the t-test for a coefficient and the WAGE1 example (β̂ = 0.092, se = 0.007,</span>
+<span id="cb3-292"><a href="#cb3-292" aria-hidden="true" tabindex="-1"></a>   t = 13.1), and the matching confidence interval."</span>
+<span id="cb3-293"><a href="#cb3-293" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"What is the F-test for joint hypotheses, what is the restricted-vs-unrestricted formula, and what</span>
+<span id="cb3-294"><a href="#cb3-294" aria-hidden="true" tabindex="-1"></a>   is the test of overall significance?"</span>
+<span id="cb3-295"><a href="#cb3-295" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"Explain the difference between statistical and practical significance in regression, and why a</span>
+<span id="cb3-296"><a href="#cb3-296" aria-hidden="true" tabindex="-1"></a>   large sample makes everything significant."</span>
+<span id="cb3-297"><a href="#cb3-297" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"Why does t² = F for a single restriction, and how does the overall F relate to R²?"</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

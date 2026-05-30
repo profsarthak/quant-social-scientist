@@ -742,6 +742,7 @@ window.Quarto = {
   <li><a href="#omitted-variable-bias" id="toc-omitted-variable-bias" class="nav-link" data-scroll-target="#omitted-variable-bias">Omitted-variable bias</a></li>
   <li><a href="#good-controls-bad-controls" id="toc-good-controls-bad-controls" class="nav-link" data-scroll-target="#good-controls-bad-controls">Good controls, bad controls</a></li>
   <li><a href="#a-fully-worked-example-school-spending-and-test-scores" id="toc-a-fully-worked-example-school-spending-and-test-scores" class="nav-link" data-scroll-target="#a-fully-worked-example-school-spending-and-test-scores">A fully worked example: school spending and test scores</a></li>
+  <li><a href="#goodness-of-fit-with-many-regressors-adjusted-r²" id="toc-goodness-of-fit-with-many-regressors-adjusted-r²" class="nav-link" data-scroll-target="#goodness-of-fit-with-many-regressors-adjusted-r²">Goodness of fit with many regressors: adjusted R²</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
   <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
@@ -902,6 +903,14 @@ Figure&nbsp;1: Holding a confounder constant. Left: the raw slope of scores on s
 \widehat{\text{math10}} = -23.14 + 7.75\,\log(\text{expend}) - 0.324\,\text{lnchprg} - 1.26\,\log(\text{enroll}).
 </span></p>
 <p>Holding poverty and enrollment constant, the spending effect <strong>drops from 11.16 to 7.75</strong>. The OVB logic explains the direction exactly: poverty is <em>negatively</em> correlated with spending (<span class="math inline">\pi &lt; 0</span>) and <em>negatively</em> affects scores (<span class="math inline">\gamma &lt; 0</span>), and <span class="math inline">(-)\times(-) = (+)</span> — so the simple regression was biased <strong>upward</strong>. Money mattered less than the naive number implied, once you compared schools at the <em>same</em> poverty level. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></p>
+</section>
+<section id="goodness-of-fit-with-many-regressors-adjusted-r²" class="level2">
+<h2 class="anchored" data-anchor-id="goodness-of-fit-with-many-regressors-adjusted-r²">Goodness of fit with many regressors: adjusted R²</h2>
+<p>A trap waits in the <a href="../../content/03-regression/simple-linear-regression.html"><span class="math inline">R^2</span></a> once you have several regressors: <strong>adding any regressor — even a useless, random one — never lowers <span class="math inline">R^2</span>, and almost always raises it.</strong> <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> OLS can always exploit a new variable’s chance correlation with the residuals to nudge the fit up, so <span class="math inline">R^2</span> rewards <em>kitchen-sink</em> models and is useless for deciding <em>whether a variable belongs</em>. The <strong>adjusted <span class="math inline">R^2</span></strong> (<span class="math inline">\bar R^2</span>) fixes this by <strong>penalising extra regressors</strong>, dividing each sum of squares by its degrees of freedom: <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></p>
+<p><span class="math display">
+\bar R^2 = 1 - \frac{\text{SSR}/(n-k-1)}{\text{SST}/(n-1)} = 1 - (1 - R^2)\,\frac{n-1}{n-k-1}.
+</span></p>
+<p>Adding a regressor lowers SSR (good for <span class="math inline">\bar R^2</span>) but also spends a degree of freedom (bad). So <span class="math inline">\bar R^2</span> rises only if the new variable improves the fit by <em>more than chance would predict</em> — it can and does <strong>fall</strong> when you add junk. This makes <span class="math inline">\bar R^2</span> a rough tool for <strong>comparing models</strong> with different numbers of regressors, where raw <span class="math inline">R^2</span> would always favour the bigger one. Two cautions: a higher <span class="math inline">\bar R^2</span> is <em>not</em> a licence to believe a model is correctly specified or causal (the whole <a href="../../content/03-regression/regression-and-causality.html">next several entries</a>), and it should only be compared across models with the <em>same dependent variable</em>. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></p>
 </section>
 <section id="common-pitfalls" class="level2">
 <h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
@@ -1639,101 +1648,122 @@ Wooldridge, Jeffrey M. 2019. <em>Introductory Econometrics: A Modern Approach</e
 <span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>biased **upward**. Money mattered less than the naive number implied, once you compared schools at the</span>
 <span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>*same* poverty level. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
 <span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="fu">## Goodness of fit with many regressors: adjusted R²</span></span>
 <span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**"Control for everything."** Bad controls (post-treatment variables) introduce bias rather than</span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>  remove it. Adding regressors is not automatically safer — it can close the channel you're studying.</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@angrist_mastering</span><span class="co">]</span></span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a controlled coefficient as definitively causal.** Holding *observed* confounders fixed</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>  does nothing about *unobserved* ones (ability is still in $u$). Selection-on-observables is an</span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>  assumption, not a guarantee — the <span class="co">[</span><span class="ot">causal entry</span><span class="co">](regression-and-causality.qmd)</span> presses this.</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>A trap waits in the <span class="co">[</span><span class="ot">$R^2$</span><span class="co">](simple-linear-regression.qmd)</span> once you have several regressors:</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>**adding any regressor — even a useless, random one — never lowers $R^2$, and almost always raises it.**</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> OLS can always exploit a new variable's chance correlation with the residuals to</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>nudge the fit up, so $R^2$ rewards *kitchen-sink* models and is useless for deciding *whether a variable</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>belongs*. The **adjusted $R^2$** ($\bar R^2$) fixes this by **penalising extra regressors**, dividing</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>each sum of squares by its degrees of freedom: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>\bar R^2 = 1 - \frac{\text{SSR}/(n-k-1)}{\text{SST}/(n-1)} = 1 - (1 - R^2)\,\frac{n-1}{n-k-1}.</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting OVB has a direction.** You can often *sign* the bias before collecting more data</span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>  ($\text{sign}(\gamma)\,\text{sign}(\pi)$) — a powerful sanity check on whether your estimate is too</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>  high or too low. <span class="co">[</span><span class="ot">@angrist_mastering</span><span class="co">]</span></span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing "holding constant" with "the data has constant values."** Partialling-out uses only the</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>  residual variation; if a regressor barely varies once controls are in, its coefficient is</span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>  imprecise — the multicollinearity issue of <span class="co">[</span><span class="ot">diagnostics</span><span class="co">](regression-diagnostics.qmd)</span>.</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>Adding a regressor lowers SSR (good for $\bar R^2$) but also spends a degree of freedom (bad). So</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>$\bar R^2$ rises only if the new variable improves the fit by *more than chance would predict* — it can</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>and does **fall** when you add junk. This makes $\bar R^2$ a rough tool for **comparing models** with</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>different numbers of regressors, where raw $R^2$ would always favour the bigger one. Two cautions: a</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>higher $\bar R^2$ is *not* a licence to believe a model is correctly specified or causal (the whole</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">next several entries</span><span class="co">](regression-and-causality.qmd)</span>), and it should only be compared across models with</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>the *same dependent variable*. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
 <span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Interpreting each coefficient in isolation from its set.** A coefficient's meaning is "holding</span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>  *these specific* controls fixed." Change the controls and you change what the number means.</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — the multiple-regression model and the ceteris-paribus</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>  interpretation; partialling-out / Frisch–Waugh–Lovell; the omitted-variable-bias formula and</span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>  direction-of-bias reasoning; the MEAP93 school-spending example (simple $11.16$ → multiple $7.75$</span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>  after adding poverty and enrollment, $n=408$).</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mastering 'Metrics* / *Mostly Harmless*** — "other things equal" as the</span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>  engine of observational social science; regression anatomy; ability bias in the returns to</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>  schooling; the good-controls vs bad-controls distinction (occupation as a bad control for</span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>  education).</span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>**The partialling-out formula.** For $y = \beta_0+\beta_1 x_1+\beta_2 x_2+u$, the FWL theorem gives</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**"Control for everything."** Bad controls (post-treatment variables) introduce bias rather than</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  remove it. Adding regressors is not automatically safer — it can close the channel you're studying.</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@angrist_mastering</span><span class="co">]</span></span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a controlled coefficient as definitively causal.** Holding *observed* confounders fixed</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>  does nothing about *unobserved* ones (ability is still in $u$). Selection-on-observables is an</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>  assumption, not a guarantee — the <span class="co">[</span><span class="ot">causal entry</span><span class="co">](regression-and-causality.qmd)</span> presses this.</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting OVB has a direction.** You can often *sign* the bias before collecting more data</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>  ($\text{sign}(\gamma)\,\text{sign}(\pi)$) — a powerful sanity check on whether your estimate is too</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>  high or too low. <span class="co">[</span><span class="ot">@angrist_mastering</span><span class="co">]</span></span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing "holding constant" with "the data has constant values."** Partialling-out uses only the</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>  residual variation; if a regressor barely varies once controls are in, its coefficient is</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  imprecise — the multicollinearity issue of <span class="co">[</span><span class="ot">diagnostics</span><span class="co">](regression-diagnostics.qmd)</span>.</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Interpreting each coefficient in isolation from its set.** A coefficient's meaning is "holding</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>  *these specific* controls fixed." Change the controls and you change what the number means.</span>
 <span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>\hat\beta_1 = \frac{\sum_i \tilde x_{1i}\,y_i}{\sum_i \tilde x_{1i}^2},</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
 <span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>where $\tilde x_{1i}$ are the residuals from regressing $x_1$ on the other regressors. Only the</span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>variation in $x_1$ *orthogonal* to the controls enters — the algebraic meaning of "holding the others</span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>fixed."</span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>**Omitted-variable bias, derived.** True model $y=\beta_0+\beta_1x_1+\beta_2x_2+u$; you instead run the</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>short regression of $y$ on $x_1$ alone. Then</span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>E<span class="co">[</span><span class="ot">\tilde\beta_1</span><span class="co">]</span> = \beta_1 + \beta_2\,\delta_1,</span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>\qquad \delta_1 = \frac{\widehat{\operatorname{Cov}}(x_1,x_2)}{\widehat{\operatorname{Var}}(x_1)},</span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>with $\delta_1$ the slope of $x_2$ on $x_1$. In the notation above $\gamma=\beta_2$, $\pi=\delta_1$,</span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>so $\text{bias}=\pi\gamma$ and its sign is $\text{sign}(\beta_2)\,\text{sign}(\delta_1)$.</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — the multiple-regression model and the ceteris-paribus</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>  interpretation; partialling-out / Frisch–Waugh–Lovell; the omitted-variable-bias formula and</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>  direction-of-bias reasoning; the MEAP93 school-spending example (simple $11.16$ → multiple $7.75$</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>  after adding poverty and enrollment, $n=408$).</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mastering 'Metrics* / *Mostly Harmless*** — "other things equal" as the</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>  engine of observational social science; regression anatomy; ability bias in the returns to</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>  schooling; the good-controls vs bad-controls distinction (occupation as a bad control for</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>  education).</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
 <span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>**Bad controls, sketched.** If $x_2$ is itself caused by $x_1$ (post-treatment), then conditioning on</span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>$x_2$ blocks the indirect path $x_1\to x_2\to y$, so $\hat\beta_1$ no longer captures the *total*</span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>effect of $x_1$ — and can even pick up <span class="co">[</span><span class="ot">collider</span><span class="co">](regression-and-causality.qmd)</span> bias. Predetermined</span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>controls don't have this problem because $x_1$ cannot have caused them.</span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">simple linear regression</span><span class="co">](simple-linear-regression.qmd)</span> (one regressor → many) and</span>
-<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">conditional expectation</span><span class="co">](../01-foundations/conditional-expectation.qmd)</span> (each coefficient is a</span>
-<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>  slice of the CEF).</span>
-<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">the Gauss–Markov assumptions</span><span class="co">](gauss-markov-assumptions.qmd)</span> (what makes these</span>
-<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>  coefficients unbiased), <span class="co">[</span><span class="ot">inference</span><span class="co">](inference-for-regression.qmd)</span> (their standard errors and tests),</span>
-<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>  and — decisively — <span class="co">[</span><span class="ot">what regression can and can't tell you</span><span class="co">](regression-and-causality.qmd)</span> (OVB and</span>
-<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>  bad controls revisited as the threats to a causal reading).</span>
-<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Underwrites:** the <span class="co">[</span><span class="ot">control strategy</span><span class="co">](../05-causal-inference/index.qmd)</span> ("selection on</span>
-<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>  observables") in the causal summit, and its limits.</span>
-<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>**The partialling-out formula.** For $y = \beta_0+\beta_1 x_1+\beta_2 x_2+u$, the FWL theorem gives</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>\hat\beta_1 = \frac{\sum_i \tilde x_{1i}\,y_i}{\sum_i \tilde x_{1i}^2},</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>where $\tilde x_{1i}$ are the residuals from regressing $x_1$ on the other regressors. Only the</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>variation in $x_1$ *orthogonal* to the controls enters — the algebraic meaning of "holding the others</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>fixed."</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>**Omitted-variable bias, derived.** True model $y=\beta_0+\beta_1x_1+\beta_2x_2+u$; you instead run the</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>short regression of $y$ on $x_1$ alone. Then</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>E<span class="co">[</span><span class="ot">\tilde\beta_1</span><span class="co">]</span> = \beta_1 + \beta_2\,\delta_1,</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>\qquad \delta_1 = \frac{\widehat{\operatorname{Cov}}(x_1,x_2)}{\widehat{\operatorname{Var}}(x_1)},</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>with $\delta_1$ the slope of $x_2$ on $x_1$. In the notation above $\gamma=\beta_2$, $\pi=\delta_1$,</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>so $\text{bias}=\pi\gamma$ and its sign is $\text{sign}(\beta_2)\,\text{sign}(\delta_1)$.</span>
 <span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"Explain the ceteris paribus interpretation of a multiple-regression coefficient and why it's the</span>
-<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>   central idea in observational social science, using the class-size example."</span>
-<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"Walk through the Frisch–Waugh–Lovell partialling-out procedure and what it means to say regression</span>
-<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>   uses only the orthogonal variation in a regressor."</span>
-<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"State the omitted-variable-bias formula and work through the ability-bias example, including the</span>
-<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>   direction of the bias."</span>
-<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"Explain good controls versus bad controls, with the occupation-as-a-bad-control example for</span>
-<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>   education and wages."</span>
-<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"Walk through Wooldridge's MEAP93 example where the spending coefficient drops from 11.16 to 7.75,</span>
-<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>   and use OVB to explain the direction of the change."</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>**Bad controls, sketched.** If $x_2$ is itself caused by $x_1$ (post-treatment), then conditioning on</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>$x_2$ blocks the indirect path $x_1\to x_2\to y$, so $\hat\beta_1$ no longer captures the *total*</span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>effect of $x_1$ — and can even pick up <span class="co">[</span><span class="ot">collider</span><span class="co">](regression-and-causality.qmd)</span> bias. Predetermined</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>controls don't have this problem because $x_1$ cannot have caused them.</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">simple linear regression</span><span class="co">](simple-linear-regression.qmd)</span> (one regressor → many) and</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">conditional expectation</span><span class="co">](../01-foundations/conditional-expectation.qmd)</span> (each coefficient is a</span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>  slice of the CEF).</span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">the Gauss–Markov assumptions</span><span class="co">](gauss-markov-assumptions.qmd)</span> (what makes these</span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>  coefficients unbiased), <span class="co">[</span><span class="ot">inference</span><span class="co">](inference-for-regression.qmd)</span> (their standard errors and tests),</span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>  and — decisively — <span class="co">[</span><span class="ot">what regression can and can't tell you</span><span class="co">](regression-and-causality.qmd)</span> (OVB and</span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>  bad controls revisited as the threats to a causal reading).</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Underwrites:** the <span class="co">[</span><span class="ot">control strategy</span><span class="co">](../05-causal-inference/index.qmd)</span> ("selection on</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>  observables") in the causal summit, and its limits.</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"Explain the ceteris paribus interpretation of a multiple-regression coefficient and why it's the</span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>   central idea in observational social science, using the class-size example."</span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"Walk through the Frisch–Waugh–Lovell partialling-out procedure and what it means to say regression</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>   uses only the orthogonal variation in a regressor."</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"State the omitted-variable-bias formula and work through the ability-bias example, including the</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>   direction of the bias."</span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"Explain good controls versus bad controls, with the occupation-as-a-bad-control example for</span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a>   education and wages."</span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"Walk through Wooldridge's MEAP93 example where the spending coefficient drops from 11.16 to 7.75,</span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>   and use OVB to explain the direction of the change."</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

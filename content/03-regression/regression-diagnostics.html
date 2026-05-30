@@ -734,7 +734,10 @@ window.Quarto = {
    
   <ul>
   <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
-  <li><a href="#heteroskedasticity" id="toc-heteroskedasticity" class="nav-link" data-scroll-target="#heteroskedasticity">Heteroskedasticity</a></li>
+  <li><a href="#heteroskedasticity" id="toc-heteroskedasticity" class="nav-link" data-scroll-target="#heteroskedasticity">Heteroskedasticity</a>
+  <ul class="collapse">
+  <li><a href="#weighted-and-generalized-least-squares" id="toc-weighted-and-generalized-least-squares" class="nav-link" data-scroll-target="#weighted-and-generalized-least-squares">Weighted and generalized least squares</a></li>
+  </ul></li>
   <li><a href="#clustered-standard-errors" id="toc-clustered-standard-errors" class="nav-link" data-scroll-target="#clustered-standard-errors">Clustered standard errors</a></li>
   <li><a href="#multicollinearity" id="toc-multicollinearity" class="nav-link" data-scroll-target="#multicollinearity">Multicollinearity</a></li>
   <li><a href="#outliers-leverage-and-influence" id="toc-outliers-leverage-and-influence" class="nav-link" data-scroll-target="#outliers-leverage-and-influence">Outliers, leverage, and influence</a></li>
@@ -827,6 +830,11 @@ Figure&nbsp;1: The canonical diagnostic: residuals vs fitted values. Left (homos
 </div>
 </div>
 <p><strong>The fix.</strong> Use <strong>heteroskedasticity-robust standard errors</strong> (White / Huber–White / “robust” SEs), valid in large samples <em>whatever</em> the form of the heteroskedasticity. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> They cost nothing and change only the SEs, not the coefficients — which is why they are now the <strong>default</strong> in much professional research: when in doubt, report robust SEs. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> (Ashley’s example: a regression of state death rates on marriage rates shows far wider scatter for populous states — severe heteroskedasticity that invalidates the naive SEs. <span class="citation" data-cites="ashley_econometrics">(<a href="#ref-ashley_econometrics" role="doc-biblioref">Ashley 2012</a>)</span>)</p>
+<section id="weighted-and-generalized-least-squares" class="level3">
+<h3 class="anchored" data-anchor-id="weighted-and-generalized-least-squares">Weighted and generalized least squares</h3>
+<p>Robust SEs <em>correct the inference</em> but leave OLS no longer <a href="../../content/03-regression/gauss-markov-assumptions.html">efficient</a> — under heteroskedasticity OLS is unbiased but not BLUE. The classical alternative <em>restores</em> efficiency: if you know (or can model) how the error variance changes, <strong>weighted least squares (WLS)</strong> down-weights the noisy, high-variance observations and up-weights the precise ones. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> WLS minimises a <em>weighted</em> sum of squared residuals, with each observation weighted by the <strong>inverse of its error variance</strong> <span class="math inline">1/\sigma_i^2</span> — so a point with twice the variance counts half as much. It is the special case of <strong>generalized least squares (GLS)</strong> for a diagonal (uncorrelated-but-unequal) error structure, and under the assumed variance form it is BLUE. In practice <span class="math inline">\sigma_i^2</span> is unknown and must be estimated first (model the variance, then weight), giving <strong>feasible GLS (FGLS)</strong>. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></p>
+<p>The modern trade-off: <strong>WLS/GLS is more <em>efficient</em> if you get the variance model right, but <em>inconsistent for the SEs if you get it wrong</em>; robust SEs on plain OLS are less efficient but safe.</strong> Today most applied researchers prefer OLS-with-robust-SEs for its robustness, reserving WLS/GLS for cases where the variance structure is genuinely known (e.g., grouped/averaged data, where the variance scales with group size). <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></p>
+</section>
 </section>
 <section id="clustered-standard-errors" class="level2">
 <h2 class="anchored" data-anchor-id="clustered-standard-errors">Clustered standard errors</h2>
@@ -1532,166 +1540,184 @@ Wooldridge, Jeffrey M. 2019. <em>Introductory Econometrics: A Modern Approach</e
 <span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>a regression of state death rates on marriage rates shows far wider scatter for populous states —</span>
 <span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>severe heteroskedasticity that invalidates the naive SEs. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span>)</span>
 <span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="fu">## Clustered standard errors</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="fu">### Weighted and generalized least squares</span></span>
 <span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>A cousin of heteroskedasticity. When observations fall into **clusters** — students within</span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>classrooms, repeated measurements on the same person, households within villages — the errors are</span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>**correlated within each cluster** because they share unobserved influences (the same teacher, the</span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>same person). <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span> Ordinary SEs assume independence, so they come out **too small**,</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>producing over-optimistic t-statistics and false significance. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>The damage is quantified by the **Moulton factor**, $1 + (n-1)\rho_e$, where $\rho_e$ is the</span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>intra-cluster correlation and $n$ the cluster size. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span> The fix is</span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>**cluster-robust standard errors**, which allow arbitrary correlation *within* clusters while</span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>assuming independence *across* them.</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="How big can the clustering inflation be? (STAR)"}</span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>In the Tennessee STAR class-size experiment, test scores were correlated within classrooms at</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>$\rho_e = 0.31$. With realistic class sizes the **Moulton factor was about 7** — meaning the honest</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>standard errors were roughly $\sqrt{7} \approx \mathbf{2.65}$ times the naive ones. Ignore clustering</span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>and you'd overstate your precision by a factor of nearly three. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>Robust SEs *correct the inference* but leave OLS no longer <span class="co">[</span><span class="ot">efficient</span><span class="co">](gauss-markov-assumptions.qmd)</span> —</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>under heteroskedasticity OLS is unbiased but not BLUE. The classical alternative *restores* efficiency:</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>if you know (or can model) how the error variance changes, **weighted least squares (WLS)** down-weights</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>the noisy, high-variance observations and up-weights the precise ones. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> WLS minimises</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>a *weighted* sum of squared residuals, with each observation weighted by the **inverse of its error</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>variance** $1/\sigma_i^2$ — so a point with twice the variance counts half as much. It is the special</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>case of **generalized least squares (GLS)** for a diagonal (uncorrelated-but-unequal) error structure,</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>and under the assumed variance form it is BLUE. In practice $\sigma_i^2$ is unknown and must be</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>estimated first (model the variance, then weight), giving **feasible GLS (FGLS)**. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>The modern trade-off: **WLS/GLS is more *efficient* if you get the variance model right, but</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>*inconsistent for the SEs if you get it wrong*; robust SEs on plain OLS are less efficient but</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>safe.** Today most applied researchers prefer OLS-with-robust-SEs for its robustness, reserving</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>WLS/GLS for cases where the variance structure is genuinely known (e.g., grouped/averaged data, where</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>the variance scales with group size). <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="fu">## Clustered standard errors</span></span>
 <span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="fu">## Multicollinearity</span></span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>**Multicollinearity** is high correlation among regressors. [@wooldridge_intro] Its **symptoms** are</span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>distinctive: large standard errors, coefficients that swing wildly with small data changes, and the</span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>tell-tale combination of a **high $R^2$ with few individually significant t-statistics** (the model</span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>explains a lot collectively, but can't credit any single variable). <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>Detect it with the **variance inflation factor**, $\text{VIF}_j = 1/(1 - R_j^2)$, where $R_j^2$ comes</span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>from regressing $x_j$ on the other regressors; a common rule of thumb flags $\text{VIF} &gt; 10$.</span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> This is exactly the $(1-R_j^2)$ term in the</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">coefficient-variance formula</span><span class="co">](gauss-markov-assumptions.qmd)</span> — multicollinearity is variance</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>inflation, literally.</span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Why it usually isn't a crisis"}</span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>Multicollinearity is a *data* problem, not an assumption violation — Arthur Goldberger mockingly</span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>called it **"micronumerosity"** (not enough independent information), the same nuisance as a small</span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>sample. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> OLS stays **unbiased**; you just can't separate the tangled variables</span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>precisely. The practical verdict: **if your coefficient of interest is still significant despite the</span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>collinearity, you don't need to worry** — and "dropping a collinear control" can reintroduce</span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">omitted-variable bias</span><span class="co">](multiple-regression.qmd)</span>, which is worse. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="fu">## Outliers, leverage, and influence</span></span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>OLS minimises *squared* residuals, so it is acutely sensitive to extreme points. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>Three distinct ideas: <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Outlier:** an observation whose actual $y$ is far from its fitted $\hat y$ (large **studentized</span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>  residual**).</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leverage:** an observation with an extreme value of $x$ — it has the *potential* to swing the</span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>  slope, like a long lever arm.</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Influence:** an observation whose *removal* materially changes the estimates. **Cook's distance**</span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>  combines residual and leverage into one influence score.</span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>A high-leverage outlier is the dangerous combination — one point can tilt the whole line.</span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Nevada and the bridal chapels"}</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>In 1980 Census data, Nevada is a wild outlier on marriage rates (its wedding-chapel industry). In a</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>death-on-marriage regression, *including Nevada pulled the slope from 0.89 down to 0.82* — a single</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>state moving the headline coefficient. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span> Always check whether one point is</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>driving your result.</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="fu">## Functional-form misspecification</span></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>A cousin of heteroskedasticity. When observations fall into **clusters** — students within</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>classrooms, repeated measurements on the same person, households within villages — the errors are</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>**correlated within each cluster** because they share unobserved influences (the same teacher, the</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>same person). <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span> Ordinary SEs assume independence, so they come out **too small**,</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>producing over-optimistic t-statistics and false significance. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>The damage is quantified by the **Moulton factor**, $1 + (n-1)\rho_e$, where $\rho_e$ is the</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>intra-cluster correlation and $n$ the cluster size. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span> The fix is</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>**cluster-robust standard errors**, which allow arbitrary correlation *within* clusters while</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>assuming independence *across* them.</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="How big can the clustering inflation be? (STAR)"}</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>In the Tennessee STAR class-size experiment, test scores were correlated within classrooms at</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>$\rho_e = 0.31$. With realistic class sizes the **Moulton factor was about 7** — meaning the honest</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>standard errors were roughly $\sqrt{7} \approx \mathbf{2.65}$ times the naive ones. Ignore clustering</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>and you'd overstate your precision by a factor of nearly three. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="fu">## Multicollinearity</span></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>**Multicollinearity** is high correlation among regressors. [@wooldridge_intro] Its **symptoms** are</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>distinctive: large standard errors, coefficients that swing wildly with small data changes, and the</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>tell-tale combination of a **high $R^2$ with few individually significant t-statistics** (the model</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>explains a lot collectively, but can't credit any single variable). <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>Detect it with the **variance inflation factor**, $\text{VIF}_j = 1/(1 - R_j^2)$, where $R_j^2$ comes</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>from regressing $x_j$ on the other regressors; a common rule of thumb flags $\text{VIF} &gt; 10$.</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> This is exactly the $(1-R_j^2)$ term in the</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">coefficient-variance formula</span><span class="co">](gauss-markov-assumptions.qmd)</span> — multicollinearity is variance</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>inflation, literally.</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Why it usually isn't a crisis"}</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>Multicollinearity is a *data* problem, not an assumption violation — Arthur Goldberger mockingly</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>called it **"micronumerosity"** (not enough independent information), the same nuisance as a small</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>sample. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> OLS stays **unbiased**; you just can't separate the tangled variables</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>precisely. The practical verdict: **if your coefficient of interest is still significant despite the</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>collinearity, you don't need to worry** — and "dropping a collinear control" can reintroduce</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">omitted-variable bias</span><span class="co">](multiple-regression.qmd)</span>, which is worse. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a><span class="fu">## Outliers, leverage, and influence</span></span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>OLS minimises *squared* residuals, so it is acutely sensitive to extreme points. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>Three distinct ideas: <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
 <span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>If you fit a line to a relationship that's really a curve — omitting a needed</span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">log or quadratic</span><span class="co">](functional-form.qmd)</span> — the estimates are biased and inconsistent.</span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> The **Ramsey RESET test** is a general check: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Estimate your model and get the fitted values $\hat y$.</span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Re-estimate with powers of the fitted values ($\hat y^2$, $\hat y^3$) added as regressors.</span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**F-test** their joint significance. If significant, the original specification is **rejected** —</span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>   you've missed a nonlinearity.</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Outlier:** an observation whose actual $y$ is far from its fitted $\hat y$ (large **studentized</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>  residual**).</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leverage:** an observation with an extreme value of $x$ — it has the *potential* to swing the</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>  slope, like a long lever arm.</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Influence:** an observation whose *removal* materially changes the estimates. **Cook's distance**</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>  combines residual and leverage into one influence score.</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>A high-leverage outlier is the dangerous combination — one point can tilt the whole line.</span>
 <span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>A caveat Wooldridge stresses: RESET tests *functional form only*, not omitted variables that happen</span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>to be uncorrelated with the included regressors. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Nevada and the bridal chapels"}</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>In 1980 Census data, Nevada is a wild outlier on marriage rates (its wedding-chapel industry). In a</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>death-on-marriage regression, *including Nevada pulled the slope from 0.89 down to 0.82* — a single</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>state moving the headline coefficient. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span> Always check whether one point is</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>driving your result.</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating heteroskedasticity/clustering as bias.** They corrupt *standard errors*, not</span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>  coefficients. The fix is robust/clustered SEs, not a different estimator. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Failing to cluster grouped data.** Independent-looking SEs on clustered data can overstate</span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>  precision several-fold (STAR's ×2.65). Cluster at the level of treatment assignment.</span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Panicking about multicollinearity.** If your key coefficient is significant, collinearity among</span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>  *controls* is harmless. Don't drop a needed control just to lower a VIF — that risks OVB.</span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="fu">## Functional-form misspecification</span></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>If you fit a line to a relationship that's really a curve — omitting a needed</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">log or quadratic</span><span class="co">](functional-form.qmd)</span> — the estimates are biased and inconsistent.</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> The **Ramsey RESET test** is a general check: <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Estimate your model and get the fitted values $\hat y$.</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Re-estimate with powers of the fitted values ($\hat y^2$, $\hat y^3$) added as regressors.</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**F-test** their joint significance. If significant, the original specification is **rejected** —</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>   you've missed a nonlinearity.</span>
 <span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring influential points — or deleting them reflexively.** Check leverage and Cook's distance;</span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>  *investigate* an influential point (is it an error? a real but special case?) before keeping or</span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>  dropping it. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping the residual plot.** The single residuals-vs-fitted plot reveals heteroskedasticity *and*</span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>  functional-form problems in seconds. Draw it every time.</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>A caveat Wooldridge stresses: RESET tests *functional form only*, not omitted variables that happen</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>to be uncorrelated with the included regressors. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
 <span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — heteroskedasticity (unbiased but invalid SEs;</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>  Breusch–Pagan and White tests; robust SEs as default); multicollinearity, the VIF $=1/(1-R_j^2)$,</span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>  "micronumerosity," and why it's usually benign; the Ramsey RESET test for functional form.</span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ashley, *Fundamentals of Applied Econometrics*** — the residuals-vs-fitted fan; the death-rate /</span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>  marriage-rate heteroskedasticity and the Nevada outlier (slope $0.89\to0.82$); clustered standard</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>  errors, the Moulton factor, and the STAR example ($\rho_e=0.31$, factor $\approx7$, $\times2.65$);</span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>  leverage, influence, and Cook's distance.</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bruce &amp; Bruce, *Practical Statistics for Data Scientists*** — the data-science framing of</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>  influential observations and residual diagnostics.</span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating heteroskedasticity/clustering as bias.** They corrupt *standard errors*, not</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  coefficients. The fix is robust/clustered SEs, not a different estimator. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Failing to cluster grouped data.** Independent-looking SEs on clustered data can overstate</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>  precision several-fold (STAR's ×2.65). Cluster at the level of treatment assignment.</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Panicking about multicollinearity.** If your key coefficient is significant, collinearity among</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>  *controls* is harmless. Don't drop a needed control just to lower a VIF — that risks OVB.</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring influential points — or deleting them reflexively.** Check leverage and Cook's distance;</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>  *investigate* an influential point (is it an error? a real but special case?) before keeping or</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>  dropping it. <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span></span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping the residual plot.** The single residuals-vs-fitted plot reveals heteroskedasticity *and*</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>  functional-form problems in seconds. Draw it every time.</span>
 <span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>**Robust (White) variance.** OLS gives $\hat\beta=\beta+(X'X)^{-1}X'u$, so</span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>$\operatorname{Var}(\hat\beta\mid X)=(X'X)^{-1}\big(X'\,\Omega\,X\big)(X'X)^{-1}$ with</span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>$\Omega=\operatorname{diag}(\sigma_i^2)$. Under homoskedasticity $\Omega=\sigma^2 I$ and this collapses</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>to the usual $\sigma^2(X'X)^{-1}$. The **White estimator** replaces the unknown $\sigma_i^2$ with the</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>squared residuals $\hat u_i^2$: $\widehat{\operatorname{Var}}=(X'X)^{-1}\big(\sum_i \hat u_i^2 x_i</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>x_i'\big)(X'X)^{-1}$ — consistent for *any* heteroskedasticity, no model of it required.</span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>**Cluster-robust variance.** Replace the middle "meat" with a sum over clusters $g$:</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>$\sum_g X_g'\,\hat u_g \hat u_g'\,X_g$, allowing arbitrary within-cluster correlation. The Moulton</span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>factor $1+(n-1)\rho_e$ is the ratio of the correct variance to the naive one in the simple equicorrelated</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>case — at $\rho_e=0.31$, $n\approx 20$, it is $\approx 7$.</span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>**VIF and the variance formula.** From $\operatorname{Var}(\hat\beta_j)=\sigma^2/<span class="co">[</span><span class="ot">\text{SST}_j(1-R_j^2)</span><span class="co">]</span>$,</span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>the factor $1/(1-R_j^2)=\text{VIF}_j$ is exactly how much the variance is inflated *relative to* an</span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>orthogonal regressor. $R_j^2=0.9\Rightarrow\text{VIF}=10\Rightarrow$ SE inflated by $\sqrt{10}\approx3.2$.</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — heteroskedasticity (unbiased but invalid SEs;</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>  Breusch–Pagan and White tests; robust SEs as default); multicollinearity, the VIF $=1/(1-R_j^2)$,</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>  "micronumerosity," and why it's usually benign; the Ramsey RESET test for functional form.</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ashley, *Fundamentals of Applied Econometrics*** — the residuals-vs-fitted fan; the death-rate /</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>  marriage-rate heteroskedasticity and the Nevada outlier (slope $0.89\to0.82$); clustered standard</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>  errors, the Moulton factor, and the STAR example ($\rho_e=0.31$, factor $\approx7$, $\times2.65$);</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>  leverage, influence, and Cook's distance.</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bruce &amp; Bruce, *Practical Statistics for Data Scientists*** — the data-science framing of</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>  influential observations and residual diagnostics.</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
 <span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
 <span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Gauss–Markov assumptions</span><span class="co">](gauss-markov-assumptions.qmd)</span> (MLR.5 and MLR.3 are</span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>  what these diagnostics check), <span class="co">[</span><span class="ot">inference for coefficients</span><span class="co">](inference-for-regression.qmd)</span> (the SEs</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>  being repaired), and <span class="co">[</span><span class="ot">messy real data</span><span class="co">](../01-foundations/messy-real-data.qmd)</span> (outliers and the</span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>  long tail, now in a model).</span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">limited dependent variables</span><span class="co">](limited-dependent-variables.qmd)</span> (where heteroskedasticity</span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>  is *built in*, motivating logit/probit) and <span class="co">[</span><span class="ot">what regression can't tell you</span><span class="co">](regression-and-causality.qmd)</span></span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>  (diagnostics fix SEs, but not the bias from a bad design).</span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reused throughout:** robust and clustered SEs are standard in every</span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">causal study</span><span class="co">](../05-causal-inference/index.qmd)</span> in Part V.</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>**Robust (White) variance.** OLS gives $\hat\beta=\beta+(X'X)^{-1}X'u$, so</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>$\operatorname{Var}(\hat\beta\mid X)=(X'X)^{-1}\big(X'\,\Omega\,X\big)(X'X)^{-1}$ with</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>$\Omega=\operatorname{diag}(\sigma_i^2)$. Under homoskedasticity $\Omega=\sigma^2 I$ and this collapses</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>to the usual $\sigma^2(X'X)^{-1}$. The **White estimator** replaces the unknown $\sigma_i^2$ with the</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>squared residuals $\hat u_i^2$: $\widehat{\operatorname{Var}}=(X'X)^{-1}\big(\sum_i \hat u_i^2 x_i</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>x_i'\big)(X'X)^{-1}$ — consistent for *any* heteroskedasticity, no model of it required.</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>**Cluster-robust variance.** Replace the middle "meat" with a sum over clusters $g$:</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>$\sum_g X_g'\,\hat u_g \hat u_g'\,X_g$, allowing arbitrary within-cluster correlation. The Moulton</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>factor $1+(n-1)\rho_e$ is the ratio of the correct variance to the naive one in the simple equicorrelated</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>case — at $\rho_e=0.31$, $n\approx 20$, it is $\approx 7$.</span>
 <span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"Explain heteroskedasticity: why OLS stays unbiased but the usual standard errors fail, how to</span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>   detect it, and how robust standard errors fix it."</span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"When and why do I need clustered standard errors? Explain the Moulton factor and the STAR example</span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>   (ρ = 0.31, factor ≈ 7)."</span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"What is multicollinearity, how does the VIF measure it, and why is it often not a serious</span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>   problem?"</span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"Explain outliers, leverage, influence, and Cook's distance, with the Nevada marriage-rate</span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>   example."</span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"How does the Ramsey RESET test detect a wrong functional form, and what can't it detect?"</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>**VIF and the variance formula.** From $\operatorname{Var}(\hat\beta_j)=\sigma^2/<span class="co">[</span><span class="ot">\text{SST}_j(1-R_j^2)</span><span class="co">]</span>$,</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>the factor $1/(1-R_j^2)=\text{VIF}_j$ is exactly how much the variance is inflated *relative to* an</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>orthogonal regressor. $R_j^2=0.9\Rightarrow\text{VIF}=10\Rightarrow$ SE inflated by $\sqrt{10}\approx3.2$.</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Gauss–Markov assumptions</span><span class="co">](gauss-markov-assumptions.qmd)</span> (MLR.5 and MLR.3 are</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>  what these diagnostics check), <span class="co">[</span><span class="ot">inference for coefficients</span><span class="co">](inference-for-regression.qmd)</span> (the SEs</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>  being repaired), and <span class="co">[</span><span class="ot">messy real data</span><span class="co">](../01-foundations/messy-real-data.qmd)</span> (outliers and the</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>  long tail, now in a model).</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">limited dependent variables</span><span class="co">](limited-dependent-variables.qmd)</span> (where heteroskedasticity</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  is *built in*, motivating logit/probit) and <span class="co">[</span><span class="ot">what regression can't tell you</span><span class="co">](regression-and-causality.qmd)</span></span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  (diagnostics fix SEs, but not the bias from a bad design).</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reused throughout:** robust and clustered SEs are standard in every</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">causal study</span><span class="co">](../05-causal-inference/index.qmd)</span> in Part V.</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"Explain heteroskedasticity: why OLS stays unbiased but the usual standard errors fail, how to</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>   detect it, and how robust standard errors fix it."</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"When and why do I need clustered standard errors? Explain the Moulton factor and the STAR example</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>   (ρ = 0.31, factor ≈ 7)."</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"What is multicollinearity, how does the VIF measure it, and why is it often not a serious</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>   problem?"</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"Explain outliers, leverage, influence, and Cook's distance, with the Nevada marriage-rate</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>   example."</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"How does the Ramsey RESET test detect a wrong functional form, and what can't it detect?"</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
