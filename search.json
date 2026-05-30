@@ -120,6 +120,570 @@
     ]
   },
   {
+    "objectID": "content/03-regression/regression-diagnostics.html",
+    "href": "content/03-regression/regression-diagnostics.html",
+    "title": "Diagnostics & Robust Inference",
+    "section": "",
+    "text": "The Gauss–Markov assumptions are rarely exactly true. The good news: the most common violations — non-constant error variance, clustered data, correlated regressors — usually leave the coefficients unbiased and damage only the standard errors. So diagnostics is mostly about detecting those violations and repairing the inference, not throwing out the model. This entry is the practitioner’s checklist.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-diagnostics.html#why-it-matters",
+    "href": "content/03-regression/regression-diagnostics.html#why-it-matters",
+    "title": "Diagnostics & Robust Inference",
+    "section": "Why it matters",
+    "text": "Why it matters\nA regression can be unbiased and still lie to you — not through its coefficients, but through its standard errors. (Wooldridge 2019) If the SEs are wrong, every t-test, p-value, and confidence interval built on them is wrong, and you’ll claim significance you haven’t earned (or miss effects that are real). The reassuring theme of this entry: heteroskedasticity, clustering, and multicollinearity do not bias OLS — they distort precision — so the fixes are about honest uncertainty, and they’re cheap. Knowing which problems threaten the coefficients (functional-form misspecification, influential outliers) versus only the standard errors is the core diagnostic skill.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-diagnostics.html#heteroskedasticity",
+    "href": "content/03-regression/regression-diagnostics.html#heteroskedasticity",
+    "title": "Diagnostics & Robust Inference",
+    "section": "Heteroskedasticity",
+    "text": "Heteroskedasticity\nHeteroskedasticity is non-constant error variance: \\operatorname{Var}(u\\mid x) changes with the regressors, violating MLR.5. (Wooldridge 2019) It is the rule, not the exception, in social data — spending varies more among rich households than poor ones, test scores more in big schools than small.\nConsequences. OLS stays unbiased and consistent — the coefficients are fine. But OLS is no longer BLUE, and the usual standard-error formulas are invalid, so t-tests and intervals are unreliable even in large samples. (Wooldridge 2019)\nDetection. (Wooldridge 2019; Ashley 2012)\n\nGraphically: plot residuals against fitted values and look for a fan or cone — scatter that widens (or narrows) as the fitted value grows.\nBreusch–Pagan test: regress the squared residuals \\hat u^2 on the regressors; a significant F/LM statistic rejects homoskedasticity.\nWhite test: the same idea with squares and cross-products added (a popular shortcut regresses \\hat u^2 on \\hat y and \\hat y^2).\n\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(6)\nn = 300\nx = rng.uniform(0, 10, n)\nfitted = 2 + 1.2 * x\n\nresid_homo = rng.normal(0, 1.5, n)                 # constant variance\nresid_hetero = rng.normal(0, 0.3 + 0.45 * x)       # variance grows with x (fan)\n\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(9.2, 3.6), sharey=True)\nfor ax, resid, title in [(axL, resid_homo, \"Homoskedastic: even band\"),\n                         (axR, resid_hetero, \"Heteroskedastic: a widening fan\")]:\n    ax.scatter(fitted, resid, s=12, color=\"#1f3a5f\", alpha=0.55)\n    ax.axhline(0, color=\"#c0392b\", lw=1.3)\n    ax.set_title(title, fontsize=10)\n    ax.set_xlabel(\"fitted value  ŷ\")\naxL.set_ylabel(\"residual  û\")\nfig.suptitle(\"Residuals vs fitted — the first plot to draw\", fontsize=12)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The canonical diagnostic: residuals vs fitted values. Left (homoskedastic) — an even band of constant width; the usual standard errors are valid. Right (heteroskedastic) — a fan that widens with the fitted value; OLS is still unbiased, but the usual standard errors are wrong and you need robust ones.\n\n\n\n\n\nThe fix. Use heteroskedasticity-robust standard errors (White / Huber–White / “robust” SEs), valid in large samples whatever the form of the heteroskedasticity. (Wooldridge 2019) They cost nothing and change only the SEs, not the coefficients — which is why they are now the default in much professional research: when in doubt, report robust SEs. (Wooldridge 2019) (Ashley’s example: a regression of state death rates on marriage rates shows far wider scatter for populous states — severe heteroskedasticity that invalidates the naive SEs. (Ashley 2012))",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-diagnostics.html#clustered-standard-errors",
+    "href": "content/03-regression/regression-diagnostics.html#clustered-standard-errors",
+    "title": "Diagnostics & Robust Inference",
+    "section": "Clustered standard errors",
+    "text": "Clustered standard errors\nA cousin of heteroskedasticity. When observations fall into clusters — students within classrooms, repeated measurements on the same person, households within villages — the errors are correlated within each cluster because they share unobserved influences (the same teacher, the same person). (Ashley 2012) Ordinary SEs assume independence, so they come out too small, producing over-optimistic t-statistics and false significance. (Ashley 2012)\nThe damage is quantified by the Moulton factor, 1 + (n-1)\\rho_e, where \\rho_e is the intra-cluster correlation and n the cluster size. (Ashley 2012) The fix is cluster-robust standard errors, which allow arbitrary correlation within clusters while assuming independence across them.\n\n\n\n\n\n\nNoteHow big can the clustering inflation be? (STAR)\n\n\n\nIn the Tennessee STAR class-size experiment, test scores were correlated within classrooms at \\rho_e = 0.31. With realistic class sizes the Moulton factor was about 7 — meaning the honest standard errors were roughly \\sqrt{7} \\approx \\mathbf{2.65} times the naive ones. Ignore clustering and you’d overstate your precision by a factor of nearly three. (Ashley 2012)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-diagnostics.html#multicollinearity",
+    "href": "content/03-regression/regression-diagnostics.html#multicollinearity",
+    "title": "Diagnostics & Robust Inference",
+    "section": "Multicollinearity",
+    "text": "Multicollinearity\nMulticollinearity is high correlation among regressors. (Wooldridge 2019) Its symptoms are distinctive: large standard errors, coefficients that swing wildly with small data changes, and the tell-tale combination of a high R^2 with few individually significant t-statistics (the model explains a lot collectively, but can’t credit any single variable). (Wooldridge 2019)\nDetect it with the variance inflation factor, \\text{VIF}_j = 1/(1 - R_j^2), where R_j^2 comes from regressing x_j on the other regressors; a common rule of thumb flags \\text{VIF} &gt; 10. (Wooldridge 2019) This is exactly the (1-R_j^2) term in the coefficient-variance formula — multicollinearity is variance inflation, literally.\n\n\n\n\n\n\nTipWhy it usually isn’t a crisis\n\n\n\nMulticollinearity is a data problem, not an assumption violation — Arthur Goldberger mockingly called it “micronumerosity” (not enough independent information), the same nuisance as a small sample. (Wooldridge 2019) OLS stays unbiased; you just can’t separate the tangled variables precisely. The practical verdict: if your coefficient of interest is still significant despite the collinearity, you don’t need to worry — and “dropping a collinear control” can reintroduce omitted-variable bias, which is worse. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-diagnostics.html#outliers-leverage-and-influence",
+    "href": "content/03-regression/regression-diagnostics.html#outliers-leverage-and-influence",
+    "title": "Diagnostics & Robust Inference",
+    "section": "Outliers, leverage, and influence",
+    "text": "Outliers, leverage, and influence\nOLS minimises squared residuals, so it is acutely sensitive to extreme points. (Ashley 2012) Three distinct ideas: (Ashley 2012)\n\nOutlier: an observation whose actual y is far from its fitted \\hat y (large studentized residual).\nLeverage: an observation with an extreme value of x — it has the potential to swing the slope, like a long lever arm.\nInfluence: an observation whose removal materially changes the estimates. Cook’s distance combines residual and leverage into one influence score.\n\nA high-leverage outlier is the dangerous combination — one point can tilt the whole line.\n\n\n\n\n\n\nNoteNevada and the bridal chapels\n\n\n\nIn 1980 Census data, Nevada is a wild outlier on marriage rates (its wedding-chapel industry). In a death-on-marriage regression, including Nevada pulled the slope from 0.89 down to 0.82 — a single state moving the headline coefficient. (Ashley 2012) Always check whether one point is driving your result.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-diagnostics.html#functional-form-misspecification",
+    "href": "content/03-regression/regression-diagnostics.html#functional-form-misspecification",
+    "title": "Diagnostics & Robust Inference",
+    "section": "Functional-form misspecification",
+    "text": "Functional-form misspecification\nIf you fit a line to a relationship that’s really a curve — omitting a needed log or quadratic — the estimates are biased and inconsistent. (Wooldridge 2019) The Ramsey RESET test is a general check: (Wooldridge 2019)\n\nEstimate your model and get the fitted values \\hat y.\nRe-estimate with powers of the fitted values (\\hat y^2, \\hat y^3) added as regressors.\nF-test their joint significance. If significant, the original specification is rejected — you’ve missed a nonlinearity.\n\nA caveat Wooldridge stresses: RESET tests functional form only, not omitted variables that happen to be uncorrelated with the included regressors. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-diagnostics.html#common-pitfalls",
+    "href": "content/03-regression/regression-diagnostics.html#common-pitfalls",
+    "title": "Diagnostics & Robust Inference",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nTreating heteroskedasticity/clustering as bias. They corrupt standard errors, not coefficients. The fix is robust/clustered SEs, not a different estimator. (Wooldridge 2019)\nFailing to cluster grouped data. Independent-looking SEs on clustered data can overstate precision several-fold (STAR’s ×2.65). Cluster at the level of treatment assignment. (Ashley 2012)\nPanicking about multicollinearity. If your key coefficient is significant, collinearity among controls is harmless. Don’t drop a needed control just to lower a VIF — that risks OVB. (Wooldridge 2019)\nIgnoring influential points — or deleting them reflexively. Check leverage and Cook’s distance; investigate an influential point (is it an error? a real but special case?) before keeping or dropping it. (Ashley 2012)\nSkipping the residual plot. The single residuals-vs-fitted plot reveals heteroskedasticity and functional-form problems in seconds. Draw it every time.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-diagnostics.html#from-the-sources",
+    "href": "content/03-regression/regression-diagnostics.html#from-the-sources",
+    "title": "Diagnostics & Robust Inference",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWooldridge, Introductory Econometrics — heteroskedasticity (unbiased but invalid SEs; Breusch–Pagan and White tests; robust SEs as default); multicollinearity, the VIF =1/(1-R_j^2), “micronumerosity,” and why it’s usually benign; the Ramsey RESET test for functional form.\nAshley, Fundamentals of Applied Econometrics — the residuals-vs-fitted fan; the death-rate / marriage-rate heteroskedasticity and the Nevada outlier (slope 0.89\\to0.82); clustered standard errors, the Moulton factor, and the STAR example (\\rho_e=0.31, factor \\approx7, \\times2.65); leverage, influence, and Cook’s distance.\nBruce & Bruce, Practical Statistics for Data Scientists — the data-science framing of influential observations and residual diagnostics.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-diagnostics.html#appendix-the-mathematics",
+    "href": "content/03-regression/regression-diagnostics.html#appendix-the-mathematics",
+    "title": "Diagnostics & Robust Inference",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nRobust (White) variance. OLS gives \\hat\\beta=\\beta+(X'X)^{-1}X'u, so \\operatorname{Var}(\\hat\\beta\\mid X)=(X'X)^{-1}\\big(X'\\,\\Omega\\,X\\big)(X'X)^{-1} with \\Omega=\\operatorname{diag}(\\sigma_i^2). Under homoskedasticity \\Omega=\\sigma^2 I and this collapses to the usual \\sigma^2(X'X)^{-1}. The White estimator replaces the unknown \\sigma_i^2 with the squared residuals \\hat u_i^2: \\widehat{\\operatorname{Var}}=(X'X)^{-1}\\big(\\sum_i \\hat u_i^2 x_i\nx_i'\\big)(X'X)^{-1} — consistent for any heteroskedasticity, no model of it required.\nCluster-robust variance. Replace the middle “meat” with a sum over clusters g: \\sum_g X_g'\\,\\hat u_g \\hat u_g'\\,X_g, allowing arbitrary within-cluster correlation. The Moulton factor 1+(n-1)\\rho_e is the ratio of the correct variance to the naive one in the simple equicorrelated case — at \\rho_e=0.31, n\\approx 20, it is \\approx 7.\nVIF and the variance formula. From \\operatorname{Var}(\\hat\\beta_j)=\\sigma^2/[\\text{SST}_j(1-R_j^2)], the factor 1/(1-R_j^2)=\\text{VIF}_j is exactly how much the variance is inflated relative to an orthogonal regressor. R_j^2=0.9\\Rightarrow\\text{VIF}=10\\Rightarrow SE inflated by \\sqrt{10}\\approx3.2.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-diagnostics.html#connections",
+    "href": "content/03-regression/regression-diagnostics.html#connections",
+    "title": "Diagnostics & Robust Inference",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: the Gauss–Markov assumptions (MLR.5 and MLR.3 are what these diagnostics check), inference for coefficients (the SEs being repaired), and messy real data (outliers and the long tail, now in a model).\nLeads to: limited dependent variables (where heteroskedasticity is built in, motivating logit/probit) and what regression can’t tell you (diagnostics fix SEs, but not the bias from a bad design).\nReused throughout: robust and clustered SEs are standard in every causal study in Part V.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-diagnostics.html#study-with-notebooklm",
+    "href": "content/03-regression/regression-diagnostics.html#study-with-notebooklm",
+    "title": "Diagnostics & Robust Inference",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Explain heteroskedasticity: why OLS stays unbiased but the usual standard errors fail, how to detect it, and how robust standard errors fix it.”\n“When and why do I need clustered standard errors? Explain the Moulton factor and the STAR example (ρ = 0.31, factor ≈ 7).”\n“What is multicollinearity, how does the VIF measure it, and why is it often not a serious problem?”\n“Explain outliers, leverage, influence, and Cook’s distance, with the Nevada marriage-rate example.”\n“How does the Ramsey RESET test detect a wrong functional form, and what can’t it detect?”",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Diagnostics & Robust Inference"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html",
+    "href": "content/03-regression/multiple-regression.html",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "",
+    "text": "You can’t randomize the world. Richer districts have both smaller classes and better labs, so a raw comparison of class sizes confounds the two. Multiple regression is how observational researchers approximate “all else equal” — adding control variables to hold confounders constant and isolate the one relationship they care about. It is the workhorse, and its central idea is simpler than its reputation.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html#why-it-matters",
+    "href": "content/03-regression/multiple-regression.html#why-it-matters",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "Why it matters",
+    "text": "Why it matters\nThe simple regression slope folds every other influence into the error term u — and if any of those influences correlates with your x, the slope is contaminated. (Wooldridge 2019) Multiple regression pulls the big confounders out of u and into the model, so each coefficient can be read ceteris paribus — holding the others fixed. This is the move that lets you ask “the effect of education at the same level of ability,” or “spending at the same level of poverty.” (Angrist and Pischke 2015) Master it and most applied empirical work becomes legible; misunderstand it and you will read confounded slopes as effects.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html#the-model-and-the-ceteris-paribus-reading",
+    "href": "content/03-regression/multiple-regression.html#the-model-and-the-ceteris-paribus-reading",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "The model and the ceteris paribus reading",
+    "text": "The model and the ceteris paribus reading\nThe multiple linear regression model adds regressors: (Wooldridge 2019)\n\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\cdots + \\beta_k x_k + u.\n\nThe whole payoff is in the interpretation of each slope:\n\n\\beta_j is the change in y for a one-unit increase in x_j, holding all the other regressors fixed. (Wooldridge 2019)\n\nThat “holding fixed” is the ceteris paribus clause, and it is why regression matters in the social sciences. (Wooldridge 2019) You cannot literally freeze the world to test class size, because the schools with small classes differ in a dozen other ways. (Angrist and Pischke 2015) But you can statistically compare observations identical on every included dimension — schools with the same budget, students with the same prior scores — and that comparison is what each coefficient reports. This is how researchers make “other things equal” claims from data that was never an experiment. (Angrist and Pischke 2015)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html#how-regression-holds-constant-partialling-out",
+    "href": "content/03-regression/multiple-regression.html#how-regression-holds-constant-partialling-out",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "How regression “holds constant”: partialling out",
+    "text": "How regression “holds constant”: partialling out\nWhat does the machinery actually do to hold things fixed? The Frisch–Waugh–Lovell result — “regression anatomy” — gives the exact, beautiful answer. Any multiple-regression coefficient \\hat\\beta_1 can be reconstructed in three steps: (Wooldridge 2019; Angrist and Pischke 2015)\n\nCleanse the regressor. Regress x_1 on all the other controls and keep the residuals \\tilde x_1 — the part of x_1 that the controls can’t explain.\nCleanse the outcome. Regress y on the same controls and keep its residuals \\tilde y.\nLink the leftovers. Regress \\tilde y on \\tilde x_1. That slope is exactly \\hat\\beta_1.\n\nThe lesson is profound: a multiple-regression coefficient uses only the variation in x_1 that is orthogonal to the other controls. (Wooldridge 2019) It throws away any part of x_1 that moves together with the controls — that’s precisely what “holding them constant” means.\n\nSee partialling-out at work\nBelow, school spending and test scores both depend on a confounder (district poverty): poorer districts spend less and score lower. The naive scatter (left) shows a steep slope — but much of it is poverty masquerading as a spending effect. The partial-regression plot (right), after residualising both variables on poverty, reveals the flatter true slope — spending’s effect among districts with the same poverty level.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(8)\nn = 200\npoverty = rng.uniform(0, 1, n)                       # the confounder Z\nspend   = 8 - 3 * poverty + rng.normal(0, 0.6, n)    # poorer districts spend less\ntrue_beta = 2.0\nscores  = 40 + true_beta * spend - 25 * poverty + rng.normal(0, 2.5, n)\n\ndef ols_slope(x, y):\n    return np.cov(x, y, bias=True)[0, 1] / np.var(x)\ndef resid_on(z, v):                                  # residual of v after regressing on z\n    b = ols_slope(z, v); a = v.mean() - b * z.mean()\n    return v - (a + b * z)\n\nnaive = ols_slope(spend, scores)\nsx, sy = resid_on(poverty, spend), resid_on(poverty, scores)\npartial = ols_slope(sx, sy)\n\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(9.2, 4.0))\naxL.scatter(spend, scores, s=14, color=\"#9aa0a6\", alpha=0.6)\nxs = np.linspace(spend.min(), spend.max(), 40)\naxL.plot(xs, scores.mean() + naive * (xs - spend.mean()), color=\"#c0392b\", lw=2.4)\naxL.set_title(f\"Raw: slope ≈ {naive:.1f}  (confounded)\")\naxL.set_xlabel(\"school spending\"); axL.set_ylabel(\"test score\")\n\naxR.scatter(sx, sy, s=14, color=\"#1f3a5f\", alpha=0.6)\nxr = np.linspace(sx.min(), sx.max(), 40)\naxR.plot(xr, sy.mean() + partial * (xr - sx.mean()), color=\"#1f8a4c\", lw=2.4)\naxR.set_title(f\"Poverty held constant: slope ≈ {partial:.1f}  (true ≈ {true_beta})\")\naxR.set_xlabel(\"spending (poverty partialled out)\")\naxR.set_ylabel(\"score (poverty partialled out)\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Holding a confounder constant. Left: the raw slope of scores on spending is steep — but poorer districts both spend less and score lower, inflating it. Right: after partialling poverty out of both variables (Frisch–Waugh–Lovell), the true slope is much flatter. This is exactly what the multiple-regression coefficient computes — mirroring Wooldridge’s MEAP93 drop from 11.16 to 7.75.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html#omitted-variable-bias",
+    "href": "content/03-regression/multiple-regression.html#omitted-variable-bias",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "Omitted-variable bias",
+    "text": "Omitted-variable bias\nThe flip side of “holding constant” is what happens when you fail to. Leave out a variable that (a) affects y and (b) correlates with an included regressor, and its influence gets forced into that regressor’s coefficient — omitted-variable bias. (Wooldridge 2019) The formula is worth memorising because it also tells you the direction: (Angrist and Pischke 2015)\n\n\\underbrace{\\beta_{\\text{short}}}_{\\text{omit the control}} =\n\\underbrace{\\beta_{\\text{long}}}_{\\text{true effect}} + \\;\\pi\\,\\gamma,\n\nwhere \\gamma is the omitted variable’s effect on y (in the full model) and \\pi is the slope from regressing the omitted variable on the included one. So:\n\n\\text{sign of bias} = \\text{sign}(\\gamma)\\times\\text{sign}(\\pi).\n\n\n\n\n\n\n\nNoteAbility bias in the returns to schooling\n\n\n\nRegress wage on education but omit ability. Ability raises wages (\\gamma &gt; 0) and is positively correlated with education (\\pi &gt; 0). So the bias is (+)\\times(+) = (+): the simple-regression education coefficient is biased upward — it overstates the true return to schooling, because some of what looks like a payoff to education is really a payoff to the ability that tends to come with it. (Angrist and Pischke 2015) This single example is why “the return to education” was argued about for decades.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html#good-controls-bad-controls",
+    "href": "content/03-regression/multiple-regression.html#good-controls-bad-controls",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "Good controls, bad controls",
+    "text": "Good controls, bad controls\nAdding a control changes another coefficient whenever the new variable correlates with both that regressor and the outcome. (Angrist and Pischke 2015) But not all controls are good:\n\nGood controls are predetermined — fixed before the treatment (demographics, pre-treatment test scores, baseline characteristics). They remove confounding and, as a bonus, soak up error variance and sharpen your estimate. (Angrist and Pischke 2015)\nBad controls are themselves outcomes of the treatment. In a wage regression, controlling for occupation is a trap: education helps determine your occupation, so holding occupation fixed closes off one of the very channels through which education raises wages — you’ve thrown away part of the effect you wanted to measure. (Angrist and Pischke 2015) “Control for everything” is not the rule; control for the right things.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html#a-fully-worked-example-school-spending-and-test-scores",
+    "href": "content/03-regression/multiple-regression.html#a-fully-worked-example-school-spending-and-test-scores",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "A fully worked example: school spending and test scores",
+    "text": "A fully worked example: school spending and test scores\nWooldridge’s MEAP93 data, 408 Michigan high schools, math pass rate on spending. (Wooldridge 2019) First the simple regression:\n\n\\widehat{\\text{math10}} = -69.34 + 11.16\\,\\log(\\text{expend}).\n\nTaken at face value, a 10% spending increase buys about a 1.12-point rise in pass rates. But high-spending schools sit in wealthier districts — classic omitted-variable territory. Add poverty (free-lunch eligibility, lnchprg) and enrollment: (Wooldridge 2019)\n\n\\widehat{\\text{math10}} = -23.14 + 7.75\\,\\log(\\text{expend}) - 0.324\\,\\text{lnchprg} - 1.26\\,\\log(\\text{enroll}).\n\nHolding poverty and enrollment constant, the spending effect drops from 11.16 to 7.75. The OVB logic explains the direction exactly: poverty is negatively correlated with spending (\\pi &lt; 0) and negatively affects scores (\\gamma &lt; 0), and (-)\\times(-) = (+) — so the simple regression was biased upward. Money mattered less than the naive number implied, once you compared schools at the same poverty level. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html#common-pitfalls",
+    "href": "content/03-regression/multiple-regression.html#common-pitfalls",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\n“Control for everything.” Bad controls (post-treatment variables) introduce bias rather than remove it. Adding regressors is not automatically safer — it can close the channel you’re studying. (Angrist and Pischke 2015)\nReading a controlled coefficient as definitively causal. Holding observed confounders fixed does nothing about unobserved ones (ability is still in u). Selection-on-observables is an assumption, not a guarantee — the causal entry presses this. (Wooldridge 2019)\nForgetting OVB has a direction. You can often sign the bias before collecting more data (\\text{sign}(\\gamma)\\,\\text{sign}(\\pi)) — a powerful sanity check on whether your estimate is too high or too low. (Angrist and Pischke 2015)\nConfusing “holding constant” with “the data has constant values.” Partialling-out uses only the residual variation; if a regressor barely varies once controls are in, its coefficient is imprecise — the multicollinearity issue of diagnostics.\nInterpreting each coefficient in isolation from its set. A coefficient’s meaning is “holding these specific controls fixed.” Change the controls and you change what the number means.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html#from-the-sources",
+    "href": "content/03-regression/multiple-regression.html#from-the-sources",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWooldridge, Introductory Econometrics — the multiple-regression model and the ceteris-paribus interpretation; partialling-out / Frisch–Waugh–Lovell; the omitted-variable-bias formula and direction-of-bias reasoning; the MEAP93 school-spending example (simple 11.16 → multiple 7.75 after adding poverty and enrollment, n=408).\nAngrist & Pischke, Mastering ’Metrics / Mostly Harmless — “other things equal” as the engine of observational social science; regression anatomy; ability bias in the returns to schooling; the good-controls vs bad-controls distinction (occupation as a bad control for education).",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html#appendix-the-mathematics",
+    "href": "content/03-regression/multiple-regression.html#appendix-the-mathematics",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nThe partialling-out formula. For y = \\beta_0+\\beta_1 x_1+\\beta_2 x_2+u, the FWL theorem gives\n\n\\hat\\beta_1 = \\frac{\\sum_i \\tilde x_{1i}\\,y_i}{\\sum_i \\tilde x_{1i}^2},\n\nwhere \\tilde x_{1i} are the residuals from regressing x_1 on the other regressors. Only the variation in x_1 orthogonal to the controls enters — the algebraic meaning of “holding the others fixed.”\nOmitted-variable bias, derived. True model y=\\beta_0+\\beta_1x_1+\\beta_2x_2+u; you instead run the short regression of y on x_1 alone. Then\n\nE[\\tilde\\beta_1] = \\beta_1 + \\beta_2\\,\\delta_1,\n\\qquad \\delta_1 = \\frac{\\widehat{\\operatorname{Cov}}(x_1,x_2)}{\\widehat{\\operatorname{Var}}(x_1)},\n\nwith \\delta_1 the slope of x_2 on x_1. In the notation above \\gamma=\\beta_2, \\pi=\\delta_1, so \\text{bias}=\\pi\\gamma and its sign is \\text{sign}(\\beta_2)\\,\\text{sign}(\\delta_1).\nBad controls, sketched. If x_2 is itself caused by x_1 (post-treatment), then conditioning on x_2 blocks the indirect path x_1\\to x_2\\to y, so \\hat\\beta_1 no longer captures the total effect of x_1 — and can even pick up collider bias. Predetermined controls don’t have this problem because x_1 cannot have caused them.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html#connections",
+    "href": "content/03-regression/multiple-regression.html#connections",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: simple linear regression (one regressor → many) and conditional expectation (each coefficient is a slice of the CEF).\nLeads to: the Gauss–Markov assumptions (what makes these coefficients unbiased), inference (their standard errors and tests), and — decisively — what regression can and can’t tell you (OVB and bad controls revisited as the threats to a causal reading).\nUnderwrites: the control strategy (“selection on observables”) in the causal summit, and its limits.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/multiple-regression.html#study-with-notebooklm",
+    "href": "content/03-regression/multiple-regression.html#study-with-notebooklm",
+    "title": "Multiple Regression & “Holding Constant”",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Explain the ceteris paribus interpretation of a multiple-regression coefficient and why it’s the central idea in observational social science, using the class-size example.”\n“Walk through the Frisch–Waugh–Lovell partialling-out procedure and what it means to say regression uses only the orthogonal variation in a regressor.”\n“State the omitted-variable-bias formula and work through the ability-bias example, including the direction of the bias.”\n“Explain good controls versus bad controls, with the occupation-as-a-bad-control example for education and wages.”\n“Walk through Wooldridge’s MEAP93 example where the spending coefficient drops from 11.16 to 7.75, and use OVB to explain the direction of the change.”",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Multiple Regression & \"Holding Constant\""
+    ]
+  },
+  {
+    "objectID": "content/03-regression/inference-for-regression.html",
+    "href": "content/03-regression/inference-for-regression.html",
+    "title": "Inference for Regression Coefficients",
+    "section": "",
+    "text": "A regression coefficient is a statistic, so it has a sampling distribution: run the study again and it would land somewhere slightly different. Everything in this entry — the standard error, the t-test, the confidence interval, the F-test — is the Part II inference machinery attached to \\hat\\beta. The discipline is the same: never report a coefficient without its uncertainty.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Inference for Regression Coefficients"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/inference-for-regression.html#why-it-matters",
+    "href": "content/03-regression/inference-for-regression.html#why-it-matters",
+    "title": "Inference for Regression Coefficients",
+    "section": "Why it matters",
+    "text": "Why it matters\nThe printout says the effect of education on log-wage is 0.092. Is that real, or could a fresh sample have produced 0? You answer with the coefficient’s standard error and the tests built on it. (Wooldridge 2019) This is where regression stops being description and becomes inference: every “significant effect,” every “we cannot reject,” every error bar in an empirical paper is one of the procedures below. And the statistical-vs-practical distinction returns with a vengeance — with enough data, everything is significant.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Inference for Regression Coefficients"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/inference-for-regression.html#the-sampling-distribution-of-a-coefficient",
+    "href": "content/03-regression/inference-for-regression.html#the-sampling-distribution-of-a-coefficient",
+    "title": "Inference for Regression Coefficients",
+    "section": "The sampling distribution of a coefficient",
+    "text": "The sampling distribution of a coefficient\nTo do exact inference at any sample size, Wooldridge adds one assumption to the Gauss–Markov five: (Wooldridge 2019)\n\nMLR.6 (Normality): the error u is independent of the regressors and distributed \\mathcal{N}(0, \\sigma^2).\n\nMLR.1–MLR.6 are the Classical Linear Model. Under them, each OLS estimator is Normally distributed around the truth: (Wooldridge 2019)\n\n\\hat\\beta_j \\sim \\mathcal{N}\\!\\big(\\beta_j,\\ \\operatorname{Var}(\\hat\\beta_j)\\big).\n\n(Even without MLR.6, the CLT delivers approximate Normality in large samples — which is why regression inference works so widely.) The standard error \\operatorname{se}(\\hat\\beta_j) is the estimated standard deviation of this distribution, built from the variance formula with \\sigma^2 replaced by its estimate \\hat\\sigma^2 (the SER squared). (Wooldridge 2019) The standard error is the whole ball game: it is what converts a point estimate into a claim.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Inference for Regression Coefficients"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/inference-for-regression.html#testing-a-single-coefficient-the-t-test",
+    "href": "content/03-regression/inference-for-regression.html#testing-a-single-coefficient-the-t-test",
+    "title": "Inference for Regression Coefficients",
+    "section": "Testing a single coefficient: the t-test",
+    "text": "Testing a single coefficient: the t-test\nTo ask “could the true effect be zero?”, test H_0:\\beta_j = 0 with the t-statistic — the estimate measured in standard errors: (Wooldridge 2019)\n\nt = \\frac{\\hat\\beta_j}{\\operatorname{se}(\\hat\\beta_j)}.\n\nIf |t| exceeds the critical value from the t-distribution with n-k-1 degrees of freedom, reject H_0 — the coefficient is statistically significant. (Wooldridge 2019) The companion confidence interval gives the range of values you can’t reject: (Wooldridge 2019)\n\n\\hat\\beta_j \\pm c\\cdot\\operatorname{se}(\\hat\\beta_j),\n\nwith c \\approx 2 for 95%. The interval and the test are duals: the coefficient is significant at 5% exactly when its 95% interval excludes zero.\n\n\n\n\n\n\nNoteWooldridge’s WAGE1 t-test\n\n\n\nIn the log-wage regression (n=526), the education coefficient is \\hat\\beta_{\\text{educ}} = 0.092 with \\operatorname{se} = 0.007. So t = 0.092/0.007 \\approx 13.1 — vastly beyond any critical value. Education is overwhelmingly statistically significant: a sampling fluke essentially could not produce a t of 13. (Wooldridge 2019) (The 95% interval, 0.092 \\pm 2(0.007) = [0.078, 0.106], nowhere near zero.)\n\n\n\nSignificance is estimate ÷ standard error\nThe t-statistic makes vivid that significance is not about the size of an effect but about its size relative to its noise. Below, two coefficients have the identical estimate (0.5); only their standard errors differ. The precise one is clearly significant; the noisy one can’t be distinguished from zero — same number, opposite verdict.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom statistics import NormalDist\n\nest = 0.5\nxs = np.linspace(-1.0, 2.0, 600)\n\nfig, ax = plt.subplots(figsize=(7, 3.7))\nfor se, color, label in [(0.10, \"#1f3a5f\", \"se = 0.10  (t = 5.0, significant)\"),\n                         (0.35, \"#d98a29\", \"se = 0.35  (t = 1.4, not significant)\")]:\n    nd = NormalDist(est, se)\n    ax.plot(xs, [nd.pdf(v) for v in xs], color=color, lw=2.0, label=label)\n    lo, hi = est - 1.96 * se, est + 1.96 * se\n    y = -0.25 if se == 0.10 else -0.5\n    ax.errorbar(est, y, xerr=1.96 * se, fmt=\"o\", color=color, capsize=4, lw=2)\nax.axvline(0, color=\"#c0392b\", ls=\"--\", lw=1.6)\nax.text(0.02, ax.get_ylim()[1] * 0.85, \"H₀: β = 0\", color=\"#c0392b\", fontsize=9)\nax.set_yticks([]); ax.set_xlabel(\"coefficient value\")\nax.set_title(\"Same estimate (0.5), different precision, different verdict\")\nax.legend(fontsize=8, frameon=False, loc=\"upper right\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Significance = estimate ÷ standard error. Both coefficients are estimated at 0.5. The precise estimate (blue, se = 0.10, t = 5) has a 95% interval far from zero — significant. The noisy estimate (orange, se = 0.35, t = 1.4) has an interval straddling zero — not significant. The point estimate is the same; the standard error decides.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Inference for Regression Coefficients"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/inference-for-regression.html#testing-several-coefficients-at-once-the-f-test",
+    "href": "content/03-regression/inference-for-regression.html#testing-several-coefficients-at-once-the-f-test",
+    "title": "Inference for Regression Coefficients",
+    "section": "Testing several coefficients at once: the F-test",
+    "text": "Testing several coefficients at once: the F-test\nSome questions involve groups of coefficients: “do any of these four neighbourhood variables matter?”, “should this block of regressors be in the model at all?” Testing them one t-test at a time invites the multiple-comparisons problem; the F-test asks the joint question in one shot. (Wooldridge 2019) It compares a restricted model (the suspect coefficients forced to zero) against the unrestricted model (all included), via their residual sums of squares: (Wooldridge 2019)\n\nF = \\frac{(\\text{SSR}_r - \\text{SSR}_{ur})/q}{\\text{SSR}_{ur}/(n-k-1)},\n\nwhere q is the number of restrictions. The logic is pure ANOVA: does dropping those regressors make the fit significantly worse? A special case — the test of overall significance — restricts all slopes to zero (H_0:\\beta_1=\\cdots=\\beta_k=0), asking whether the model explains anything at all. (Wooldridge 2019) (This F is what reproduces the ANOVA F-test when the regressors are group dummies — regression contains ANOVA.)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Inference for Regression Coefficients"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/inference-for-regression.html#statistical-vs-practical-significance-again",
+    "href": "content/03-regression/inference-for-regression.html#statistical-vs-practical-significance-again",
+    "title": "Inference for Regression Coefficients",
+    "section": "Statistical vs practical significance — again",
+    "text": "Statistical vs practical significance — again\nWooldridge hammers the distinction, because regression makes it so easy to confuse: (Wooldridge 2019)\n\nStatistical significance (the t-stat / p-value) asks whether the effect is distinguishable from zero — a question about noise.\nPractical (economic) significance (the magnitude of \\hat\\beta_j) asks whether the effect is big enough to matter — a question about substance.\n\nWith a huge sample, a trivially small coefficient can be “highly significant” (t enormous, effect meaningless); with a small sample, a large, important effect can be “insignificant.” (Wooldridge 2019) Always report and interpret the coefficient’s size in real units, not just its stars. A significant 0.2%-per-year effect and a significant 8%-per-year effect are both “significant” and worlds apart.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Inference for Regression Coefficients"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/inference-for-regression.html#common-pitfalls",
+    "href": "content/03-regression/inference-for-regression.html#common-pitfalls",
+    "title": "Inference for Regression Coefficients",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nReading stars instead of magnitudes. Significance is not importance. A tiny, precisely-estimated effect is significant and may be useless; report the size and a confidence interval. (Wooldridge 2019)\nMining many t-tests for the significant one. Each coefficient at 5% has a 1-in-20 false-positive rate; with many regressors, use the F-test for joint questions and pre-specify hypotheses. (Wooldridge 2019)\nTrusting standard errors when MLR.5 fails. Heteroskedasticity or clustering makes the printed SEs wrong (the coefficients are still fine). Use robust/clustered SEs. (Wooldridge 2019)\nInterpreting a wide interval around zero as ‘no effect.’ It may mean underpowered, not null — the power lesson, in regression dress.\nForgetting inference assumes a valid model. A perfect t-statistic on an endogenous coefficient precisely estimates a biased number. Inference quantifies sampling noise, not specification error.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Inference for Regression Coefficients"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/inference-for-regression.html#from-the-sources",
+    "href": "content/03-regression/inference-for-regression.html#from-the-sources",
+    "title": "Inference for Regression Coefficients",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWooldridge, Introductory Econometrics — MLR.6 normality and the Classical Linear Model; the Normal sampling distribution of \\hat\\beta_j and the standard error; the t-statistic t=\\hat\\beta_j/\\operatorname{se}(\\hat\\beta_j), the n-k-1 degrees of freedom, and confidence intervals; the WAGE1 example (\\hat\\beta_{\\text{educ}}=0.092, \\operatorname{se}=0.007, t\\approx13.1); the F-test for joint/exclusion restrictions and overall significance; the statistical-vs-practical-significance distinction and the large-sample caution.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Inference for Regression Coefficients"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/inference-for-regression.html#appendix-the-mathematics",
+    "href": "content/03-regression/inference-for-regression.html#appendix-the-mathematics",
+    "title": "Inference for Regression Coefficients",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nFrom Normal to t. Under the CLM, (\\hat\\beta_j-\\beta_j)/\\operatorname{sd}(\\hat\\beta_j) is exactly standard Normal. Replacing the unknown \\sigma in \\operatorname{sd} with the estimate \\hat\\sigma inflates the tails to a t distribution with n-k-1 degrees of freedom — the same \\sigma-is-estimated penalty as the one-sample t-test, now with k+1 parameters consumed instead of one.\nThe F as a fit comparison. Adding regressors can only lower (never raise) the SSR, so \\text{SSR}_r \\ge \\text{SSR}_{ur}. The numerator (\\text{SSR}_r-\\text{SSR}_{ur})/q is the average improvement per restriction; the denominator \\text{SSR}_{ur}/(n-k-1) estimates \\sigma^2. Under H_0 both estimate the same noise, so F\\approx1; a real contribution makes F large. F\\sim F_{q,\\,n-k-1} under the null.\nt and F coincide for one restriction. For q=1, F = t^2 exactly — the joint test of a single coefficient is just the square of its t-test.\nAn R²-form of the overall F. Dividing through by SST, the overall-significance F equals \\dfrac{R^2/k}{(1-R^2)/(n-k-1)} — large when the model explains a big share of variance relative to its degrees of freedom.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Inference for Regression Coefficients"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/inference-for-regression.html#connections",
+    "href": "content/03-regression/inference-for-regression.html#connections",
+    "title": "Inference for Regression Coefficients",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: the Gauss–Markov assumptions (the variance formula behind the SE; MLR.6 for exact normality), estimation (a coefficient is an estimator with a sampling distribution), and confidence intervals & testing (the t/F machinery, applied to \\hat\\beta).\nLeads to: functional form (interpreting the coefficients you’re now testing) and diagnostics (when the standard errors are wrong and how to fix them).\nReappears in: every causal estimate, each reported with a standard error, a t-stat, and an interval generated exactly this way.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Inference for Regression Coefficients"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/inference-for-regression.html#study-with-notebooklm",
+    "href": "content/03-regression/inference-for-regression.html#study-with-notebooklm",
+    "title": "Inference for Regression Coefficients",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Explain the sampling distribution of an OLS coefficient and what the standard error measures, using the Classical Linear Model assumptions.”\n“Walk through the t-test for a coefficient and the WAGE1 example (β̂ = 0.092, se = 0.007, t = 13.1), and the matching confidence interval.”\n“What is the F-test for joint hypotheses, what is the restricted-vs-unrestricted formula, and what is the test of overall significance?”\n“Explain the difference between statistical and practical significance in regression, and why a large sample makes everything significant.”\n“Why does t² = F for a single restriction, and how does the overall F relate to R²?”",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Inference for Regression Coefficients"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html",
+    "href": "content/03-regression/gauss-markov-assumptions.html",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "",
+    "text": "OLS always produces a line. Whether that line tells the truth depends on a short list of assumptions. Four of them make OLS unbiased; a fifth makes it efficient; together they make it BLUE — the best linear unbiased estimator. One assumption, exogeneity, carries the entire causal burden, and it is the one that fails most often.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html#why-it-matters",
+    "href": "content/03-regression/gauss-markov-assumptions.html#why-it-matters",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "Why it matters",
+    "text": "Why it matters\nYou have seen OLS fit a line and read off coefficients. But “the computer printed 0.54” is not the same as “0.54 is the truth.” Between them sit the Gauss–Markov assumptions — the conditions under which the OLS estimator is unbiased and as precise as any linear unbiased rule can be. (Wooldridge 2019) Knowing them is not pedantry: it is how you diagnose when to believe a regression and, just as importantly, why a coefficient might be wrong. The assumptions also name the threats — omitted variables, simultaneity, measurement error — that the rest of econometrics and all of causal inference exist to address.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html#the-five-assumptions",
+    "href": "content/03-regression/gauss-markov-assumptions.html#the-five-assumptions",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "The five assumptions",
+    "text": "The five assumptions\nWooldridge’s assumptions for multiple regression on cross-sectional data: (Wooldridge 2019)\n\n\n\n\n\n\n\n\n\nAssumption\nWhat it says\n\n\n\n\nMLR.1\nLinear in parameters\nThe population model is y = \\beta_0 + \\beta_1 x_1 + \\cdots + \\beta_k x_k + u.\n\n\nMLR.2\nRandom sampling\nThe n observations are a random sample from that population.\n\n\nMLR.3\nNo perfect collinearity\nNo regressor is constant, and none is an exact linear combination of the others.\n\n\nMLR.4\nZero conditional mean (exogeneity)\nE[u \\mid x_1,\\dots,x_k] = 0 — the unobservables average to zero at every combination of the regressors.\n\n\nMLR.5\nHomoskedasticity\n\\operatorname{Var}(u \\mid x_1,\\dots,x_k) = \\sigma^2 — the error variance is constant across the regressors.\n\n\n\nA word on each of the load-bearing two. MLR.3 doesn’t forbid correlated regressors — only perfectly collinear ones (you can’t separate the effects of “years of education” and “months of education”). MLR.4 is the heart of everything: it says x carries no information about the unobserved u, so the part of y that moves with x is genuinely x’s doing and not some lurking factor’s. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html#what-each-assumption-buys",
+    "href": "content/03-regression/gauss-markov-assumptions.html#what-each-assumption-buys",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "What each assumption buys",
+    "text": "What each assumption buys\nThe division of labour is clean and worth memorising: (Wooldridge 2019)\n\nMLR.1–MLR.4 give unbiasedness: E[\\hat\\beta_j] = \\beta_j. Across many random samples, the OLS estimate averages to the true parameter. Note that homoskedasticity is not needed for unbiasedness — a heteroskedastic model still has unbiased coefficients.\nMLR.5 buys the usual variance formula: homoskedasticity is what makes the standard-error formulas your software prints (and the tests built on them) valid. Without it the coefficients are still unbiased but the standard errors are wrong — the problem robust standard errors fix.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html#the-gaussmarkov-theorem-ols-is-blue",
+    "href": "content/03-regression/gauss-markov-assumptions.html#the-gaussmarkov-theorem-ols-is-blue",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "The Gauss–Markov theorem: OLS is BLUE",
+    "text": "The Gauss–Markov theorem: OLS is BLUE\nPut MLR.1–MLR.5 together and you get the central justification for OLS. (Wooldridge 2019)\n\nGauss–Markov theorem. Under MLR.1–MLR.5, OLS is the Best Linear Unbiased Estimator (BLUE).\n\nUnpack the acronym: (Wooldridge 2019)\n\nLinear — the estimator is a linear function of the outcomes y.\nUnbiased — it’s right on average, E[\\hat\\beta_j] = \\beta_j.\nBest — among all linear unbiased estimators, OLS has the smallest variance. No other linear unbiased rule is more precise.\n\nSo OLS is not an arbitrary choice; it is provably the most efficient option in its class. The picture makes “Best” concrete: a rival linear-unbiased estimator (here, a simple grouping estimator) is also centred on the truth, but it scatters far more than OLS.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(1)\ntrue_slope, n, reps = 1.0, 40, 5000\nols, grouping = np.empty(reps), np.empty(reps)\n\nfor r in range(reps):\n    x = rng.uniform(0, 10, n)\n    y = 2 + true_slope * x + rng.normal(0, 3, n)\n    # OLS slope\n    ols[r] = np.cov(x, y, bias=True)[0, 1] / np.var(x)\n    # rival: split at median x, slope through the two group means (linear & unbiased)\n    hi = x &gt;= np.median(x)\n    grouping[r] = (y[hi].mean() - y[~hi].mean()) / (x[hi].mean() - x[~hi].mean())\n\nfig, ax = plt.subplots(figsize=(7, 3.7))\nbins = np.linspace(-0.5, 2.5, 70)\nax.hist(grouping, bins=bins, density=True, color=\"#d98a29\", alpha=0.7,\n        label=f\"Grouping estimator (SD {grouping.std():.2f})\")\nax.hist(ols, bins=bins, density=True, color=\"#1f3a5f\", alpha=0.8,\n        label=f\"OLS (SD {ols.std():.2f})\")\nax.axvline(true_slope, color=\"#b5446e\", ls=\"--\", lw=1.8, label=\"true slope = 1\")\nax.set_yticks([]); ax.set_xlabel(\"estimated slope\")\nax.set_title(\"Both unbiased — OLS is the minimum-variance (Best) one\")\nax.legend(fontsize=8, frameon=False)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: OLS is BLUE. Across 5,000 simulated samples (true slope = 1), both OLS (blue) and a rival linear, unbiased ‘grouping’ estimator (orange) centre on the truth — both are unbiased. But OLS is far tighter: among linear unbiased estimators, none has smaller variance. That minimum-variance property is the ‘Best’ in BLUE.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html#exogeneity-the-assumption-that-does-the-causal-work",
+    "href": "content/03-regression/gauss-markov-assumptions.html#exogeneity-the-assumption-that-does-the-causal-work",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "Exogeneity: the assumption that does the causal work",
+    "text": "Exogeneity: the assumption that does the causal work\nIf you remember one thing, remember this: MLR.4 (exogeneity) is the assumption that licenses a causal reading, and it is the most fragile. (Wooldridge 2019) When E[u\\mid x]\\neq 0, the regressor is endogenous: it carries information about the unobservables, so the slope mixes x’s true effect with whatever lurks in u. Three classic ways it fails: (Wooldridge 2019)\n\nOmitted variables. A relevant factor left out of the model and correlated with a regressor — ability in a wage-on-education regression. Its effect contaminates the education coefficient (the OVB of the last entry). (Wooldridge 2019)\nSimultaneity. x causes y and y causes x — price and quantity in a market, where supply and demand determine each other. (Wooldridge 2019)\nMeasurement error. The recorded x is a noisy proxy for the true one, which (as the next-but-one entry shows) typically attenuates the coefficient toward zero. (Wooldridge 2019)\n\nCrucially, no amount of data fixes an exogeneity failure — a bigger sample just pins down the wrong number more precisely. This is exactly why Part V builds an entire arsenal (instruments, experiments, discontinuities) around defending or engineering exogeneity.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html#what-inflates-a-coefficients-variance",
+    "href": "content/03-regression/gauss-markov-assumptions.html#what-inflates-a-coefficients-variance",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "What inflates a coefficient’s variance",
+    "text": "What inflates a coefficient’s variance\nEven when OLS is BLUE, “best” can still be imprecise. The variance of an OLS slope is (Wooldridge 2019)\n\n\\operatorname{Var}(\\hat\\beta_j) = \\frac{\\sigma^2}{\\text{SST}_j\\,(1 - R_j^2)},\n\nand reading off the three knobs tells you what hurts precision:\n\nError variance \\sigma^2 (numerator): more unexplained noise → fuzzier estimates. Good controls reduce it.\nRegressor variation \\text{SST}_j: little spread in x_j → hard to see its effect. You can’t estimate the slope of a line from points that barely move horizontally.\nMulticollinearity R_j^2: how well the other regressors explain x_j. As R_j^2 \\to 1 the denominator \\to 0 and the variance explodes — when two regressors move together, OLS struggles to apportion credit between them (diagnostics).",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html#common-pitfalls",
+    "href": "content/03-regression/gauss-markov-assumptions.html#common-pitfalls",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nBelieving a regression because it ran. OLS always produces numbers; they’re only trustworthy if the assumptions — above all exogeneity — hold. The software cannot check MLR.4 for you. (Wooldridge 2019)\nThinking more data cures bias. Endogeneity bias does not shrink with n. Precision improves; accuracy doesn’t. Only a better design or a credible identification argument helps. (Wooldridge 2019)\nTreating heteroskedasticity as a threat to unbiasedness. It isn’t — MLR.5 affects standard errors, not the coefficients. Use robust SEs, don’t panic about bias. (Wooldridge 2019)\nConfusing ‘no perfect collinearity’ with ‘no correlation.’ Correlated regressors are fine and normal; only exact linear dependence is forbidden. High (not perfect) correlation just inflates variance. (Wooldridge 2019)\nForgetting BLUE is conditional. “Best” holds within linear unbiased estimators and under the assumptions. Drop exogeneity and OLS isn’t even unbiased; allow nonlinear or biased estimators and something else (e.g. ridge) can beat it on MSE.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html#from-the-sources",
+    "href": "content/03-regression/gauss-markov-assumptions.html#from-the-sources",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWooldridge, Introductory Econometrics — the five MLR assumptions (linearity, random sampling, no perfect collinearity, zero conditional mean / exogeneity, homoskedasticity); MLR.1–4 ⟹ unbiasedness while MLR.5 underwrites the usual variance formula; the Gauss–Markov theorem and the meaning of BLUE (linear, unbiased, minimum-variance); exogeneity as the causal workhorse and its three failure modes (omitted variables, simultaneity, measurement error); the slope-variance formula \\sigma^2/[\\text{SST}_j(1-R_j^2)] and its three drivers.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html#appendix-the-mathematics",
+    "href": "content/03-regression/gauss-markov-assumptions.html#appendix-the-mathematics",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nUnbiasedness from exogeneity. Write \\hat\\beta_1 = \\beta_1 + \\sum_i w_i u_i where w_i = \\tilde x_{1i}/\\sum_j \\tilde x_{1j}^2 (the partialling-out weights). Taking the conditional expectation and using MLR.4, E[u_i\\mid X]=0, gives E[\\hat\\beta_1\\mid X]=\\beta_1 — unbiased, regardless of the variance structure. Homoskedasticity (MLR.5) is never used here.\nThe variance formula. Under MLR.1–MLR.5, \\operatorname{Var}(\\hat\\beta_j\\mid X) = \\sigma^2/\\sum_i \\tilde x_{ji}^2. Since \\sum_i \\tilde x_{ji}^2 = \\text{SST}_j(1-R_j^2) — total variation in x_j times the fraction not explained by the other regressors — this is the printed formula. Heteroskedasticity breaks it: the correct variance becomes \\sum_i w_i^2\\sigma_i^2, which is what the White/robust estimator estimates directly.\nGauss–Markov, sketched. Any linear estimator is \\sum_i a_i y_i; unbiasedness imposes linear constraints on the a_i. Minimising \\operatorname{Var}=\\sigma^2\\sum_i a_i^2 subject to those constraints (Lagrange) yields exactly the OLS weights a_i=w_i. Hence OLS attains the minimum variance among linear unbiased estimators — the content of “Best.”",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html#connections",
+    "href": "content/03-regression/gauss-markov-assumptions.html#connections",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: multiple regression (the model these assumptions govern), estimation (bias, variance, efficiency, BLUE — first met there), and conditional expectation (exogeneity makes the regression line the CEF).\nLeads to: inference for coefficients (which adds normality, MLR.6, for exact tests), diagnostics (detecting and fixing MLR.5 and collinearity), and regression and causality (exogeneity as the threat).\nMotivates: the causal-inference summit, whose every method is a strategy for making exogeneity credible.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/gauss-markov-assumptions.html#study-with-notebooklm",
+    "href": "content/03-regression/gauss-markov-assumptions.html#study-with-notebooklm",
+    "title": "The Gauss–Markov Assumptions & BLUE",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“State the five Gauss–Markov assumptions and explain what each one means, per Wooldridge.”\n“Which assumptions give unbiasedness and which gives the usual variance formula, and why is homoskedasticity not needed for unbiasedness?”\n“State the Gauss–Markov theorem and explain exactly what ‘Best’, ‘Linear’, and ‘Unbiased’ mean.”\n“Why is the zero-conditional-mean assumption E[u|x] = 0 the crucial one for causal claims, and how do omitted variables, simultaneity, and measurement error break it?”\n“Explain the OLS slope-variance formula σ²/[SSTⱼ(1 − Rⱼ²)] and what each of the three terms does to precision.”",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "The Gauss–Markov Assumptions & BLUE"
+    ]
+  },
+  {
     "objectID": "content/02-inference/statistical-power.html",
     "href": "content/02-inference/statistical-power.html",
     "title": "Statistical Power & Sample Size",
@@ -5511,6 +6075,138 @@
     ]
   },
   {
+    "objectID": "content/03-regression/functional-form.html",
+    "href": "content/03-regression/functional-form.html",
+    "title": "Functional Form: Logs, Polynomials, Dummies & Interactions",
+    "section": "",
+    "text": "“Linear regression” is linear in the parameters, not the variables — which means you can fit curves, percentage effects, group differences, and effects-that-depend-on-other-effects, all with OLS. The catch is interpretation: a coefficient on \\log x, on x^2, on a 0/1 dummy, or on an interaction each means something different. This entry is the dictionary.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Functional Form: Logs, Polynomials, Dummies & Interactions"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/functional-form.html#why-it-matters",
+    "href": "content/03-regression/functional-form.html#why-it-matters",
+    "title": "Functional Form: Logs, Polynomials, Dummies & Interactions",
+    "section": "Why it matters",
+    "text": "Why it matters\nReal relationships are rarely straight lines through raw variables. Income is skewed and its effects are percentage effects; experience pays off with diminishing returns; the wage gap is a difference between groups; the return to education might differ by gender. Each is captured by a change of functional form — and each changes how you read \\hat\\beta. (Wooldridge 2019) Getting this wrong is one of the most common errors in applied work: reporting a log coefficient as a dollar effect, or a quadratic’s first coefficient as “the” effect. The forms below cover the vast majority of applied specifications.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Functional Form: Logs, Polynomials, Dummies & Interactions"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/functional-form.html#logarithms-percentages-and-elasticities",
+    "href": "content/03-regression/functional-form.html#logarithms-percentages-and-elasticities",
+    "title": "Functional Form: Logs, Polynomials, Dummies & Interactions",
+    "section": "Logarithms: percentages and elasticities",
+    "text": "Logarithms: percentages and elasticities\nTaking logs does three jobs at once: it tames skew in positive variables, it encodes constant-percentage effects, and (in log-log form) it yields elasticities. (Wooldridge 2019) The interpretation depends on what is logged:\n\n\n\n\n\n\n\n\n\nModel\ny\nx\nInterpretation of \\beta_1\n\n\n\n\nLevel–level\ny\nx\n\\Delta y = \\beta_1 \\Delta x (a unit change)\n\n\nLevel–log\ny\n\\log x\na 1% rise in x changes y by \\beta_1/100\n\n\nLog–level\n\\log y\nx\na one-unit rise in x changes y by 100\\beta_1 percent\n\n\nLog–log\n\\log y\n\\log x\na 1% rise in x changes y by \\beta_1 percent — an elasticity\n\n\n\nThe “100\\beta_1 percent” reading is an approximation (the semi-elasticity) that’s excellent for small coefficients; for large ones, use the exact percentage change 100\\,[\\exp(\\hat\\beta_1)-1]. (Wooldridge 2019)\n\n\n\n\n\n\nNoteTwo Wooldridge workhorses\n\n\n\nReturns to education (log–level). \\widehat{\\log(\\text{wage})} = 0.584 + 0.083\\,\\text{educ} (n=526, R^2=0.186): each extra year of schooling raises wages by about 8.3% — a constant percentage return, which is why log-wage is the standard outcome. (Wooldridge 2019)\nCEO pay (log–log). \\widehat{\\log(\\text{salary})} = 4.822 + 0.257\\,\\log(\\text{sales}): the estimated elasticity is 0.257 — a 1% increase in firm sales is associated with a 0.257% increase in CEO salary. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Functional Form: Logs, Polynomials, Dummies & Interactions"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/functional-form.html#quadratics-diminishing-returns-and-turning-points",
+    "href": "content/03-regression/functional-form.html#quadratics-diminishing-returns-and-turning-points",
+    "title": "Functional Form: Logs, Polynomials, Dummies & Interactions",
+    "section": "Quadratics: diminishing returns and turning points",
+    "text": "Quadratics: diminishing returns and turning points\nTo let an effect change as x grows, add a squared term: (Wooldridge 2019)\n\ny = \\beta_0 + \\beta_1 x + \\beta_2 x^2 + u.\n\nNow the effect of x is not constant — it’s the derivative, \\Delta y \\approx\n(\\beta_1 + 2\\beta_2 x)\\,\\Delta x, which depends on where you start. (Wooldridge 2019) When \\beta_1 and \\beta_2 have opposite signs the curve has a turning point — a peak or trough — at\n\nx^* = \\left|\\frac{\\beta_1}{2\\beta_2}\\right|.\n\n\n\n\n\n\n\nNoteWage and experience\n\n\n\nWooldridge’s WAGE1 estimate: \\widehat{\\text{wage}} = 3.73 + 0.298\\,\\text{exper} - 0.0061\\,\\text{exper}^2. The first year of experience adds about 30 cents, but the negative squared term means each further year adds less. The peak is at x^* = 0.298/[2(0.0061)] \\approx \\mathbf{24.4} years — after which predicted wages actually decline. Reporting only the +0.298 would badly mislead. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Functional Form: Logs, Polynomials, Dummies & Interactions"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/functional-form.html#dummy-variables-differences-between-groups",
+    "href": "content/03-regression/functional-form.html#dummy-variables-differences-between-groups",
+    "title": "Functional Form: Logs, Polynomials, Dummies & Interactions",
+    "section": "Dummy variables: differences between groups",
+    "text": "Dummy variables: differences between groups\nA dummy (indicator) variable is 1 if a condition holds, 0 otherwise, and it shifts the intercept between groups. (Wooldridge 2019) Its coefficient is the average difference between that group and the omitted base category, holding the other regressors fixed. (Wooldridge 2019)\n\n\n\n\n\n\nNoteThe gender wage gap\n\n\n\n\\widehat{\\text{wage}} = -1.57 - 1.81\\,\\text{female} + 0.572\\,\\text{educ} + \\cdots — holding education and other factors constant, women earn about $1.81 less per hour than men, the base group. (Wooldridge 2019)\n\n\nOne trap: with an overall intercept and a full set of mutually exclusive categories, you must omit one as the reference — including all of them plus the intercept creates perfect collinearity (the dummy-variable trap, an MLR.3 violation). (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Functional Form: Logs, Polynomials, Dummies & Interactions"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/functional-form.html#interactions-when-one-effect-depends-on-another",
+    "href": "content/03-regression/functional-form.html#interactions-when-one-effect-depends-on-another",
+    "title": "Functional Form: Logs, Polynomials, Dummies & Interactions",
+    "section": "Interactions: when one effect depends on another",
+    "text": "Interactions: when one effect depends on another\nSometimes the effect of x_1 isn’t fixed — it depends on x_2. Capture that with their product: (Wooldridge 2019)\n\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\beta_3 (x_1\\cdot x_2) + u.\n\nNow the partial effect of x_2 is \\beta_2 + \\beta_3 x_1 — it moves with x_1. (Wooldridge 2019) The interaction coefficient \\beta_3 answers “does the slope of one variable change as the other changes?”\n\n\n\n\n\n\nNoteDoes the return to education differ by gender?\n\n\n\n\\log(\\text{wage}) = \\beta_0 + \\delta_0\\,\\text{female} + \\beta_1\\,\\text{educ} +\n\\delta_1(\\text{female}\\cdot\\text{educ}) + u. Here \\beta_1 is the return to education for men, \\beta_1 + \\delta_1 the return for women, and \\delta_1 is the difference in returns. A significant \\delta_1 means the wage–education profiles are not parallel — education pays differently across groups. (Wooldridge 2019)\n\n\n\nSeeing curves and branches\nTwo functional forms that change the shape of the fit: a quadratic (an effect that peaks) and an interaction (slopes that differ by group).\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(9.2, 3.8))\n\n# Quadratic: wage = 3.73 + 0.298 exper - 0.0061 exper^2\nexper = np.linspace(0, 45, 200)\nwage = 3.73 + 0.298 * exper - 0.0061 * exper ** 2\nxstar = 0.298 / (2 * 0.0061)\naxL.plot(exper, wage, color=\"#1f3a5f\", lw=2.4)\naxL.axvline(xstar, color=\"#c0392b\", ls=\"--\", lw=1.4)\naxL.text(xstar + 0.6, wage.min() + 0.3, f\"turning point\\n≈ {xstar:.1f} yrs\",\n         color=\"#c0392b\", fontsize=8)\naxL.set_title(\"Quadratic: diminishing returns to experience\")\naxL.set_xlabel(\"years of experience\"); axL.set_ylabel(\"predicted wage ($)\")\n\n# Interaction: steeper return to education for one group\neduc = np.linspace(8, 20, 50)\naxR.plot(educ, 1.0 + 0.40 * educ, color=\"#1f8a4c\", lw=2.4, label=\"Group A (steeper return)\")\naxR.plot(educ, 1.0 + 0.25 * educ, color=\"#d98a29\", lw=2.4, label=\"Group B (flatter return)\")\naxR.set_title(\"Interaction: non-parallel slopes\")\naxR.set_xlabel(\"years of education\"); axR.set_ylabel(\"predicted log wage\")\naxR.legend(fontsize=8, frameon=False, loc=\"upper left\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Left: the quadratic wage–experience curve, rising then falling, peaking at the turning point ≈ 24.4 years — diminishing returns made visible. Right: an interaction — the wage–education slope is steeper for one group than another, so the lines aren’t parallel; the interaction coefficient is the gap between the slopes.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Functional Form: Logs, Polynomials, Dummies & Interactions"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/functional-form.html#common-pitfalls",
+    "href": "content/03-regression/functional-form.html#common-pitfalls",
+    "title": "Functional Form: Logs, Polynomials, Dummies & Interactions",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nReading a log coefficient as a level effect. \\hat\\beta = 0.083 in a log-wage model is 8.3%, not 8.3 cents. Match the interpretation to the form. (Wooldridge 2019)\nReporting a quadratic’s linear term as ‘the effect.’ With x^2 in the model the effect is \\beta_1+2\\beta_2 x — it varies with x. Quote the marginal effect at meaningful values and the turning point. (Wooldridge 2019)\nFalling into the dummy-variable trap. Omit one category as the base; never include a full set of dummies and an intercept. (Wooldridge 2019)\nInterpreting a main effect alone when an interaction is present. With x_1\\cdot x_2 in the model, \\beta_1 is the effect of x_1 only when x_2=0. The full effect is \\beta_1+\\beta_3 x_2. (Wooldridge 2019)\nAdding curves to chase R². Higher-order terms can overfit; include them for substantive reasons or when diagnostics (RESET) flag misspecification, not reflexively.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Functional Form: Logs, Polynomials, Dummies & Interactions"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/functional-form.html#from-the-sources",
+    "href": "content/03-regression/functional-form.html#from-the-sources",
+    "title": "Functional Form: Logs, Polynomials, Dummies & Interactions",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWooldridge, Introductory Econometrics — the four log forms and their interpretations (semi-elasticity 100\\beta vs the exact 100[\\exp(\\beta)-1]; log-wage 8.3%/year; log-log CEO-pay elasticity 0.257); quadratics, the marginal effect \\beta_1+2\\beta_2x and turning point |\\beta_1/2\\beta_2| (wage–experience peak at 24.4 years); dummy variables, the base category, the gender-gap example (−$1.81), and the dummy-variable trap; interaction terms, the partial effect \\beta_2+\\beta_3x_1, and the education-by-gender example with non-parallel slopes.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Functional Form: Logs, Polynomials, Dummies & Interactions"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/functional-form.html#appendix-the-mathematics",
+    "href": "content/03-regression/functional-form.html#appendix-the-mathematics",
+    "title": "Functional Form: Logs, Polynomials, Dummies & Interactions",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nWhy log-level is a percentage. Differentiate \\log y = \\beta_0+\\beta_1 x: d(\\log y) = \\beta_1\\,dx, and d(\\log y)=dy/y is the fractional change in y. So \\%\\Delta y \\approx 100\\beta_1\\,\\Delta x. For a discrete change the exact figure is 100[\\exp(\\beta_1\\Delta x)-1], which exceeds 100\\beta_1\\Delta x as the coefficient grows (the gap is the curvature of \\exp).\nWhy log-log is an elasticity. With \\log y=\\beta_0+\\beta_1\\log x, \\dfrac{dy/y}{dx/x}=\\beta_1 — the ratio of percentage changes, i.e. the elasticity, constant at every x.\nThe turning point. For \\hat y=\\hat\\beta_0+\\hat\\beta_1x+\\hat\\beta_2x^2, set the derivative \\hat\\beta_1+2\\hat\\beta_2 x=0 to get x^*=-\\hat\\beta_1/(2\\hat\\beta_2); it is a maximum when \\hat\\beta_2&lt;0, a minimum when \\hat\\beta_2&gt;0.\nInteraction = two-line model. Writing the female-interaction model by group: for men (\\text{female}=0) the slope on educ is \\beta_1; for women (\\text{female}=1) it is \\beta_1+\\delta_1, and the intercept shifts by \\delta_0. The single regression with an interaction is two regression lines estimated jointly.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Functional Form: Logs, Polynomials, Dummies & Interactions"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/functional-form.html#connections",
+    "href": "content/03-regression/functional-form.html#connections",
+    "title": "Functional Form: Logs, Polynomials, Dummies & Interactions",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: transformations of random variables (logs and the log-normal), inference for coefficients (testing \\delta_1, \\beta_2), and multiple regression (these are all multiple regressions with constructed regressors).\nConnects to: comparing groups — a regression on a set of group dummies reproduces the ANOVA F-test, so dummies are how regression absorbs ANOVA.\nLeads to: diagnostics (RESET catches the wrong functional form) and limited dependent variables (a different nonlinearity — in the outcome).",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Functional Form: Logs, Polynomials, Dummies & Interactions"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/functional-form.html#study-with-notebooklm",
+    "href": "content/03-regression/functional-form.html#study-with-notebooklm",
+    "title": "Functional Form: Logs, Polynomials, Dummies & Interactions",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Lay out the four log functional forms (level-level, level-log, log-level, log-log) and how to interpret each coefficient, with Wooldridge’s wage and CEO-salary examples.”\n“Explain quadratic terms, the marginal effect β₁ + 2β₂x, and the turning point, using the wage–experience example peaking at 24.4 years.”\n“How do dummy variables work, what is the base category, and what is the dummy-variable trap? Interpret the −$1.81 gender-gap coefficient.”\n“Explain interaction terms and how the effect of one variable depends on another, using the education-by-gender example.”\n“When should I use the exact percentage 100[exp(β) − 1] instead of the approximation 100β, and why?”",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Functional Form: Logs, Polynomials, Dummies & Interactions"
+    ]
+  },
+  {
     "objectID": "content/03-regression/index.html",
     "href": "content/03-regression/index.html",
     "title": "III · Statistical Modelling: Regression",
@@ -5527,7 +6223,7 @@
     "href": "content/03-regression/index.html#entries",
     "title": "III · Statistical Modelling: Regression",
     "section": "Entries",
-    "text": "Entries\n\n\n\n\n\n\n\n\nEntry\nStatus\nCore sources\n\n\n\n\nCorrelation & simple regression\n🔜 Planned\nWooldridge, Angrist & Pischke\n\n\nMultiple regression & “holding constant”\n🔜 Planned\nWooldridge\n\n\nThe Gauss–Markov assumptions\n🔜 Planned\nWooldridge\n\n\nInference for coefficients\n🔜 Planned\nWooldridge\n\n\nDummy variables & interactions\n🔜 Planned\nWooldridge\n\n\nDiagnostics: heteroskedasticity, functional form\n🔜 Planned\nWooldridge\n\n\nRobust & clustered standard errors\n🔜 Planned\nAngrist & Pischke; Wooldridge\n\n\nLimited dependent variables (logit, probit)\n🔜 Planned\nWooldridge; Moffatt",
+    "text": "Entries\n\n\n\nEntry\nStatus\nCore sources\n\n\n\n\nSimple linear regression: the line of best fit\n✅ Written\nWooldridge, Bruce\n\n\nMultiple regression & “holding constant”\n✅ Written\nWooldridge, Angrist & Pischke\n\n\nThe Gauss–Markov assumptions & BLUE\n✅ Written\nWooldridge\n\n\nInference for regression coefficients\n✅ Written\nWooldridge\n\n\nFunctional form: logs, polynomials, dummies & interactions\n✅ Written\nWooldridge\n\n\nDiagnostics & robust inference\n✅ Written\nWooldridge, Ashley, Bruce\n\n\nLimited dependent variables: LPM, logit & probit\n✅ Written\nWooldridge, Moffatt\n\n\nWhat regression can — and can’t — tell you\n✅ Written\nAngrist & Pischke, Wooldridge",
     "crumbs": [
       "Home",
       "III · Statistical Modelling: Regression",
@@ -5556,6 +6252,462 @@
       "Home",
       "III · Statistical Modelling: Regression",
       "III · Statistical Modelling: Regression"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html",
+    "href": "content/03-regression/limited-dependent-variables.html",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "",
+    "text": "Half the outcomes social scientists care about are binary: employed or not, approved or denied, voted or stayed home. You can run OLS on a 0/1 variable — and sometimes should — but a line that keeps climbing will eventually predict probabilities above 1 and below 0. Logit and probit fix that by fitting an S-shaped curve trapped between 0 and 1, at the cost of coefficients you must work harder to interpret.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#why-it-matters",
+    "href": "content/03-regression/limited-dependent-variables.html#why-it-matters",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "Why it matters",
+    "text": "Why it matters\nA great many dependent variables are limited — they can only take certain values, the simplest case being binary. (Wooldridge 2019) Labour-force participation, loan approval, turnout, purchase. The regression machinery you’ve built still applies, but the binary outcome forces three choices — the easy-but-flawed linear model, or the bounded-but-nonlinear logit/probit — and a new interpretive discipline (the coefficients aren’t what you think). This is also the gateway to the classification models of Part IV: logistic regression is the workhorse of predictive modelling, and it’s born here.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#the-linear-probability-model",
+    "href": "content/03-regression/limited-dependent-variables.html#the-linear-probability-model",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "The linear probability model",
+    "text": "The linear probability model\nThe linear probability model (LPM) is just OLS with a 0/1 outcome. (Wooldridge 2019) Its interpretation is unusually clean: since E[y\\mid x] = P(y=1\\mid x) for a binary y, each coefficient is the change in the probability of “success” for a one-unit change in x_j:\n\nP(y=1\\mid x) = \\beta_0 + \\beta_1 x_1 + \\cdots + \\beta_k x_k,\n\\qquad \\Delta P(y=1\\mid x) = \\beta_j\\,\\Delta x_j.\n\nThat directness is the appeal — coefficients are marginal effects, no transformation needed, and it estimates in one OLS call. (Wooldridge 2019) But it has three problems: (Wooldridge 2019)\n\nNonsensical predictions. A line doesn’t stop at 0 or 1, so for extreme x it predicts probabilities below 0 or above 1 — impossible.\nBuilt-in heteroskedasticity. For a binary outcome, \\operatorname{Var}(y\\mid x) =\nP(y=1\\mid x)\\,[1 - P(y=1\\mid x)] — the variance depends on x, so MLR.5 fails by construction and you must use robust standard errors.\nUnrealistic constant effects. The LPM says x_j moves the probability by the same amount everywhere. In a labour-force model it would claim the first child and the fourth child each cut the probability of working by the same 26.2 points — intuitively wrong, since the effect should shrink as the probability nears the floor. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#logit-and-probit-bending-the-line-into-an-s",
+    "href": "content/03-regression/limited-dependent-variables.html#logit-and-probit-bending-the-line-into-an-s",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "Logit and probit: bending the line into an S",
+    "text": "Logit and probit: bending the line into an S\nTo respect the [0, 1] boundary, logit and probit pass the linear index through an S-shaped (sigmoid) function G: (Wooldridge 2019)\n\nP(y=1\\mid x) = G(\\beta_0 + \\beta_1 x_1 + \\cdots + \\beta_k x_k), \\qquad 0 &lt; G &lt; 1.\n\n\nLogit uses the logistic CDF, G(z) = \\dfrac{e^z}{1 + e^z}.\nProbit uses the standard Normal CDF, G(z) = \\Phi(z).\n\nA compelling way to motivate both is the latent-variable story: imagine an unobserved propensity y^* = \\beta_0 + x\\beta + e (the underlying tendency to “do it”), and you observe y = 1 only when that propensity crosses a threshold, y^* &gt; 0. (Wooldridge 2019; Moffatt 2016) The S-curve falls out, and it has exactly the right shape: steepest in the middle (near P=0.5) and flattening toward the 0 and 1 boundaries — encoding the realism the LPM lacked, that a push matters most for the undecided and barely moves the near-certain. (Wooldridge 2019)\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(5)\nn = 200\nx = rng.uniform(-4, 4, n)\np = 1 / (1 + np.exp(-(0.2 + 1.1 * x)))     # true logistic probabilities\ny = (rng.uniform(size=n) &lt; p).astype(float)\n\n# LPM by OLS\nb1 = np.cov(x, y, bias=True)[0, 1] / np.var(x)\nb0 = y.mean() - b1 * x.mean()\nxs = np.linspace(-5.5, 5.5, 200)\n\nfig, ax = plt.subplots(figsize=(7, 4.0))\nax.scatter(x, y, s=14, color=\"#9aa0a6\", alpha=0.5, zorder=2)\nax.plot(xs, b0 + b1 * xs, color=\"#c0392b\", lw=2.2, label=\"Linear probability model\")\nax.plot(xs, 1 / (1 + np.exp(-(0.2 + 1.1 * xs))), color=\"#1f3a5f\", lw=2.6, label=\"Logit (S-curve)\")\nax.axhline(0, color=\"#999\", lw=0.8, ls=\":\"); ax.axhline(1, color=\"#999\", lw=0.8, ls=\":\")\nax.fill_between(xs, 1, 1.25, color=\"#c0392b\", alpha=0.06)\nax.fill_between(xs, -0.25, 0, color=\"#c0392b\", alpha=0.06)\nax.set_ylim(-0.25, 1.25)\nax.set_xlabel(\"predictor x\"); ax.set_ylabel(\"P(y = 1)\")\nax.set_title(\"LPM escapes [0,1]; the logistic S-curve respects it\")\nax.legend(fontsize=9, frameon=False, loc=\"center right\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A binary outcome (dots at 0 and 1) against a predictor. The linear probability model (red) fits a straight line that escapes the [0,1] box — predicting impossible probabilities at the extremes. The logistic curve (blue) stays inside the box, steep in the middle and flat at the edges, where the LPM’s constant slope is least believable.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#odds-and-odds-ratios-logit",
+    "href": "content/03-regression/limited-dependent-variables.html#odds-and-odds-ratios-logit",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "Odds and odds ratios (logit)",
+    "text": "Odds and odds ratios (logit)\nLogit has a special gift: while the probability is nonlinear in x, the log-odds is perfectly linear. (Wooldridge 2019) The odds are the ratio of success to failure, and their log is the linear index:\n\n\\frac{P(y=1)}{P(y=0)} = e^{\\beta_0 + \\beta_1 x_1 + \\cdots}, \\qquad\n\\ln\\!\\left(\\frac{p}{1-p}\\right) = \\beta_0 + \\beta_1 x_1 + \\cdots + \\beta_k x_k.\n\nSo e^{\\beta_j} is the odds ratio — the multiplicative factor by which the odds change per one-unit rise in x_j. (Wooldridge 2019) If e^{\\beta_j} = 2.57, a one-unit increase multiplies the odds by 2.57 — a 157% rise in the odds. (Odds, note, not probability — a distinction that trips up many readers.)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#marginal-effects-the-coefficient-isnt-the-effect",
+    "href": "content/03-regression/limited-dependent-variables.html#marginal-effects-the-coefficient-isnt-the-effect",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "Marginal effects: the coefficient isn’t the effect",
+    "text": "Marginal effects: the coefficient isn’t the effect\nThe crucial interpretive trap: in logit and probit, the coefficients are not the marginal effects on probability. (Wooldridge 2019) They give the sign and significance, but the actual change in probability depends on where you sit on the S-curve — big in the steep middle, tiny in the flat tails. The partial effect of a continuous x_j is g(\\beta_0 + x\\beta)\\,\\beta_j, where g is the density (the slope of the S). (Wooldridge 2019) Two standard summaries: (Wooldridge 2019)\n\nMarginal effect at the mean (MEM): evaluate the formula at the average person, \\bar x.\nAverage marginal effect (AME): compute each person’s marginal effect and average them — usually preferred, since it reflects the whole sample’s diversity rather than a possibly-atypical “average” person.\n\nThis is why logit/probit output is reported as marginal effects, not raw coefficients.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#estimation-maximum-likelihood-not-ols",
+    "href": "content/03-regression/limited-dependent-variables.html#estimation-maximum-likelihood-not-ols",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "Estimation: maximum likelihood, not OLS",
+    "text": "Estimation: maximum likelihood, not OLS\nBecause logit and probit are nonlinear in the parameters, OLS doesn’t apply; they are fit by maximum likelihood instead. (Wooldridge 2019) MLE chooses the parameters that make the observed pattern of 0s and 1s most probable under the assumed (logistic or Normal) model — the same “what parameter best explains my data?” logic from estimation, now doing the heavy lifting. It yields consistent, asymptotically Normal, efficient estimates and automatically handles the binary heteroskedasticity. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#which-to-use-and-how-they-compare",
+    "href": "content/03-regression/limited-dependent-variables.html#which-to-use-and-how-they-compare",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "Which to use, and how they compare",
+    "text": "Which to use, and how they compare\nIn practice all three usually tell the same story about signs and significance. (Wooldridge 2019) Guidance:\n\nLPM is a fine starting point and quick approximation, especially when fitted probabilities sit near 0.5 (away from the boundaries). (Wooldridge 2019)\nLogit/probit when probabilities approach 0 or 1, or when you need predictions guaranteed inside [0, 1]. (Wooldridge 2019)\nRough conversion: multiply probit coefficients by ~1.6 to compare with logit; divide logit by ~4 (probit by ~2.5) to compare with LPM marginal effects. (Wooldridge 2019)\n\n\n\n\n\n\n\nNoteMarried women’s labour-force participation (Mroz, n = 753)\n\n\n\nThe marginal effect of a year of education on the probability of working is remarkably stable across methods: LPM 0.038, logit ≈0.040, probit ≈0.039 — about a 3.8–4.0 percentage-point increase per year. Where they diverge is at the extremes: a child under six lowers the probability of working by 26.2 points in the LPM but 33.4 points for an average woman under probit — the nonlinear “penalty” the S-curve captures and the straight line flattens. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#common-pitfalls",
+    "href": "content/03-regression/limited-dependent-variables.html#common-pitfalls",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nReading logit/probit coefficients as probability effects. They aren’t — compute marginal effects (AME preferred). Only LPM coefficients are direct probability changes. (Wooldridge 2019)\nConfusing odds ratios with probability changes. e^{\\beta}=2.57 means the odds multiply by 2.57, not the probability. At p=0.5 that’s a big move; near p=0.95 it’s small. (Wooldridge 2019)\nForgetting robust SEs in the LPM. Binary outcomes are inherently heteroskedastic (p(1-p)), so the LPM always needs robust standard errors. (Wooldridge 2019)\nOver-trusting LPM predictions near the boundary. When fitted probabilities approach 0 or 1, the LPM can predict impossibilities; switch to logit/probit. (Wooldridge 2019)\nTreating a binary-outcome coefficient as causal. Everything from the causal entry still applies — a precise logit coefficient on an endogenous regressor estimates a biased effect.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#from-the-sources",
+    "href": "content/03-regression/limited-dependent-variables.html#from-the-sources",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWooldridge, Introductory Econometrics — the LPM, its probability interpretation, and its three problems (out-of-range predictions, inherent heteroskedasticity p(1-p), constant effects — the 26.2-point child example); logit (logistic CDF) and probit (Normal CDF) and the bounded S-curve; odds, log-odds, and the odds ratio e^{\\beta}; marginal effects (MEM vs AME) and why coefficients aren’t effects; MLE; LPM-vs-logit-vs-probit comparison and conversion factors; the Mroz labour-force example (n=753; education ≈3.8–4.0 points; child-under-6 −26.2 LPM vs −33.4 probit).\nMoffatt, Experimetrics — the latent-variable / index-function formulation y^*=x\\beta+e, y=\\mathbf 1\\{y^*&gt;0\\}, for binary choice.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#appendix-the-mathematics",
+    "href": "content/03-regression/limited-dependent-variables.html#appendix-the-mathematics",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nLPM heteroskedasticity. For y\\in\\{0,1\\} with p=P(y=1\\mid x), y is Bernoulli, so \\operatorname{Var}(y\\mid x)=p(1-p)=(\\beta_0+x\\beta)(1-\\beta_0-x\\beta) — a function of x. Hence the homoskedasticity assumption fails identically, and robust SEs are mandatory.\nLatent variable → S-curve. With y^*=x\\beta+e and y=\\mathbf 1\\{y^*&gt;0\\}, P(y=1\\mid x)=P(e&gt;-x\\beta)=1-F(-x\\beta)=F(x\\beta) for a symmetric error CDF F. Take F=\\Phi for probit (Normal e) or the logistic CDF for logit. The threshold-crossing is the S-curve.\nMarginal effect. Differentiate P(y=1\\mid x)=G(x\\beta): \\partial P/\\partial x_j = g(x\\beta)\\,\\beta_j, where g=G' is the density. Because g peaks at the centre and vanishes in the tails, the same \\beta_j produces a large probability effect near P=0.5 and a negligible one near 0 or 1.\nLog-likelihood (logit). \\ell(\\beta)=\\sum_i\\big[y_i\\log G(x_i\\beta)+(1-y_i)\\log(1-G(x_i\\beta))\\big]; maximising it (no closed form — solved numerically) gives the MLE, the binary-data analogue of the coin-bias MLE.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#connections",
+    "href": "content/03-regression/limited-dependent-variables.html#connections",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: multiple regression (the linear index inside G), the common distributions (the logistic and Normal CDFs), maximum likelihood (the estimator), and diagnostics (the built-in heteroskedasticity).\nLeads to: logistic regression as classification in Part IV — the same model, judged by out-of-sample prediction rather than coefficient interpretation.\nInherits: every caveat of regression and causality — a binary outcome doesn’t make a coefficient causal.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/limited-dependent-variables.html#study-with-notebooklm",
+    "href": "content/03-regression/limited-dependent-variables.html#study-with-notebooklm",
+    "title": "Limited Dependent Variables: LPM, Logit & Probit",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Explain the linear probability model, how to interpret its coefficients, and its three problems.”\n“How do logit and probit use an S-curve to model a binary outcome, and what is the latent-variable formulation?”\n“Explain odds, log-odds, and odds ratios in logit, including what exp(β) = 2.57 means.”\n“Why are logit/probit coefficients not the marginal effects, and what’s the difference between the marginal effect at the mean and the average marginal effect?”\n“Compare LPM, logit, and probit using the Mroz labour-force example, including the education and young-children effects.”",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Limited Dependent Variables: LPM, Logit & Probit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html",
+    "href": "content/03-regression/regression-and-causality.html",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "",
+    "text": "You can now fit, interpret, and stress-test a regression. The last and hardest question is the one that matters most: when is a coefficient a cause, not just a correlation with controls? The honest answer is humbling — almost never automatically. Regression estimates a conditional average; turning that into a causal effect takes an assumption that data alone can’t verify, and usually a research design. This entry is the bridge to the summit.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#why-it-matters",
+    "href": "content/03-regression/regression-and-causality.html#why-it-matters",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "Why it matters",
+    "text": "Why it matters\nIt is dangerously easy to run a regression, add some controls, and announce “the effect of X on Y.” But holding things constant only neutralises the confounders you observed and included. (Angrist and Pischke 2009) The unobserved ones — ability, motivation, health, a thousand others — sit in the error term, and if they correlate with your regressor, the coefficient is biased no matter how clean the output looks. This entry assembles the threats into one clear-eyed account of regression’s causal limits, and explains why credible causal claims need more than a longer control list — they need the methods of Part V.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#the-one-condition-exogeneity",
+    "href": "content/03-regression/regression-and-causality.html#the-one-condition-exogeneity",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "The one condition: exogeneity",
+    "text": "The one condition: exogeneity\nStrip everything away and a single condition decides whether a slope is causal: the regressor must be exogenous, E[u\\mid x]=0 — equivalently, treatment is as good as randomly assigned once you condition on the controls (the conditional independence or selection-on-observables assumption). (Angrist and Pischke 2009; Wooldridge 2019) When it holds, the regression line is the causal conditional expectation function. When it fails, regression still faithfully estimates the best linear approximation to the CEF — but the CEF is descriptive, not causal. (Angrist and Pischke 2009) Regression is an extraordinary describing machine; whether its description is also an explanation is a question about the world, not the math.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#threat-1-omitted-variables-the-central-one",
+    "href": "content/03-regression/regression-and-causality.html#threat-1-omitted-variables-the-central-one",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "Threat 1 — omitted variables (the central one)",
+    "text": "Threat 1 — omitted variables (the central one)\nThe dominant threat, revisited from multiple regression: leave out a confounder and its influence loads onto your coefficient. The logic is the “short = long + bias” identity — the coefficient you get omitting a control equals the true effect plus (\\text{effect of omitted on }y)\\times(\\text{its relation to the included regressor}). (Angrist and Pischke 2009) The classic case is ability bias: regress wages on education without ability, and since ability raises wages and correlates with schooling, the education coefficient is biased upward. (Angrist and Pischke 2009)\nThe uncomfortable truth: you can never be certain you’ve controlled for everything. (Angrist and Pischke 2009) There is no test that confirms exogeneity; the unobserved confounder is, by definition, unobserved. This is why “I controlled for a lot of stuff” is an argument, not a proof — and why more controls buy credibility, never certainty.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#threat-2-bad-controls-when-a-control-hurts",
+    "href": "content/03-regression/regression-and-causality.html#threat-2-bad-controls-when-a-control-hurts",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "Threat 2 — bad controls (when a control hurts)",
+    "text": "Threat 2 — bad controls (when a control hurts)\nThe instinct “control for everything” is wrong, and dangerously so. (Angrist and Pischke 2009) A bad control is a variable that is itself an outcome of the treatment — a post-treatment variable. Conditioning on it doesn’t remove confounding; it introduces bias. (Angrist and Pischke 2009)\n\n\n\n\n\n\nNoteOccupation, the textbook bad control\n\n\n\nStudy the effect of education on wages, and it’s tempting to control for occupation. Don’t: education causes occupation (more schooling opens better jobs), so holding occupation fixed closes off one of the very channels through which education raises wages. You’d be measuring only the within-occupation effect and throwing away the part that flows through getting a better job — biasing the total effect, usually toward zero. (Angrist and Pischke 2009) The rule: good controls are predetermined (fixed before treatment); post-treatment variables are bad controls.\n\n\n\nCollider bias: how conditioning creates correlation\nThe subtlest version: conditioning on a common consequence of two variables manufactures an association that isn’t there. This is collider (or selection) bias. (Angrist and Pischke 2009) The picture below is the canonical example: talent and beauty are uncorrelated in the population, but among people selected on their sum (say, working actors, hired for one or the other), they appear negatively correlated — condition on the collider and a spurious relationship springs into being.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(4)\nn = 2000\ntalent = rng.normal(0, 1, n)\nbeauty = rng.normal(0, 1, n)          # independent of talent in the population\nhired = (talent + beauty) &gt; 1.6       # selected on a common consequence (a collider)\n\nr_all = np.corrcoef(talent, beauty)[0, 1]\nr_sel = np.corrcoef(talent[hired], beauty[hired])[0, 1]\n\nfig, ax = plt.subplots(figsize=(6.6, 4.4))\nax.scatter(talent[~hired], beauty[~hired], s=8, color=\"#c9ccd1\", alpha=0.5,\n           label=f\"everyone (r = {r_all:+.2f})\")\nax.scatter(talent[hired], beauty[hired], s=16, color=\"#1f3a5f\", alpha=0.8,\n           label=f\"hired (selected) (r = {r_sel:+.2f})\")\n# trend line within the selected group\nb = np.cov(talent[hired], beauty[hired], bias=True)[0, 1] / np.var(talent[hired])\nxs = np.linspace(talent[hired].min(), talent[hired].max(), 30)\nax.plot(xs, beauty[hired].mean() + b * (xs - talent[hired].mean()),\n        color=\"#c0392b\", lw=2.2)\nax.set_xlabel(\"talent\"); ax.set_ylabel(\"beauty\")\nax.set_title(\"Conditioning on a collider invents a correlation\")\nax.legend(fontsize=8, frameon=False, loc=\"upper right\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Collider/selection bias. In the full population (grey), talent and beauty are independent — no relationship. But the ‘hired’ subsample (blue), selected because talent + beauty is high, shows a spurious negative correlation: among the selected, more of one implies less of the other. Conditioning on a common consequence manufactures an association — which is exactly what a bad (post-treatment) control can do.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#threat-3-reverse-causality",
+    "href": "content/03-regression/regression-and-causality.html#threat-3-reverse-causality",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "Threat 3 — reverse causality",
+    "text": "Threat 3 — reverse causality\nRegression coefficients are symmetric; the data don’t know which way the arrow points. Reverse causality (simultaneity) is when y also causes x. (Wooldridge 2019) More police and more crime appear together — but high-crime cities hire more police, so the naive regression confuses “police cause crime” with “crime causes police.” Likewise income and health: wealth buys health, and health enables earning. When x and y co-determine each other, OLS estimates a tangle of both directions, not the effect you want. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#threat-4-measurement-error-and-attenuation",
+    "href": "content/03-regression/regression-and-causality.html#threat-4-measurement-error-and-attenuation",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "Threat 4 — measurement error and attenuation",
+    "text": "Threat 4 — measurement error and attenuation\nIf your regressor is measured with noise — self-reported income, a proxy for ability, a mismeasured treatment — the coefficient is biased, and in a predictable direction. Under classical measurement error, the bias is attenuation: the coefficient is pulled toward zero. (Wooldridge 2019) The intuition: noise in x adds variation that carries no signal about y, so the estimated slope is diluted — a real effect looks weaker than it is. Mismeasure the outcome and you mostly lose precision; mismeasure the regressor and you bias the effect downward.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#the-verdict-you-need-a-design-not-just-controls",
+    "href": "content/03-regression/regression-and-causality.html#the-verdict-you-need-a-design-not-just-controls",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "The verdict: you need a design, not just controls",
+    "text": "The verdict: you need a design, not just controls\nPut the threats together and the lesson is stark. Adding control variables cannot, by itself, deliver a credible causal effect — it addresses observed confounders while leaving unobserved confounding, reverse causality, and measurement error untouched, and it can create bias through bad controls. (Angrist and Pischke 2009) Selection-on-observables is an assumption you must argue for, not a box the software ticks.\nWhat does deliver credibility is a research design that makes exogeneity defensible by construction: (Angrist and Pischke 2009)\n\nRandomized experiments — random assignment forces X \\perp u, the gold standard.\nInstrumental variables — a lever that moves X but affects Y only through X.\nNatural experiments — regression discontinuity, difference-in-differences — where nature or policy supplies as-good-as-random variation.\n\nThis is the hinge of the whole book. Regression is the engine every one of those designs runs on — but the design is what licenses the causal claim. Part V is the study of building that license.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#common-pitfalls",
+    "href": "content/03-regression/regression-and-causality.html#common-pitfalls",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\n“I controlled for confounders, so it’s causal.” Only for the confounders you observed. Unobserved ones remain, and there’s no test for exogeneity. Controls build credibility, not proof. (Angrist and Pischke 2009)\nControlling for everything available. Post-treatment (bad) controls and colliders add bias. Control for predetermined variables; never for outcomes of the treatment. (Angrist and Pischke 2009)\nIgnoring the direction of causation. If y could plausibly cause x, the coefficient blends both directions. Ask which way the arrows run before interpreting. (Wooldridge 2019)\nTrusting a precise coefficient on a noisy regressor. Measurement error attenuates toward zero; a small “insignificant” effect may be a real effect, diluted. (Wooldridge 2019)\nBelieving a tiny standard error rescues a biased estimate. Inference quantifies sampling noise, not specification error. A precise estimate of the wrong number is still the wrong number. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#from-the-sources",
+    "href": "content/03-regression/regression-and-causality.html#from-the-sources",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nAngrist & Pischke, Mastering ’Metrics / Mostly Harmless Econometrics — a coefficient is causal only under selection-on-observables / conditional independence; the “short = long + bias” OVB logic and ability bias; bad controls (post-treatment variables; occupation in the education–wage regression) and the good-controls-are-predetermined rule; selection/collider bias from conditioning on a common consequence; and the case that credible causal inference needs a design (randomization, IV, natural experiments), with regression as the engine.\nWooldridge, Introductory Econometrics — exogeneity E[u\\mid x]=0 as the causal condition; endogeneity from omitted variables, simultaneity / reverse causality (police–crime, income–health), and measurement-error attenuation (classical error in a regressor biases toward zero).",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#appendix-the-mathematics",
+    "href": "content/03-regression/regression-and-causality.html#appendix-the-mathematics",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nWhen OLS is causal. Writing the structural model y=\\beta x + u, OLS estimates \\hat\\beta \\xrightarrow{p} \\beta + \\dfrac{\\operatorname{Cov}(x,u)}{\\operatorname{Var}(x)}. The second term — the bias — vanishes iff \\operatorname{Cov}(x,u)=0, i.e. exogeneity. Every threat below is a reason \\operatorname{Cov}(x,u)\\neq 0.\nAttenuation, derived. Let the true regressor be x^* but you observe x=x^*+e with classical error (e independent of x^* and u, variance \\sigma_e^2). Then \n\\operatorname{plim}\\hat\\beta = \\beta\\cdot\\frac{\\sigma_{x^*}^2}{\\sigma_{x^*}^2+\\sigma_e^2} = \\beta\\cdot\\lambda,\n\\qquad 0&lt;\\lambda&lt;1,\n so the estimate is the truth times a reliability ratio \\lambda&lt;1 — shrunk toward zero. The noisier the measure, the smaller \\lambda, the worse the attenuation.\nWhy a collider induces dependence. If C = x + y + \\varepsilon is a common consequence and x,y are marginally independent, then conditioning on C=c ties them: y \\approx c - x - \\varepsilon, so within a stratum of C, higher x forces lower y — a negative conditional correlation from a zero marginal one. Controlling for a post-treatment collider does exactly this.\nSimultaneity bias. With y=\\beta x+u and x=\\gamma y+v, solving the system makes \\operatorname{Cov}(x,u)\\neq0, so OLS is inconsistent — the coefficient mixes \\beta and \\gamma. The fix is an instrument that shifts x without touching u — the subject of Part V.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#connections",
+    "href": "content/03-regression/regression-and-causality.html#connections",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: multiple regression (OVB and good/bad controls), the Gauss–Markov assumptions (exogeneity and its failure modes), conditional expectation (regression as the best-linear-approximation to the CEF, which is descriptive), and correlation is not causation (now formalised).\nLeads to: the entire causal-inference summit — potential outcomes, randomized experiments, instrumental variables, regression discontinuity, and difference-in-differences — each a strategy for making exogeneity credible.\nCloses: Part III. You can fit and interpret regressions and judge when their coefficients deserve a causal reading — the prerequisite for everything that follows.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/regression-and-causality.html#study-with-notebooklm",
+    "href": "content/03-regression/regression-and-causality.html#study-with-notebooklm",
+    "title": "What Regression Can — and Can’t — Tell You",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Under exactly what condition is a regression coefficient a causal effect, and why is the conditional expectation function not automatically causal?”\n“Explain omitted-variable bias as the central threat and why we can never be sure we’ve controlled for every confounder, using ability bias.”\n“What is a bad control? Explain with the occupation example, and explain collider/selection bias from conditioning on a common consequence.”\n“Explain reverse causality with the police-and-crime example, and measurement-error attenuation toward zero.”\n“Why does credible causal inference require a research design (randomization, instruments, natural experiments) rather than just adding control variables?”",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "What Regression Can — and Can't — Tell You"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html",
+    "href": "content/03-regression/simple-linear-regression.html",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "",
+    "text": "Correlation tells you whether two things move together; regression tells you by how much, with an equation. Fit a line through a scatter so that it misses the points by as little as possible, and you have the single most-used tool in empirical social science — and, it turns out, an estimate of the conditional expectation you met in Part I.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html#why-it-matters",
+    "href": "content/03-regression/simple-linear-regression.html#why-it-matters",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "Why it matters",
+    "text": "Why it matters\nAlmost every empirical claim in the social sciences is, under the hood, a regression coefficient: the return to a year of schooling, the effect of class size on test scores, the gender wage gap. Where correlation gives a single unitless number, regression gives a formula — \\hat y = \\hat\\beta_0 +\n\\hat\\beta_1 x — whose slope you can read in real units and whose machinery extends, in the next entries, to holding other things constant. (Wooldridge 2019) This entry builds the one-predictor case completely: what the line means, how it’s chosen, and how to tell whether it fits.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html#the-model",
+    "href": "content/03-regression/simple-linear-regression.html#the-model",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "The model",
+    "text": "The model\nThe simple linear regression model describes a relationship in the population: (Wooldridge 2019)\n\ny = \\beta_0 + \\beta_1 x + u.\n\n\ny is the dependent (outcome, explained) variable; x is the independent (regressor, explanatory) variable. (Wooldridge 2019)\n\\beta_0 is the intercept — the expected y when x=0.\n\\beta_1 is the slope, the parameter of interest: the ceteris paribus effect of x on y.\nu is the error term — everything else that affects y but isn’t x (all the unobserved factors). (Wooldridge 2019)\n\nInterpreting the slope is the whole game: a one-unit increase in x is associated with a \\beta_1 change in y, on average — formally, holding the unobservables fixed (\\Delta u = 0), \\Delta y = \\beta_1 \\Delta x. (Wooldridge 2019)\n\n\n\n\n\n\nTipRegression is the conditional expectation function\n\n\n\nThis connects straight back to conditional expectation. Under the zero conditional mean assumption — the unobservables average out to zero at every value of x, E[u\\mid x]=0 — the regression line is the CEF: (Wooldridge 2019)\n\nE[y \\mid x] = \\beta_0 + \\beta_1 x.\n\nSo the regression line threads the average value of y for every slice of x. That is why regression is the best predictor machinery made practical — and why E[u\\mid x]=0 (which we scrutinise in R3) is the assumption that does all the work.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html#ordinary-least-squares",
+    "href": "content/03-regression/simple-linear-regression.html#ordinary-least-squares",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "Ordinary least squares",
+    "text": "Ordinary least squares\nWe never see the population line; we estimate it from a sample of n points. Ordinary least squares (OLS) picks the line that makes the total squared miss as small as possible — it chooses \\hat\\beta_0, \\hat\\beta_1 to minimise the sum of squared residuals: (Wooldridge 2019)\n\n\\min_{\\hat\\beta_0,\\hat\\beta_1} \\sum_{i=1}^n \\big(y_i - \\hat\\beta_0 - \\hat\\beta_1 x_i\\big)^2.\n\nWhy squared? Squaring makes every miss positive (so they can’t cancel), and penalises big misses disproportionately. Solving this minimisation (calculus in the appendix) gives two beautifully interpretable formulas: (Wooldridge 2019)\n\n\\hat\\beta_1 = \\frac{\\sum_i (x_i-\\bar x)(y_i-\\bar y)}{\\sum_i (x_i-\\bar x)^2}\n= \\frac{\\widehat{\\operatorname{Cov}}(x,y)}{\\widehat{\\operatorname{Var}}(x)},\n\\qquad\n\\hat\\beta_0 = \\bar y - \\hat\\beta_1 \\bar x.\n\nThe slope is just the covariance of x and y divided by the variance of x — co-movement, rescaled by how much x itself varies. The intercept then sits wherever it must for the line to pass through the average point (\\bar x, \\bar y).\n\nLeast squares, made visible\nThe picture below is the method: OLS slides and tilts a line until the sum of the squared vertical gaps (the residuals, in red) is as small as possible. No other line through this cloud makes that total smaller.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(3)\nn = 70\neduc = rng.integers(6, 19, n).astype(float)            # years of schooling\nwage = -0.90 + 0.54 * educ + rng.normal(0, 1.6, n)     # WAGE1-style relationship\n\n# OLS by the covariance/variance formula\nb1 = np.cov(educ, wage, bias=True)[0, 1] / np.var(educ)\nb0 = wage.mean() - b1 * educ.mean()\nfit = b0 + b1 * educ\n\nfig, ax = plt.subplots(figsize=(7, 4.2))\nax.vlines(educ, np.minimum(wage, fit), np.maximum(wage, fit),\n          color=\"#c0392b\", lw=0.9, alpha=0.7)          # residuals\nax.scatter(educ, wage, s=22, color=\"#1f3a5f\", alpha=0.8, zorder=3)\nxs = np.linspace(6, 18, 50)\nax.plot(xs, b0 + b1 * xs, color=\"#1f8a4c\", lw=2.4,\n        label=f\"OLS:  wage = {b0:.2f} + {b1:.2f}·educ\")\nax.set_xlabel(\"years of education\"); ax.set_ylabel(\"hourly wage ($)\")\nax.set_title(\"OLS minimises the total squared residual (red)\")\nax.legend(fontsize=9, frameon=False, loc=\"upper left\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Ordinary least squares on simulated wage–education data. The blue line minimises the total squared length of the red residual segments — the vertical gaps between each point and the line. Its slope (≈ 0.54) says each extra year of schooling predicts about 54 cents more per hour, echoing Wooldridge’s WAGE1 estimate.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html#fitted-values-residuals-and-olss-built-in-properties",
+    "href": "content/03-regression/simple-linear-regression.html#fitted-values-residuals-and-olss-built-in-properties",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "Fitted values, residuals, and OLS’s built-in properties",
+    "text": "Fitted values, residuals, and OLS’s built-in properties\nFor each observation the line gives a fitted value \\hat y_i = \\hat\\beta_0 + \\hat\\beta_1 x_i (the prediction) and a residual \\hat u_i = y_i - \\hat y_i (the miss). (Wooldridge 2019) By construction, OLS guarantees three algebraic facts that hold for any dataset: (Wooldridge 2019)\n\nThe residuals sum to zero, \\sum_i \\hat u_i = 0 — positive and negative misses cancel exactly.\nThe residuals are uncorrelated with x — the line has wrung all the linear information out of x; whatever is left is, by definition, unrelated to it.\nThe line passes through (\\bar x, \\bar y) — plug in the average x and you get the average y.\n\nThese aren’t assumptions to check; they’re identities baked into the least-squares solution.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html#goodness-of-fit-r²-and-the-standard-error",
+    "href": "content/03-regression/simple-linear-regression.html#goodness-of-fit-r²-and-the-standard-error",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "Goodness of fit: R² and the standard error",
+    "text": "Goodness of fit: R² and the standard error\nHow much of y’s variation did the line actually capture? Decompose the total variation exactly as ANOVA does — the same between/within split: (Wooldridge 2019)\n\n\\underbrace{\\sum_i (y_i-\\bar y)^2}_{\\text{SST (total)}} =\n\\underbrace{\\sum_i (\\hat y_i-\\bar y)^2}_{\\text{SSE (explained)}} +\n\\underbrace{\\sum_i \\hat u_i^2}_{\\text{SSR (residual)}}.\n\nThe coefficient of determination is the explained share: (Wooldridge 2019)\n\nR^2 = \\frac{\\text{SSE}}{\\text{SST}} = 1 - \\frac{\\text{SSR}}{\\text{SST}} \\in [0,1].\n\nAn R^2 of 0.60 means x explains 60% of the sample variation in y. (Wooldridge 2019) Two facts worth carrying: in simple regression R^2 is exactly the square of the correlation coefficient, R^2 = r_{xy}^2 — regression and correlation measuring the same association two ways; and the standard error of the regression, \\text{SER} = \\sqrt{\\text{SSR}/(n-2)}, estimates the typical vertical distance of points from the line, in the units of y. (Wooldridge 2019) (Low R^2 is not failure: in social data, individual behaviour is noisy, and a small-but-precise slope can still be the answer you want.)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html#a-fully-worked-example-wage-and-education",
+    "href": "content/03-regression/simple-linear-regression.html#a-fully-worked-example-wage-and-education",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "A fully worked example: wage and education",
+    "text": "A fully worked example: wage and education\nWooldridge’s canonical case, estimated on n = 526 workers (the WAGE1 data): (Wooldridge 2019)\n\n\\widehat{\\text{wage}} = -0.90 + 0.54\\,\\cdot\\,\\text{educ}, \\qquad R^2 = 0.171.\n\n\nSlope 0.54: each additional year of schooling predicts about 54 cents more per hour. Put comparatively (the honest framing): comparing two groups one year of schooling apart, the more-schooled group earns about $0.54/hour more on average. (Wooldridge 2019)\nIntercept -0.90: literally, zero education predicts a negative wage — nonsensical, a reminder that the intercept is often just a mathematical anchor, not a meaningful x=0 value. (Wooldridge 2019)\nR^2 = 0.171: education explains about 17% of the variation in wages. The other 83% lives in u — ability, experience, luck, industry — which is exactly why we move to multiple regression next. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html#common-pitfalls",
+    "href": "content/03-regression/simple-linear-regression.html#common-pitfalls",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nReading the slope as causal. \\hat\\beta_1 is an association unless E[u\\mid x]=0 holds — and with one regressor it rarely does (ability is in u and correlates with education). The causal reading waits on much more. (Wooldridge 2019)\nOver-interpreting the intercept. \\hat\\beta_0 is the fitted value at x=0, often outside the data’s range and meaningless (the -0.90 wage). Don’t force a story onto it. (Wooldridge 2019)\nWorshipping R^2. A high R^2 doesn’t make a model correct or causal, and a low R^2 doesn’t make a slope wrong. Social-behaviour models routinely have small R^2 and useful coefficients. (Wooldridge 2019)\nExtrapolating beyond the data. The line is fitted where the points are; predictions far outside the observed x range are unsupported.\nForgetting the squared-miss objective. OLS minimises squared residuals, so it is sensitive to outliers — one extreme point can swing the line.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html#from-the-sources",
+    "href": "content/03-regression/simple-linear-regression.html#from-the-sources",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWooldridge, Introductory Econometrics — the model y=\\beta_0+\\beta_1x+u and the meaning of each term; the slope as the ceteris-paribus effect and the CEF link under E[u\\mid x]=0; OLS as minimising the SSR; the slope =\\widehat{\\operatorname{Cov}}(x,y)/\\widehat{\\operatorname{Var}}(x) and intercept formulas; fitted values, residuals, and the three algebraic properties; SST=SSE+SSR, R^2, R^2=r_{xy}^2, and the SER; the WAGE1 example (\\widehat{\\text{wage}}=-0.90+0.54\\,\\text{educ}, R^2=0.171, n=526).\nBruce & Bruce, Practical Statistics for Data Scientists — regression as fitting an equation (vs correlation’s single number); fitted values and residuals in the predictive idiom.\nAngrist & Pischke, Mastering ’Metrics — the comparative (“two groups one unit apart”) framing of a slope, foreshadowing the causal reading.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html#appendix-the-mathematics",
+    "href": "content/03-regression/simple-linear-regression.html#appendix-the-mathematics",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nDeriving the OLS estimators. Minimise S(\\hat\\beta_0,\\hat\\beta_1)=\\sum_i(y_i-\\hat\\beta_0-\\hat\\beta_1 x_i)^2. The first-order conditions (set partial derivatives to zero) are the normal equations:\n\n\\sum_i (y_i-\\hat\\beta_0-\\hat\\beta_1 x_i)=0, \\qquad \\sum_i x_i(y_i-\\hat\\beta_0-\\hat\\beta_1 x_i)=0.\n\nThe first gives \\hat\\beta_0=\\bar y-\\hat\\beta_1\\bar x (the line through the means). Substituting into the second and simplifying gives \\hat\\beta_1=\\dfrac{\\sum_i(x_i-\\bar x)(y_i-\\bar y)}{\\sum_i(x_i-\\bar x)^2}. The two normal equations are the algebraic properties “residuals sum to zero” and “residuals uncorrelated with x.”\nWhy R^2=r_{xy}^2 in simple regression. With \\hat y_i-\\bar y=\\hat\\beta_1(x_i-\\bar x), \\text{SSE}=\\hat\\beta_1^2\\sum(x_i-\\bar x)^2. Insert \\hat\\beta_1=S_{xy}/S_{xx}: \\text{SSE}=S_{xy}^2/S_{xx}, so R^2=\\text{SSE}/\\text{SST}=S_{xy}^2/(S_{xx}S_{yy})=r_{xy}^2.\nThe SER and degrees of freedom. \\text{SER}=\\sqrt{\\text{SSR}/(n-2)}; the n-2 is the two degrees of freedom spent estimating \\hat\\beta_0 and \\hat\\beta_1, making \\text{SER}^2 an unbiased estimate of \\operatorname{Var}(u).",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html#connections",
+    "href": "content/03-regression/simple-linear-regression.html#connections",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: conditional expectation (the regression line as the CEF / best predictor), covariance & correlation (the slope is Cov/Var; R^2=r^2), and estimation (OLS is an estimator).\nLeads to: multiple regression (adding regressors to hold things constant and shrink u), and inference for coefficients (standard errors and tests on \\hat\\beta_1).\nMirrors: the ANOVA decomposition (SST = SSE + SSR is the between/within split) and the law of total variance.",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
+    ]
+  },
+  {
+    "objectID": "content/03-regression/simple-linear-regression.html#study-with-notebooklm",
+    "href": "content/03-regression/simple-linear-regression.html#study-with-notebooklm",
+    "title": "Simple Linear Regression: The Line of Best Fit",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Explain the simple regression model y = β₀ + β₁x + u, the meaning of each term, and how the slope is interpreted, using Wooldridge.”\n“Derive the OLS slope and intercept by minimising the sum of squared residuals, and explain why the slope equals Cov(x,y)/Var(x).”\n“Explain the SST = SSE + SSR decomposition and R², and why R² equals the squared correlation in simple regression.”\n“Walk through Wooldridge’s WAGE1 example (wage = −0.90 + 0.54·educ, R² = 0.171) and interpret every number.”\n“Why is the OLS slope only a causal effect under the zero-conditional-mean assumption E[u|x] = 0, and why does that usually fail with a single regressor?”",
+    "crumbs": [
+      "Home",
+      "III · Statistical Modelling: Regression",
+      "Simple Linear Regression: The Line of Best Fit"
     ]
   },
   {
