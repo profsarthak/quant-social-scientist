@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Causal Machine Learning: Heterogeneous Effects – The Quantitative Social Scientist</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../content/06-field-realities/index.html" rel="next">
+<link href="../../content/05-causal-inference/synthetic-control.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-a6a8d579619ec60b6cc16f651ef3cf7e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-e06e5700cfc727e31a5c8bda3c8b1a89.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">The Quantitative Social Scientist</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/00-overture/index.html"> 
+<span class="menu-text">Curriculum</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/ml-track/index.html"> 
+<span class="menu-text">ML Track</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../appendices/math/index.html"> 
+<span class="menu-text">Appendices</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">How to use this</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://profsarthak.github.io/quant-social-scientist/" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/05-causal-inference/index.html">V · The Summit: Causal Inference</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/synthetic-control.html">Frontiers</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/causal-machine-learning.html">Causal Machine Learning: Heterogeneous Effects</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Start here</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Quantitative Social Scientist</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to use this</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/what-quantitative-research-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Quantitative Social Science Actually Does</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/anatomy-of-a-study.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Anatomy of a Study</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/concepts-and-measurement.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Concepts &amp; Variables: The Problem of Measurement</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/variables-and-relationships.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Cast of Characters: Kinds of Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/research-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A Field Guide to Research Designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/credibility-and-failure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Makes Research Credible — and How It Fails</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/ethics-and-human-subjects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ethics and the Human-Subjects Frame</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Probability</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/what-probability-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Probability Actually Is</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/sample-spaces-and-axioms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sample Spaces, Events &amp; the Axioms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/counting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Counting: The Arithmetic of Possibility</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Probability &amp; Independence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/bayes-theorem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bayes’ Theorem: Updating Beliefs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/random-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random Variables (Discrete &amp; Continuous)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/expectation-and-variance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expectation &amp; Variance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/common-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Common Distributions and What They Model</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/covariance-and-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Joint Distributions, Covariance &amp; Correlation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-expectation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Expectation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/transformations-and-sums.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transformations &amp; Sums of Random Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/law-of-large-numbers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Law of Large Numbers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Describing Data</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/location-spread-shape.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Location, Spread &amp; Shape</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/exploratory-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory Data Analysis &amp; Visual Summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/messy-real-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Messy Real Data: What to Expect</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">II · Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">II · Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Classical Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-and-survey-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling &amp; Survey Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-distributions-clt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling Distributions &amp; the Central Limit Theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Estimation: From Sample to Best Guess</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Confidence Intervals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hypothesis Testing &amp; p-values</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/comparing-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparing Groups: ANOVA, Chi-Square &amp; Proportions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/resampling-and-nonparametric-tests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Resampling &amp; Distribution-Free Tests</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical Power &amp; Sample Size</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/replication-crisis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Replication Crisis, Made Rigorous</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-worldview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bayesian Worldview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-machinery.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Machinery: Priors, Likelihoods, Posteriors</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/credible-intervals-and-computation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Credible Intervals, Computation &amp; the Verdict</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/simple-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simple Linear Regression: The Line of Best Fit</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/multiple-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple Regression &amp; "Holding Constant"</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/gauss-markov-assumptions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Gauss–Markov Assumptions &amp; BLUE</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/inference-for-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inference for Regression Coefficients</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/functional-form.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functional Form: Logs, Polynomials, Dummies &amp; Interactions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/regression-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Diagnostics &amp; Robust Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/limited-dependent-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Limited Dependent Variables: LPM, Logit &amp; Probit</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/regression-and-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Regression Can — and Can’t — Tell You</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">IV · Predictive Modelling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">IV · The Computational Turn: Predictive Modelling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Predictive Paradigm</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/explaining-vs-predicting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Explaining to Predicting: Two Goals, Two Cultures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/bias-variance-tradeoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bias–Variance Trade-off</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/classification-and-knn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Classification: When the Outcome Is a Category</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/cross-validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Out-of-Sample Honesty: The Test Set &amp; Cross-Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regularization: Ridge &amp; Lasso</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/trees-and-forests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Trees, Forests &amp; Boosting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/interpretability-and-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Interpretability &amp; ML for Social Science</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Time Series &amp; Forecasting</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/time-series-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Time-Series Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/arima-forecasting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Forecasting with ARIMA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Causal Framework</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/potential-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Potential Outcomes &amp; the Fundamental Problem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/randomized-experiments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Randomized Experiments: The Gold Standard</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/directed-acyclic-graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Directed Acyclic Graphs (DAGs)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Furious Five</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/matching-and-propensity-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Selection on Observables: Matching &amp; Propensity Scores</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/instrumental-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Instrumental Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/regression-discontinuity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regression Discontinuity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/difference-in-differences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Difference-in-Differences</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/panel-and-fixed-effects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Panel Data &amp; Fixed Effects</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="true">
+ <span class="menu-text">Frontiers</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-16" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/synthetic-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic Control</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/causal-machine-learning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Causal Machine Learning: Heterogeneous Effects</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" role="navigation" aria-expanded="true">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-17" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="true">
+ <span class="menu-text">ML Track (separate)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-18" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ML Track (separate)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-19" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/math/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Mathematics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/computing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Computing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#from-ate-to-cate" id="toc-from-ate-to-cate" class="nav-link" data-scroll-target="#from-ate-to-cate">From ATE to CATE</a></li>
+  <li><a href="#why-naive-ml-is-biased-for-effects" id="toc-why-naive-ml-is-biased-for-effects" class="nav-link" data-scroll-target="#why-naive-ml-is-biased-for-effects">Why naive ML is biased for effects</a></li>
+  <li><a href="#doubledebiased-machine-learning" id="toc-doubledebiased-machine-learning" class="nav-link" data-scroll-target="#doubledebiased-machine-learning">Double/debiased machine learning</a></li>
+  <li><a href="#causal-forests-and-honesty" id="toc-causal-forests-and-honesty" class="nav-link" data-scroll-target="#causal-forests-and-honesty">Causal forests and honesty</a></li>
+  <li><a href="#policy-learning" id="toc-policy-learning" class="nav-link" data-scroll-target="#policy-learning">Policy learning</a></li>
+  <li><a href="#the-cautions-ml-is-not-a-license" id="toc-the-cautions-ml-is-not-a-license" class="nav-link" data-scroll-target="#the-cautions-ml-is-not-a-license">The cautions: ML is not a license</a></li>
+  <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
+  <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
+  <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
+  <li><a href="#connections" id="toc-connections" class="nav-link" data-scroll-target="#connections">Connections</a></li>
+  <li><a href="#study-with-notebooklm" id="toc-study-with-notebooklm" class="nav-link" data-scroll-target="#study-with-notebooklm">Study with NotebookLM</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/05-causal-inference/index.html">V · The Summit: Causal Inference</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/synthetic-control.html">Frontiers</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/causal-machine-learning.html">Causal Machine Learning: Heterogeneous Effects</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Causal Machine Learning: Heterogeneous Effects</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">Bend the predictive toolkit of Part IV toward causation — to learn not just the average effect, but <em>for whom</em> it is large, and to act on it.</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="lead-kernel">
+<p>The whole of Part V chased a single number: an average effect. But “never cross a river that is on average four feet deep.” Causal machine learning estimates the effect <strong>as a function of who you are</strong> — the conditional average treatment effect <span class="math inline">\tau(x)</span> — using the <a href="../../content/04-predictive/trees-and-forests.html">flexibility of ML</a> without inheriting its bias. The trick is to estimate the <em>effect</em>, not the outcome, and to protect that estimate from overfitting with orthogonalisation and cross-fitting. It closes the loop: the predictive culture, disciplined back into the service of cause.</p>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p>An <a href="../../content/05-causal-inference/potential-outcomes.html">ATE</a> can hide everything that matters for policy: a drug that helps the young and harms the old can average to “no effect.” <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> Modern social science wants <strong>heterogeneous treatment effects</strong> — <em>for whom</em> does this work? — and the obvious idea, “throw a random forest at it,” <strong>fails</strong> in a way worth understanding deeply. This entry is where <a href="../../content/04-predictive/interpretability-and-ml.html">Part IV’s machinery</a> — regularization, cross-validation, forests, the bias–variance trade — is <strong>repurposed for causation</strong>, and where the <a href="../../content/04-predictive/interpretability-and-ml.html">double/debiased ML</a> preview is finally cashed out. It is the natural summit of the summit: the predictive and causal cultures, reconciled.</p>
+</section>
+<section id="from-ate-to-cate" class="level2">
+<h2 class="anchored" data-anchor-id="from-ate-to-cate">From ATE to CATE</h2>
+<p>The target shifts from a scalar to a function — the <strong>conditional average treatment effect</strong>: <span class="math display">
+\tau(x)=\mathbb E\big[Y(1)-Y(0)\mid X=x\big].
+</span> <span class="math inline">\tau(x)</span> is the effect <strong>for units with characteristics <span class="math inline">x</span></strong> — the engine of <strong>personalised</strong> policy, letting you move from a uniform rollout to <strong>targeting</strong> whoever benefits most. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> Everything from <a href="../../content/05-causal-inference/potential-outcomes.html">potential outcomes</a> still holds; we’ve simply stopped averaging away the variation we now want to see.</p>
+</section>
+<section id="why-naive-ml-is-biased-for-effects" class="level2">
+<h2 class="anchored" data-anchor-id="why-naive-ml-is-biased-for-effects">Why naive ML is biased for effects</h2>
+<p>The tempting move — fit a flexible ML model of <span class="math inline">Y</span> on <span class="math inline">(D,X)</span> and read off <span class="math inline">D</span>’s influence — is <strong>biased</strong>, for a reason that is subtle and important: <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p>
+<ul>
+<li><strong>Regularization bias.</strong> ML methods are built to minimise <em>prediction</em> error for <span class="math inline">Y</span>, so they <a href="../../content/04-predictive/regularization.html">regularize</a> — shrinking coefficients, pruning splits — toward whatever predicts the outcome best. When the treatment effect is <strong>small relative to other predictors</strong>, the algorithm cheerfully <strong>shrinks the treatment’s role toward zero</strong>, biasing the effect. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></li>
+<li><strong>Effect ≠ prediction.</strong> Estimating an effect is <em>fundamentally harder</em> than predicting an outcome: it targets the <strong>difference between two counterfactual states</strong>, only one of which is ever observed. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> A model superb at predicting <span class="math inline">Y</span> can be terrible at isolating <span class="math inline">\partial
+Y/\partial D</span>.</li>
+</ul>
+<p>The fix is to stop estimating the outcome and start estimating the <strong>effect</strong>, with the nuisances <em>partialled out</em>.</p>
+</section>
+<section id="doubledebiased-machine-learning" class="level2">
+<h2 class="anchored" data-anchor-id="doubledebiased-machine-learning">Double/debiased machine learning</h2>
+<p><strong>Double machine learning (DML)</strong>, due to Chernozhukov and coauthors, lets you use any flexible ML for the hard prediction parts while keeping <strong>valid inference</strong> on the causal parameter. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> Three moves:</p>
+<ol type="1">
+<li><strong>Estimate two nuisance functions</strong> with ML: an <strong>outcome model</strong> <span class="math inline">g_0(X)=\mathbb E[Y\mid X]</span> and a <strong>treatment/propensity model</strong> <span class="math inline">m_0(X)=\mathbb E[D\mid X]</span>. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></li>
+<li><strong>Orthogonalise (partial out).</strong> Residualise <em>both</em> <span class="math inline">Y</span> and <span class="math inline">D</span> on <span class="math inline">X</span> — regress the <span class="math inline">Y</span>-residual on the <span class="math inline">D</span>-residual. This is <a href="../../content/03-regression/multiple-regression.html">Frisch–Waugh–Lovell</a> with ML doing the conditioning, and it yields a <strong>Neyman-orthogonal</strong> moment: the effect estimate is <strong>first-order insensitive</strong> to small errors in <span class="math inline">g_0</span> and <span class="math inline">m_0</span>. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> You can plug in imperfect ML nuisances and the errors <strong>don’t spill</strong> into the treatment effect — the “debiasing.”</li>
+<li><strong>Cross-fit.</strong> Estimate the nuisances on one fold and the effect on a <em>held-out</em> fold, so no unit’s own outcome contaminates its own nuisance prediction — removing overfitting bias. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> (Exactly the <a href="../../content/04-predictive/cross-validation.html">cross-validation</a> discipline, now load-bearing for <em>inference</em>, not just tuning.)</li>
+</ol>
+<p>Orthogonality kills the <em>regularization</em> bias; cross-fitting kills the <em>overfitting</em> bias. Together they let ML serve identification instead of sabotaging it. The figure shows the payoff DML and causal forests deliver — recovering an effect that <strong>varies with <span class="math inline">x</span></strong>.</p>
+<div id="cell-fig-cate" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Show the figure code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">21</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">6000</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> rng.uniform(<span class="dv">0</span>, <span class="dv">1</span>, n)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>D <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, n)                  <span class="co"># randomized treatment (clean identification)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>tau_true <span class="op">=</span> <span class="fl">0.5</span> <span class="op">+</span> <span class="fl">3.0</span> <span class="op">*</span> x                   <span class="co"># effect grows with x (heterogeneous)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> <span class="fl">1.0</span> <span class="op">+</span> <span class="fl">2.0</span> <span class="op">*</span> x <span class="op">+</span> tau_true <span class="op">*</span> D <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.0</span>, n)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Honest binned CATE: within each x-bin, treated mean - control mean (+ 95% CI).</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>edges <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">11</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>centers, est, lo, hi <span class="op">=</span> [], [], [], []</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(edges[:<span class="op">-</span><span class="dv">1</span>], edges[<span class="dv">1</span>:]):</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> (x <span class="op">&gt;=</span> a) <span class="op">&amp;</span> (x <span class="op">&lt;</span> b)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    yt, yc <span class="op">=</span> y[m <span class="op">&amp;</span> (D <span class="op">==</span> <span class="dv">1</span>)], y[m <span class="op">&amp;</span> (D <span class="op">==</span> <span class="dv">0</span>)]</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> yt.mean() <span class="op">-</span> yc.mean()</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    se <span class="op">=</span> np.sqrt(yt.var(ddof<span class="op">=</span><span class="dv">1</span>)<span class="op">/</span>yt.size <span class="op">+</span> yc.var(ddof<span class="op">=</span><span class="dv">1</span>)<span class="op">/</span>yc.size)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    centers.append((a<span class="op">+</span>b)<span class="op">/</span><span class="dv">2</span>)<span class="op">;</span> est.append(d)<span class="op">;</span> lo.append(d<span class="op">-</span><span class="fl">1.96</span><span class="op">*</span>se)<span class="op">;</span> hi.append(d<span class="op">+</span><span class="fl">1.96</span><span class="op">*</span>se)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>centers, est <span class="op">=</span> np.array(centers), np.array(est)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>ate <span class="op">=</span> (y[D<span class="op">==</span><span class="dv">1</span>].mean() <span class="op">-</span> y[D<span class="op">==</span><span class="dv">0</span>].mean())</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.2</span>))</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">100</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, <span class="fl">0.5</span> <span class="op">+</span> <span class="fl">3.0</span><span class="op">*</span>xs, color<span class="op">=</span><span class="st">"#1f8a4c"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="st">"true CATE  τ(x)"</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>ax.errorbar(centers, est, yerr<span class="op">=</span>[est<span class="op">-</span>np.array(lo), np.array(hi)<span class="op">-</span>est], fmt<span class="op">=</span><span class="st">"o"</span>,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"#1f3a5f"</span>, ms<span class="op">=</span><span class="dv">5</span>, capsize<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">"honest binned estimate"</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>ax.axhline(ate, color<span class="op">=</span><span class="st">"#9aa0a6"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="ss">f"ATE = </span><span class="sc">{</span>ate<span class="sc">:.2f}</span><span class="ss"> (hides heterogeneity)"</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"covariate x"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"treatment effect"</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Who benefits? The effect as a function of x"</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-cate" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="causal-machine-learning_files/figure-html/fig-cate-output-1.png" width="681" height="394" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Heterogeneous treatment effects. The true CATE τ(x) (green) rises with a covariate x — the treatment helps high-x units far more than low-x units, a pattern the ATE (grey dashed) completely hides. An honest, binned effect estimator (blue points, with 95% intervals) recovers τ(x) by comparing treated and control outcomes within strata of x — the intuition behind causal forests, which split to maximise effect heterogeneity and estimate honestly for valid intervals.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="causal-forests-and-honesty" class="level2">
+<h2 class="anchored" data-anchor-id="causal-forests-and-honesty">Causal forests and honesty</h2>
+<p>To estimate <span class="math inline">\tau(x)</span> flexibly, <strong>causal forests</strong> (generalized random forests) adapt <a href="../../content/04-predictive/trees-and-forests.html">random forests</a> with two changes: <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p>
+<ul>
+<li><strong>Causal splitting.</strong> Instead of splitting to reduce prediction error (RSS), trees split to <strong>maximise the heterogeneity of the estimated treatment effect</strong> across the children — actively hunting for the covariates along which the effect <em>varies</em>. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></li>
+<li><strong>Honesty.</strong> A tree is <strong>honest</strong> if it uses <strong>one subsample to choose the splits</strong> and a <strong>separate subsample to estimate the effect</strong> in each leaf. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> This separation is what makes the leaf estimates statistically <em>valid</em> — it earns trustworthy <strong>confidence intervals</strong> on <span class="math inline">\tau(x)</span>, instead of the overconfident ones you’d get from estimating effects in the very leaves you carved to maximise them.</li>
+</ul>
+</section>
+<section id="policy-learning" class="level2">
+<h2 class="anchored" data-anchor-id="policy-learning">Policy learning</h2>
+<p>The point of knowing <span class="math inline">\tau(x)</span> is often to <strong>act</strong>. <strong>Policy learning</strong> turns CATEs into an assignment rule <span class="math inline">\pi(x)</span>. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> The unconstrained optimum is simple — <em>treat everyone with a positive predicted effect</em>: <span class="math display">
+\pi^*(x)=\mathbf 1\{\tau(x)\ge 0\}.
+</span> Framed as a <a href="../../content/04-predictive/classification-and-knn.html">classification</a> problem, it predicts the <strong>sign</strong> of the effect, <strong>weighted by its magnitude</strong> — misclassifying a <em>large</em> positive effect costs more than fumbling a near-zero one (cost-sensitive classification). <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> This is where causal inference meets <a href="../../content/06-field-realities/index.html">decision-making</a>: not “what is the effect?” but “whom should we treat?”</p>
+</section>
+<section id="the-cautions-ml-is-not-a-license" class="level2">
+<h2 class="anchored" data-anchor-id="the-cautions-ml-is-not-a-license">The cautions: ML is not a license</h2>
+<p>The most important sentence in the chapter: <strong>machine learning does not fix identification.</strong> <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> Every method here delivers <em>causal</em> answers only if the <a href="../../content/05-causal-inference/matching-and-propensity-scores.html">identifying assumptions still hold</a> — <strong>conditional exogeneity (unconfoundedness)</strong> and <strong>overlap</strong> <span class="math inline">0&lt;\Pr(D=1\mid X)&lt;1</span>. DML and causal forests make you <em>efficient and flexible</em> under those assumptions; they cannot conjure them. Throwing a forest at confounded data yields a beautifully estimated <strong>biased</strong> effect. Two further risks: <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p>
+<ul>
+<li><strong>Fairness.</strong> ML models absorb the prejudices in their training data (gender and racial bias in text embeddings, biased historical decisions) — a <a href="../../content/04-predictive/interpretability-and-ml.html">Part IV worry</a> with higher stakes when the output <em>assigns treatment</em>.</li>
+<li><strong>Interpretability ≠ mechanism.</strong> Tools like <a href="../../content/04-predictive/interpretability-and-ml.html">SHAP</a> or distilling a forest into a shallow tree explain <strong>how the model guesses</strong>, not the <strong>causal mechanism</strong> of the world. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></li>
+</ul>
+</section>
+<section id="common-pitfalls" class="level2">
+<h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
+<div class="callout callout-style-default callout-warning callout-titled" title="Where this goes wrong">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Where this goes wrong
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><p><strong>Naive ML on the outcome.</strong> Regularization shrinks small treatment effects toward zero. Orthogonalise (DML) — estimate the <em>effect</em>, not <span class="math inline">Y</span>. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
+<li><p><strong>Skipping cross-fitting.</strong> Using a unit’s own data to fit its nuisance reintroduces overfitting bias into the effect. Split the folds. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
+<li><p><strong>Dishonest forests.</strong> Choosing splits <em>and</em> estimating effects on the same data gives invalid, overconfident intervals on <span class="math inline">\tau(x)</span>. Use honest estimation. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
+<li><p><strong>Believing ML earns identification.</strong> Unconfoundedness and overlap are still required; ML buys flexibility, not exogeneity. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
+<li><p><strong>Acting on a biased CATE.</strong> A policy rule is only as causal as the <span class="math inline">\tau(x)</span> beneath it — garbage identification in, harmful targeting out. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="from-the-sources" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Who says what">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Who says what
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Chernozhukov et al., <em>Applied Causal Inference Powered by ML and AI</em></strong> — the <strong>CATE</strong> <span class="math inline">\tau(x)=\mathbb E[Y(1)-Y(0)\mid X=x]</span> and the “four-feet-deep river”; <strong>regularization bias</strong> from naive outcome-prediction ML; <strong>double/debiased ML</strong> — nuisances <span class="math inline">g_0(X),m_0(X)</span>, <strong>Neyman orthogonality</strong>, <strong>cross-fitting</strong>; <strong>causal forests / GRF</strong> with <strong>causal splitting</strong> and <strong>honest</strong> estimation for valid CIs; <strong>policy learning</strong> <span class="math inline">\pi^*(x)=\mathbf 1\{\tau(x)\ge0\}</span> as cost-sensitive classification; and the cautions — ML doesn’t fix <strong>identification</strong> (needs unconfoundedness + overlap), fairness, and interpretability-vs-mechanism.</li>
+<li><strong>Jacobucci, Grimm &amp; Zhang, <em>ML for Social &amp; Behavioral Research</em></strong> — heterogeneous effects for social science, encoded bias/fairness, and interpretability tools (SHAP, distillation) describing the model, not the mechanism.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="appendix-the-mathematics" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="appendix-the-mathematics">Appendix · the mathematics</h2>
+<div class="math-appendix">
+<p><strong>The orthogonalised (partialling-out) estimator.</strong> In the partially linear model <span class="math inline">Y=\theta D+g_0(X)+\varepsilon</span>, <span class="math inline">D=m_0(X)+v</span>, define residuals <span class="math inline">\tilde Y=Y-\mathbb E[Y\mid X]</span> and <span class="math inline">\tilde D=D-m_0(X)</span>. The DML estimate solves the <strong>Neyman-orthogonal</strong> moment <span class="math display">
+\hat\theta=\frac{\frac1n\sum_i \tilde D_i\,\tilde Y_i}{\frac1n\sum_i \tilde D_i^2},
+</span> each nuisance fit on a <em>separate fold</em>. Orthogonality means <span class="math inline">\partial_{\eta}\mathbb E[\psi(W;\theta,\eta)]=0</span> at the truth: small errors <span class="math inline">\hat g-g_0</span>, <span class="math inline">\hat m-m_0</span> enter the estimating equation only at <strong>second order</strong>, so <span class="math inline">\hat\theta</span> stays <span class="math inline">\sqrt n</span>-consistent and asymptotically normal even though the nuisances converge slowly. This is <a href="../../content/03-regression/multiple-regression.html">FWL</a> made robust to ML noise.</p>
+<p><strong>Honest CATE intervals.</strong> Split the data: use sample <span class="math inline">\mathcal I_1</span> to grow the tree (choose splits maximising <span class="math inline">\sum_{\text{children}} n_c\,\hat\tau_c^2</span>, effect heterogeneity), and the <em>independent</em> sample <span class="math inline">\mathcal I_2</span> to estimate each leaf’s <span class="math inline">\hat\tau(x)</span>. Because the leaf was not chosen using <span class="math inline">\mathcal I_2</span>’s outcomes, the leaf estimate is (asymptotically) unbiased with a usable variance — the formal basis for confidence intervals on <span class="math inline">\tau(x)</span>.</p>
+<p><strong>Policy value.</strong> A rule <span class="math inline">\pi</span> earns welfare <span class="math inline">V(\pi)=\mathbb E[\,Y(\pi(X))\,]=\mathbb E[\,\pi(X)\tau(X)\,]+\text{const}</span>, maximised pointwise by <span class="math inline">\pi^*(x)=\mathbf 1\{\tau(x)\ge0\}</span> — treat exactly where the effect is positive; the regret of any rule is <span class="math inline">\mathbb E[(\pi^*-\pi)\tau]</span>, which weights mistakes by effect size.</p>
+</div>
+</section>
+<section id="connections" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
+<ul>
+<li><strong>Builds on:</strong> <a href="../../content/04-predictive/interpretability-and-ml.html">interpretability &amp; ML</a> (the DML/causal- forest preview, now full), <a href="../../content/04-predictive/regularization.html">regularization</a> and <a href="../../content/04-predictive/cross-validation.html">cross-validation</a> (the bias they cause and cure here), <a href="../../content/03-regression/multiple-regression.html">FWL partialling-out</a>, and <a href="../../content/05-causal-inference/matching-and-propensity-scores.html">matching/overlap</a> (the identification ML still needs).</li>
+<li><strong>Closes:</strong> the summit — from the <a href="../../content/05-causal-inference/potential-outcomes.html">fundamental problem</a> to estimating <em>who</em> benefits and <em>whom to treat</em>.</li>
+<li><strong>Leads to:</strong> <a href="../../content/06-field-realities/index.html">Part VI · doing research in the world</a>, where these estimates meet measurement, incentives, fairness, and the tyranny of metrics.</li>
+</ul>
+</section>
+<section id="study-with-notebooklm" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="study-with-notebooklm">Study with NotebookLM</h2>
+<ol type="1">
+<li>“Define the CATE <span class="math inline">\tau(x)</span> and explain why it matters more than the ATE for policy (‘never cross a river that is on average four feet deep’).”</li>
+<li>“Why does naively applying prediction-focused ML to the outcome give biased treatment-effect estimates (regularization bias)?”</li>
+<li>“Explain double/debiased machine learning: nuisance functions, Neyman orthogonality, and cross-fitting. How does each remove a source of bias?”</li>
+<li>“What are causal forests, causal splitting, and honest estimation, and why is honesty needed for valid confidence intervals on <span class="math inline">\tau(x)</span>?”</li>
+<li>“What is policy learning (<span class="math inline">\pi^*(x)=\mathbf 1\{\tau(x)\ge0\}</span>), and what cautions remain — why does ML not fix identification?”</li>
+</ol>
+
+
+<!-- -->
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-chernozhukov_causalml" class="csl-entry" role="listitem">
+Chernozhukov, Victor, Christian Hansen, Nathan Kallus, Martin Spindler, and Vasilis Syrgkanis. 2024. <em>Applied Causal Inference Powered by ML and AI</em>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/profsarthak\.github\.io\/quant-social-scientist\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../content/05-causal-inference/synthetic-control.html" class="pagination-link" aria-label="Synthetic Control">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Synthetic Control</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../content/06-field-realities/index.html" class="pagination-link" aria-label="VI · Doing Research in the World">
+        <span class="nav-page-text">VI · Doing Research in the World</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Causal Machine Learning: Heterogeneous Effects"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Bend the predictive toolkit of Part IV toward causation — to learn not just the average effect, but *for whom* it is large, and to act on it."</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>The whole of Part V chased a single number: an average effect. But "never cross a river that is on</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>average four feet deep." Causal machine learning estimates the effect **as a function of who you are** —</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>the conditional average treatment effect $\tau(x)$ — using the [flexibility of</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>ML](../04-predictive/trees-and-forests.qmd) without inheriting its bias. The trick is to estimate the</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>*effect*, not the outcome, and to protect that estimate from overfitting with orthogonalisation and</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>cross-fitting. It closes the loop: the predictive culture, disciplined back into the service of cause.</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>An <span class="co">[</span><span class="ot">ATE</span><span class="co">](potential-outcomes.qmd)</span> can hide everything that matters for policy: a drug that helps the</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>young and harms the old can average to "no effect." <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> Modern social science wants</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>**heterogeneous treatment effects** — *for whom* does this work? — and the obvious idea, "throw a random</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>forest at it," **fails** in a way worth understanding deeply. This entry is where</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Part IV's machinery</span><span class="co">](../04-predictive/interpretability-and-ml.qmd)</span> — regularization, cross-validation,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>forests, the bias–variance trade — is **repurposed for causation**, and where the</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">double/debiased ML</span><span class="co">](../04-predictive/interpretability-and-ml.qmd)</span> preview is finally cashed out. It is</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>the natural summit of the summit: the predictive and causal cultures, reconciled.</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="fu">## From ATE to CATE</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>The target shifts from a scalar to a function — the **conditional average treatment effect**:</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>\tau(x)=\mathbb E\big<span class="co">[</span><span class="ot">Y(1)-Y(0)\mid X=x\big</span><span class="co">]</span>.</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>$\tau(x)$ is the effect **for units with characteristics $x$** — the engine of **personalised** policy,</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>letting you move from a uniform rollout to **targeting** whoever benefits most. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>Everything from <span class="co">[</span><span class="ot">potential outcomes</span><span class="co">](potential-outcomes.qmd)</span> still holds; we've simply stopped averaging</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>away the variation we now want to see.</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why naive ML is biased for effects</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>The tempting move — fit a flexible ML model of $Y$ on $(D,X)$ and read off $D$'s influence — is</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>**biased**, for a reason that is subtle and important: <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Regularization bias.** ML methods are built to minimise *prediction* error for $Y$, so they</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">regularize</span><span class="co">](../04-predictive/regularization.qmd)</span> — shrinking coefficients, pruning splits — toward</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>  whatever predicts the outcome best. When the treatment effect is **small relative to other</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>  predictors**, the algorithm cheerfully **shrinks the treatment's role toward zero**, biasing the</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  effect. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Effect ≠ prediction.** Estimating an effect is *fundamentally harder* than predicting an outcome:</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>  it targets the **difference between two counterfactual states**, only one of which is ever observed.</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> A model superb at predicting $Y$ can be terrible at isolating $\partial</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>  Y/\partial D$.</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>The fix is to stop estimating the outcome and start estimating the **effect**, with the nuisances</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>*partialled out*.</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="fu">## Double/debiased machine learning</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>**Double machine learning (DML)**, due to Chernozhukov and coauthors, lets you use any flexible ML for</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>the hard prediction parts while keeping **valid inference** on the causal parameter.</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> Three moves:</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Estimate two nuisance functions** with ML: an **outcome model** $g_0(X)=\mathbb E<span class="co">[</span><span class="ot">Y\mid X</span><span class="co">]</span>$ and a</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>   **treatment/propensity model** $m_0(X)=\mathbb E<span class="co">[</span><span class="ot">D\mid X</span><span class="co">]</span>$. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Orthogonalise (partial out).** Residualise *both* $Y$ and $D$ on $X$ — regress the $Y$-residual on</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>   the $D$-residual. This is <span class="co">[</span><span class="ot">Frisch–Waugh–Lovell</span><span class="co">](../03-regression/multiple-regression.qmd)</span> with ML</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>   doing the conditioning, and it yields a **Neyman-orthogonal** moment: the effect estimate is</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>   **first-order insensitive** to small errors in $g_0$ and $m_0$. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> You can</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>   plug in imperfect ML nuisances and the errors **don't spill** into the treatment effect — the</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>   "debiasing."</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Cross-fit.** Estimate the nuisances on one fold and the effect on a *held-out* fold, so no unit's</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>   own outcome contaminates its own nuisance prediction — removing overfitting bias.</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>   <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> (Exactly the <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](../04-predictive/cross-validation.qmd)</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>   discipline, now load-bearing for *inference*, not just tuning.)</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>Orthogonality kills the *regularization* bias; cross-fitting kills the *overfitting* bias. Together they</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>let ML serve identification instead of sabotaging it. The figure shows the payoff DML and causal forests</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>deliver — recovering an effect that **varies with $x$**.</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-cate</span></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Heterogeneous treatment effects. The true CATE τ(x) (green) rises with a covariate x — the treatment helps high-x units far more than low-x units, a pattern the ATE (grey dashed) completely hides. An honest, binned effect estimator (blue points, with 95% intervals) recovers τ(x) by comparing treated and control outcomes within strata of x — the intuition behind causal forests, which split to maximise effect heterogeneity and estimate honestly for valid intervals."</span></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">21</span>)</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">6000</span></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> rng.uniform(<span class="dv">0</span>, <span class="dv">1</span>, n)</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>D <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, n)                  <span class="co"># randomized treatment (clean identification)</span></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>tau_true <span class="op">=</span> <span class="fl">0.5</span> <span class="op">+</span> <span class="fl">3.0</span> <span class="op">*</span> x                   <span class="co"># effect grows with x (heterogeneous)</span></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> <span class="fl">1.0</span> <span class="op">+</span> <span class="fl">2.0</span> <span class="op">*</span> x <span class="op">+</span> tau_true <span class="op">*</span> D <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.0</span>, n)</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="co"># Honest binned CATE: within each x-bin, treated mean - control mean (+ 95% CI).</span></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>edges <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">11</span>)</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>centers, est, lo, hi <span class="op">=</span> [], [], [], []</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(edges[:<span class="op">-</span><span class="dv">1</span>], edges[<span class="dv">1</span>:]):</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> (x <span class="op">&gt;=</span> a) <span class="op">&amp;</span> (x <span class="op">&lt;</span> b)</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>    yt, yc <span class="op">=</span> y[m <span class="op">&amp;</span> (D <span class="op">==</span> <span class="dv">1</span>)], y[m <span class="op">&amp;</span> (D <span class="op">==</span> <span class="dv">0</span>)]</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> yt.mean() <span class="op">-</span> yc.mean()</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>    se <span class="op">=</span> np.sqrt(yt.var(ddof<span class="op">=</span><span class="dv">1</span>)<span class="op">/</span>yt.size <span class="op">+</span> yc.var(ddof<span class="op">=</span><span class="dv">1</span>)<span class="op">/</span>yc.size)</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>    centers.append((a<span class="op">+</span>b)<span class="op">/</span><span class="dv">2</span>)<span class="op">;</span> est.append(d)<span class="op">;</span> lo.append(d<span class="op">-</span><span class="fl">1.96</span><span class="op">*</span>se)<span class="op">;</span> hi.append(d<span class="op">+</span><span class="fl">1.96</span><span class="op">*</span>se)</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>centers, est <span class="op">=</span> np.array(centers), np.array(est)</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>ate <span class="op">=</span> (y[D<span class="op">==</span><span class="dv">1</span>].mean() <span class="op">-</span> y[D<span class="op">==</span><span class="dv">0</span>].mean())</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.2</span>))</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">100</span>)</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, <span class="fl">0.5</span> <span class="op">+</span> <span class="fl">3.0</span><span class="op">*</span>xs, color<span class="op">=</span><span class="st">"#1f8a4c"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="st">"true CATE  τ(x)"</span>)</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>ax.errorbar(centers, est, yerr<span class="op">=</span>[est<span class="op">-</span>np.array(lo), np.array(hi)<span class="op">-</span>est], fmt<span class="op">=</span><span class="st">"o"</span>,</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"#1f3a5f"</span>, ms<span class="op">=</span><span class="dv">5</span>, capsize<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">"honest binned estimate"</span>)</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>ax.axhline(ate, color<span class="op">=</span><span class="st">"#9aa0a6"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="ss">f"ATE = </span><span class="sc">{</span>ate<span class="sc">:.2f}</span><span class="ss"> (hides heterogeneity)"</span>)</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"covariate x"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"treatment effect"</span>)</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Who benefits? The effect as a function of x"</span>)</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a><span class="fu">## Causal forests and honesty</span></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>To estimate $\tau(x)$ flexibly, **causal forests** (generalized random forests) adapt</span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">random forests</span><span class="co">](../04-predictive/trees-and-forests.qmd)</span> with two changes: <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Causal splitting.** Instead of splitting to reduce prediction error (RSS), trees split to</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>  **maximise the heterogeneity of the estimated treatment effect** across the children — actively</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>  hunting for the covariates along which the effect *varies*. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Honesty.** A tree is **honest** if it uses **one subsample to choose the splits** and a **separate</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>  subsample to estimate the effect** in each leaf. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> This separation is what</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>  makes the leaf estimates statistically *valid* — it earns trustworthy **confidence intervals** on</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>  $\tau(x)$, instead of the overconfident ones you'd get from estimating effects in the very leaves you</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>  carved to maximise them.</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="fu">## Policy learning</span></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>The point of knowing $\tau(x)$ is often to **act**. **Policy learning** turns CATEs into an assignment</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>rule $\pi(x)$. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> The unconstrained optimum is simple — *treat everyone with a</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>positive predicted effect*:</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>\pi^*(x)=\mathbf 1<span class="sc">\{</span>\tau(x)\ge 0<span class="sc">\}</span>.</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>Framed as a <span class="co">[</span><span class="ot">classification</span><span class="co">](../04-predictive/classification-and-knn.qmd)</span> problem, it predicts the</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>**sign** of the effect, **weighted by its magnitude** — misclassifying a *large* positive effect costs</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>more than fumbling a near-zero one (cost-sensitive classification). <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> This is</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>where causal inference meets <span class="co">[</span><span class="ot">decision-making</span><span class="co">](../06-field-realities/index.qmd)</span>: not "what is the</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>effect?" but "whom should we treat?"</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="fu">## The cautions: ML is not a license</span></span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>The most important sentence in the chapter: **machine learning does not fix identification.**</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> Every method here delivers *causal* answers only if the</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">identifying assumptions still hold</span><span class="co">](matching-and-propensity-scores.qmd)</span> — **conditional exogeneity</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>(unconfoundedness)** and **overlap** $0&lt;\Pr(D=1\mid X)&lt;1$. DML and causal forests make you *efficient</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>and flexible* under those assumptions; they cannot conjure them. Throwing a forest at confounded data</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>yields a beautifully estimated **biased** effect. Two further risks: <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Fairness.** ML models absorb the prejudices in their training data (gender and racial bias in text</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>  embeddings, biased historical decisions) — a <span class="co">[</span><span class="ot">Part IV worry</span><span class="co">](../04-predictive/interpretability-and-ml.qmd)</span></span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>  with higher stakes when the output *assigns treatment*.</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Interpretability ≠ mechanism.** Tools like <span class="co">[</span><span class="ot">SHAP</span><span class="co">](../04-predictive/interpretability-and-ml.qmd)</span> or</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>  distilling a forest into a shallow tree explain **how the model guesses**, not the **causal</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>  mechanism** of the world. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Naive ML on the outcome.** Regularization shrinks small treatment effects toward zero. Orthogonalise</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>  (DML) — estimate the *effect*, not $Y$. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping cross-fitting.** Using a unit's own data to fit its nuisance reintroduces overfitting bias</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>  into the effect. Split the folds. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dishonest forests.** Choosing splits *and* estimating effects on the same data gives invalid,</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>  overconfident intervals on $\tau(x)$. Use honest estimation. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Believing ML earns identification.** Unconfoundedness and overlap are still required; ML buys</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>  flexibility, not exogeneity. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Acting on a biased CATE.** A policy rule is only as causal as the $\tau(x)$ beneath it — garbage</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  identification in, harmful targeting out. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chernozhukov et al., *Applied Causal Inference Powered by ML and AI*** — the **CATE**</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>  $\tau(x)=\mathbb E<span class="co">[</span><span class="ot">Y(1)-Y(0)\mid X=x</span><span class="co">]</span>$ and the "four-feet-deep river"; **regularization bias** from</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>  naive outcome-prediction ML; **double/debiased ML** — nuisances $g_0(X),m_0(X)$, **Neyman</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>  orthogonality**, **cross-fitting**; **causal forests / GRF** with **causal splitting** and **honest**</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>  estimation for valid CIs; **policy learning** $\pi^*(x)=\mathbf 1<span class="sc">\{</span>\tau(x)\ge0<span class="sc">\}</span>$ as cost-sensitive</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>  classification; and the cautions — ML doesn't fix **identification** (needs unconfoundedness +</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>  overlap), fairness, and interpretability-vs-mechanism.</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Jacobucci, Grimm &amp; Zhang, *ML for Social &amp; Behavioral Research*** — heterogeneous effects for social</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>  science, encoded bias/fairness, and interpretability tools (SHAP, distillation) describing the model,</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>  not the mechanism.</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>**The orthogonalised (partialling-out) estimator.** In the partially linear model</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>$Y=\theta D+g_0(X)+\varepsilon$, $D=m_0(X)+v$, define residuals $\tilde Y=Y-\mathbb E<span class="co">[</span><span class="ot">Y\mid X</span><span class="co">]</span>$ and</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>$\tilde D=D-m_0(X)$. The DML estimate solves the **Neyman-orthogonal** moment</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>\hat\theta=\frac{\frac1n\sum_i \tilde D_i\,\tilde Y_i}{\frac1n\sum_i \tilde D_i^2},</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>each nuisance fit on a *separate fold*. Orthogonality means $\partial_{\eta}\mathbb E<span class="co">[</span><span class="ot">\psi(W;\theta,\eta)</span><span class="co">]</span>=0$</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>at the truth: small errors $\hat g-g_0$, $\hat m-m_0$ enter the estimating equation only at **second</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>order**, so $\hat\theta$ stays $\sqrt n$-consistent and asymptotically normal even though the nuisances</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>converge slowly. This is <span class="co">[</span><span class="ot">FWL</span><span class="co">](../03-regression/multiple-regression.qmd)</span> made robust to ML noise.</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>**Honest CATE intervals.** Split the data: use sample $\mathcal I_1$ to grow the tree (choose splits</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>maximising $\sum_{\text{children}} n_c\,\hat\tau_c^2$, effect heterogeneity), and the *independent*</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>sample $\mathcal I_2$ to estimate each leaf's $\hat\tau(x)$. Because the leaf was not chosen using</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>$\mathcal I_2$'s outcomes, the leaf estimate is (asymptotically) unbiased with a usable variance — the</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>formal basis for confidence intervals on $\tau(x)$.</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>**Policy value.** A rule $\pi$ earns welfare</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>$V(\pi)=\mathbb E<span class="co">[</span><span class="ot">\,Y(\pi(X))\,</span><span class="co">]</span>=\mathbb E<span class="co">[</span><span class="ot">\,\pi(X)\tau(X)\,</span><span class="co">]</span>+\text{const}$, maximised pointwise by</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>$\pi^*(x)=\mathbf 1<span class="sc">\{</span>\tau(x)\ge0<span class="sc">\}</span>$ — treat exactly where the effect is positive; the regret of any rule</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>is $\mathbb E<span class="co">[</span><span class="ot">(\pi^*-\pi)\tau</span><span class="co">]</span>$, which weights mistakes by effect size.</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">interpretability &amp; ML</span><span class="co">](../04-predictive/interpretability-and-ml.qmd)</span> (the DML/causal-</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>  forest preview, now full), <span class="co">[</span><span class="ot">regularization</span><span class="co">](../04-predictive/regularization.qmd)</span> and</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](../04-predictive/cross-validation.qmd)</span> (the bias they cause and cure here),</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">FWL partialling-out</span><span class="co">](../03-regression/multiple-regression.qmd)</span>, and</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">matching/overlap</span><span class="co">](matching-and-propensity-scores.qmd)</span> (the identification ML still needs).</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Closes:** the summit — from the <span class="co">[</span><span class="ot">fundamental problem</span><span class="co">](potential-outcomes.qmd)</span> to estimating *who*</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>  benefits and *whom to treat*.</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">Part VI · doing research in the world</span><span class="co">](../06-field-realities/index.qmd)</span>, where these</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>  estimates meet measurement, incentives, fairness, and the tyranny of metrics.</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"Define the CATE $\tau(x)$ and explain why it matters more than the ATE for policy ('never cross a</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>   river that is on average four feet deep')."</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"Why does naively applying prediction-focused ML to the outcome give biased treatment-effect</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>   estimates (regularization bias)?"</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"Explain double/debiased machine learning: nuisance functions, Neyman orthogonality, and</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>   cross-fitting. How does each remove a source of bias?"</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"What are causal forests, causal splitting, and honest estimation, and why is honesty needed for</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>   valid confidence intervals on $\tau(x)$?"</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"What is policy learning ($\pi^*(x)=\mathbf 1<span class="sc">\{</span>\tau(x)\ge0<span class="sc">\}</span>$), and what cautions remain — why does</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>   ML not fix identification?"</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

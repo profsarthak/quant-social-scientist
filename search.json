@@ -84,6 +84,716 @@
     ]
   },
   {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html",
+    "href": "content/05-causal-inference/regression-discontinuity.html",
+    "title": "Regression Discontinuity",
+    "section": "",
+    "text": "Wherever a sharp rule assigns a treatment by a threshold — pass at 80, eligible at 65, win at 50% — the people just on either side are, by luck of a few decimal points, interchangeable. The jump in the outcome right at the cutoff can only be the treatment, because nothing else changes discontinuously there. RD is the observational design closest to an experiment, with the most defensible identifying assumption in this Part — and the narrowest reach.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#why-it-matters",
+    "href": "content/05-causal-inference/regression-discontinuity.html#why-it-matters",
+    "title": "Regression Discontinuity",
+    "section": "Why it matters",
+    "text": "Why it matters\nIV needed an exclusion restriction you can only argue for. RD needs something far easier to believe: that the world is smooth except where the rule cuts. (Cunningham 2021) That makes it one of the most credible strategies in observational social science — its key assumption is nearly visible in a scatterplot. (Cunningham 2021) Rules with thresholds are everywhere in administrative data — test scores, age, income, vote share — so RD turns the bureaucracy’s arbitrariness into identification.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#the-idea-a-running-variable-and-a-cutoff",
+    "href": "content/05-causal-inference/regression-discontinuity.html#the-idea-a-running-variable-and-a-cutoff",
+    "title": "Regression Discontinuity",
+    "section": "The idea: a running variable and a cutoff",
+    "text": "The idea: a running variable and a cutoff\nRD applies when treatment D is assigned by whether a continuous running variable (a.k.a. forcing or score variable) X crosses a known cutoff c. (Cunningham 2021) The engine is comparability at the boundary: a student scoring 79.9 and one scoring 80.1 are effectively identical in preparedness — one just had marginally better luck on exam day — yet only the second gets the scholarship. (Cunningham 2021) So any jump in the outcome exactly at c is caused by the treatment, not by the running variable, which varies smoothly across it. The cutoff manufactures as-good-as-random assignment in a narrow window — a local experiment.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#sharp-vs-fuzzy",
+    "href": "content/05-causal-inference/regression-discontinuity.html#sharp-vs-fuzzy",
+    "title": "Regression Discontinuity",
+    "section": "Sharp vs fuzzy",
+    "text": "Sharp vs fuzzy\nTwo flavours, by how strictly the rule binds: (Cunningham 2021)\n\nSharp RD. Treatment is a deterministic step of the running variable: D_i=\\mathbf 1[X_i\\ge\nc] — probability jumps cleanly from 0 to 1 at c. The RD estimate is simply the jump in the outcome at the cutoff.\nFuzzy RD. Crossing the cutoff changes the probability of treatment, not treatment itself (some above stay untreated; some below get treated). Now the threshold is an instrument: the effect is the jump in the outcome divided by the jump in treatment probability at c — a LATE for compliers (those the rule actually moves). (Cunningham 2021) Fuzzy RD is IV with the cutoff as Z.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#the-identifying-assumption-continuity",
+    "href": "content/05-causal-inference/regression-discontinuity.html#the-identifying-assumption-continuity",
+    "title": "Regression Discontinuity",
+    "section": "The identifying assumption: continuity",
+    "text": "The identifying assumption: continuity\nRD rests on continuity of potential outcomes at the cutoff: \\mathbb E[Y(0)\\mid X] and \\mathbb\nE[Y(1)\\mid X] are smooth functions of X through c. (Cunningham 2021) In words: absent the treatment, nothing about the outcome would jump at c — the cutoff is special only because it triggers treatment. Then the observed discontinuity in Y is the causal effect, full stop. Continuity is weaker and more credible than IV’s exclusion or matching’s CIA: it allows the running variable to be related to the outcome in any smooth way; it forbids only a coincidental jump at the exact threshold.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(2)\nn = 600\nX = rng.uniform(-1, 1, n)              # running variable, cutoff at 0\ntau = 2.0                              # true jump (causal effect) at the cutoff\nY = 1.0 + 1.5 * X + 0.8 * X**2 + tau * (X &gt;= 0) + rng.normal(0, 0.5, n)\n\ndef local_fit(mask):\n    b = np.polyfit(X[mask], Y[mask], 1)\n    return b\nbl = local_fit(X &lt; 0); br = local_fit(X &gt;= 0)\nxl = np.linspace(-1, 0, 50); xr = np.linspace(0, 1, 50)\njump = np.polyval(br, 0) - np.polyval(bl, 0)\n\nfig, ax = plt.subplots(figsize=(7.2, 4.2))\nax.scatter(X[X &lt; 0], Y[X &lt; 0], s=10, color=\"#9aa0a6\", alpha=0.5, label=\"untreated (X &lt; c)\")\nax.scatter(X[X &gt;= 0], Y[X &gt;= 0], s=10, color=\"#1f8a4c\", alpha=0.5, label=\"treated (X ≥ c)\")\nax.plot(xl, np.polyval(bl, xl), color=\"#1f3a5f\", lw=2.4)\nax.plot(xr, np.polyval(br, xr), color=\"#1f3a5f\", lw=2.4)\nax.axvline(0, color=\"#c0392b\", ls=\":\", lw=1.4)\nax.annotate(\"\", xy=(0, np.polyval(br, 0)), xytext=(0, np.polyval(bl, 0)),\n            arrowprops=dict(arrowstyle=\"&lt;-&gt;\", color=\"#c0392b\", lw=2.2))\nax.text(0.04, (np.polyval(br,0)+np.polyval(bl,0))/2, f\"jump = {jump:.2f}\\n(true {tau})\",\n        color=\"#c0392b\", fontsize=9, va=\"center\")\nax.set_xlabel(\"running variable  X   (cutoff c = 0)\"); ax.set_ylabel(\"outcome Y\")\nax.set_title(\"The treatment effect is the jump at the cutoff\")\nax.legend(fontsize=8, frameon=False, loc=\"upper left\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A sharp regression discontinuity. Treatment switches on at the cutoff (X ≥ 0). Below and above, the outcome trends smoothly with the running variable; local-linear fits on each side estimate the boundary limits, and their vertical gap at the cutoff (red) is the causal effect. The estimate is identified only at the threshold — it says nothing about units far from it.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#estimation-stay-local-stay-simple",
+    "href": "content/05-causal-inference/regression-discontinuity.html#estimation-stay-local-stay-simple",
+    "title": "Regression Discontinuity",
+    "section": "Estimation: stay local, stay simple",
+    "text": "Estimation: stay local, stay simple\nSince few units sit exactly at c, you estimate the outcome’s limits from each side and take their difference. The modern default is local linear regression: fit a separate line to the data within a bandwidth h on each side of the cutoff. (Cunningham 2021) Two choices matter:\n\nBandwidth h is a bias–variance dial in disguise. Narrow h uses only the most comparable units (low bias) but little data (high variance); wide h adds precision but risks bias if the smooth trend curves. (Cunningham 2021)\nKeep the polynomial low. High-order global polynomials (X^3, X^4) were once standard but are now discouraged: they overfit noise and can manufacture illusory jumps at the boundary. Prefer linear or quadratic local fits. (Cunningham 2021)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#the-threat-manipulation",
+    "href": "content/05-causal-inference/regression-discontinuity.html#the-threat-manipulation",
+    "title": "Regression Discontinuity",
+    "section": "The threat: manipulation",
+    "text": "The threat: manipulation\nRD has one characteristic failure: sorting. If units can precisely manipulate their position relative to the cutoff, those just below are no longer comparable to those just above — think people misreporting income to drop just under a benefits threshold. (Cunningham 2021) The diagnostic is the McCrary density test: examine the distribution of the running variable for a discontinuous jump in density at c. Bunching just on the favourable side is the fingerprint of manipulation and invalidates the design. (Cunningham 2021) (Continuity of the density is something you can look at — a rare testable implication in this Part.)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#what-you-get-local-but-clean",
+    "href": "content/05-causal-inference/regression-discontinuity.html#what-you-get-local-but-clean",
+    "title": "Regression Discontinuity",
+    "section": "What you get: local, but clean",
+    "text": "What you get: local, but clean\nRD’s bargain is sharp. Internal validity near the cutoff is exceptional — close to experimental. But external validity is local: the estimate is the effect for units at the threshold and need not generalise. (Cunningham 2021) A scholarship’s effect estimated at a score of 80 says nothing about how it would help A-students or C-students. You trade reach for credibility — the recurring price of a clean natural experiment.\n\n\n\n\n\n\nNoteFour RD classics\n\n\n\n\nClose elections & incumbency (Lee 2008). The 50% vote-share threshold is a sharp RD: winning a close race is as-good-as-random. Incumbency raises a party’s reelection probability by ~40 percentage points. (Cunningham 2021)\nThe drinking age (Carpenter & Dobkin 2009). Age is the running variable, 21 the cutoff. Mortality from external causes (car crashes, etc.) jumps at 21 — roughly +7.7 deaths per 100,000. (Cunningham 2021)\nThe original RD (Thistlethwaite & Campbell 1960). Compared National Merit award winners just above and below the qualifying score — the design’s debut. (Cunningham 2021)\nClass size, Maimonides’ rule (Angrist & Lavy 1999). Israeli law caps classes at 40, so a 41st pupil forces a split into two ~20-pupil classes — a fuzzy RD. Smaller classes raised achievement, a Wald estimate of about −0.27 SD (per added pupil) for fourth-graders’ scores. (Angrist and Pischke 2009)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#common-pitfalls",
+    "href": "content/05-causal-inference/regression-discontinuity.html#common-pitfalls",
+    "title": "Regression Discontinuity",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nManipulable running variables. Precise sorting around c breaks comparability. Run the McCrary density test; look for bunching. (Cunningham 2021)\nHigh-order polynomials. They overfit and fabricate boundary jumps. Use local linear/quadratic and show robustness to bandwidth. (Cunningham 2021)\nOver-claiming generality. RD identifies a local effect at the cutoff; don’t extrapolate to units far away. (Cunningham 2021)\nAnother rule at the same cutoff. If a different program also switches at c (e.g. multiple benefits at the same income line), continuity fails and the jump conflates them. (Cunningham 2021)\nIgnoring the fuzzy denominator. In fuzzy RD you must scale by the jump in treatment probability; the raw outcome jump understates the effect. (Cunningham 2021)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#from-the-sources",
+    "href": "content/05-causal-inference/regression-discontinuity.html#from-the-sources",
+    "title": "Regression Discontinuity",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nCunningham, The Mixtape — RD as among the most credible observational designs; running variable & cutoff, the 79.9-vs-80.1 comparability intuition; sharp D=\\mathbf 1[X\\ge c] vs fuzzy (cutoff as instrument, effect = outcome jump ÷ treatment-probability jump, a LATE); continuity of potential outcomes as the identifying assumption; local linear estimation, bandwidth bias–variance, the case against high-order polynomials; manipulation and the McCrary density test; local external validity; Lee (2008) incumbency \\approx 40pp and Carpenter–Dobkin MLDA-21 mortality \\approx +7.7/100{,}000; Thistlethwaite–Campbell (1960).\nAngrist & Pischke — RD in the credibility-revolution toolkit; Angrist–Lavy (1999) Maimonides’ rule class-size fuzzy RD (\\approx-0.27 SD).",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#appendix-the-mathematics",
+    "href": "content/05-causal-inference/regression-discontinuity.html#appendix-the-mathematics",
+    "title": "Regression Discontinuity",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nThe sharp RD estimand. Under continuity, the effect at the cutoff is the difference of one-sided limits, \n\\tau_{\\text{SRD}}=\\lim_{x\\downarrow c}\\mathbb E[Y\\mid X=x]-\\lim_{x\\uparrow c}\\mathbb E[Y\\mid X=x]\n=\\mathbb E[Y(1)-Y(0)\\mid X=c].\n Continuity is what lets the two limits estimate the treated and untreated potential-outcome means at the same point c.\nFuzzy RD as a ratio (Wald at the cutoff). \n\\tau_{\\text{FRD}}=\\frac{\\lim_{x\\downarrow c}\\mathbb E[Y\\mid x]-\\lim_{x\\uparrow c}\\mathbb E[Y\\mid x]}\n{\\lim_{x\\downarrow c}\\mathbb E[D\\mid x]-\\lim_{x\\uparrow c}\\mathbb E[D\\mid x]},\n the outcome discontinuity over the treatment-probability discontinuity — the Wald/IV estimator with the threshold-crossing indicator as the instrument, identifying the LATE for cutoff compliers.\nBandwidth and the bias–variance tradeoff. Local linear estimation has bias O(h^2) (from curvature of the conditional mean) and variance O(1/(nh)). Minimising MSE \\propto h^4 + 1/(nh) gives an optimal h^\\star\\propto n^{-1/5} — formalising “narrow enough to be comparable, wide enough to be precise,” the same logic as kernel/CV bandwidth selection.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#connections",
+    "href": "content/05-causal-inference/regression-discontinuity.html#connections",
+    "title": "Regression Discontinuity",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: instrumental variables (fuzzy RD is IV at the cutoff), bias–variance (bandwidth choice), and potential outcomes (the estimand as a limit of conditional means).\nLeads to: difference-in-differences and panel methods — other natural-experiment designs when no single sharp cutoff exists.\nReappears in: policy evaluation throughout Part VI, where eligibility thresholds are a standard source of identification.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/regression-discontinuity.html#study-with-notebooklm",
+    "href": "content/05-causal-inference/regression-discontinuity.html#study-with-notebooklm",
+    "title": "Regression Discontinuity",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Explain the RD design: running variable, cutoff, and why units just above and below are comparable (a local experiment).”\n“Distinguish sharp from fuzzy RD, and explain why fuzzy RD is an instrumental-variables problem.”\n“State the continuity assumption and explain why it’s more credible than IV’s exclusion restriction or matching’s CIA.”\n“How is RD estimated with local linear regression? Explain the bandwidth bias–variance tradeoff and the case against high-order polynomials.”\n“What is the manipulation threat, and how does the McCrary density test detect it? Why is RD’s external validity only local?”",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Regression Discontinuity"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html",
+    "href": "content/05-causal-inference/potential-outcomes.html",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "",
+    "text": "A causal effect is a comparison between two worlds: the outcome with the treatment and the outcome without it, for the same unit at the same moment. Exactly one of those worlds is ever realised — the other is a counterfactual we can never see. That single missing number is the fundamental problem of causal inference, and every method in this Part is a strategy for filling it in credibly. Master this language and the whole summit becomes one idea applied many ways.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html#why-it-matters",
+    "href": "content/05-causal-inference/potential-outcomes.html#why-it-matters",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "Why it matters",
+    "text": "Why it matters\nThe bridge from regression left us with a verdict: a coefficient is causal only under an assumption data can’t verify, and you usually need a design. To state those assumptions precisely we need a language for causation itself — one that defines an effect before any estimator, so we can say exactly what we are trying to learn and exactly what could go wrong. That language is the potential outcomes framework (the Rubin Causal Model), shared by Cunningham, Gerber & Green, and Angrist & Pischke alike. (Cunningham 2021; Gerber and Green 2012) It reframes causal inference as a missing-data problem — which is the most clarifying sentence in this entire book.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html#two-potential-outcomes-one-effect",
+    "href": "content/05-causal-inference/potential-outcomes.html#two-potential-outcomes-one-effect",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "Two potential outcomes, one effect",
+    "text": "Two potential outcomes, one effect\nFor each unit i and a binary treatment, imagine two outcomes: (Cunningham 2021)\n\nY_i(1) — what i’s outcome would be if treated,\nY_i(0) — what i’s outcome would be if untreated (the control state).\n\nThe individual treatment effect is their difference, the gap between the two worlds for that one person: \n\\tau_i = Y_i(1) - Y_i(0).\n\nThese are defined for everyone, treated or not — they are properties of the unit, not of what happened to it. (Cunningham 2021) A small intuition pump from the corpus: to know the effect of an article on your mood, compare your mood had you read it (Y(1)=3) with your mood had you not (Y(0)=5); the effect is \\tau=-2. (Cunningham 2021) Nothing statistical yet — just a careful definition of what “effect” means.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html#the-fundamental-problem-of-causal-inference",
+    "href": "content/05-causal-inference/potential-outcomes.html#the-fundamental-problem-of-causal-inference",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "The fundamental problem of causal inference",
+    "text": "The fundamental problem of causal inference\nHere is the catch that defines the field. For any unit you observe only one potential outcome — the one corresponding to the treatment it actually received. The other is a counterfactual, and it is missing. (Cunningham 2021) This is the fundamental problem of causal inference: the individual effect \\tau_i is never observable, because it requires two numbers and reality hands you one. (Cunningham 2021; Gerber and Green 2012)\nThe link between the unobservable potential outcomes and the single number you do see is the switching equation (or observation equation), where D_i\\in\\{0,1\\} indicates treatment: \nY_i = D_i\\,Y_i(1) + (1-D_i)\\,Y_i(0).\n Set D_i=1 and you observe Y_i(1), with Y_i(0) forever hidden; set D_i=0 and the reverse. (Cunningham 2021) The treatment indicator is a switch that reveals one world and conceals the other. Causal inference is the science of reasoning about the concealed one.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html#what-we-can-hope-to-learn-the-estimands",
+    "href": "content/05-causal-inference/potential-outcomes.html#what-we-can-hope-to-learn-the-estimands",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "What we can hope to learn: the estimands",
+    "text": "What we can hope to learn: the estimands\nSince individual effects are out of reach, we retreat to averages over groups — the population quantities we actually try to estimate (the estimands): (Cunningham 2021)\n\nAverage Treatment Effect (ATE) — the average effect across the whole population: \\;\\text{ATE} = \\mathbb E[Y_i(1)-Y_i(0)].\nAverage Treatment effect on the Treated (ATT) — the average among those who actually got treated: \\;\\text{ATT} = \\mathbb E[Y_i(1)-Y_i(0)\\mid D_i=1].\nAverage Treatment effect on the Untreated (ATU) — the average among the untreated: \\;\\text{ATU} = \\mathbb E[Y_i(1)-Y_i(0)\\mid D_i=0].\n\nThese can differ sharply. A job-training program may help those who enrol (ATT) far more than it would help those who stayed away (ATU) — which average you want depends on the policy question (expand the program to everyone? then ATE; evaluate the current program? then ATT). (Cunningham 2021) Being explicit about the estimand is half of thinking clearly about causation.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html#why-a-naive-comparison-fails-selection-bias",
+    "href": "content/05-causal-inference/potential-outcomes.html#why-a-naive-comparison-fails-selection-bias",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "Why a naive comparison fails: selection bias",
+    "text": "Why a naive comparison fails: selection bias\nThe tempting estimator is the naive difference in group means: average outcome of the treated minus average outcome of the untreated, \\mathbb E[Y_i\\mid D_i=1]-\\mathbb E[Y_i\\mid D_i=0]. It is usually biased, because the groups were not comparable to begin with. (Cunningham 2021) Using the switching equation, the naive comparison decomposes exactly: (Cunningham 2021) \n\\underbrace{\\mathbb E[Y\\mid D=1]-\\mathbb E[Y\\mid D=0]}_{\\text{naive comparison}}\n= \\underbrace{\\text{ATT}}_{\\text{the effect we want}}\n+ \\underbrace{\\mathbb E[Y(0)\\mid D=1]-\\mathbb E[Y(0)\\mid D=0]}_{\\textbf{selection bias}}.\n\nThe second term is selection bias: the difference between the groups in their untreated state. It asks — how would the treated and control groups have compared even if no one had been treated? If sicker people check into hospital, comparing the hospitalised to the healthy makes hospitals look lethal, because the hospitalised “would have been sicker even if they’d stayed home.” (Cunningham 2021) The bias has nothing to do with the treatment’s effect; it is baked into who ends up where.\n\n\n\n\n\n\nNoteCunningham’s surgery-vs-chemo reversal\n\n\n\nThe starkest illustration in the Mixtape: a surgeon assigns patients to surgery when it would extend their life and to chemotherapy otherwise — optimal medicine, ruinous statistics. Across the patients the true ATE is +0.6 years (surgery genuinely helps on average), yet the naive difference in means is -0.4 — surgery looks worse. The culprit is a selection bias of -4.8: the surgery group was naturally far sicker, so their good-outcome-under-no-surgery baseline was much lower. Selection bias doesn’t just shrink the estimate — here it flips its sign. (Cunningham 2021)\n\n\nThe figure makes the mechanism visible: when assignment depends on the untreated baseline, the observed gap measures who got sorted where as much as what the treatment did.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(3)\nn = 400\nseverity = rng.uniform(0, 1, n)            # 1 = sickest\ny0 = 8.0 - 6.0 * severity + rng.normal(0, 0.4, n)   # survival w/o surgery: sicker -&gt; lower\ntau = 0.6 + 0.0 * severity                  # surgery adds ~0.6 yr on average (true ATE&gt;0)\ny1 = y0 + tau + rng.normal(0, 0.1, n)\n# Sicker patients are routed to surgery (selection on the untreated baseline).\nD = (severity + rng.normal(0, 0.15, n)) &gt; 0.5\n\nate = np.mean(y1 - y0)\nobs_treated = y1[D].mean()\nobs_control = y0[~D].mean()\nnaive = obs_treated - obs_control\nsel_bias = y0[D].mean() - y0[~D].mean()     # difference in untreated baselines\n\nfig, ax = plt.subplots(figsize=(7.2, 4.2))\nax.scatter(severity[~D], y0[~D], s=10, color=\"#c9ccd1\", alpha=0.6, label=\"control: observed Y(0)\")\nax.scatter(severity[D], y1[D], s=10, color=\"#1f8a4c\", alpha=0.6, label=\"treated: observed Y(1)\")\nax.axhline(obs_control, color=\"#9aa0a6\", lw=1.6, ls=\"--\")\nax.axhline(obs_treated, color=\"#1f8a4c\", lw=1.6, ls=\"--\")\n# selection-bias bracket: treated group's hidden Y(0) baseline vs control's\nax.axhline(y0[D].mean(), color=\"#c0392b\", lw=1.4, ls=\":\")\nax.annotate(\"\", xy=(0.04, y0[D].mean()), xytext=(0.04, obs_control),\n            arrowprops=dict(arrowstyle=\"&lt;-&gt;\", color=\"#c0392b\", lw=1.8))\nax.text(0.06, (y0[D].mean()+obs_control)/2, f\"selection bias\\n= {sel_bias:+.1f}\",\n        color=\"#c0392b\", fontsize=8, va=\"center\")\nax.text(0.62, obs_treated+0.3, f\"treated observed mean = {obs_treated:.1f}\", color=\"#1f8a4c\", fontsize=8)\nax.text(0.62, obs_control+0.3, f\"control observed mean = {obs_control:.1f}\", color=\"#6b6f76\", fontsize=8)\nax.set_title(f\"True ATE = {ate:+.1f}, but naive comparison = {naive:+.1f}\")\nax.set_xlabel(\"severity  (sicker →)\"); ax.set_ylabel(\"survival (years)\")\nax.legend(fontsize=8, frameon=False, loc=\"upper right\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Selection bias can reverse a real effect. Each patient has two potential outcomes; surgery genuinely adds survival (true effect positive, dashed arrows up). But sicker patients (low baseline Y(0)) are the ones routed to surgery, so the treated group’s observed mean (green) sits below the control group’s (grey) — a negative naive comparison masking a positive ATE. The selection-bias gap is the difference in the groups’ untreated baselines (red bracket).\n\n\n\n\n\nThe lesson the whole Part builds on: identification is about making the selection-bias term vanish. A randomized experiment forces it to zero by design; every observational method is an argument that, conditional on something, it is as if zero.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html#sutva-the-assumption-that-makes-outcomes-well-defined",
+    "href": "content/05-causal-inference/potential-outcomes.html#sutva-the-assumption-that-makes-outcomes-well-defined",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "SUTVA: the assumption that makes outcomes well-defined",
+    "text": "SUTVA: the assumption that makes outcomes well-defined\nThe framework quietly assumes the potential outcomes even exist as stable, single numbers. That is the Stable Unit Treatment Value Assumption (SUTVA), and it has two parts: (Cunningham 2021)\n\nNo interference (no spillovers). Unit i’s potential outcomes depend only on i’s own treatment, not on whether others are treated. (Cunningham 2021) Tutoring a student who then helps a control-group friend violates it — the friend’s Y(0) was altered by someone else’s treatment.\nNo hidden variations of treatment. There is one well-defined “version” of treatment, so Y_i(1) is unambiguous. A vague or inconsistently delivered treatment has many versions and no single potential outcome. (Cunningham 2021)\n\nClassic violations to watch for: spillovers/contagion between units; resource displacement (moving equipment from control to treatment classrooms changes the controls’ baseline); and general-equilibrium effects (a job-training program so large it shifts the market wage, changing the “no-treatment” world itself). (Cunningham 2021) SUTVA is why causal claims need a clearly localised, non-interfering treatment — and why scaling a program up can break the very estimate that justified it.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html#common-pitfalls",
+    "href": "content/05-causal-inference/potential-outcomes.html#common-pitfalls",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nReading the naive difference as the effect. It equals ATT plus selection bias; unless the groups are comparable in their untreated state, it can shrink, inflate, or even reverse the truth. (Cunningham 2021)\nConfusing the estimands. ATE, ATT, and ATU answer different policy questions and can differ greatly under effect heterogeneity. State which one you mean before estimating. (Cunningham 2021)\nForgetting the effect is unit-level and unobservable. \\tau_i exists for everyone but is never seen; all we ever estimate are averages, and only under assumptions. (Cunningham 2021)\nIgnoring SUTVA. Spillovers, multiple treatment versions, and general-equilibrium effects quietly invalidate the potential outcomes themselves — no estimator fixes a mis-defined estimand. (Cunningham 2021)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html#from-the-sources",
+    "href": "content/05-causal-inference/potential-outcomes.html#from-the-sources",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nCunningham, Causal Inference: The Mixtape — the Rubin Causal Model; potential outcomes Y_i(1),Y_i(0) and \\tau_i; the fundamental problem and the switching equation Y_i=D_iY_i(1)+(1-D_i)Y_i(0); ATE/ATT/ATU; the selection-bias decomposition (naive = ATT + selection bias, and the fuller ATE version with the heterogeneous-effect term (1-\\pi)(\\text{ATT}-\\text{ATU})); the surgery-vs-chemo numerical reversal (ATE +0.6, naive -0.4, selection bias -4.8); and SUTVA with its spillover / resource-displacement / general-equilibrium violations.\nGerber & Green, Field Experiments — potential outcomes and the fundamental problem framed as missing data; averages (ATE) as the learnable target; the groundwork for randomization as the fix.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html#appendix-the-mathematics",
+    "href": "content/05-causal-inference/potential-outcomes.html#appendix-the-mathematics",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nDeriving the selection-bias decomposition. The naive comparison uses observed outcomes, which the switching equation ties to potential outcomes: \\mathbb E[Y\\mid D=1]=\\mathbb E[Y(1)\\mid D=1] and \\mathbb E[Y\\mid D=0]=\\mathbb E[Y(0)\\mid D=0]. Subtract, then add and subtract \\mathbb E[Y(0)\\mid D=1] (the treated group’s missing untreated baseline): \n\\mathbb E[Y\\mid D=1]-\\mathbb E[Y\\mid D=0]\n= \\underbrace{\\big(\\mathbb E[Y(1)\\mid D=1]-\\mathbb E[Y(0)\\mid D=1]\\big)}_{\\text{ATT}}\n+ \\underbrace{\\big(\\mathbb E[Y(0)\\mid D=1]-\\mathbb E[Y(0)\\mid D=0]\\big)}_{\\text{selection bias}}.\n\nThe fuller ATE form. Let \\pi=\\Pr(D=1). Writing the naive comparison in terms of the ATE, Cunningham shows (Cunningham 2021) \n\\mathbb E[Y\\mid D=1]-\\mathbb E[Y\\mid D=0]\n= \\text{ATE} + \\underbrace{\\big(\\mathbb E[Y(0)\\mid D=1]-\\mathbb E[Y(0)\\mid D=0]\\big)}_{\\text{selection bias}}\n+ \\underbrace{(1-\\pi)\\,(\\text{ATT}-\\text{ATU})}_{\\text{heterogeneous-effect bias}}.\n Two distinct biases, then: the groups differ in their baselines (selection bias) and the treatment may affect the treated differently from the untreated (heterogeneity). Random assignment kills both at once, because it makes D independent of both potential outcomes: (Y(1),Y(0))\\perp D forces \\mathbb E[Y(0)\\mid D=1]=\\mathbb E[Y(0)\\mid D=0] and \\text{ATT}=\\text{ATU}=\\text{ATE} — the subject of the next entry.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html#connections",
+    "href": "content/05-causal-inference/potential-outcomes.html#connections",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: what regression can’t tell you (exogeneity, OVB, the “you need a design” verdict) and conditional expectation (the \\mathbb E[\\cdot\\mid D] objects throughout).\nLeads to: randomized experiments (assignment that zeroes the selection-bias term) and the entire toolkit — matching, IV, RD, DiD — each an argument that selection bias is, conditionally, zero.\nReappears in: every estimand in Part V; the DAG view of confounding is the same idea drawn as a graph.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/potential-outcomes.html#study-with-notebooklm",
+    "href": "content/05-causal-inference/potential-outcomes.html#study-with-notebooklm",
+    "title": "Potential Outcomes & the Fundamental Problem",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Define potential outcomes Y_i(1), Y_i(0), and the individual treatment effect, and state the fundamental problem of causal inference and the switching equation.”\n“Define ATE, ATT, and ATU, and give a policy question for which each is the right estimand.”\n“Derive the decomposition: naive difference in means = ATT + selection bias. What is the selection bias term, intuitively?”\n“Walk through Cunningham’s surgery-vs-chemotherapy example where selection bias reverses the sign of the estimated effect.”\n“State SUTVA’s two components and give examples of spillover, resource-displacement, and general-equilibrium violations.”",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Potential Outcomes & the Fundamental Problem"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "",
+    "text": "Sometimes treatment isn’t random, but it is as-good-as-random once you condition on what you observe. That bet — the conditional independence assumption — is the backdoor criterion cashed out as an estimator. Matching and propensity scores build the missing counterfactual by pairing the treated with comparable untreated units, approximating the experiment you couldn’t run. The catch never goes away: they balance only what you measured, so the assumption is an argument, never a proof.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#why-it-matters",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#why-it-matters",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "Why it matters",
+    "text": "Why it matters\nThe DAG told you which variables close the backdoors; this entry is how you actually adjust for them to recover an effect. (Cunningham 2021) It matters because “selection on observables” is the workhorse of applied social science — the strategy behind most “we controlled for X, Y, Z” papers — and doing it as matching rather than a single regression makes its assumptions, and its weaknesses, impossible to hide. (Angrist and Pischke 2009) The reward is a transparent approximation of an experiment; the price is honesty about the one assumption that can’t be tested.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#the-two-conditions",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#the-two-conditions",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "The two conditions",
+    "text": "The two conditions\nEverything rests on two requirements: (Cunningham 2021)\n\nConditional Independence Assumption (CIA) — also unconfoundedness or ignorability: \n\\big(Y_i(1),Y_i(0)\\big)\\ \\perp\\ D_i \\ \\big|\\ X_i.\n Within cells of the observed covariates X, treatment is as good as randomly assigned — independent of the potential outcomes. It is randomization’s independence, but only conditional on X. (Angrist and Pischke 2009)\nCommon support / overlap — for every covariate value, some chance of either arm: 0 &lt; \\Pr(D_i=1\\mid X_i) &lt; 1. If a kind of person is always treated (or never), they have no counterpart in the other group and no comparison is possible for them. (Cunningham 2021)\n\nCIA is the identifying assumption; overlap is what makes it operational. Both must hold.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#subclassification-the-idea-in-its-purest-form",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#subclassification-the-idea-in-its-purest-form",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "Subclassification: the idea in its purest form",
+    "text": "Subclassification: the idea in its purest form\nThe most transparent estimator simply stratifies. Partition the sample into cells (strata) of X; within a cell, units are alike on X, so under CIA the treated–control difference is causal; then average those within-cell differences, weighting by each stratum’s share of the population. That weighted average is the ATE — the backdoor adjustment formula made arithmetic. (Cunningham 2021)\n\n\n\n\n\n\nNoteCunningham’s Titanic\n\n\n\nDid riding first class raise your chance of surviving the Titanic? The naive survival gap (the simple difference in outcomes) is 35.4 percentage points. But first-class passengers were disproportionately women and the better-off — and “women and children first” plus age drove survival directly. Stratify on age and gender, take the within-stratum first-class effect, and reweight: the estimate falls to 16.1 points. (Cunningham 2021) Less than half the naive gap was the cabin; the rest was who was in it — selection bias, removed by conditioning on the confounders the DAG flagged.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#matching-and-why-many-covariates-break-it",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#matching-and-why-many-covariates-break-it",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "Matching, and why many covariates break it",
+    "text": "Matching, and why many covariates break it\nMatching generalises the idea: impute each unit’s missing counterfactual from the closest units in the other arm. (Cunningham 2021)\n\nExact matching pairs a treated unit with controls having identical X — perfect, when feasible.\nNearest-neighbour matching pairs with the closest available X when exact matches run out.\n\nThe wall it hits is the curse of dimensionality. With many covariates, the space is vast and the data sparse: cells empty out, exact matches vanish, and common support fails — you simply can’t find a treated and a control unit in most cells. (Cunningham 2021) Matching on more than a few covariates at once is infeasible in finite samples. This is the problem the propensity score was invented to dissolve.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#the-propensity-score-one-number-to-balance-them-all",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#the-propensity-score-one-number-to-balance-them-all",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "The propensity score: one number to balance them all",
+    "text": "The propensity score: one number to balance them all\nThe propensity score is the probability of treatment given covariates, \ne(X) = \\Pr(D=1\\mid X).\n The Rosenbaum–Rubin (1983) theorem is the magic: if CIA holds given the full vector X, then it also holds given the single scalar e(X): (Cunningham 2021) \n\\big(Y(1),Y(0)\\big)\\perp D \\ \\big|\\ e(X).\n The score is a balancing score — among units with the same propensity, the entire distribution of X is identical across treated and control. So you can condition on one number instead of a high-dimensional vector, sidestepping the curse of dimensionality entirely. (Cunningham 2021) You estimate e(X) (usually a logit), then match, stratify, or weight on it.\nThe figure shows what overlap looks like — and where it fails.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(5)\nn = 4000\nX = rng.normal(0, 1, n)\n# True propensity rises with X; treatment assigned accordingly (confounding by X).\ne = 1 / (1 + np.exp(-1.3 * X))\nD = rng.uniform(size=n) &lt; e\n\nfig, ax = plt.subplots(figsize=(7.2, 4.0))\nbins = np.linspace(0, 1, 41)\nax.hist(e[D],  bins=bins, color=\"#1f8a4c\", alpha=0.6, label=\"treated\", density=True)\nax.hist(e[~D], bins=bins, color=\"#9aa0a6\", alpha=0.6, label=\"control\", density=True)\nax.axvspan(0.0, 0.12, color=\"#c0392b\", alpha=0.08)\nax.axvspan(0.88, 1.0, color=\"#c0392b\", alpha=0.08)\nax.text(0.02, ax.get_ylim()[1]*0.85, \"few treated\\n(no controls' match here?)\", fontsize=7.5, color=\"#b9791f\")\nax.text(0.62, ax.get_ylim()[1]*0.92, \"common support\\n(matching works)\", fontsize=8, color=\"#1f3a5f\")\nax.set_xlabel(\"estimated propensity score  e(X) = P(D=1 | X)\")\nax.set_ylabel(\"density\")\nax.set_title(\"Overlap is what makes matching possible\")\nax.legend(fontsize=8, frameon=False, loc=\"upper center\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Common support in propensity scores. The estimated probability of treatment, e(X), for treated (green) and control (grey) units. Where the histograms overlap, every treated unit has comparable controls and matching works. In the tails — control units near 0, treated units near 1 — there is no counterpart in the other group (the shaded ‘no-overlap’ zones); those units must be trimmed, and the effect is identified only on the region of common support.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#inverse-probability-weighting",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#inverse-probability-weighting",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "Inverse probability weighting",
+    "text": "Inverse probability weighting\nInstead of matching, you can reweight. Inverse probability weighting (IPW) builds a synthetic sample in which treatment is independent of X by up-weighting the rare cases — a treated unit with a low propensity stands in for the many similar units who went untreated. (Cunningham 2021) The ATE estimator weights each outcome by treatment status over (one minus) the propensity: \n\\widehat{\\text{ATE}} = \\frac1N\\sum_i Y_i\\cdot\\frac{D_i-\\hat e(X_i)}{\\hat e(X_i)\\,(1-\\hat e(X_i))}.\n Weighting and matching are two ways to spend the same propensity score; both lean entirely on getting e(X) — and CIA — right. (Note the danger lurking in the denominator: propensities near 0 or 1 produce explosive weights, which is the overlap problem returning in a new guise.)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#regression-is-matching-in-disguise",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#regression-is-matching-in-disguise",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "Regression is matching in disguise",
+    "text": "Regression is matching in disguise\nWhere does ordinary regression fit? Angrist & Pischke call it an “automated matchmaker.” (Angrist and Pischke 2009) Regression with controls is also a selection-on-observables estimator built on CIA, and it can be written as a weighted average of within-cell treatment–control contrasts — i.e. a matching estimator. The difference is the weights: matching for the ATT weights cells by the covariate distribution among the treated, while regression weights them by the variance of treatment within each cell, \\,\\Pr(X)(1-\\Pr(X)) — giving most weight to cells where treatment is a coin flip (near 0.5), because those are the most precise. (Angrist and Pischke 2009) Same identifying assumption, different weighting — which is why matching and regression usually agree, and why, when they disagree, the culprit is the weighting or the functional form.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#the-limitation-you-can-never-escape",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#the-limitation-you-can-never-escape",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "The limitation you can never escape",
+    "text": "The limitation you can never escape\nHere is the line that separates this whole family from randomization: matching and propensity scores balance only the observables. (Cunningham 2021) An experiment balances everything, seen and unseen; selection-on-observables balances X and prays the rest goes with it. CIA is fundamentally untestable — it concerns the missing counterfactuals — so if unobserved ability or motivation drives both treatment and outcome, every method here stays biased, no matter how clean the balance table. (Cunningham 2021) Matching is not a machine for removing bias; it is a machine for removing bias due to observed confounders, conditional on an assumption you must defend on substance.\n\n\n\n\n\n\nNoteLaLonde, and when it works (NSW / Dehejia–Wahba)\n\n\n\nThe famous test: the National Supported Work job-training program had a true experimental benchmark of about +$1,794 in earnings. LaLonde (1986) discarded the experimental controls and substituted observational comparison groups (from the CPS and PSID) — the naive gap swung to −$8,498, catastrophic negative selection (trainees were far more disadvantaged to begin with). (Cunningham 2021) Dehejia & Wahba (1999) then applied propensity-score matching with trimming to enforce common support, conditioning on demographics and two years of pre-treatment earnings; their screened estimate, +$1,362, landed close to the experimental truth. (Cunningham 2021) The moral cuts both ways: matching can recover the experiment — if the selection really is on observables you have (here, rich earnings histories) — and fails badly when it isn’t.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#common-pitfalls",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#common-pitfalls",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nTreating CIA as established. It’s untestable. “We controlled for a lot” is an argument about unobservables, not a proof; a hidden confounder leaves the estimate biased. (Cunningham 2021)\nIgnoring common support. Comparing units with no counterpart in the other arm extrapolates off a cliff; check overlap and trim non-overlapping units. (Cunningham 2021)\nMatching on many covariates directly. The curse of dimensionality empties the cells — use the propensity score to collapse X to one number. (Cunningham 2021)\nExtreme IPW weights. Propensities near 0 or 1 blow up the weights and the variance; it’s the overlap problem in disguise. (Cunningham 2021)\nReading balance on X as balance overall. A perfect balance table says nothing about the unobservables — the very things that make this weaker than an experiment. (Cunningham 2021)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#from-the-sources",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#from-the-sources",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nCunningham, Causal Inference: The Mixtape — the CIA/unconfoundedness (Y(1),Y(0))\\perp D\\mid X and common support 0&lt;\\Pr(D=1\\mid X)&lt;1; subclassification and the Titanic example (SDO 35.4\\%\\to weighted ATE 16.1\\% stratifying on age/gender); exact and nearest-neighbour matching and the curse of dimensionality; the propensity score e(X)=\\Pr(D=1\\mid X) and the Rosenbaum–Rubin balancing theorem; IPW formulas for ATE and ATT; the untestability of CIA; and the NSW / LaLonde / Dehejia–Wahba evaluation (experimental \\$1{,}794; naive -\\$8{,}498; PSM \\$1{,}362).\nAngrist & Pischke, Mostly Harmless / Mastering ’Metrics — regression as an automated matchmaker and a weighted matching estimator; regression’s variance weighting \\Pr(X)(1-\\Pr(X)) vs matching’s treated-distribution weighting; CIA as the shared foundation.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#appendix-the-mathematics",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#appendix-the-mathematics",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nIdentification under CIA. Under (Y(1),Y(0))\\perp D\\mid X and overlap, \n\\mathbb E[Y\\mid D=1,X]-\\mathbb E[Y\\mid D=0,X]=\\mathbb E[Y(1)-Y(0)\\mid X],\n and averaging over the distribution of X gives the ATE — the backdoor adjustment. Subclassification estimates the inner contrast cell by cell and averages with weights \\Pr(X=x).\nThe balancing-score theorem (sketch). Rosenbaum & Rubin show D\\perp X\\mid e(X): by construction \\Pr(D=1\\mid X,e(X))=e(X) depends on X only through e(X), so within a level of e(X) the covariate distribution is identical across arms. Combined with CIA-given-X, this yields CIA-given-e(X) — so conditioning on the scalar e(X) suffices. The high-dimensional X is compressed to one number with no loss for identification.\nWhy regression weights by treatment variance. With saturated controls, OLS recovers \\sum_x w(x)\\,\\big(\\mathbb E[Y\\mid D=1,x]-\\mathbb E[Y\\mid D=0,x]\\big) with w(x)\\propto \\Pr(X=x)\\,\\operatorname{Var}(D\\mid X=x)=\\Pr(X=x)\\,e(x)(1-e(x)). The factor e(x)(1-e(x)) peaks at e=1/2, so cells with the most treatment variation — the most informative comparisons — dominate the OLS estimand. This is why the regression number can differ from a matching ATT even under the same CIA.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#connections",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#connections",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: DAGs (the backdoor criterion this estimates), potential outcomes (CIA is conditional independence of D and the Y(d)), and logistic regression (how e(X) is fit).\nLeads to: the designs for when CIA fails — instrumental variables, regression discontinuity, and difference-in-differences find leverage beyond the observables.\nReappears in: causal machine learning, where flexible ML estimates e(X) and the outcome model and double/debiased ML combines them to be robust to errors in each.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/matching-and-propensity-scores.html#study-with-notebooklm",
+    "href": "content/05-causal-inference/matching-and-propensity-scores.html#study-with-notebooklm",
+    "title": "Selection on Observables: Matching & Propensity Scores",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“State the conditional independence assumption and the common-support condition, and explain each intuitively. Why is CIA untestable?”\n“Explain subclassification using Cunningham’s Titanic example — how does stratifying on age and gender move the estimate from 35.4% to 16.1%?”\n“What is the curse of dimensionality in matching, and how does the propensity score (Rosenbaum–Rubin balancing theorem) solve it?”\n“Define the propensity score and IPW. How does inverse-probability weighting reconstruct a balanced sample?”\n“In what sense is regression an ‘automated matchmaker’, and how do its weights differ from a matching estimator’s? Use the NSW/Dehejia–Wahba results to discuss when matching works.”",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Selection on Observables: Matching & Propensity Scores"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/index.html",
+    "href": "content/05-causal-inference/index.html",
+    "title": "V · The Summit: Causal Inference",
+    "section": "",
+    "text": "The summit of the whole manual, and the centre of gravity of the source library. The question is deceptively simple — what is the effect of X on Y? — and answering it honestly requires a framework for imagining the world that didn’t happen, plus the design and computational tools built in every part before this one.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "V · The Summit: Causal Inference"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/index.html#the-causal-framework",
+    "href": "content/05-causal-inference/index.html#the-causal-framework",
+    "title": "V · The Summit: Causal Inference",
+    "section": "The Causal Framework",
+    "text": "The Causal Framework\nThe language of cause — how to imagine the world that didn’t happen, and how to read a diagram of it:\n\n\n\nEntry\nStatus\nCore sources\n\n\n\n\nPotential outcomes & the fundamental problem\n✅ Written\nGerber & Green, Cunningham\n\n\nRandomized experiments: the gold standard\n✅ Written\nGerber & Green, Moffatt\n\n\nDirected acyclic graphs (DAGs)\n✅ Written\nCunningham",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "V · The Summit: Causal Inference"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/index.html#the-furious-five",
+    "href": "content/05-causal-inference/index.html#the-furious-five",
+    "title": "V · The Summit: Causal Inference",
+    "section": "The “Furious Five”",
+    "text": "The “Furious Five”\nThe applied core, as Angrist & Pischke frame it: regression/matching adjustment, instrumental variables, regression discontinuity, difference-in-differences (with panel fixed effects as their backbone). Each is a different argument for why a comparison is fair — a different way of approximating the experiment you wish you could have run.\n\n\n\nEntry\nStatus\nCore sources\n\n\n\n\nSelection on observables: matching & propensity scores\n✅ Written\nCunningham, Angrist & Pischke\n\n\nInstrumental variables\n✅ Written\nAngrist & Pischke, Cunningham\n\n\nRegression discontinuity\n✅ Written\nCunningham, Angrist & Pischke\n\n\nDifference-in-differences\n✅ Written\nDiD Guide, Cunningham\n\n\nPanel data & fixed effects\n✅ Written\nDong Li, Wooldridge",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "V · The Summit: Causal Inference"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/index.html#frontiers",
+    "href": "content/05-causal-inference/index.html#frontiers",
+    "title": "V · The Summit: Causal Inference",
+    "section": "Frontiers",
+    "text": "Frontiers\n\n\n\nEntry\nStatus\nCore sources\n\n\n\n\nSynthetic control\n✅ Written\nCunningham\n\n\nCausal machine learning: heterogeneous effects\n✅ Written\nChernozhukov, Jacobucci",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "V · The Summit: Causal Inference"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/index.html#where-this-leads",
+    "href": "content/05-causal-inference/index.html#where-this-leads",
+    "title": "V · The Summit: Causal Inference",
+    "section": "Where this leads",
+    "text": "Where this leads\nDown from the summit to Part VI · Doing Research in the World: having learned what a credible causal claim is, you learn what survives contact with measurement, incentives, and a client who needs an answer by Friday.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "V · The Summit: Causal Inference"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/difference-in-differences.html",
+    "href": "content/05-causal-inference/difference-in-differences.html",
+    "title": "Difference-in-Differences",
+    "section": "",
+    "text": "When a policy hits one group and not another, you can’t just compare the two — they differed to begin with. And you can’t just track the treated group over time — everything else moved too. Difference-in- differences does both subtractions at once: the treated group’s change minus the control group’s change. The first difference erases fixed group gaps; the second erases shocks common to all. What survives is the treatment effect — if the groups would have moved in parallel anyway.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Difference-in-Differences"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/difference-in-differences.html#why-it-matters",
+    "href": "content/05-causal-inference/difference-in-differences.html#why-it-matters",
+    "title": "Difference-in-Differences",
+    "section": "Why it matters",
+    "text": "Why it matters\nRD needs a sharp cutoff; IV needs a clever instrument. DiD needs only a policy change, a comparison group, and data before and after — which is why it is the most widely used quasi-experimental design in economics and policy. (Cunningham 2021) It exploits a different kind of as-good-as-random variation: the timing of a treatment that some units get and others don’t. And it is the design where the field has most recently discovered it was doing things wrong — making this entry both a how-to and a cautionary tale. (Baker et al. 2025)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Difference-in-Differences"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/difference-in-differences.html#the-canonical-22",
+    "href": "content/05-causal-inference/difference-in-differences.html#the-canonical-22",
+    "title": "Difference-in-Differences",
+    "section": "The canonical 2×2",
+    "text": "The canonical 2×2\nThe simplest DiD has two groups — treated (D=1) and control (D=0) — and two periods, before and after. The estimator double-differences four means: (Baker et al. 2025) \n\\hat\\delta_{DD}=\\big(\\bar Y_{\\text{treat,post}}-\\bar Y_{\\text{treat,pre}}\\big)\n-\\big(\\bar Y_{\\text{ctrl,post}}-\\bar Y_{\\text{ctrl,pre}}\\big).\n Read the two subtractions: (Baker et al. 2025)\n\nThe first difference (post − pre, within each group) wipes out every time-invariant group trait — the treated group can be richer, sicker, bigger; if it doesn’t change, it cancels.\nThe second difference (treated change − control change) wipes out any shock common to both groups in that period — a recession, a seasonal swing, a nationwide trend.\n\nTwo confounding layers removed by arithmetic, no controls required. What remains is attributed to the treatment.\n\n\n\n\n\n\nNoteCard & Krueger and the minimum wage\n\n\n\nThe study that made DiD famous — and overturned a textbook prediction. In 1992 New Jersey raised its minimum wage from $4.25 to $5.05; neighbouring Pennsylvania held at $4.25. Card & Krueger surveyed ~400 fast-food restaurants before and after, measuring full-time-equivalent employment: (Cunningham 2021)\n\n\n\n\nPre\nPost\nChange\n\n\n\n\nNew Jersey (treated)\n20.44\n21.03\n+0.59\n\n\nPennsylvania (control)\n23.33\n21.17\n−2.16\n\n\n\nDiD = (+0.59)-(-2.16) = \\mathbf{+2.76}. Employment fell in Pennsylvania (a common regional shock) but rose relative to it in New Jersey — the opposite of the competitive prediction that a higher minimum wage destroys jobs. Note the logic: NJ’s raw +0.59 alone would be misleading; only by netting out PA’s -2.16 regional slump does the policy’s relative effect appear. (Cunningham 2021)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Difference-in-Differences"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/difference-in-differences.html#the-one-assumption-parallel-trends",
+    "href": "content/05-causal-inference/difference-in-differences.html#the-one-assumption-parallel-trends",
+    "title": "Difference-in-Differences",
+    "section": "The one assumption: parallel trends",
+    "text": "The one assumption: parallel trends\nDiD’s entire credibility rests on parallel trends: absent the treatment, the treated and control groups would have moved in parallel. (Baker et al. 2025) The control group’s change is used as the treated group’s missing counterfactual change — valid only if their paths would have stayed parallel. Two things to internalise: (Baker et al. 2025)\n\nIt is fundamentally untestable. It concerns the treated group’s unobserved no-treatment path after the intervention — a counterfactual we never see.\nPre-trends are the evidence. If the groups tracked each other before treatment, it’s more plausible they’d have continued. So researchers plot the pre-period and check for parallel paths — necessary support, not proof. (Levels may differ wildly; it is the slopes that must match.)\n\n\n\nShow the figure code\nimport matplotlib.pyplot as plt\n\nt = [0, 1]                       # pre, post\nnj = [20.44, 21.03]             # treated\npa = [23.33, 21.17]             # control\nnj_cf = [20.44, 20.44 + (pa[1] - pa[0])]   # counterfactual: NJ + PA's change\ndid = (nj[1] - nj[0]) - (pa[1] - pa[0])\n\nfig, ax = plt.subplots(figsize=(7.0, 4.2))\nax.plot(t, nj, \"o-\", color=\"#1f8a4c\", lw=2.4, label=\"New Jersey (treated)\")\nax.plot(t, pa, \"o-\", color=\"#9aa0a6\", lw=2.4, label=\"Pennsylvania (control)\")\nax.plot(t, nj_cf, \"o--\", color=\"#c0392b\", lw=2.0, label=\"NJ counterfactual (parallel)\")\nax.annotate(\"\", xy=(1, nj[1]), xytext=(1, nj_cf[1]),\n            arrowprops=dict(arrowstyle=\"&lt;-&gt;\", color=\"#c0392b\", lw=2.0))\nax.text(1.02, (nj[1] + nj_cf[1]) / 2, f\"DiD = {did:+.2f}\", color=\"#c0392b\", fontsize=10, va=\"center\")\nax.set_xticks(t); ax.set_xticklabels([\"pre (Feb 1992)\", \"post (Nov 1992)\"])\nax.set_ylabel(\"FTE employment per restaurant\")\nax.set_title(\"Each group its own control: subtract the common shock\")\nax.legend(fontsize=8, frameon=False, loc=\"lower left\")\nax.set_xlim(-0.15, 1.35)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Difference-in-differences (Card–Krueger). New Jersey (treated) and Pennsylvania (control) start at different employment levels — DiD allows that. Pennsylvania’s change (−2.16) estimates the common shock both states faced; applying it to New Jersey gives the counterfactual (dashed) — where NJ would have landed with no minimum-wage hike. The gap between NJ’s actual post value and that counterfactual is the DiD effect, +2.76.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Difference-in-Differences"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/difference-in-differences.html#twfe-and-the-event-study",
+    "href": "content/05-causal-inference/difference-in-differences.html#twfe-and-the-event-study",
+    "title": "Difference-in-Differences",
+    "section": "TWFE and the event study",
+    "text": "TWFE and the event study\nIn practice DiD is run as a two-way fixed effects (TWFE) regression, which generalises the four means to many units and periods: (Baker et al. 2025) \nY_{it}=\\eta_i+\\theta_t+\\beta D_{it}+\\epsilon_{it}.\n The unit fixed effects \\eta_i absorb all time-invariant differences between units (the first difference); the time fixed effects \\theta_t absorb shocks common to all units in a period (the second difference); \\beta is the DiD effect. (Baker et al. 2025) It is the panel/fixed-effects machinery of the next entry — DiD is a fixed-effects design.\nThe event study enriches this by replacing the single D_{it} with dummies for periods relative to treatment: (Baker et al. 2025) \nY_{it}=\\eta_i+\\theta_t+\\sum_{\\tau=-q}^{m}\\delta_\\tau D_{i,\\tau}+\\epsilon_{it}.\n The leads (\\tau&lt;0) should be near zero — a visual parallel-trends check; the lags (\\tau\\ge0) trace how the effect grows, fades, or plateaus after treatment. (Baker et al. 2025) An event study is the single most persuasive DiD graphic: flat before, a clear break after.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Difference-in-Differences"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/difference-in-differences.html#the-did-revolution-when-twfe-lies",
+    "href": "content/05-causal-inference/difference-in-differences.html#the-did-revolution-when-twfe-lies",
+    "title": "Difference-in-Differences",
+    "section": "The DiD revolution: when TWFE lies",
+    "text": "The DiD revolution: when TWFE lies\nHere is the cautionary tale, and why this entry cites a 2020s practitioner’s guide. When units are treated at different times (staggered adoption), the trusty TWFE regression can become biased — even sign-flipped. (Baker et al. 2025)\n\nForbidden comparisons. With staggering, TWFE implicitly uses already-treated units as controls for later-treated ones. If effects change over time (dynamic effects), those already-treated “controls” are themselves still moving because of their own treatment, contaminating the comparison. (Baker et al. 2025)\nGoodman-Bacon decomposition. TWFE’s \\beta is a weighted average of all possible 2×2 DiDs — and in staggered designs some weights can be negative. The estimate can come out the wrong sign even if every unit’s true effect is positive. (Baker et al. 2025)\nNew estimators. “Forward-engineered” methods fix it by using only clean controls: Callaway–Sant’Anna (compare each treated cohort only to never-treated or not-yet-treated units), Sun–Abraham (a saturated cohort-by-time interaction), and de Chaisemartin–D’Haultfœuille (robust when treatment switches on and off). (Baker et al. 2025)\n\nThe lesson is humbling and current: a method everyone trusted for decades was quietly mis-estimating staggered rollouts, and the corpus’s most recent source exists to set it right.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Difference-in-Differences"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/difference-in-differences.html#common-pitfalls",
+    "href": "content/05-causal-inference/difference-in-differences.html#common-pitfalls",
+    "title": "Difference-in-Differences",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nAsserting parallel trends from a good story. It’s untestable; show pre-trends / event-study leads near zero, and reason about confounders that could break parallelism. (Baker et al. 2025)\nA control group on its own trajectory. If the control was already diverging (a differential trend), the second difference doesn’t cancel it and DiD is biased. (Baker et al. 2025)\nDefault TWFE under staggered adoption. Negative weights and forbidden comparisons can flip the sign; use Callaway–Sant’Anna / Sun–Abraham / dCDH and report a Goodman-Bacon decomposition. (Baker et al. 2025)\nA shock that hits only one group. Parallel trends fails if something else changed for the treated group at the same time (a concurrent policy). (Cunningham 2021)\nAnticipation. If units change behaviour before treatment (expecting it), pre-periods are contaminated and leads aren’t a clean test. (Baker et al. 2025)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Difference-in-Differences"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/difference-in-differences.html#from-the-sources",
+    "href": "content/05-causal-inference/difference-in-differences.html#from-the-sources",
+    "title": "Difference-in-Differences",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nDiD Practitioner’s Guide (Baker, Callaway, Cunningham, Goodman-Bacon, Sant’Anna) — the 2×2 and double-differencing; parallel trends, its untestability, and pre-trend/event-study evidence; TWFE Y_{it}=\\eta_i+\\theta_t+\\beta D_{it}+\\epsilon_{it} and the event-study leads/lags; the staggered-adoption problem — forbidden comparisons, the Goodman-Bacon decomposition and negative weights, and the new Callaway–Sant’Anna / Sun–Abraham / de Chaisemartin– D’Haultfœuille estimators.\nCunningham, The Mixtape — DiD intuition and the Card–Krueger minimum-wage study (NJ 20.44\\to21.03, PA 23.33\\to21.17, DiD =+2.76).\nAngrist & Pischke — DiD as a fixed-effects regression within the credibility-revolution toolkit.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Difference-in-Differences"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/difference-in-differences.html#appendix-the-mathematics",
+    "href": "content/05-causal-inference/difference-in-differences.html#appendix-the-mathematics",
+    "title": "Difference-in-Differences",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nWhy double-differencing identifies the effect. Write potential outcomes with additive group and time components: Y_{it}(0)=\\gamma_i+\\lambda_t+\\varepsilon_{it}, and Y_{it}(1)=Y_{it}(0)+\\delta. Parallel trends is the statement that \\lambda_t is common across groups (the no-treatment trend is the same). Taking each group’s post−pre difference removes \\gamma_i; subtracting the control’s difference removes the common \\lambda_{\\text{post}}-\\lambda_{\\text{pre}}, leaving exactly \\delta. The assumption is precisely “the \\lambda_t path is shared,” which is why differing levels \\gamma_i are harmless but differing trends are fatal.\nTWFE recovers the 2×2. In the saturated two-period, two-group case, the OLS coefficient on D_{it} in Y_{it}=\\eta_i+\\theta_t+\\beta D_{it}+\\epsilon_{it} equals \\hat\\delta_{DD} exactly — the unit dummies are the first difference, the time dummies the second.\nGoodman-Bacon weights. With staggered timing, \\hat\\beta_{TWFE}=\\sum_k s_k\\,\\hat\\beta_k over all 2×2 sub-experiments k, with weights s_k proportional to subsample size and treatment variance. Comparisons that use already-treated units as controls can receive negative s_k when those controls’ effects are still evolving — so a positive-everywhere effect can aggregate to a negative \\hat\\beta_{TWFE}. The new estimators restrict attention to clean (never- / not-yet-treated) controls, forcing non-negative weighting.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Difference-in-Differences"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/difference-in-differences.html#connections",
+    "href": "content/05-causal-inference/difference-in-differences.html#connections",
+    "title": "Difference-in-Differences",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: panel & fixed effects (TWFE is its two-way special case), potential outcomes (parallel trends as an assumption about counterfactual changes), and regression FE intuition.\nLeads to: synthetic control — what to do when no single control group has parallel trends, by building a weighted one.\nReappears in: modern applied policy work throughout Part VI, where staggered rollouts are the norm and the new estimators are now standard.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Difference-in-Differences"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/difference-in-differences.html#study-with-notebooklm",
+    "href": "content/05-causal-inference/difference-in-differences.html#study-with-notebooklm",
+    "title": "Difference-in-Differences",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Explain the canonical 2×2 DiD and how the two differences remove time-invariant group differences and common time shocks. Work the Card–Krueger numbers.”\n“State the parallel-trends assumption, explain why it’s untestable, and how pre-trends / event-study leads provide evidence.”\n“Write the two-way fixed-effects regression and explain what the unit and time fixed effects absorb. How does an event study generalise it?”\n“Explain the staggered-adoption problem: forbidden comparisons, the Goodman-Bacon decomposition, and how negative weights can flip the sign of TWFE.”\n“What do the Callaway–Sant’Anna, Sun–Abraham, and de Chaisemartin–D’Haultfœuille estimators do differently to fix staggered DiD?”",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Difference-in-Differences"
+    ]
+  },
+  {
     "objectID": "content/04-predictive/trees-and-forests.html",
     "href": "content/04-predictive/trees-and-forests.html",
     "title": "Trees, Forests & Boosting",
@@ -8190,51 +8900,952 @@
     ]
   },
   {
-    "objectID": "content/05-causal-inference/index.html",
-    "href": "content/05-causal-inference/index.html",
-    "title": "V · The Summit: Causal Inference",
+    "objectID": "content/05-causal-inference/causal-machine-learning.html",
+    "href": "content/05-causal-inference/causal-machine-learning.html",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
     "section": "",
-    "text": "The summit of the whole manual, and the centre of gravity of the source library. The question is deceptively simple — what is the effect of X on Y? — and answering it honestly requires a framework for imagining the world that didn’t happen, plus the design and computational tools built in every part before this one.",
+    "text": "The whole of Part V chased a single number: an average effect. But “never cross a river that is on average four feet deep.” Causal machine learning estimates the effect as a function of who you are — the conditional average treatment effect \\tau(x) — using the flexibility of ML without inheriting its bias. The trick is to estimate the effect, not the outcome, and to protect that estimate from overfitting with orthogonalisation and cross-fitting. It closes the loop: the predictive culture, disciplined back into the service of cause.",
     "crumbs": [
       "Home",
       "V · The Summit: Causal Inference",
-      "V · The Summit: Causal Inference"
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
     ]
   },
   {
-    "objectID": "content/05-causal-inference/index.html#entries",
-    "href": "content/05-causal-inference/index.html#entries",
-    "title": "V · The Summit: Causal Inference",
-    "section": "Entries",
-    "text": "Entries\n\n\n\n\n\n\n\n\nEntry\nStatus\nCore sources\n\n\n\n\nPotential outcomes & the fundamental problem\n🔜 Planned\nGerber & Green, Cunningham\n\n\nRandomised experiments: the gold standard\n🔜 Planned\nGerber & Green, Moffatt\n\n\nDirected acyclic graphs (DAGs)\n🔜 Planned\nCunningham\n\n\nInstrumental variables for causality\n🔜 Planned\nAngrist & Pischke\n\n\nRegression discontinuity\n🔜 Planned\nCunningham, Angrist & Pischke\n\n\nDifference-in-differences\n🔜 Planned\nCunningham, Angrist & Pischke\n\n\nPanel & fixed-effects designs\n🔜 Planned\nPanel Data Econometrics; Wooldridge\n\n\nMatching & propensity scores\n🔜 Planned\nCunningham\n\n\nSynthetic control\n🔜 Planned\nCunningham\n\n\nML for treatment-effect heterogeneity\n🔜 Planned\nML for Experiments; ML for Social & Behavioral",
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#why-it-matters",
+    "href": "content/05-causal-inference/causal-machine-learning.html#why-it-matters",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "Why it matters",
+    "text": "Why it matters\nAn ATE can hide everything that matters for policy: a drug that helps the young and harms the old can average to “no effect.” (Chernozhukov et al. 2024) Modern social science wants heterogeneous treatment effects — for whom does this work? — and the obvious idea, “throw a random forest at it,” fails in a way worth understanding deeply. This entry is where Part IV’s machinery — regularization, cross-validation, forests, the bias–variance trade — is repurposed for causation, and where the double/debiased ML preview is finally cashed out. It is the natural summit of the summit: the predictive and causal cultures, reconciled.",
     "crumbs": [
       "Home",
       "V · The Summit: Causal Inference",
-      "V · The Summit: Causal Inference"
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
     ]
   },
   {
-    "objectID": "content/05-causal-inference/index.html#the-furious-five",
-    "href": "content/05-causal-inference/index.html#the-furious-five",
-    "title": "V · The Summit: Causal Inference",
-    "section": "The “Furious Five”",
-    "text": "The “Furious Five”\nThe applied core, as Angrist & Pischke frame it: randomised experiments, regression adjustment, instrumental variables, regression discontinuity, and difference-in-differences. Each is a different argument for why a comparison is fair — a different way of approximating the experiment you wish you could have run.",
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#from-ate-to-cate",
+    "href": "content/05-causal-inference/causal-machine-learning.html#from-ate-to-cate",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "From ATE to CATE",
+    "text": "From ATE to CATE\nThe target shifts from a scalar to a function — the conditional average treatment effect: \n\\tau(x)=\\mathbb E\\big[Y(1)-Y(0)\\mid X=x\\big].\n \\tau(x) is the effect for units with characteristics x — the engine of personalised policy, letting you move from a uniform rollout to targeting whoever benefits most. (Chernozhukov et al. 2024) Everything from potential outcomes still holds; we’ve simply stopped averaging away the variation we now want to see.",
     "crumbs": [
       "Home",
       "V · The Summit: Causal Inference",
-      "V · The Summit: Causal Inference"
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
     ]
   },
   {
-    "objectID": "content/05-causal-inference/index.html#where-this-leads",
-    "href": "content/05-causal-inference/index.html#where-this-leads",
-    "title": "V · The Summit: Causal Inference",
-    "section": "Where this leads",
-    "text": "Where this leads\nDown from the summit to Part VI · Doing Research in the World: having learned what a credible causal claim is, you learn what survives contact with measurement, incentives, and a client who needs an answer by Friday.",
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#why-naive-ml-is-biased-for-effects",
+    "href": "content/05-causal-inference/causal-machine-learning.html#why-naive-ml-is-biased-for-effects",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "Why naive ML is biased for effects",
+    "text": "Why naive ML is biased for effects\nThe tempting move — fit a flexible ML model of Y on (D,X) and read off D’s influence — is biased, for a reason that is subtle and important: (Chernozhukov et al. 2024)\n\nRegularization bias. ML methods are built to minimise prediction error for Y, so they regularize — shrinking coefficients, pruning splits — toward whatever predicts the outcome best. When the treatment effect is small relative to other predictors, the algorithm cheerfully shrinks the treatment’s role toward zero, biasing the effect. (Chernozhukov et al. 2024)\nEffect ≠ prediction. Estimating an effect is fundamentally harder than predicting an outcome: it targets the difference between two counterfactual states, only one of which is ever observed. (Chernozhukov et al. 2024) A model superb at predicting Y can be terrible at isolating \\partial\nY/\\partial D.\n\nThe fix is to stop estimating the outcome and start estimating the effect, with the nuisances partialled out.",
     "crumbs": [
       "Home",
       "V · The Summit: Causal Inference",
-      "V · The Summit: Causal Inference"
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#doubledebiased-machine-learning",
+    "href": "content/05-causal-inference/causal-machine-learning.html#doubledebiased-machine-learning",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "Double/debiased machine learning",
+    "text": "Double/debiased machine learning\nDouble machine learning (DML), due to Chernozhukov and coauthors, lets you use any flexible ML for the hard prediction parts while keeping valid inference on the causal parameter. (Chernozhukov et al. 2024) Three moves:\n\nEstimate two nuisance functions with ML: an outcome model g_0(X)=\\mathbb E[Y\\mid X] and a treatment/propensity model m_0(X)=\\mathbb E[D\\mid X]. (Chernozhukov et al. 2024)\nOrthogonalise (partial out). Residualise both Y and D on X — regress the Y-residual on the D-residual. This is Frisch–Waugh–Lovell with ML doing the conditioning, and it yields a Neyman-orthogonal moment: the effect estimate is first-order insensitive to small errors in g_0 and m_0. (Chernozhukov et al. 2024) You can plug in imperfect ML nuisances and the errors don’t spill into the treatment effect — the “debiasing.”\nCross-fit. Estimate the nuisances on one fold and the effect on a held-out fold, so no unit’s own outcome contaminates its own nuisance prediction — removing overfitting bias. (Chernozhukov et al. 2024) (Exactly the cross-validation discipline, now load-bearing for inference, not just tuning.)\n\nOrthogonality kills the regularization bias; cross-fitting kills the overfitting bias. Together they let ML serve identification instead of sabotaging it. The figure shows the payoff DML and causal forests deliver — recovering an effect that varies with x.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(21)\nn = 6000\nx = rng.uniform(0, 1, n)\nD = rng.integers(0, 2, n)                  # randomized treatment (clean identification)\ntau_true = 0.5 + 3.0 * x                   # effect grows with x (heterogeneous)\ny = 1.0 + 2.0 * x + tau_true * D + rng.normal(0, 1.0, n)\n\n# Honest binned CATE: within each x-bin, treated mean - control mean (+ 95% CI).\nedges = np.linspace(0, 1, 11)\ncenters, est, lo, hi = [], [], [], []\nfor a, b in zip(edges[:-1], edges[1:]):\n    m = (x &gt;= a) & (x &lt; b)\n    yt, yc = y[m & (D == 1)], y[m & (D == 0)]\n    d = yt.mean() - yc.mean()\n    se = np.sqrt(yt.var(ddof=1)/yt.size + yc.var(ddof=1)/yc.size)\n    centers.append((a+b)/2); est.append(d); lo.append(d-1.96*se); hi.append(d+1.96*se)\ncenters, est = np.array(centers), np.array(est)\nate = (y[D==1].mean() - y[D==0].mean())\n\nfig, ax = plt.subplots(figsize=(7.2, 4.2))\nxs = np.linspace(0, 1, 100)\nax.plot(xs, 0.5 + 3.0*xs, color=\"#1f8a4c\", lw=2.4, label=\"true CATE  τ(x)\")\nax.errorbar(centers, est, yerr=[est-np.array(lo), np.array(hi)-est], fmt=\"o\",\n            color=\"#1f3a5f\", ms=5, capsize=3, label=\"honest binned estimate\")\nax.axhline(ate, color=\"#9aa0a6\", ls=\"--\", lw=1.6, label=f\"ATE = {ate:.2f} (hides heterogeneity)\")\nax.set_xlabel(\"covariate x\"); ax.set_ylabel(\"treatment effect\")\nax.set_title(\"Who benefits? The effect as a function of x\")\nax.legend(fontsize=8, frameon=False, loc=\"upper left\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Heterogeneous treatment effects. The true CATE τ(x) (green) rises with a covariate x — the treatment helps high-x units far more than low-x units, a pattern the ATE (grey dashed) completely hides. An honest, binned effect estimator (blue points, with 95% intervals) recovers τ(x) by comparing treated and control outcomes within strata of x — the intuition behind causal forests, which split to maximise effect heterogeneity and estimate honestly for valid intervals.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#causal-forests-and-honesty",
+    "href": "content/05-causal-inference/causal-machine-learning.html#causal-forests-and-honesty",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "Causal forests and honesty",
+    "text": "Causal forests and honesty\nTo estimate \\tau(x) flexibly, causal forests (generalized random forests) adapt random forests with two changes: (Chernozhukov et al. 2024)\n\nCausal splitting. Instead of splitting to reduce prediction error (RSS), trees split to maximise the heterogeneity of the estimated treatment effect across the children — actively hunting for the covariates along which the effect varies. (Chernozhukov et al. 2024)\nHonesty. A tree is honest if it uses one subsample to choose the splits and a separate subsample to estimate the effect in each leaf. (Chernozhukov et al. 2024) This separation is what makes the leaf estimates statistically valid — it earns trustworthy confidence intervals on \\tau(x), instead of the overconfident ones you’d get from estimating effects in the very leaves you carved to maximise them.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#policy-learning",
+    "href": "content/05-causal-inference/causal-machine-learning.html#policy-learning",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "Policy learning",
+    "text": "Policy learning\nThe point of knowing \\tau(x) is often to act. Policy learning turns CATEs into an assignment rule \\pi(x). (Chernozhukov et al. 2024) The unconstrained optimum is simple — treat everyone with a positive predicted effect: \n\\pi^*(x)=\\mathbf 1\\{\\tau(x)\\ge 0\\}.\n Framed as a classification problem, it predicts the sign of the effect, weighted by its magnitude — misclassifying a large positive effect costs more than fumbling a near-zero one (cost-sensitive classification). (Chernozhukov et al. 2024) This is where causal inference meets decision-making: not “what is the effect?” but “whom should we treat?”",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#the-cautions-ml-is-not-a-license",
+    "href": "content/05-causal-inference/causal-machine-learning.html#the-cautions-ml-is-not-a-license",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "The cautions: ML is not a license",
+    "text": "The cautions: ML is not a license\nThe most important sentence in the chapter: machine learning does not fix identification. (Chernozhukov et al. 2024) Every method here delivers causal answers only if the identifying assumptions still hold — conditional exogeneity (unconfoundedness) and overlap 0&lt;\\Pr(D=1\\mid X)&lt;1. DML and causal forests make you efficient and flexible under those assumptions; they cannot conjure them. Throwing a forest at confounded data yields a beautifully estimated biased effect. Two further risks: (Chernozhukov et al. 2024)\n\nFairness. ML models absorb the prejudices in their training data (gender and racial bias in text embeddings, biased historical decisions) — a Part IV worry with higher stakes when the output assigns treatment.\nInterpretability ≠ mechanism. Tools like SHAP or distilling a forest into a shallow tree explain how the model guesses, not the causal mechanism of the world. (Chernozhukov et al. 2024)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#common-pitfalls",
+    "href": "content/05-causal-inference/causal-machine-learning.html#common-pitfalls",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nNaive ML on the outcome. Regularization shrinks small treatment effects toward zero. Orthogonalise (DML) — estimate the effect, not Y. (Chernozhukov et al. 2024)\nSkipping cross-fitting. Using a unit’s own data to fit its nuisance reintroduces overfitting bias into the effect. Split the folds. (Chernozhukov et al. 2024)\nDishonest forests. Choosing splits and estimating effects on the same data gives invalid, overconfident intervals on \\tau(x). Use honest estimation. (Chernozhukov et al. 2024)\nBelieving ML earns identification. Unconfoundedness and overlap are still required; ML buys flexibility, not exogeneity. (Chernozhukov et al. 2024)\nActing on a biased CATE. A policy rule is only as causal as the \\tau(x) beneath it — garbage identification in, harmful targeting out. (Chernozhukov et al. 2024)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#from-the-sources",
+    "href": "content/05-causal-inference/causal-machine-learning.html#from-the-sources",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nChernozhukov et al., Applied Causal Inference Powered by ML and AI — the CATE \\tau(x)=\\mathbb E[Y(1)-Y(0)\\mid X=x] and the “four-feet-deep river”; regularization bias from naive outcome-prediction ML; double/debiased ML — nuisances g_0(X),m_0(X), Neyman orthogonality, cross-fitting; causal forests / GRF with causal splitting and honest estimation for valid CIs; policy learning \\pi^*(x)=\\mathbf 1\\{\\tau(x)\\ge0\\} as cost-sensitive classification; and the cautions — ML doesn’t fix identification (needs unconfoundedness + overlap), fairness, and interpretability-vs-mechanism.\nJacobucci, Grimm & Zhang, ML for Social & Behavioral Research — heterogeneous effects for social science, encoded bias/fairness, and interpretability tools (SHAP, distillation) describing the model, not the mechanism.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#appendix-the-mathematics",
+    "href": "content/05-causal-inference/causal-machine-learning.html#appendix-the-mathematics",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nThe orthogonalised (partialling-out) estimator. In the partially linear model Y=\\theta D+g_0(X)+\\varepsilon, D=m_0(X)+v, define residuals \\tilde Y=Y-\\mathbb E[Y\\mid X] and \\tilde D=D-m_0(X). The DML estimate solves the Neyman-orthogonal moment \n\\hat\\theta=\\frac{\\frac1n\\sum_i \\tilde D_i\\,\\tilde Y_i}{\\frac1n\\sum_i \\tilde D_i^2},\n each nuisance fit on a separate fold. Orthogonality means \\partial_{\\eta}\\mathbb E[\\psi(W;\\theta,\\eta)]=0 at the truth: small errors \\hat g-g_0, \\hat m-m_0 enter the estimating equation only at second order, so \\hat\\theta stays \\sqrt n-consistent and asymptotically normal even though the nuisances converge slowly. This is FWL made robust to ML noise.\nHonest CATE intervals. Split the data: use sample \\mathcal I_1 to grow the tree (choose splits maximising \\sum_{\\text{children}} n_c\\,\\hat\\tau_c^2, effect heterogeneity), and the independent sample \\mathcal I_2 to estimate each leaf’s \\hat\\tau(x). Because the leaf was not chosen using \\mathcal I_2’s outcomes, the leaf estimate is (asymptotically) unbiased with a usable variance — the formal basis for confidence intervals on \\tau(x).\nPolicy value. A rule \\pi earns welfare V(\\pi)=\\mathbb E[\\,Y(\\pi(X))\\,]=\\mathbb E[\\,\\pi(X)\\tau(X)\\,]+\\text{const}, maximised pointwise by \\pi^*(x)=\\mathbf 1\\{\\tau(x)\\ge0\\} — treat exactly where the effect is positive; the regret of any rule is \\mathbb E[(\\pi^*-\\pi)\\tau], which weights mistakes by effect size.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#connections",
+    "href": "content/05-causal-inference/causal-machine-learning.html#connections",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: interpretability & ML (the DML/causal- forest preview, now full), regularization and cross-validation (the bias they cause and cure here), FWL partialling-out, and matching/overlap (the identification ML still needs).\nCloses: the summit — from the fundamental problem to estimating who benefits and whom to treat.\nLeads to: Part VI · doing research in the world, where these estimates meet measurement, incentives, fairness, and the tyranny of metrics.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/causal-machine-learning.html#study-with-notebooklm",
+    "href": "content/05-causal-inference/causal-machine-learning.html#study-with-notebooklm",
+    "title": "Causal Machine Learning: Heterogeneous Effects",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Define the CATE \\tau(x) and explain why it matters more than the ATE for policy (‘never cross a river that is on average four feet deep’).”\n“Why does naively applying prediction-focused ML to the outcome give biased treatment-effect estimates (regularization bias)?”\n“Explain double/debiased machine learning: nuisance functions, Neyman orthogonality, and cross-fitting. How does each remove a source of bias?”\n“What are causal forests, causal splitting, and honest estimation, and why is honesty needed for valid confidence intervals on \\tau(x)?”\n“What is policy learning (\\pi^*(x)=\\mathbf 1\\{\\tau(x)\\ge0\\}), and what cautions remain — why does ML not fix identification?”",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Causal Machine Learning: Heterogeneous Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "",
+    "text": "A DAG is a diagram of what causes what, drawn before you touch the data. Its power is that it turns the murky question “which variables should I control for?” into a mechanical rule. Confounders open backdoor paths that must be closed; colliders are dams that you must not open. The same graph that justifies a control exposes the controls that would manufacture bias — Part III’s good-vs-bad controls, now derivable rather than memorised.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html#why-it-matters",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html#why-it-matters",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "Why it matters",
+    "text": "Why it matters\nRandomization is the gold standard, but most questions can’t be randomized — you can’t assign people a gender, a recession, or a war. Then you must reason about confounding explicitly, and a directed acyclic graph is the tool for it: a transparent statement of your causal assumptions that makes the consequences for estimation derivable. (Cunningham 2021) DAGs are how Cunningham bridges theory and econometrics — and they settle, with a rule instead of an argument, the question that ended Part III: which controls help, and which ones hurt?",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html#reading-the-graph",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html#reading-the-graph",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "Reading the graph",
+    "text": "Reading the graph\nA DAG has three ingredients: (Cunningham 2021)\n\nNodes are random variables.\nDirected edges (arrows) are direct causal effects: D\\to Y means D causes Y. The absence of an arrow is the strongest claim of all — a firm theoretical commitment that no direct effect exists.\nAcyclic means no feedback loops: causation flows one way. Reverse causality isn’t drawn as a cycle but by splitting the variable across time (Y_1, Y_2), so the arrows still point forward.\n\nBehind the picture sits a structural causal model — a set of equations in which each variable is generated by its parents (the nodes with arrows into it) plus a random shock. (Cunningham 2021) The graph is the qualitative skeleton of that data-generating process; drawing it forces you to make your assumptions visible and falsifiable.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html#three-structures-and-how-association-flows",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html#three-structures-and-how-association-flows",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "Three structures, and how association flows",
+    "text": "Three structures, and how association flows\nEvery DAG is built from three elementary configurations, and association (statistical correlation, causal or not) flows through them differently: (Cunningham 2021)\n\nThe chain / mediator D\\to M\\to Y. D affects Y only through M. Association flows along the chain — that flow is the causal effect.\nThe fork / confounder D\\leftarrow Z\\to Y. A common cause Z drives both. This creates a non-causal association between D and Y: they move together because they share an origin, not because one causes the other.\nThe collider D\\to C\\leftarrow Y. Two arrows collide into a common effect. Here D and Y are independent — until you condition on C.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html#paths-backdoors-and-the-dam",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html#paths-backdoors-and-the-dam",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "Paths, backdoors, and the dam",
+    "text": "Paths, backdoors, and the dam\nA path is any sequence of edges connecting D and Y, ignoring arrow direction. The one you want is the direct/causal path D\\to Y. The troublemakers are backdoor paths — any path that leaves D through an incoming arrow, like D\\leftarrow Z\\to Y. (Cunningham 2021) A backdoor path is a pipe through which confounding flows, manufacturing correlation that isn’t cause.\nWhether a path transmits association depends on what’s on it — the intuition of d-separation: (Cunningham 2021)\n\nA path through a confounder (a fork) is open: association flows. Conditioning on that confounder blocks it.\nA path through a collider is naturally blocked. The collider is a dam: it stops the flow — unless you condition on it (or its descendant), which opens the dam and lets spurious association through.\n\nThis is the crucial asymmetry. Conditioning closes forks but opens colliders. Controlling is not free; it changes which pipes are open.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html#the-backdoor-criterion-the-rule-for-controls",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html#the-backdoor-criterion-the-rule-for-controls",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "The backdoor criterion: the rule for controls",
+    "text": "The backdoor criterion: the rule for controls\nPutting it together gives the backdoor criterion, the formal rule for what to condition on: a set of variables identifies the causal effect of D on Y if it (Cunningham 2021)\n\ncloses every backdoor path (block each one by conditioning on a non-collider along it), and\nopens no new path (never condition on a collider or a descendant of one).\n\nSatisfy it and the leftover association between D and Y is purely causal. This is selection-on-observables stated as graph surgery: the “controls” you need are exactly the ones that shut the backdoors, and not one variable more.\n\n\nShow the figure code\nimport matplotlib.pyplot as plt\n\nfig, ax = plt.subplots(figsize=(7.0, 4.2))\npos = {\"D\": (0.15, 0.30), \"Y\": (0.85, 0.30), \"Z\": (0.50, 0.82), \"C\": (0.50, 0.04)}\nfor name, (x, y) in pos.items():\n    color = {\"D\": \"#1f3a5f\", \"Y\": \"#1f3a5f\", \"Z\": \"#c0392b\", \"C\": \"#d98a29\"}[name]\n    ax.add_patch(plt.Circle((x, y), 0.055, color=color, zorder=3))\n    ax.text(x, y, name, color=\"white\", ha=\"center\", va=\"center\",\n            fontsize=12, fontweight=\"bold\", zorder=4)\n\ndef arrow(a, b, color, style=\"-|&gt;\", lw=2.0, rad=0.0):\n    ax.annotate(\"\", xy=pos[b], xytext=pos[a],\n                arrowprops=dict(arrowstyle=style, color=color, lw=lw,\n                                shrinkA=16, shrinkB=16,\n                                connectionstyle=f\"arc3,rad={rad}\"), zorder=2)\n\narrow(\"D\", \"Y\", \"#1f8a4c\", lw=2.8)      # causal effect of interest\narrow(\"Z\", \"D\", \"#c0392b\")               # confounder -&gt; D\narrow(\"Z\", \"Y\", \"#c0392b\")               # confounder -&gt; Y  (backdoor path D&lt;-Z-&gt;Y)\narrow(\"D\", \"C\", \"#d98a29\")               # D -&gt; collider\narrow(\"Y\", \"C\", \"#d98a29\")               # Y -&gt; collider\n\nax.text(0.50, 0.40, \"causal effect\", color=\"#1f8a4c\", fontsize=9, ha=\"center\")\nax.text(0.50, 0.62, \"backdoor path (close it: condition on Z)\", color=\"#c0392b\",\n        fontsize=8.5, ha=\"center\")\nax.text(0.50, 0.13, \"collider — a dam (do NOT condition on C)\", color=\"#b9791f\",\n        fontsize=8.5, ha=\"center\")\nax.set_xlim(0, 1); ax.set_ylim(-0.05, 1.0); ax.axis(\"off\")\nax.set_title(\"Confounder vs collider: what to control for\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A DAG with both a confounder and a collider. The causal effect of interest is D → Y (green). Z is a confounder opening the backdoor path D ← Z → Y (red), which you must close by conditioning on Z. C is a collider (D → C ← Y): it sits on no backdoor path and is naturally blocked, so conditioning on it would OPEN a spurious path and manufacture bias. The backdoor criterion here: control for Z, never for C.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html#good-vs-bad-controls-now-derivable",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html#good-vs-bad-controls-now-derivable",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "Good vs bad controls, now derivable",
+    "text": "Good vs bad controls, now derivable\nThe graph delivers Part III’s control rules as theorems: (Cunningham 2021)\n\nConditioning on a mediator M in D\\to M\\to Y blocks the very causal flow you want, stripping out the indirect effect and under-stating the total impact. This is over-control — the occupation-in-the-wage-regression mistake, now visibly a blocked chain.\nConditioning on a collider C opens a closed path and invents association between variables that were independent. This is selection/collider bias — the gravest control error.\n\n\n\n\n\n\n\nNoteTwo colliders worth memorising (Cunningham)\n\n\n\nGoogle and the gender pay gap. Google argued that once you control for occupation (plus location, tenure, role), the gender gap disappears. But occupation is a collider: discrimination affects which jobs women get (\\text{gender}\\to\\text{occupation}) and so does unobserved ability (\\text{ability}\\to\\text{occupation}). Conditioning on occupation opens a path between gender and ability and can mask real discrimination. The “control” that made the gap vanish is exactly the one the backdoor criterion forbids. (Cunningham 2021)\nThe movie-star collider (Cunningham, crediting Gabriel Rossman). Why do film stars seem to be either gorgeous or talented, rarely both? In the population, beauty and talent are independent. But stardom is a collider: \\text{beauty}\\to\\text{star}\\leftarrow\\text{talent}. Look only at stars (condition on the collider) and a spurious negative correlation appears — an untalented star must be beautiful, a plain star must be talented. Pure selection bias, manufactured by conditioning. (Cunningham 2021)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html#common-pitfalls",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html#common-pitfalls",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\n“Control for everything you have.” Each control can close a backdoor or open a collider. Conditioning is surgery, not insurance. (Cunningham 2021)\nConditioning on a collider (or its descendant). It creates association from nothing — the subtlest bias in applied work, and invisible to R^2 or significance. (Cunningham 2021)\nControlling for a mediator when you want the total effect. You block the channel you meant to measure and under-state the effect. (Cunningham 2021)\nDrawing the DAG to fit the result. The graph encodes assumptions; its missing arrows are claims. Draw it from theory, before estimation, and defend the absences. (Cunningham 2021)\nBelieving a DAG removes unobserved confounding. It only tells you what to condition on given the assumed structure; an omitted common cause you didn’t draw is still a backdoor left open. (Cunningham 2021)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html#from-the-sources",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html#from-the-sources",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nCunningham, Causal Inference: The Mixtape — DAGs as a causal language bridging theory and econometrics; nodes/arrows, the meaning of a missing arrow, acyclicity, and the underlying structural causal model; the three structures — chain/mediator D\\to M\\to Y, fork/confounder D\\leftarrow Z\\to Y, collider D\\to C\\leftarrow Y; paths, backdoor paths, open vs blocked and colliders as dams (d-separation); the backdoor criterion; over-control from conditioning on a mediator and selection bias from conditioning on a collider; the Google/occupation gender-gap example and the movie-star (beauty → star ← talent) collider.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html#appendix-the-mathematics",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html#appendix-the-mathematics",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nThe backdoor adjustment formula. If a set Z satisfies the backdoor criterion for D\\to Y, the causal effect is identified by conditioning then averaging over Z: \n\\Pr(Y\\mid \\operatorname{do}(D=d)) = \\sum_{z}\\Pr(Y\\mid D=d, Z=z)\\,\\Pr(Z=z),\n where \\operatorname{do}(D=d) denotes setting D by intervention (not merely observing it). In means, \\text{ATE}=\\mathbb E_Z\\big[\\mathbb E[Y\\mid D=1,Z]-\\mathbb E[Y\\mid D=0,Z]\\big] — exactly the subclassification estimator of the next entry. The criterion is what licenses writing the causal \\operatorname{do}-probability as ordinary conditional probabilities you can estimate.\nWhy a collider induces dependence (algebra). Let D\\perp Y marginally and C=\\alpha D+\\beta\nY+\\varepsilon. Then \\operatorname{Cov}(D,Y)=0, but conditional on C=c we have \\beta Y \\approx c-\\alpha D-\\varepsilon, so within a stratum of C a higher D forces a lower Y — a nonzero conditional covariance created purely by conditioning. This is the same algebra as the collider figure in Part III, now located on the graph.\nAcyclicity and solvability. Acyclicity guarantees the structural equations can be ordered topologically and solved recursively (each variable from its parents), so the joint distribution factorises as \\prod_i \\Pr(X_i\\mid \\text{parents}(X_i)) — the Markov factorisation that makes d-separation read off the graph correspond to real conditional independence in the data.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html#connections",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html#connections",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: regression and causality (good/bad controls and collider bias, now derived) and potential outcomes (the backdoor adjustment is the conditional version of the selection-bias fix).\nLeads to: matching & propensity scores (estimating the backdoor adjustment when the criterion holds) and the quasi-experimental designs (IV, RD, DiD) for when it doesn’t — when an unblockable backdoor remains.\nReappears in: the IV graph (an instrument Z\\to D\\to Y with no Z\\to Y arrow) and the bad-control warnings throughout Part V.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/directed-acyclic-graphs.html#study-with-notebooklm",
+    "href": "content/05-causal-inference/directed-acyclic-graphs.html#study-with-notebooklm",
+    "title": "Directed Acyclic Graphs (DAGs)",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“What do nodes, arrows, and missing arrows mean in a DAG, and what does ‘acyclic’ encode about reverse causality?”\n“Define the chain (mediator), fork (confounder), and collider, and explain how association flows through each.”\n“What is a backdoor path, and what does it mean for a path to be open or blocked (d-separation)? Why is a collider a ‘dam’?”\n“State the backdoor criterion and explain why you must not condition on a collider or its descendant.”\n“Use Cunningham’s Google/occupation and movie-star examples to explain how conditioning on a collider creates spurious association.”",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Directed Acyclic Graphs (DAGs)"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html",
+    "href": "content/05-causal-inference/instrumental-variables.html",
+    "title": "Instrumental Variables",
+    "section": "",
+    "text": "Matching fails the moment an unobserved confounder drives both treatment and outcome — exactly the case the bridge warned is untestable. Instrumental variables sidesteps it entirely. Find a variable that nudges the treatment but has no other path to the outcome, and the slice of treatment variation it creates is as-good-as-random. IV throws away all the contaminated variation and keeps only that clean slice — buying identification at the price of estimating an effect for a particular subpopulation.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html#why-it-matters",
+    "href": "content/05-causal-inference/instrumental-variables.html#why-it-matters",
+    "title": "Instrumental Variables",
+    "section": "Why it matters",
+    "text": "Why it matters\nEvery selection-on-observables method assumes you measured the confounders. When you didn’t — ability in the wage equation, health in the income equation — those methods stay biased, with no test to warn you. (Angrist and Pischke 2009) IV is the first design in this Part that defeats unobserved confounding, and it does so with an idea that recurs everywhere after: isolate a source of variation in the treatment that is exogenous by argument, and use only that. (Cunningham 2021) It is the engine beneath noncompliance, fuzzy RD, and many natural experiments — learn it once, recognise it for the rest of the summit.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html#the-endogeneity-problem",
+    "href": "content/05-causal-inference/instrumental-variables.html#the-endogeneity-problem",
+    "title": "Instrumental Variables",
+    "section": "The endogeneity problem",
+    "text": "The endogeneity problem\nA regressor D is endogenous when it is correlated with the error term, \\operatorname{Cov}(D,u)\\ne\n0 — from omitted variables, measurement error, or simultaneity. Then OLS is biased and inconsistent: it cannot separate D’s effect on Y from the influence of the unobserved u that moves both. (Angrist and Pischke 2009) IV’s job is to recover the causal effect despite that correlation.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html#what-makes-an-instrument-valid",
+    "href": "content/05-causal-inference/instrumental-variables.html#what-makes-an-instrument-valid",
+    "title": "Instrumental Variables",
+    "section": "What makes an instrument valid",
+    "text": "What makes an instrument valid\nAn instrument Z is a variable that perturbs D for reasons unrelated to u. Validity rests on two conditions (plus an independence premise): (Angrist and Pischke 2009; Cunningham 2021)\n\nRelevance (the first stage). Z actually moves the treatment: \\operatorname{Cov}(Z,D)\\ne0. This is testable — regress D on Z and look. A strong first stage is non-negotiable.\nExclusion restriction. Z affects Y only through D — no direct path, no other channel: \\operatorname{Cov}(Z,u)=0. This is not testable; it is an argument about the world.\nIndependence / as-good-as-random. Z is unrelated to the unobserved confounders, as if randomly assigned.\n\nThe whole design is one DAG: \\;Z\\to D\\to Y\\; with an unobserved u creating D\\leftarrow u\\to Y — and no arrow Z\\to Y. (Cunningham 2021) That missing arrow is the exclusion restriction; it is a collider-free assumption you draw, not test, and the entire credibility of an IV study lives or dies on defending it.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html#how-iv-estimates-wald-and-2sls",
+    "href": "content/05-causal-inference/instrumental-variables.html#how-iv-estimates-wald-and-2sls",
+    "title": "Instrumental Variables",
+    "section": "How IV estimates: Wald and 2SLS",
+    "text": "How IV estimates: Wald and 2SLS\nWith a single binary instrument and no covariates, the estimator is the Wald ratio — the reduced form (effect of Z on Y) divided by the first stage (effect of Z on D): \n\\rho_{\\text{Wald}}=\\frac{\\mathbb E[Y\\mid Z=1]-\\mathbb E[Y\\mid Z=0]}{\\mathbb E[D\\mid Z=1]-\\mathbb E[D\\mid Z=0]}.\n The intuition is a unit-conversion: the instrument shifts the outcome by the numerator, but only because it shifted treatment by the denominator; dividing rescales “effect of the nudge” into “effect of the treatment.” (Angrist and Pischke 2009) (This is exactly the LATE formula \\text{ITT}_Y/\\text{ITT}_D — random assignment is the perfect instrument.)\nTwo-stage least squares (2SLS) generalises it to covariates and multiple instruments: (Angrist and Pischke 2009)\n\nFirst stage: regress D on Z (and controls X); keep the fitted values \\hat D — the part of treatment driven by the instrument, purged of the variation correlated with u.\nSecond stage: regress Y on \\hat D (and X). The coefficient on \\hat D is the IV estimate.\n\nThe slogan: 2SLS uses only the treatment variation the instrument explains, discarding the endogenous remainder. The figure shows the payoff — OLS is dragged off by the confounder; IV, riding only the instrument’s clean variation, recovers the truth.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(8)\nn = 4000\nbeta = 1.0                                   # true causal effect of D on Y\nZ = rng.normal(0, 1, n)                      # the instrument\nu = rng.normal(0, 1, n)                      # unobserved confounder\nD = 0.8 * Z + 1.2 * u + rng.normal(0, 0.5, n)   # treatment: moved by Z AND by u\nY = beta * D - 1.5 * u + rng.normal(0, 0.5, n)  # u also pushes Y (so OLS is biased)\n\nols = np.cov(D, Y, bias=True)[0, 1] / np.var(D)\nwald = (np.cov(Z, Y, bias=True)[0, 1]) / (np.cov(Z, D, bias=True)[0, 1])  # reduced form / first stage\n\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(7.8, 3.8))\n# scatter with OLS vs true line\nidx = rng.choice(n, 500, replace=False)\naxL.scatter(D[idx], Y[idx], s=8, color=\"#c9ccd1\", alpha=0.6)\nxs = np.linspace(D.min(), D.max(), 20)\naxL.plot(xs, ols * xs, color=\"#d98a29\", lw=2.4, label=f\"OLS slope = {ols:.2f}\")\naxL.plot(xs, beta * xs, color=\"#1f8a4c\", lw=2.2, ls=\"--\", label=f\"true effect = {beta:.2f}\")\naxL.set_xlabel(\"treatment D\"); axL.set_ylabel(\"outcome Y\")\naxL.set_title(\"OLS is pulled off by the confounder\"); axL.legend(fontsize=8, frameon=False)\n\nlabels = [\"true\", \"OLS\", \"IV (Wald)\"]\nvals = [beta, ols, wald]\ncolors = [\"#1f8a4c\", \"#d98a29\", \"#1f3a5f\"]\naxR.bar(labels, vals, color=colors)\nfor i, v in enumerate(vals):\n    axR.text(i, v + 0.03, f\"{v:.2f}\", ha=\"center\", fontsize=9)\naxR.axhline(beta, color=\"#1f8a4c\", ls=\"--\", lw=1.3)\naxR.set_ylabel(\"estimated effect\"); axR.set_title(\"IV lands on the truth\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: IV recovers what OLS can’t. The treatment D is confounded by an unobserved u that also raises Y, so OLS (orange) overstates the true effect (green dashed). The instrument Z shifts D without touching u; the Wald/2SLS estimator uses only that instrument-driven slice of variation — the reduced-form effect of Z on Y divided by its first-stage effect on D — landing on the true slope (blue). Bars compare the three estimates against truth.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html#what-iv-actually-estimates-late-and-compliers",
+    "href": "content/05-causal-inference/instrumental-variables.html#what-iv-actually-estimates-late-and-compliers",
+    "title": "Instrumental Variables",
+    "section": "What IV actually estimates: LATE and compliers",
+    "text": "What IV actually estimates: LATE and compliers\nHere is IV’s subtle, essential catch. When the effect varies across people, IV does not deliver the population ATE. It identifies the Local Average Treatment Effect (LATE) — the average effect for compliers, the people whose treatment status the instrument actually moved. (Angrist and Pischke 2009; Cunningham 2021) Sort the population by how they respond to Z:\n\nCompliers — take treatment iff the instrument says so (D_1=1, D_0=0). These, and only these, IV speaks for.\nAlways-takers (D_1=D_0=1) and never-takers (D_1=D_0=0) — the instrument doesn’t move them, so they contribute nothing to the estimate.\nDefiers (D_1=0, D_0=1) — do the opposite of the nudge.\n\nLATE requires monotonicity: the instrument pushes everyone it affects the same direction — no defiers. (Angrist and Pischke 2009) The consequence is interpretive, not technical: a draft-lottery estimate is the effect of service on men whom the lottery induced to serve, not on volunteers or the unfit. Different instruments for the same treatment estimate different LATEs, on different complier groups — which is why two valid IV studies can honestly disagree.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html#weak-instruments",
+    "href": "content/05-causal-inference/instrumental-variables.html#weak-instruments",
+    "title": "Instrumental Variables",
+    "section": "Weak instruments",
+    "text": "Weak instruments\nRelevance isn’t binary — instruments can be weak, barely correlated with D. The damage is double: 2SLS standard errors balloon, and the estimator suffers finite-sample bias back toward OLS, even in large samples — so a weak instrument quietly reintroduces the very bias IV was meant to remove. (Angrist and Pischke 2009) The standard guard is the first-stage F-statistic on the excluded instruments, with the rule of thumb F&gt;10 for the instrument to be considered strong enough. (Angrist and Pischke 2009) A weak first stage is the most common way an IV paper fails.\n\n\n\n\n\n\nNoteThree instruments that made the method famous\n\n\n\n\nThe Vietnam draft lottery (Angrist 1990). To estimate the effect of military service on earnings, use random draft-eligibility lottery numbers as an instrument for veteran status — random by construction (independence), and plausibly affecting earnings only through service (exclusion). For white men born in 1950 the first stage was 0.159 (eligibility raised service by ~16 points), and the IV estimate was an earnings loss of about $2,400. (Angrist and Pischke 2009)\nQuarter of birth (Angrist & Krueger 1991). Compulsory-schooling laws let those born later in the year leave school with slightly less education. Using quarter-of-birth dummies as instruments for schooling, the IV return to education was 8.9%, against an OLS 7.1%. (Angrist and Pischke 2009)\nDistance to college (Card 1995). Growing up near a four-year college instruments years of schooling: it raised education by 0.327 years (first-stage F=15.8), and the IV return was 13.2%, well above OLS’s 7.5%. (Cunningham 2021)\n\nThat IV often exceeds OLS is itself informative — consistent with attenuation from measurement error, or with LATE weighting toward high-return compliers.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html#common-pitfalls",
+    "href": "content/05-causal-inference/instrumental-variables.html#common-pitfalls",
+    "title": "Instrumental Variables",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nA shaky exclusion restriction. If Z affects Y through any channel besides D, IV is biased — and you can’t test it. Most IV critiques are exclusion critiques. (Angrist and Pischke 2009)\nWeak instruments. Low first-stage F inflates variance and biases 2SLS toward OLS. Report the first stage and its F; treat F&lt;10 as a red flag. (Angrist and Pischke 2009)\nReading IV as the ATE. Under heterogeneity it’s the LATE for compliers — a local effect on whoever the instrument moved, not the population. State the complier group. (Cunningham 2021)\nForgetting monotonicity. Defiers break the complier interpretation; argue the instrument pushes one way for everyone. (Angrist and Pischke 2009)\nInstrument-shopping. Trying many instruments until one “works” mines for a strong-but-invalid first stage; the exclusion restriction must be defended on substance, not chosen by fit. (Cunningham 2021)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html#from-the-sources",
+    "href": "content/05-causal-inference/instrumental-variables.html#from-the-sources",
+    "title": "Instrumental Variables",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nAngrist & Pischke, Mastering ’Metrics / Mostly Harmless — endogeneity and OLS inconsistency; relevance (first stage) and the exclusion restriction + independence; the Wald estimator (reduced form ÷ first stage) and 2SLS (fitted \\hat D); LATE and the complier/always-taker/never-taker/defier taxonomy with monotonicity; weak instruments and the first-stage F&gt;10 rule; the draft-lottery (first stage .159, \\approx-\\$2{,}400) and quarter-of-birth (.089 vs OLS .071) studies.\nCunningham, The Mixtape — the IV DAG Z\\to D\\to Y with D\\leftarrow u\\to Y and no Z\\to\nY; the exclusion restriction as the missing arrow; Card’s distance-to-college (+0.327 yrs, F=15.8, IV return 13.2\\% vs OLS 7.5\\%).",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html#appendix-the-mathematics",
+    "href": "content/05-causal-inference/instrumental-variables.html#appendix-the-mathematics",
+    "title": "Instrumental Variables",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nWhy the IV estimand is unbiased under exclusion. With structural equation Y=\\beta D+u, take the covariance with Z: \\operatorname{Cov}(Z,Y)=\\beta\\operatorname{Cov}(Z,D)+\\operatorname{Cov}(Z,u). Exclusion sets the last term to zero, so \n\\beta=\\frac{\\operatorname{Cov}(Z,Y)}{\\operatorname{Cov}(Z,D)},\n the population Wald/2SLS estimand. The denominator is relevance — if \\operatorname{Cov}(Z,D)\\to0 (weak instrument) the ratio explodes, which is why weak instruments wreck precision.\n2SLS as a projection. \\hat D=P_Z D where P_Z=Z(Z'Z)^{-1}Z' projects D onto the instrument space; the second stage gives \\hat\\beta_{2SLS}=(\\hat D'\\hat D)^{-1}\\hat D'Y. 2SLS keeps only the component of D in the column space of Z — the exogenous slice — and discards the rest.\nLATE theorem (Imbens–Angrist). Under independence, exclusion, relevance, and monotonicity, \n\\frac{\\mathbb E[Y\\mid Z=1]-\\mathbb E[Y\\mid Z=0]}{\\mathbb E[D\\mid Z=1]-\\mathbb E[D\\mid Z=0]}\n=\\mathbb E[\\,Y(1)-Y(0)\\mid \\text{complier}\\,].\n The denominator equals the share of compliers, so the ratio reweights the reduced form onto exactly the subpopulation the instrument moves — the formal reason IV is local.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html#connections",
+    "href": "content/05-causal-inference/instrumental-variables.html#connections",
+    "title": "Instrumental Variables",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: randomized experiments (LATE/compliers from noncompliance; assignment as the ideal instrument), DAGs (the exclusion restriction is a missing arrow), and endogeneity (the problem IV solves).\nLeads to: fuzzy regression discontinuity (the cutoff as an instrument) and the credibility-revolution natural experiments.\nReappears in: causal machine learning, where double/debiased ML orthogonalises treatment and instrument with flexible first stages.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/instrumental-variables.html#study-with-notebooklm",
+    "href": "content/05-causal-inference/instrumental-variables.html#study-with-notebooklm",
+    "title": "Instrumental Variables",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“What is endogeneity, and what two conditions (relevance, exclusion) must an instrument satisfy? Draw the IV DAG and locate each assumption.”\n“Derive the Wald estimator as reduced form over first stage, and explain the two stages of 2SLS.”\n“What is LATE? Define compliers, always-takers, never-takers, and defiers, and state the monotonicity assumption.”\n“What are weak instruments, why do they bias 2SLS and inflate variance, and what is the first-stage F&gt;10 rule?”\n“Explain the draft-lottery, quarter-of-birth, and distance-to-college studies — the instrument, the first stage, and why IV often exceeds OLS.”",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Instrumental Variables"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html",
+    "title": "Panel Data & Fixed Effects",
+    "section": "",
+    "text": "The deepest threat to causal claims is the confounder you can’t measure: ability, culture, managerial skill. If you observe the same units repeatedly, a near-magical trick becomes available — compare each unit only to itself across time. Anything about a unit that stays fixed, however unobservable, differences away. Fixed effects buys you control over an entire universe of time-invariant confounders for free — and the fine print is everything it cannot touch.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#why-it-matters",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#why-it-matters",
+    "title": "Panel Data & Fixed Effects",
+    "section": "Why it matters",
+    "text": "Why it matters\nMatching only handles observed confounders; IV and RD need special variation that isn’t always there. Panel data offers a different escape: by following units over time, you can sweep away all time-invariant unobservables at once. (Li 2023) This is the backbone of the “Furious Five” — difference-in-differences is a two-period fixed- effects design — and the most common way applied researchers defend against unobserved heterogeneity. (Wooldridge 2019)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#panel-data-and-the-heterogeneity-problem",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#panel-data-and-the-heterogeneity-problem",
+    "title": "Panel Data & Fixed Effects",
+    "section": "Panel data and the heterogeneity problem",
+    "text": "Panel data and the heterogeneity problem\nPanel (longitudinal) data follows the same cross-sectional units — people, firms, countries — across multiple periods. (Li 2023) Model the outcome with a unit-specific term: \nY_{it}=\\beta_0 + X_{it}\\beta + \\alpha_i + u_{it},\n where \\alpha_i is the individual fixed effect — all the unobserved, time-invariant traits of unit i (innate ability in a wage equation, managerial skill in a firm). (Li 2023) The danger: if \\alpha_i is correlated with X_{it}, pooled OLS is biased and inconsistent — heterogeneity bias. (Li 2023) (High-ability workers get more schooling and earn more; ignore ability and schooling’s coefficient inherits its effect — the ability bias of Part III, now with a repeated-measures cure.)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#the-within-fixed-effects-estimator",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#the-within-fixed-effects-estimator",
+    "title": "Panel Data & Fixed Effects",
+    "section": "The within (fixed-effects) estimator",
+    "text": "The within (fixed-effects) estimator\nThe fix is disarmingly simple. Demean every variable by its unit-specific mean over time — the within transformation: (Li 2023) \n(Y_{it}-\\bar Y_i) = (X_{it}-\\bar X_i)\\beta + (u_{it}-\\bar u_i).\n Because \\alpha_i is constant over time, its own mean is itself (\\bar\\alpha_i=\\alpha_i), so \\alpha_i-\\bar\\alpha_i=0 — it vanishes. (Li 2023) Every fixed trait, observed or not, is swept away, and \\beta is identified purely from within-unit variation over time: when a unit’s X changes, how does its Y change? The figure shows why this matters — pooled and within slopes can point in opposite directions.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(6)\nbeta_true = -1.0\nunits, T = 6, 8\ncolors = plt.cm.viridis(np.linspace(0.1, 0.9, units))\n\nfig, ax = plt.subplots(figsize=(7.2, 4.2))\nallX, allY = [], []\nfor u in range(units):\n    alpha = 4.0 * u                          # unit fixed effect, correlated with X below\n    x = alpha + rng.normal(0, 0.6, T)        # high-alpha units have high X (confounding)\n    y = alpha + beta_true * (x - alpha) + rng.normal(0, 0.3, T)  # within-unit slope is negative\n    ax.scatter(x, y, color=colors[u], s=22, zorder=3)\n    b = np.polyfit(x, y, 1)                   # within-unit fit\n    xs = np.linspace(x.min(), x.max(), 10)\n    ax.plot(xs, np.polyval(b, xs), color=colors[u], lw=1.6, alpha=0.8)\n    allX.append(x); allY.append(y)\n\nallX = np.concatenate(allX); allY = np.concatenate(allY)\nbp = np.polyfit(allX, allY, 1)               # pooled OLS\nxs = np.linspace(allX.min(), allX.max(), 20)\nax.plot(xs, np.polyval(bp, xs), \"k--\", lw=2.4, label=f\"pooled OLS slope = {bp[0]:+.2f}\")\nax.plot([], [], color=\"#555\", lw=1.6, label=f\"within-unit slope ≈ {beta_true:+.2f} (true)\")\nax.set_xlabel(\"X (e.g. schooling)\"); ax.set_ylabel(\"Y (e.g. wage)\")\nax.set_title(\"Fixed effects recovers the within-unit relationship\")\nax.legend(fontsize=8, frameon=False, loc=\"upper left\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Fixed effects vs pooled OLS (a Simpson’s-paradox structure). Each colour is one unit observed over several periods. Pooled OLS (dashed black) ignores units and fits across the cloud — sloping upward — because high-α units happen to have high X. But within every unit the relationship is negative: raise that unit’s X and its Y falls. The within (fixed-effects) estimator recovers the negative within-unit slope by demeaning each unit, immune to the time-invariant αᵢ that drives the misleading between-unit pattern.\n\n\n\n\n\nThere’s an immediate corollary: a variable that never changes for a unit — race, gender, distance to a fixed river — is demeaned to zero, so fixed effects cannot estimate its effect. (Li 2023) The very trick that kills the confounding also kills any time-invariant regressor of interest.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#first-differencing-and-a-cousin",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#first-differencing-and-a-cousin",
+    "title": "Panel Data & Fixed Effects",
+    "section": "First differencing, and a cousin",
+    "text": "First differencing, and a cousin\nAn alternative removes \\alpha_i by subtracting consecutive periods — first differencing: \\Delta Y_{it}=\\Delta X_{it}\\beta+\\Delta u_{it}. (Li 2023) With exactly two periods, FE and FD are numerically identical. (Li 2023) With more, the choice hinges on the errors: FE is more efficient if the idiosyncratic u_{it} are serially uncorrelated, while FD is better if they behave like a random walk (so differencing whitens them). (Li 2023)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#fixed-vs-random-effects-and-the-hausman-test",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#fixed-vs-random-effects-and-the-hausman-test",
+    "title": "Panel Data & Fixed Effects",
+    "section": "Fixed vs random effects, and the Hausman test",
+    "text": "Fixed vs random effects, and the Hausman test\nA random-effects (RE) model instead treats \\alpha_i as part of a composite error v_{it}=\\alpha_i+u_{it}. (Li 2023) The bargain: (Li 2023)\n\nRE is more efficient — it uses both within- and between-unit variation and can estimate time-invariant regressors — but only if the RE assumption holds: \\operatorname{Cov}(X_{it},\\alpha_i)=0, the individual effect is uncorrelated with the regressors.\nFE is consistent regardless, even when \\alpha_i correlates with X — exactly the case that matters for causal work in observational data, where such correlation is the norm.\n\nThe Hausman test adjudicates: under the null \\operatorname{Cov}(X,\\alpha)=0, FE and RE agree; reject the null → use FE (RE is inconsistent); fail to reject → RE for its efficiency. (Li 2023) For causal inference the default leans FE, because the whole reason you reached for panel data was a suspicion that \\alpha_i is correlated with treatment.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#two-way-fixed-effects",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#two-way-fixed-effects",
+    "title": "Panel Data & Fixed Effects",
+    "section": "Two-way fixed effects",
+    "text": "Two-way fixed effects\nAdd time fixed effects \\lambda_t to absorb shocks hitting all units in a period — a recession, a national policy: (Li 2023) \nY_{it}=\\alpha_i+\\lambda_t+X_{it}\\beta+u_{it}.\n Unit effects sweep away fixed cross-unit differences; time effects sweep away common temporal shocks — and with treatment as the regressor this is difference-in-differences, generalised to many units and periods. (Li 2023) (Which is also why the staggered-adoption critique applies to TWFE here too.)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#what-fixed-effects-cannot-fix",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#what-fixed-effects-cannot-fix",
+    "title": "Panel Data & Fixed Effects",
+    "section": "What fixed effects cannot fix",
+    "text": "What fixed effects cannot fix\nFE is powerful but not a magic bullet — and knowing its blind spots is the mark of using it well: (Li 2023)\n\nTime-varying confounders. FE removes only what’s constant. An unobserved trait that changes and correlates with treatment — a city’s shifting economic climate — still biases the estimate.\nReverse causality. If Y also causes X (crime → police spending), FE is biased like any OLS; demeaning doesn’t fix simultaneity.\nTime-invariant regressors. As noted, their effects are unidentifiable — they difference out.\n\nThe honest summary: fixed effects neutralise time-invariant unobserved confounding and nothing else. That single, large class of threats is what they buy — which is why FE is usually a foundation for a design (DiD, event study), not a complete identification strategy on its own.\n\n\n\n\n\n\nNoteWooldridge’s job-training grants\n\n\n\nDo training grants raise productivity? With a panel of 54 firms, a pure cross-section would be biased — grants may go to firms that are already well-run (high \\alpha_i). Fixed effects differences that fixed firm “skill” away, identifying the effect from firms’ changes across years: the 1988 grant is estimated to cut the 1989 scrap rate by ~34.4% (e^{-0.422}-1). (Wooldridge 2019) The effect is only credible because the same firms were watched over time.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#common-pitfalls",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#common-pitfalls",
+    "title": "Panel Data & Fixed Effects",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nBelieving FE removes all confounding. It removes only time-invariant unobservables; time-varying confounders and reverse causality remain. (Li 2023)\nTrying to estimate a time-invariant effect with FE. Gender, race, fixed geography difference out — use RE (if its assumption is defensible) or another design. (Li 2023)\nDefaulting to random effects for efficiency. RE is inconsistent if \\alpha_i correlates with X — usually the case in observational data. Run Hausman; lean FE for causal claims. (Li 2023)\nIgnoring serial correlation. It changes FE-vs-FD efficiency and demands clustered standard errors; un-clustered SEs badly overstate precision in panels. (Li 2023)\nToo little within-variation. If treatment barely changes within units, FE has almost nothing to work with and estimates are imprecise. (Li 2023)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#from-the-sources",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#from-the-sources",
+    "title": "Panel Data & Fixed Effects",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nDong Li, Panel Data Econometrics — panel data and unobserved time-invariant heterogeneity \\alpha_i; the model Y_{it}=X_{it}\\beta+\\alpha_i+u_{it} and heterogeneity bias; the within (fixed-effects) estimator via demeaning; first differencing and FE=FD at T=2; random effects and its \\operatorname{Cov}(X,\\alpha)=0 assumption, efficiency-vs-consistency, and the Hausman test; two-way fixed effects; the limits — time-varying confounders, reverse causality, time-invariant regressors; and DiD as a two-period panel FE model.\nWooldridge, Introductory Econometrics — the within estimator and the job-training grants / scrap-rate panel (54 firms; 1988 grant \\Rightarrow ~-34.4\\% scrap rate in 1989).",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#appendix-the-mathematics",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#appendix-the-mathematics",
+    "title": "Panel Data & Fixed Effects",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nThe within transformation kills \\alpha_i. Average the model over t for unit i: \\bar Y_i=\\beta_0+\\bar X_i\\beta+\\alpha_i+\\bar u_i (since \\bar\\alpha_i=\\alpha_i). Subtract from the level equation: \nY_{it}-\\bar Y_i=(X_{it}-\\bar X_i)\\beta+(u_{it}-\\bar u_i),\n in which \\alpha_i and \\beta_0 have disappeared. OLS on the demeaned data is the FE estimator \\hat\\beta_{FE}=\\big(\\sum_{it}\\ddot X_{it}\\ddot X_{it}'\\big)^{-1}\\sum_{it}\\ddot X_{it}\\ddot Y_{it} with \\ddot X_{it}=X_{it}-\\bar X_i — a regression on deviations from unit means, so only within-unit covariation identifies \\beta.\nFE = FD at T=2. With two periods, demeaning gives X_{i2}-\\bar X_i=\\tfrac12\\Delta X_i and likewise for Y; the factor \\tfrac12 cancels in the OLS ratio, so \\hat\\beta_{FE}=\\hat\\beta_{FD} exactly. This is why the 2×2 DiD can be read as either.\nWhy Hausman points to FE on rejection. Under H_0:\\operatorname{Cov}(X,\\alpha)=0, both estimators are consistent but RE is efficient; under H_1 only FE is consistent. The statistic (\\hat\\beta_{FE}-\\hat\\beta_{RE})'[\\operatorname{Var}(\\hat\\beta_{FE})-\\operatorname{Var}(\\hat\\beta_{RE})]^{-1}(\\hat\\beta_{FE}-\\hat\\beta_{RE}) is \\chi^2 under H_0; a large value signals the estimators disagree, indicting RE’s assumption and favouring FE.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#connections",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#connections",
+    "title": "Panel Data & Fixed Effects",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: omitted-variable bias (the unobserved \\alpha_i FE removes), multiple regression (FE is OLS on dummies/deviations), and clustering (panel SEs).\nLeads to: difference-in-differences (two-way FE with a treatment timing) and synthetic control (when you have one treated unit and FE/DiD has no clean control group).\nReappears in: virtually all applied field work on administrative panels.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/panel-and-fixed-effects.html#study-with-notebooklm",
+    "href": "content/05-causal-inference/panel-and-fixed-effects.html#study-with-notebooklm",
+    "title": "Panel Data & Fixed Effects",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“What is panel data, and how does the individual fixed effect \\alpha_i create heterogeneity bias in pooled OLS?”\n“Explain the within (fixed-effects) estimator: the demeaning transformation, why \\alpha_i vanishes, and why only within-unit variation identifies \\beta.”\n“How does first differencing remove \\alpha_i, and when does it equal fixed effects?”\n“Contrast random effects and fixed effects (assumptions, efficiency, consistency) and explain the Hausman test.”\n“What can fixed effects NOT fix (time-varying confounders, reverse causality, time-invariant variables), and how is DiD a two-period fixed-effects design?”",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Furious Five",
+      "Panel Data & Fixed Effects"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html",
+    "href": "content/05-causal-inference/randomized-experiments.html",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "",
+    "text": "Selection bias is the difference between the treated and control groups in their untreated state. Randomization annihilates it: if a coin decides who is treated, treatment status carries no information about anyone’s potential outcomes, so the groups are comparable by construction. A simple difference in means then estimates the average effect — no controls, no model, no assumption you can’t defend. This is the benchmark; every observational design in this Part is an argument for why it is as if you ran this experiment.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html#why-it-matters",
+    "href": "content/05-causal-inference/randomized-experiments.html#why-it-matters",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "Why it matters",
+    "text": "Why it matters\nThe last entry reduced causal inference to one obstacle: the naive comparison equals the effect plus selection bias, and you can’t see the selection-bias term because it lives in unobserved counterfactuals. A randomized experiment is the gold standard because it makes that term zero by design — severing the statistical link between treatment and every other variable that predicts the outcome, observed or unobserved. (Gerber and Green 2012) Nothing else in this Part achieves that for free; everything else assumes a version of it. Understanding exactly why randomization works tells you exactly what each later method must imitate.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html#independence-the-engine",
+    "href": "content/05-causal-inference/randomized-experiments.html#independence-the-engine",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "Independence: the engine",
+    "text": "Independence: the engine\nRandom assignment — a coin, a lottery, a random-number generator — makes the treatment indicator D statistically independent of the potential outcomes and all background traits X: \n\\big(Y(0),\\,Y(1),\\,X\\big)\\ \\perp\\ D.\n Knowing whether someone was treated tells you nothing about what their outcome would have been. (Gerber and Green 2012) Feed that into the selection-bias decomposition: independence forces \\mathbb E[Y(0)\\mid D=1]=\\mathbb E[Y(0)\\mid D=0], so the selection-bias term is zero — and, because it also makes \\text{ATT}=\\text{ATU}=\\text{ATE}, the heterogeneous-effect term vanishes too. (Gerber and Green 2012) What remains is clean: \n\\mathbb E[Y\\mid D=1]-\\mathbb E[Y\\mid D=0]\\;=\\;\\text{ATE}.\n The difference in observed group means identifies the average treatment effect for the whole population. (Gerber and Green 2012) That is the entire magic, and it is why the design needs no control variables: randomization balances everything at once, including the confounders you never thought to measure.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html#balance-the-observable-signature",
+    "href": "content/05-causal-inference/randomized-experiments.html#balance-the-observable-signature",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "Balance: the observable signature",
+    "text": "Balance: the observable signature\nYou can’t check independence directly (it concerns unobserved counterfactuals), but it has a visible fingerprint: covariate balance. Since assignment is random, every pre-treatment characteristic should have the same distribution across arms — \\mathbb E[X\\mid D=1]=\\mathbb E[X\\mid D=0]. (Gerber and Green 2012) So researchers report a balance table: group means of age, gender, baseline outcomes, and so on, treated vs control. Large systematic gaps signal a botched randomization; small, chance-sized ones are expected. A joint check regresses assignment on all covariates and tests their joint significance with an F-statistic, ideally judged by randomization inference (below). (Gerber and Green 2012) Balance is necessary, not sufficient — it speaks only to observed covariates — but a clean balance table is the first thing a credible experiment shows.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html#the-estimator-and-its-uncertainty",
+    "href": "content/05-causal-inference/randomized-experiments.html#the-estimator-and-its-uncertainty",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "The estimator and its uncertainty",
+    "text": "The estimator and its uncertainty\nThe estimator is just the difference in means, \\hat\\theta=\\bar Y_{\\text{treat}}-\\bar\nY_{\\text{control}}, and it is unbiased: averaged over all the random assignments the procedure could have produced, it recovers the true ATE. (Gerber and Green 2012) Unbiased is not the same as precise — any single experiment scatters around the truth by sampling variability, especially in small samples, which is why design (below) and adequate n matter. (Gerber and Green 2012)\nHow to get a p-value? The corpus draws the classic distinction between Fisher and Neyman: (Gerber and Green 2012)\n\nFisher’s sharp null asserts no effect for anyone: Y_i(1)=Y_i(0) for every unit. Under that null both potential outcomes are known for everyone (they’re equal to the observed Y_i), so you can recompute the estimate under every possible reassignment of the treatment label and see how often chance alone produces something as extreme as what you saw. This is randomization inference — a permutation test that needs no Normal approximation. (Gerber and Green 2012)\nNeyman targets the ATE in a population and supplies (conservative) standard errors that allow the effect to vary across units, instead of assuming it is zero for all. (Gerber and Green 2012)\n\nThe figure runs Fisher’s procedure: shuffle the treatment labels thousands of times to build the sharp-null distribution, then locate the experiment’s actual estimate in its tail.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(11)\nn = 120\n# One realized experiment: a true positive effect of ~0.6.\nbase = rng.normal(0, 1, n)\nD = rng.permutation(np.r_[np.ones(n // 2), np.zeros(n // 2)]).astype(bool)\ny = base + 0.6 * D + rng.normal(0, 1, n)\nobs = y[D].mean() - y[~D].mean()\n\n# Sharp-null permutation distribution: reshuffle who is \"treated\".\nperms = 5000\nm = D.sum()\nnull = np.empty(perms)\nidx = np.arange(n)\nfor b in range(perms):\n    t = rng.permutation(idx)[:m]\n    mask = np.zeros(n, bool); mask[t] = True\n    null[b] = y[mask].mean() - y[~mask].mean()\n\np_two = np.mean(np.abs(null) &gt;= abs(obs))\n\nfig, ax = plt.subplots(figsize=(7, 4.0))\nax.hist(null, bins=45, color=\"#c9ccd1\", edgecolor=\"white\")\nax.axvline(obs, color=\"#c0392b\", lw=2.2)\nax.text(obs, ax.get_ylim()[1]*0.9, f\"  observed = {obs:+.2f}\", color=\"#c0392b\", fontsize=9)\nax.text(0.02, 0.86, f\"randomization p = {p_two:.3f}\", transform=ax.transAxes,\n        fontsize=10, color=\"#1f3a5f\", fontweight=\"bold\")\nax.set_xlabel(\"difference in means under reshuffled assignment\")\nax.set_ylabel(\"frequency\")\nax.set_title(\"Fisher's sharp-null distribution vs the observed effect\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Randomization inference (Fisher). Under the sharp null of no effect for anyone, the treatment label is arbitrary, so re-shuffling it across units regenerates the distribution of the difference-in-means that chance alone could produce (grey). The actual experiment’s estimate (red) sits far in the tail — the share of permutations at least as extreme is the exact randomization p-value, computed with no distributional assumption.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html#design-buy-precision-before-you-run",
+    "href": "content/05-causal-inference/randomized-experiments.html#design-buy-precision-before-you-run",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "Design: buy precision before you run",
+    "text": "Design: buy precision before you run\nRandomization removes bias; smart design cuts variance. Two standard moves: (Gerber and Green 2012)\n\nBlock (stratified) randomization. Partition units into homogeneous blocks on strong pre-treatment predictors (school, region, baseline score), then randomize within each block. This “blocks out” unlucky draws that would imbalance an important covariate, narrowing the sampling distribution — the experimental cousin of adding a good control. (Gerber and Green 2012)\nClustered randomization. Sometimes you must assign whole groups — classrooms, villages, precincts — together, for logistics or to contain spillovers. The price is precision: units within a cluster are correlated, which inflates standard errors (the clustering problem from regression, by design rather than accident). (Gerber and Green 2012)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html#when-reality-intrudes-attrition-and-noncompliance",
+    "href": "content/05-causal-inference/randomized-experiments.html#when-reality-intrudes-attrition-and-noncompliance",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "When reality intrudes: attrition and noncompliance",
+    "text": "When reality intrudes: attrition and noncompliance\nTwo departures from the ideal experiment are common enough to be their own literatures: (Gerber and Green 2012)\nAttrition — outcomes go missing for some subjects. If missingness is related to potential outcomes (the most disgruntled controls drop out), the difference in means is biased even though assignment was random. Defences: define the estimand on always-reporters, or compute extreme-value bounds that fill the missing outcomes with worst/best cases and check whether the conclusion survives. (Gerber and Green 2012)\nNoncompliance — some assigned to treatment go untreated, and vice versa. Now there are two distinct effects: (Gerber and Green 2012)\n\nIntention-to-treat (ITT) — the effect of being assigned/offered treatment, regardless of uptake. It is unbiased (assignment was random) and is exactly what a policymaker who can only offer a program wants — but it is diluted by anyone who didn’t comply.\nLocal Average Treatment Effect (LATE / CACE) — the effect of actually taking treatment, for the compliers (those who take it if and only if assigned). It is recovered by scaling ITT up by the compliance rate: \\text{LATE} = \\text{ITT}_{Y}/\\text{ITT}_{D} (the outcome effect over the take-up effect). (Gerber and Green 2012)\n\nThe framework sorts everyone into compliers, never-takers, always-takers, and defiers, and the LATE result needs monotonicity — assignment never pushes anyone the wrong way, i.e. no defiers. (Gerber and Green 2012) (This complier logic is exactly the machinery of instrumental variables — random assignment is the perfect instrument.)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html#common-pitfalls",
+    "href": "content/05-causal-inference/randomized-experiments.html#common-pitfalls",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nAdding controls to “improve” an experiment. Randomization already balances everything in expectation; the diff-in-means is unbiased on its own. Use covariates for precision (blocking, regression adjustment), not to fix bias. (Gerber and Green 2012)\nTreating a balance failure as fatal — or a balance pass as proof. Some imbalance is chance; balance concerns only observed covariates. It’s evidence about the randomization, not a guarantee of unconfoundedness. (Gerber and Green 2012)\nIgnoring clustering in the standard errors. Assigning groups but analysing individuals as if independent understates uncertainty, sometimes massively. (Gerber and Green 2012)\nReporting per-protocol instead of ITT under noncompliance. Dropping or reclassifying noncompliers reintroduces selection bias. Report ITT; scale to LATE only under monotonicity. (Gerber and Green 2012)\nLetting attrition slide. Differential dropout is selection bias wearing a lab coat. Bound it. (Gerber and Green 2012)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html#from-the-sources",
+    "href": "content/05-causal-inference/randomized-experiments.html#from-the-sources",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nGerber & Green, Field Experiments — randomization as the gold standard; the independence assumption (Y(0),Y(1),X)\\perp D zeroing the selection-bias term so diff-in-means identifies the ATE; covariate balance and the joint F balance check; unbiasedness of the difference in means; Fisher’s sharp null + permutation/randomization inference vs the Neyman ATE approach with conservative SEs; block and clustered randomization (precision up; SEs up); attrition (bias + extreme-value bounds, always-reporters); noncompliance with ITT, LATE/CACE =\\text{ITT}_Y/\\text{ITT}_D, the complier/never-taker/always-taker/defier taxonomy, and monotonicity (no defiers).\nMoffatt, Experimetrics — experimental design and analysis as an econometric practice (randomization inference, design for precision).",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html#appendix-the-mathematics",
+    "href": "content/05-causal-inference/randomized-experiments.html#appendix-the-mathematics",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nWhy independence identifies the ATE. Independence gives \\mathbb E[Y\\mid D=1]=\\mathbb E[Y(1)\\mid D=1]=\\mathbb E[Y(1)] and likewise \\mathbb E[Y\\mid D=0]=\\mathbb E[Y(0)], since conditioning on D is uninformative about the potential outcomes. Subtracting, \n\\mathbb E[Y\\mid D=1]-\\mathbb E[Y\\mid D=0]=\\mathbb E[Y(1)]-\\mathbb E[Y(0)]=\\text{ATE}.\n No covariates, no functional form — the design does the work.\nWhy blocking helps. With blocks b of size n_b, the block-stratified estimator is the precision-weighted average of within-block diff-in-means. Because within-block units are more alike, the residual variance entering each block’s estimate is smaller, so the overall sampling variance \\operatorname{Var}(\\hat\\theta) shrinks relative to simple randomization — the same variance reduction a good control buys, secured ex ante.\nLATE as a ratio (the Wald form). Let Z be random assignment and D actual take-up. Then \n\\text{LATE} = \\frac{\\mathbb E[Y\\mid Z=1]-\\mathbb E[Y\\mid Z=0]}{\\mathbb E[D\\mid Z=1]-\\mathbb E[D\\mid Z=0]}\n= \\frac{\\text{ITT}_Y}{\\text{ITT}_D},\n the reduced-form effect of assignment on the outcome divided by the first-stage effect of assignment on take-up. Under monotonicity the denominator is the share of compliers, and the ratio is their average treatment effect — the bridge to instrumental variables.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html#connections",
+    "href": "content/05-causal-inference/randomized-experiments.html#connections",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: potential outcomes (the selection-bias term this design zeroes), resampling (randomization inference is a permutation test), and sampling & survey design (random assignment vs random sampling — different randomness, different jobs).\nLeads to: DAGs (when no experiment is possible, draw the confounding and reason about it) and the whole observational toolkit; noncompliance flows straight into instrumental variables.\nReappears in: every later design, each judged by how well it reproduces this benchmark’s independence.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/randomized-experiments.html#study-with-notebooklm",
+    "href": "content/05-causal-inference/randomized-experiments.html#study-with-notebooklm",
+    "title": "Randomized Experiments: The Gold Standard",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Why does random assignment make (Y(0),Y(1),X)\\perp D, and how does that zero the selection-bias term so the difference in means identifies the ATE?”\n“What is covariate balance, why is it the observable signature of randomization, and how is a joint balance test constructed?”\n“Contrast Fisher’s sharp null (and the permutation test) with the Neyman approach to experimental standard errors.”\n“How do block (stratified) and clustered randomization each affect bias and precision?”\n“Under noncompliance, define ITT and LATE/CACE, the four subject types, and the monotonicity assumption; give the LATE = ITT_Y / ITT_D ratio.”",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "The Causal Framework",
+      "Randomized Experiments: The Gold Standard"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/synthetic-control.html",
+    "href": "content/05-causal-inference/synthetic-control.html",
+    "title": "Synthetic Control",
+    "section": "",
+    "text": "Difference-in-differences needs a control group with parallel trends. But what if exactly one place is treated — California passes a tobacco tax, terrorism strikes the Basque Country — and no single other place is a credible stand-in? Synthetic control manufactures the missing counterpart: a weighted average of untreated units, with weights chosen so the blend tracks the treated unit’s history almost perfectly. The post-treatment gap between the real unit and its synthetic twin is the effect — a transparent, data-driven counterfactual where DiD has no clean comparison.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Synthetic Control"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/synthetic-control.html#why-it-matters",
+    "href": "content/05-causal-inference/synthetic-control.html#why-it-matters",
+    "title": "Synthetic Control",
+    "section": "Why it matters",
+    "text": "Why it matters\nThe “Furious Five” all assume you have a usable comparison group. At the aggregate level — states, countries, regions — you often don’t: there’s one treated unit and a handful of imperfect controls, and picking one control is ad hoc. (Cunningham 2021) Synthetic control, due to Abadie and coauthors, solves exactly this, and Cunningham frames it as a generalisation of difference-in-differences for comparative case studies. (Cunningham 2021) It has become one of the most influential methods in modern policy evaluation precisely because it makes the counterfactual explicit and reproducible rather than a matter of the analyst’s judgment.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Synthetic Control"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/synthetic-control.html#the-idea-a-weighted-donor-pool",
+    "href": "content/05-causal-inference/synthetic-control.html#the-idea-a-weighted-donor-pool",
+    "title": "Synthetic Control",
+    "section": "The idea: a weighted donor pool",
+    "text": "The idea: a weighted donor pool\nInstead of choosing one control, build a synthetic one from many. Take a donor pool of untreated units and form a weighted average, with a weight w_j on each donor: (Cunningham 2021)\n\nthe weights are non-negative and sum to one;\nthey are chosen so the synthetic unit matches the treated unit’s pre-treatment outcomes and predictors as closely as possible.\n\nThat constraint — weights on the simplex — is the method’s quiet genius: it forces interpolation, not extrapolation. The counterfactual lives inside the convex hull of the donor pool, anchored to combinations of data that actually exist rather than a regression’s projection beyond the data’s support. (Cunningham 2021) (This is the discipline a linear regression lacks: OLS will happily extrapolate with negative or huge coefficients; synthetic control refuses.)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Synthetic Control"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/synthetic-control.html#the-estimate-a-gap",
+    "href": "content/05-causal-inference/synthetic-control.html#the-estimate-a-gap",
+    "title": "Synthetic Control",
+    "section": "The estimate: a gap",
+    "text": "The estimate: a gap\nOnce the weights w^* reproduce the treated unit’s pre-treatment path, the treatment effect is the post-treatment gap between the treated unit and its synthetic control: (Cunningham 2021) \n\\hat\\delta_{1t}=Y_{1t}-\\sum_{j=2}^{J+1} w_j^*\\,Y_{jt}.\n Before treatment the two lines should sit on top of each other (that’s how the weights were chosen); after, any divergence is attributed to the intervention. The figure shows the signature picture: a near-perfect pre-period match, then a widening gap.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(99)\nyears = np.arange(1970, 2001)\ntreat_year = 1988\npre = years &lt; treat_year\n\n# A common smooth trend both real and synthetic share pre-treatment.\ntrend = 130 - 0.6 * (years - 1970) + 6 * np.sin((years - 1970) / 4)\nreal = trend + rng.normal(0, 1.0, years.size)\nsynth = trend + rng.normal(0, 1.0, years.size)        # matches in the pre-period\n# Treatment opens a growing gap after 1988 (program cuts real CA sales).\neffect = np.where(years &gt;= treat_year, -2.0 * (years - treat_year + 1), 0.0)\nreal = real + effect\n\nfig, ax = plt.subplots(figsize=(7.2, 4.2))\nax.plot(years, real, color=\"#1f3a5f\", lw=2.2, label=\"California (treated)\")\nax.plot(years, synth, color=\"#c0392b\", lw=2.0, ls=\"--\", label=\"synthetic California\")\nax.fill_between(years[years &gt;= treat_year], real[years &gt;= treat_year],\n                synth[years &gt;= treat_year], color=\"#1f8a4c\", alpha=0.18, label=\"estimated effect\")\nax.axvline(treat_year, color=\"#9aa0a6\", lw=1.2, ls=\":\")\nax.text(treat_year + 0.4, ax.get_ylim()[1]*0.96, \"Prop 99 (1988)\", fontsize=8, color=\"#6b6f76\")\nax.set_xlabel(\"year\"); ax.set_ylabel(\"cigarette sales (packs per capita)\")\nax.set_title(\"Match the pre-period, read the effect off the gap\")\nax.legend(fontsize=8, frameon=False, loc=\"lower left\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Synthetic control (California Proposition 99 style). The synthetic California — a weighted blend of donor states — tracks real California’s cigarette sales almost exactly before the 1988 tax (the weights are fit to the pre-period). After 1988 the two diverge: real California falls below its synthetic twin, and the shaded gap is the estimated effect of the tobacco-control program. Inference compares this gap to placebo gaps from pretending each donor state was treated.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Synthetic Control"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/synthetic-control.html#inference-placebos-not-standard-errors",
+    "href": "content/05-causal-inference/synthetic-control.html#inference-placebos-not-standard-errors",
+    "title": "Synthetic Control",
+    "section": "Inference: placebos, not standard errors",
+    "text": "Inference: placebos, not standard errors\nWith a single treated unit, classical standard errors (which reflect sampling variability) miss the point — the real question is whether the synthetic control could reproduce the gap by chance. (Cunningham 2021) So inference is by placebo / permutation: (Cunningham 2021)\n\nPretend each donor was the treated unit, and run synthetic control on it — generating a distribution of placebo gaps for units that got no treatment.\nMeasure fit with the root-mean-squared prediction error (RMSPE), pre and post, and rank the treated unit’s post/pre RMSPE ratio against the placebos.\nIf the true treated unit’s gap is an extreme outlier — a high rank — the effect is unlikely to be chance. The rank gives an exact p-value. (Cunningham 2021)\n\nThe post/pre ratio is the clever part: it rewards a large post-period gap only if the pre-period fit was tight, automatically penalising placebos that never matched their own history.\n\n\n\n\n\n\nNoteThe two founding studies\n\n\n\n\nCalifornia Proposition 99 (Abadie, Diamond & Hainmueller 2010). California’s 1988 tobacco program raised cigarette taxes by 25¢. A synthetic California built from a 38-state donor pool tracked real California almost exactly before 1988 (in 1980, real =120.20 packs vs synthetic =120.43). After 1988 the lines split sharply, and placebo tests gave California the highest post/pre RMSPE ratio in the sample — an exact p=0.026. (Cunningham 2021)\nBasque Country terrorism (Abadie & Gardeazabal 2003). The method’s debut: a synthetic Basque region, weighted from other Spanish regions, showed terrorism drove Basque per-capita GDP below its counterfactual. (Cunningham 2021)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Synthetic Control"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/synthetic-control.html#requirements-and-limits",
+    "href": "content/05-causal-inference/synthetic-control.html#requirements-and-limits",
+    "title": "Synthetic Control",
+    "section": "Requirements and limits",
+    "text": "Requirements and limits\nSynthetic control’s credibility comes with conditions: (Cunningham 2021)\n\nGood pre-treatment fit. The synthetic unit must hug the treated unit’s pre-period path; a poor match means no credible counterfactual.\nA long pre-period. Many pre-intervention periods are what let matching on past outcomes soak up unobserved factors — the more history matched, the harder it is to match by luck.\nNo anticipation. Units mustn’t change behaviour before treatment in expectation of it, or the pre-period is contaminated.\nA clean donor pool. Exclude units hit by similar interventions or large idiosyncratic shocks — they’d poison the blend.\nNo-extrapolation honesty. If the treated unit is outside the donor pool’s convex hull (an extreme on some predictor), no weighted average can match it, and the method shouldn’t be forced.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Synthetic Control"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/synthetic-control.html#common-pitfalls",
+    "href": "content/05-causal-inference/synthetic-control.html#common-pitfalls",
+    "title": "Synthetic Control",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nPoor pre-treatment fit. If the synthetic unit doesn’t reproduce the pre-period, the post-period gap is not a clean effect. Report the fit and the RMSPE. (Cunningham 2021)\nA contaminated donor. A donor that also experienced the policy (or a big shock) drags the counterfactual; curate the pool. (Cunningham 2021)\nReading standard errors instead of placebos. Inference is by permutation/RMSPE ranking, not textbook SEs, when there’s one treated unit. (Cunningham 2021)\nOverfitting the pre-period. Matching noise (too many predictors, too short a pre-period) can fake a good fit that doesn’t reflect a real counterfactual. (Cunningham 2021)\nForcing extrapolation. If no convex combination matches the treated unit, the design is telling you it can’t answer — don’t override it. (Cunningham 2021)",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Synthetic Control"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/synthetic-control.html#from-the-sources",
+    "href": "content/05-causal-inference/synthetic-control.html#from-the-sources",
+    "title": "Synthetic Control",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nCunningham, The Mixtape — synthetic control as a generalisation of DiD for comparative case studies with one treated aggregate unit; the donor pool and non-negative weights summing to one (interpolation within the convex hull, no extrapolation); fitting weights to pre-treatment outcomes/predictors; the gap estimator \\hat\\delta_{1t}=Y_{1t}-\\sum_j w_j^* Y_{jt}; placebo inference with RMSPE and the post/pre ratio rank giving an exact p-value; the requirements (pre-fit, long pre-period, no anticipation, clean donor pool); and the California Prop 99 (38 donors; 1980 120.20 vs 120.43; p=0.026) and Basque Country studies.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Synthetic Control"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/synthetic-control.html#appendix-the-mathematics",
+    "href": "content/05-causal-inference/synthetic-control.html#appendix-the-mathematics",
+    "title": "Synthetic Control",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nThe optimisation. Let X_1 be the treated unit’s vector of pre-treatment predictors and X_0 the donors’. Choose weights W=(w_2,\\dots,w_{J+1}) to \n\\min_{W}\\ (X_1-X_0 W)'V(X_1-X_0 W)\\quad\\text{s.t.}\\quad w_j\\ge0,\\ \\sum_j w_j=1,\n where V weights predictors by importance (often chosen so the resulting W best fits pre-treatment outcomes). The simplex constraints w_j\\ge0,\\sum w_j=1 are what restrict the synthetic unit to the convex hull of the donors — no negative or &gt;1 weights, hence no extrapolation.\nWhy it generalises DiD. DiD gives the single untreated comparison a weight of one and assumes parallel trends. Synthetic control instead chooses weights so the pre-trends match by construction — turning the parallel-trends assumption into a fitted property of the pre-period, at the cost of needing a rich donor pool and long history.\nPlacebo p-value. With J donors, run the method treating each as “treated,” compute the post/pre RMSPE ratio r_j for all units, and rank the true treated unit. The exact p-value is \\,p=\\dfrac{\\#\\{j: r_j\\ge r_{\\text{treated}}\\}}{J+1}\\, — the share of units (placebos plus the real one) whose gap is at least as extreme. California’s rank of 1 out of 39 gives 1/39\\approx0.026.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Synthetic Control"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/synthetic-control.html#connections",
+    "href": "content/05-causal-inference/synthetic-control.html#connections",
+    "title": "Synthetic Control",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: difference-in-differences (synthetic control generalises it; pre-fit replaces assumed parallel trends), panel data (aggregate time series per unit), and resampling (placebo inference is a permutation test).\nLeads to: causal machine learning — flexible, data-driven counterfactuals and heterogeneous effects, the modern frontier.\nReappears in: aggregate policy evaluation, where a single jurisdiction adopts a reform.",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Synthetic Control"
+    ]
+  },
+  {
+    "objectID": "content/05-causal-inference/synthetic-control.html#study-with-notebooklm",
+    "href": "content/05-causal-inference/synthetic-control.html#study-with-notebooklm",
+    "title": "Synthetic Control",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“What problem does synthetic control solve that difference-in-differences cannot, and why is it called a generalisation of DiD?”\n“How is the synthetic control constructed? Explain the donor pool, the non-negative weights summing to one, and why that prevents extrapolation (the convex hull).”\n“How is the treatment effect estimated as a gap, and what makes a good pre-treatment fit essential?”\n“Explain placebo/permutation inference with RMSPE and the post/pre ratio — how does it produce an exact p-value?”\n“Summarise the California Proposition 99 and Basque Country studies, including the donor pool and the p = 0.026 result.”",
+    "crumbs": [
+      "Home",
+      "V · The Summit: Causal Inference",
+      "Frontiers",
+      "Synthetic Control"
     ]
   },
   {

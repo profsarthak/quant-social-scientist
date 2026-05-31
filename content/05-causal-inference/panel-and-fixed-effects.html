@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Panel Data &amp; Fixed Effects – The Quantitative Social Scientist</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../content/05-causal-inference/synthetic-control.html" rel="next">
+<link href="../../content/05-causal-inference/difference-in-differences.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-a6a8d579619ec60b6cc16f651ef3cf7e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-e06e5700cfc727e31a5c8bda3c8b1a89.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">The Quantitative Social Scientist</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/00-overture/index.html"> 
+<span class="menu-text">Curriculum</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/ml-track/index.html"> 
+<span class="menu-text">ML Track</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../appendices/math/index.html"> 
+<span class="menu-text">Appendices</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">How to use this</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://profsarthak.github.io/quant-social-scientist/" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/05-causal-inference/index.html">V · The Summit: Causal Inference</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/matching-and-propensity-scores.html">The Furious Five</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/panel-and-fixed-effects.html">Panel Data &amp; Fixed Effects</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Start here</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Quantitative Social Scientist</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to use this</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/what-quantitative-research-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Quantitative Social Science Actually Does</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/anatomy-of-a-study.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Anatomy of a Study</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/concepts-and-measurement.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Concepts &amp; Variables: The Problem of Measurement</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/variables-and-relationships.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Cast of Characters: Kinds of Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/research-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A Field Guide to Research Designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/credibility-and-failure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Makes Research Credible — and How It Fails</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/ethics-and-human-subjects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ethics and the Human-Subjects Frame</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Probability</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/what-probability-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Probability Actually Is</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/sample-spaces-and-axioms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sample Spaces, Events &amp; the Axioms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/counting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Counting: The Arithmetic of Possibility</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Probability &amp; Independence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/bayes-theorem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bayes’ Theorem: Updating Beliefs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/random-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random Variables (Discrete &amp; Continuous)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/expectation-and-variance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expectation &amp; Variance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/common-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Common Distributions and What They Model</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/covariance-and-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Joint Distributions, Covariance &amp; Correlation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-expectation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Expectation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/transformations-and-sums.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transformations &amp; Sums of Random Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/law-of-large-numbers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Law of Large Numbers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Describing Data</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/location-spread-shape.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Location, Spread &amp; Shape</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/exploratory-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory Data Analysis &amp; Visual Summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/messy-real-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Messy Real Data: What to Expect</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">II · Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">II · Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Classical Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-and-survey-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling &amp; Survey Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-distributions-clt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling Distributions &amp; the Central Limit Theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Estimation: From Sample to Best Guess</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Confidence Intervals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hypothesis Testing &amp; p-values</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/comparing-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparing Groups: ANOVA, Chi-Square &amp; Proportions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/resampling-and-nonparametric-tests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Resampling &amp; Distribution-Free Tests</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical Power &amp; Sample Size</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/replication-crisis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Replication Crisis, Made Rigorous</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-worldview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bayesian Worldview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-machinery.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Machinery: Priors, Likelihoods, Posteriors</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/credible-intervals-and-computation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Credible Intervals, Computation &amp; the Verdict</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/simple-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simple Linear Regression: The Line of Best Fit</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/multiple-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple Regression &amp; "Holding Constant"</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/gauss-markov-assumptions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Gauss–Markov Assumptions &amp; BLUE</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/inference-for-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inference for Regression Coefficients</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/functional-form.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functional Form: Logs, Polynomials, Dummies &amp; Interactions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/regression-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Diagnostics &amp; Robust Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/limited-dependent-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Limited Dependent Variables: LPM, Logit &amp; Probit</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/regression-and-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Regression Can — and Can’t — Tell You</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">IV · Predictive Modelling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">IV · The Computational Turn: Predictive Modelling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Predictive Paradigm</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/explaining-vs-predicting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Explaining to Predicting: Two Goals, Two Cultures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/bias-variance-tradeoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bias–Variance Trade-off</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/classification-and-knn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Classification: When the Outcome Is a Category</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/cross-validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Out-of-Sample Honesty: The Test Set &amp; Cross-Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regularization: Ridge &amp; Lasso</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/trees-and-forests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Trees, Forests &amp; Boosting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/interpretability-and-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Interpretability &amp; ML for Social Science</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Time Series &amp; Forecasting</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/time-series-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Time-Series Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/arima-forecasting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Forecasting with ARIMA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Causal Framework</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/potential-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Potential Outcomes &amp; the Fundamental Problem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/randomized-experiments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Randomized Experiments: The Gold Standard</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/directed-acyclic-graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Directed Acyclic Graphs (DAGs)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="true">
+ <span class="menu-text">The Furious Five</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/matching-and-propensity-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Selection on Observables: Matching &amp; Propensity Scores</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/instrumental-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Instrumental Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/regression-discontinuity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regression Discontinuity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/difference-in-differences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Difference-in-Differences</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/panel-and-fixed-effects.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Panel Data &amp; Fixed Effects</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false">
+ <span class="menu-text">Frontiers</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-16" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/synthetic-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic Control</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/causal-machine-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Causal Machine Learning: Heterogeneous Effects</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" role="navigation" aria-expanded="true">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-17" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="true">
+ <span class="menu-text">ML Track (separate)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-18" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ML Track (separate)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-19" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/math/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Mathematics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/computing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Computing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#panel-data-and-the-heterogeneity-problem" id="toc-panel-data-and-the-heterogeneity-problem" class="nav-link" data-scroll-target="#panel-data-and-the-heterogeneity-problem">Panel data and the heterogeneity problem</a></li>
+  <li><a href="#the-within-fixed-effects-estimator" id="toc-the-within-fixed-effects-estimator" class="nav-link" data-scroll-target="#the-within-fixed-effects-estimator">The within (fixed-effects) estimator</a></li>
+  <li><a href="#first-differencing-and-a-cousin" id="toc-first-differencing-and-a-cousin" class="nav-link" data-scroll-target="#first-differencing-and-a-cousin">First differencing, and a cousin</a></li>
+  <li><a href="#fixed-vs-random-effects-and-the-hausman-test" id="toc-fixed-vs-random-effects-and-the-hausman-test" class="nav-link" data-scroll-target="#fixed-vs-random-effects-and-the-hausman-test">Fixed vs random effects, and the Hausman test</a></li>
+  <li><a href="#two-way-fixed-effects" id="toc-two-way-fixed-effects" class="nav-link" data-scroll-target="#two-way-fixed-effects">Two-way fixed effects</a></li>
+  <li><a href="#what-fixed-effects-cannot-fix" id="toc-what-fixed-effects-cannot-fix" class="nav-link" data-scroll-target="#what-fixed-effects-cannot-fix">What fixed effects cannot fix</a></li>
+  <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
+  <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
+  <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
+  <li><a href="#connections" id="toc-connections" class="nav-link" data-scroll-target="#connections">Connections</a></li>
+  <li><a href="#study-with-notebooklm" id="toc-study-with-notebooklm" class="nav-link" data-scroll-target="#study-with-notebooklm">Study with NotebookLM</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/05-causal-inference/index.html">V · The Summit: Causal Inference</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/matching-and-propensity-scores.html">The Furious Five</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/panel-and-fixed-effects.html">Panel Data &amp; Fixed Effects</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Panel Data &amp; Fixed Effects</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">Watch each unit change against itself over time, and every fixed thing about it — measured or not — cancels out.</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="lead-kernel">
+<p>The deepest threat to causal claims is the <a href="../../content/03-regression/regression-and-causality.html">confounder you can’t measure</a>: ability, culture, managerial skill. If you observe the <em>same units repeatedly</em>, a near-magical trick becomes available — compare each unit only <strong>to itself across time</strong>. Anything about a unit that stays fixed, however unobservable, differences away. Fixed effects buys you control over an entire universe of time-invariant confounders for free — and the fine print is everything it <em>cannot</em> touch.</p>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p><a href="../../content/05-causal-inference/matching-and-propensity-scores.html">Matching</a> only handles <em>observed</em> confounders; <a href="../../content/05-causal-inference/instrumental-variables.html">IV</a> and <a href="../../content/05-causal-inference/regression-discontinuity.html">RD</a> need special variation that isn’t always there. <strong>Panel data</strong> offers a different escape: by following units over time, you can sweep away <strong>all</strong> time-invariant unobservables at once. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> This is the backbone of the “Furious Five” — <a href="../../content/05-causal-inference/difference-in-differences.html">difference-in-differences</a> <em>is</em> a two-period fixed- effects design — and the most common way applied researchers defend against unobserved heterogeneity. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></p>
+</section>
+<section id="panel-data-and-the-heterogeneity-problem" class="level2">
+<h2 class="anchored" data-anchor-id="panel-data-and-the-heterogeneity-problem">Panel data and the heterogeneity problem</h2>
+<p><strong>Panel (longitudinal) data</strong> follows the <em>same</em> cross-sectional units — people, firms, countries — across multiple periods. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> Model the outcome with a unit-specific term: <span class="math display">
+Y_{it}=\beta_0 + X_{it}\beta + \alpha_i + u_{it},
+</span> where <span class="math inline">\alpha_i</span> is the <strong>individual fixed effect</strong> — all the unobserved, <strong>time-invariant</strong> traits of unit <span class="math inline">i</span> (innate ability in a wage equation, managerial skill in a firm). <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> The danger: if <span class="math inline">\alpha_i</span> is <strong>correlated with</strong> <span class="math inline">X_{it}</span>, pooled OLS is biased and inconsistent — <strong>heterogeneity bias</strong>. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> (High-ability workers get more schooling <em>and</em> earn more; ignore ability and schooling’s coefficient inherits its effect — the <a href="../../content/03-regression/regression-and-causality.html">ability bias</a> of Part III, now with a repeated-measures cure.)</p>
+</section>
+<section id="the-within-fixed-effects-estimator" class="level2">
+<h2 class="anchored" data-anchor-id="the-within-fixed-effects-estimator">The within (fixed-effects) estimator</h2>
+<p>The fix is disarmingly simple. <strong>Demean</strong> every variable by its <em>unit-specific mean over time</em> — the <strong>within transformation</strong>: <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> <span class="math display">
+(Y_{it}-\bar Y_i) = (X_{it}-\bar X_i)\beta + (u_{it}-\bar u_i).
+</span> Because <span class="math inline">\alpha_i</span> is constant over time, its own mean is itself (<span class="math inline">\bar\alpha_i=\alpha_i</span>), so <span class="math inline">\alpha_i-\bar\alpha_i=0</span> — it <strong>vanishes</strong>. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> Every fixed trait, observed or not, is swept away, and <span class="math inline">\beta</span> is identified purely from <strong>within-unit variation over time</strong>: <em>when a unit’s <span class="math inline">X</span> changes, how does its <span class="math inline">Y</span> change?</em> The figure shows why this matters — pooled and within slopes can point in <strong>opposite directions</strong>.</p>
+<div id="cell-fig-within" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Show the figure code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">6</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>beta_true <span class="op">=</span> <span class="op">-</span><span class="fl">1.0</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>units, T <span class="op">=</span> <span class="dv">6</span>, <span class="dv">8</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> plt.cm.viridis(np.linspace(<span class="fl">0.1</span>, <span class="fl">0.9</span>, units))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.2</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>allX, allY <span class="op">=</span> [], []</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> u <span class="kw">in</span> <span class="bu">range</span>(units):</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="fl">4.0</span> <span class="op">*</span> u                          <span class="co"># unit fixed effect, correlated with X below</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> alpha <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.6</span>, T)        <span class="co"># high-alpha units have high X (confounding)</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> alpha <span class="op">+</span> beta_true <span class="op">*</span> (x <span class="op">-</span> alpha) <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.3</span>, T)  <span class="co"># within-unit slope is negative</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y, color<span class="op">=</span>colors[u], s<span class="op">=</span><span class="dv">22</span>, zorder<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    b <span class="op">=</span> np.polyfit(x, y, <span class="dv">1</span>)                   <span class="co"># within-unit fit</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    xs <span class="op">=</span> np.linspace(x.<span class="bu">min</span>(), x.<span class="bu">max</span>(), <span class="dv">10</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    ax.plot(xs, np.polyval(b, xs), color<span class="op">=</span>colors[u], lw<span class="op">=</span><span class="fl">1.6</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    allX.append(x)<span class="op">;</span> allY.append(y)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>allX <span class="op">=</span> np.concatenate(allX)<span class="op">;</span> allY <span class="op">=</span> np.concatenate(allY)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>bp <span class="op">=</span> np.polyfit(allX, allY, <span class="dv">1</span>)               <span class="co"># pooled OLS</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(allX.<span class="bu">min</span>(), allX.<span class="bu">max</span>(), <span class="dv">20</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, np.polyval(bp, xs), <span class="st">"k--"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="ss">f"pooled OLS slope = </span><span class="sc">{</span>bp[<span class="dv">0</span>]<span class="sc">:+.2f}</span><span class="ss">"</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>ax.plot([], [], color<span class="op">=</span><span class="st">"#555"</span>, lw<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="ss">f"within-unit slope ≈ </span><span class="sc">{</span>beta_true<span class="sc">:+.2f}</span><span class="ss"> (true)"</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"X (e.g. schooling)"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"Y (e.g. wage)"</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Fixed effects recovers the within-unit relationship"</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-within" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-within-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="panel-and-fixed-effects_files/figure-html/fig-within-output-1.png" width="681" height="394" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-within-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Fixed effects vs pooled OLS (a Simpson’s-paradox structure). Each colour is one unit observed over several periods. Pooled OLS (dashed black) ignores units and fits across the cloud — sloping upward — because high-α units happen to have high X. But within every unit the relationship is negative: raise that unit’s X and its Y falls. The within (fixed-effects) estimator recovers the negative within-unit slope by demeaning each unit, immune to the time-invariant αᵢ that drives the misleading between-unit pattern.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>There’s an immediate corollary: a variable that <strong>never changes</strong> for a unit — race, gender, distance to a fixed river — is demeaned to zero, so <strong>fixed effects cannot estimate its effect</strong>. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> The very trick that kills the confounding also kills any time-invariant regressor of interest.</p>
+</section>
+<section id="first-differencing-and-a-cousin" class="level2">
+<h2 class="anchored" data-anchor-id="first-differencing-and-a-cousin">First differencing, and a cousin</h2>
+<p>An alternative removes <span class="math inline">\alpha_i</span> by subtracting consecutive periods — <strong>first differencing</strong>: <span class="math inline">\Delta Y_{it}=\Delta X_{it}\beta+\Delta u_{it}</span>. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> With exactly <strong>two periods, FE and FD are numerically identical</strong>. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> With more, the choice hinges on the errors: FE is more efficient if the idiosyncratic <span class="math inline">u_{it}</span> are serially <strong>uncorrelated</strong>, while FD is better if they behave like a <strong>random walk</strong> (so differencing whitens them). <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span></p>
+</section>
+<section id="fixed-vs-random-effects-and-the-hausman-test" class="level2">
+<h2 class="anchored" data-anchor-id="fixed-vs-random-effects-and-the-hausman-test">Fixed vs random effects, and the Hausman test</h2>
+<p>A <strong>random-effects (RE)</strong> model instead treats <span class="math inline">\alpha_i</span> as part of a composite error <span class="math inline">v_{it}=\alpha_i+u_{it}</span>. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> The bargain: <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span></p>
+<ul>
+<li><strong>RE</strong> is <strong>more efficient</strong> — it uses both within- and between-unit variation and <em>can</em> estimate time-invariant regressors — <strong>but only if</strong> the <strong>RE assumption</strong> holds: <span class="math inline">\operatorname{Cov}(X_{it},\alpha_i)=0</span>, the individual effect is uncorrelated with the regressors.</li>
+<li><strong>FE</strong> is <strong>consistent regardless</strong>, even when <span class="math inline">\alpha_i</span> correlates with <span class="math inline">X</span> — exactly the case that matters for causal work in observational data, where such correlation is the <em>norm</em>.</li>
+</ul>
+<p>The <strong>Hausman test</strong> adjudicates: under the null <span class="math inline">\operatorname{Cov}(X,\alpha)=0</span>, FE and RE agree; <strong>reject the null → use FE</strong> (RE is inconsistent); fail to reject → RE for its efficiency. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> For causal inference the default leans FE, because the whole reason you reached for panel data was a suspicion that <span class="math inline">\alpha_i</span> <em>is</em> correlated with treatment.</p>
+</section>
+<section id="two-way-fixed-effects" class="level2">
+<h2 class="anchored" data-anchor-id="two-way-fixed-effects">Two-way fixed effects</h2>
+<p>Add <strong>time fixed effects</strong> <span class="math inline">\lambda_t</span> to absorb shocks hitting all units in a period — a recession, a national policy: <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> <span class="math display">
+Y_{it}=\alpha_i+\lambda_t+X_{it}\beta+u_{it}.
+</span> Unit effects sweep away fixed <em>cross-unit</em> differences; time effects sweep away common <em>temporal</em> shocks — and with treatment as the regressor this <strong>is</strong> <a href="../../content/05-causal-inference/difference-in-differences.html">difference-in-differences</a>, generalised to many units and periods. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span> (Which is also why the <a href="../../content/05-causal-inference/difference-in-differences.html">staggered-adoption critique</a> applies to TWFE here too.)</p>
+</section>
+<section id="what-fixed-effects-cannot-fix" class="level2">
+<h2 class="anchored" data-anchor-id="what-fixed-effects-cannot-fix">What fixed effects cannot fix</h2>
+<p>FE is powerful but <strong>not a magic bullet</strong> — and knowing its blind spots is the mark of using it well: <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span></p>
+<ul>
+<li><strong>Time-<em>varying</em> confounders.</strong> FE removes only what’s constant. An unobserved trait that <strong>changes</strong> and correlates with treatment — a city’s shifting economic climate — still biases the estimate.</li>
+<li><strong>Reverse causality.</strong> If <span class="math inline">Y</span> also causes <span class="math inline">X</span> (crime → police spending), FE is biased like any OLS; demeaning doesn’t fix simultaneity.</li>
+<li><strong>Time-invariant regressors.</strong> As noted, their effects are unidentifiable — they difference out.</li>
+</ul>
+<p>The honest summary: fixed effects neutralise <strong>time-invariant</strong> unobserved confounding and <strong>nothing else</strong>. That single, large class of threats is what they buy — which is why FE is usually a <em>foundation</em> for a design (DiD, event study), not a complete identification strategy on its own.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Wooldridge's job-training grants">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Wooldridge’s job-training grants
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Do training grants raise productivity? With a panel of <strong>54 firms</strong>, a pure cross-section would be biased — grants may go to firms that are <em>already</em> well-run (high <span class="math inline">\alpha_i</span>). Fixed effects differences that fixed firm “skill” away, identifying the effect from firms’ <em>changes</em> across years: the 1988 grant is estimated to <strong>cut the 1989 scrap rate by ~34.4%</strong> (<span class="math inline">e^{-0.422}-1</span>). <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> The effect is only credible <em>because</em> the same firms were watched over time.</p>
+</div>
+</div>
+</section>
+<section id="common-pitfalls" class="level2">
+<h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
+<div class="callout callout-style-default callout-warning callout-titled" title="Where this goes wrong">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Where this goes wrong
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><p><strong>Believing FE removes <em>all</em> confounding.</strong> It removes only <strong>time-invariant</strong> unobservables; time-varying confounders and reverse causality remain. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span></p></li>
+<li><p><strong>Trying to estimate a time-invariant effect with FE.</strong> Gender, race, fixed geography difference out — use RE (if its assumption is defensible) or another design. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span></p></li>
+<li><p><strong>Defaulting to random effects for efficiency.</strong> RE is inconsistent if <span class="math inline">\alpha_i</span> correlates with <span class="math inline">X</span> — usually the case in observational data. Run Hausman; lean FE for causal claims. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span></p></li>
+<li><p><strong>Ignoring serial correlation.</strong> It changes FE-vs-FD efficiency <em>and</em> demands clustered standard errors; un-clustered SEs badly overstate precision in panels. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span></p></li>
+<li><p><strong>Too little within-variation.</strong> If treatment barely changes within units, FE has almost nothing to work with and estimates are imprecise. <span class="citation" data-cites="dongli_panel">(<a href="#ref-dongli_panel" role="doc-biblioref">Li 2023</a>)</span></p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="from-the-sources" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Who says what">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Who says what
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Dong Li, <em>Panel Data Econometrics</em></strong> — panel data and <strong>unobserved time-invariant heterogeneity</strong> <span class="math inline">\alpha_i</span>; the model <span class="math inline">Y_{it}=X_{it}\beta+\alpha_i+u_{it}</span> and <strong>heterogeneity bias</strong>; the <strong>within (fixed-effects) estimator</strong> via demeaning; <strong>first differencing</strong> and FE=FD at <span class="math inline">T=2</span>; <strong>random effects</strong> and its <span class="math inline">\operatorname{Cov}(X,\alpha)=0</span> assumption, efficiency-vs-consistency, and the <strong>Hausman test</strong>; <strong>two-way fixed effects</strong>; the limits — time-varying confounders, reverse causality, time-invariant regressors; and DiD as a two-period panel FE model.</li>
+<li><strong>Wooldridge, <em>Introductory Econometrics</em></strong> — the within estimator and the <strong>job-training grants / scrap-rate</strong> panel (54 firms; 1988 grant <span class="math inline">\Rightarrow</span> ~<span class="math inline">-34.4\%</span> scrap rate in 1989).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="appendix-the-mathematics" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="appendix-the-mathematics">Appendix · the mathematics</h2>
+<div class="math-appendix">
+<p><strong>The within transformation kills <span class="math inline">\alpha_i</span>.</strong> Average the model over <span class="math inline">t</span> for unit <span class="math inline">i</span>: <span class="math inline">\bar Y_i=\beta_0+\bar X_i\beta+\alpha_i+\bar u_i</span> (since <span class="math inline">\bar\alpha_i=\alpha_i</span>). Subtract from the level equation: <span class="math display">
+Y_{it}-\bar Y_i=(X_{it}-\bar X_i)\beta+(u_{it}-\bar u_i),
+</span> in which <span class="math inline">\alpha_i</span> and <span class="math inline">\beta_0</span> have disappeared. OLS on the demeaned data is the FE estimator <span class="math inline">\hat\beta_{FE}=\big(\sum_{it}\ddot X_{it}\ddot X_{it}'\big)^{-1}\sum_{it}\ddot X_{it}\ddot Y_{it}</span> with <span class="math inline">\ddot X_{it}=X_{it}-\bar X_i</span> — a regression on <strong>deviations from unit means</strong>, so only within-unit covariation identifies <span class="math inline">\beta</span>.</p>
+<p><strong>FE = FD at <span class="math inline">T=2</span>.</strong> With two periods, demeaning gives <span class="math inline">X_{i2}-\bar X_i=\tfrac12\Delta X_i</span> and likewise for <span class="math inline">Y</span>; the factor <span class="math inline">\tfrac12</span> cancels in the OLS ratio, so <span class="math inline">\hat\beta_{FE}=\hat\beta_{FD}</span> exactly. This is why <a href="../../content/05-causal-inference/difference-in-differences.html">the 2×2 DiD</a> can be read as either.</p>
+<p><strong>Why Hausman points to FE on rejection.</strong> Under <span class="math inline">H_0:\operatorname{Cov}(X,\alpha)=0</span>, both estimators are consistent but RE is efficient; under <span class="math inline">H_1</span> only FE is consistent. The statistic <span class="math inline">(\hat\beta_{FE}-\hat\beta_{RE})'[\operatorname{Var}(\hat\beta_{FE})-\operatorname{Var}(\hat\beta_{RE})]^{-1}(\hat\beta_{FE}-\hat\beta_{RE})</span> is <span class="math inline">\chi^2</span> under <span class="math inline">H_0</span>; a large value signals the estimators <em>disagree</em>, indicting RE’s assumption and favouring FE.</p>
+</div>
+</section>
+<section id="connections" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
+<ul>
+<li><strong>Builds on:</strong> <a href="../../content/03-regression/regression-and-causality.html">omitted-variable bias</a> (the unobserved <span class="math inline">\alpha_i</span> FE removes), <a href="../../content/03-regression/multiple-regression.html">multiple regression</a> (FE is OLS on dummies/deviations), and <a href="../../content/03-regression/regression-diagnostics.html">clustering</a> (panel SEs).</li>
+<li><strong>Leads to:</strong> <a href="../../content/05-causal-inference/difference-in-differences.html">difference-in-differences</a> (two-way FE with a treatment timing) and <a href="../../content/05-causal-inference/synthetic-control.html">synthetic control</a> (when you have <em>one</em> treated unit and FE/DiD has no clean control group).</li>
+<li><strong>Reappears in:</strong> virtually all applied <a href="../../content/06-field-realities/index.html">field work</a> on administrative panels.</li>
+</ul>
+</section>
+<section id="study-with-notebooklm" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="study-with-notebooklm">Study with NotebookLM</h2>
+<ol type="1">
+<li>“What is panel data, and how does the individual fixed effect <span class="math inline">\alpha_i</span> create heterogeneity bias in pooled OLS?”</li>
+<li>“Explain the within (fixed-effects) estimator: the demeaning transformation, why <span class="math inline">\alpha_i</span> vanishes, and why only within-unit variation identifies <span class="math inline">\beta</span>.”</li>
+<li>“How does first differencing remove <span class="math inline">\alpha_i</span>, and when does it equal fixed effects?”</li>
+<li>“Contrast random effects and fixed effects (assumptions, efficiency, consistency) and explain the Hausman test.”</li>
+<li>“What can fixed effects NOT fix (time-varying confounders, reverse causality, time-invariant variables), and how is DiD a two-period fixed-effects design?”</li>
+</ol>
+
+
+<!-- -->
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-dongli_panel" class="csl-entry" role="listitem">
+Li, Dong. 2023. <em>Panel Data Econometrics</em>.
+</div>
+<div id="ref-wooldridge_intro" class="csl-entry" role="listitem">
+Wooldridge, Jeffrey M. 2019. <em>Introductory Econometrics: A Modern Approach</em>. 7th ed. Cengage Learning.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/profsarthak\.github\.io\/quant-social-scientist\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../content/05-causal-inference/difference-in-differences.html" class="pagination-link" aria-label="Difference-in-Differences">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Difference-in-Differences</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../content/05-causal-inference/synthetic-control.html" class="pagination-link" aria-label="Synthetic Control">
+        <span class="nav-page-text">Synthetic Control</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Panel Data &amp; Fixed Effects"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Watch each unit change against itself over time, and every fixed thing about it — measured or not — cancels out."</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>The deepest threat to causal claims is the <span class="co">[</span><span class="ot">confounder you can't measure</span><span class="co">](../03-regression/regression-and-causality.qmd)</span>:</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>ability, culture, managerial skill. If you observe the *same units repeatedly*, a near-magical trick</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>becomes available — compare each unit only **to itself across time**. Anything about a unit that stays</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>fixed, however unobservable, differences away. Fixed effects buys you control over an entire universe</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>of time-invariant confounders for free — and the fine print is everything it *cannot* touch.</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Matching</span><span class="co">](matching-and-propensity-scores.qmd)</span> only handles *observed* confounders;</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">IV</span><span class="co">](instrumental-variables.qmd)</span> and <span class="co">[</span><span class="ot">RD</span><span class="co">](regression-discontinuity.qmd)</span> need special variation that</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>isn't always there. **Panel data** offers a different escape: by following units over time, you can</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>sweep away **all** time-invariant unobservables at once. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span> This is the backbone of the</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>"Furious Five" — <span class="co">[</span><span class="ot">difference-in-differences</span><span class="co">](difference-in-differences.qmd)</span> *is* a two-period fixed-</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>effects design — and the most common way applied researchers defend against unobserved heterogeneity.</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="fu">## Panel data and the heterogeneity problem</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>**Panel (longitudinal) data** follows the *same* cross-sectional units — people, firms, countries —</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>across multiple periods. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span> Model the outcome with a unit-specific term:</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>Y_{it}=\beta_0 + X_{it}\beta + \alpha_i + u_{it},</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>where $\alpha_i$ is the **individual fixed effect** — all the unobserved, **time-invariant** traits of</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>unit $i$ (innate ability in a wage equation, managerial skill in a firm). <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span> The danger:</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>if $\alpha_i$ is **correlated with** $X_{it}$, pooled OLS is biased and inconsistent — **heterogeneity</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>bias**. [@dongli_panel] (High-ability workers get more schooling *and* earn more; ignore ability and</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>schooling's coefficient inherits its effect — the <span class="co">[</span><span class="ot">ability bias</span><span class="co">](../03-regression/regression-and-causality.qmd)</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>of Part III, now with a repeated-measures cure.)</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="fu">## The within (fixed-effects) estimator</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>The fix is disarmingly simple. **Demean** every variable by its *unit-specific mean over time* — the</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>**within transformation**: <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>(Y_{it}-\bar Y_i) = (X_{it}-\bar X_i)\beta + (u_{it}-\bar u_i).</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>Because $\alpha_i$ is constant over time, its own mean is itself ($\bar\alpha_i=\alpha_i$), so</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>$\alpha_i-\bar\alpha_i=0$ — it **vanishes**. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span> Every fixed trait, observed or not, is</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>swept away, and $\beta$ is identified purely from **within-unit variation over time**: *when a unit's</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>$X$ changes, how does its $Y$ change?* The figure shows why this matters — pooled and within slopes can</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>point in **opposite directions**.</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-within</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Fixed effects vs pooled OLS (a Simpson's-paradox structure). Each colour is one unit observed over several periods. Pooled OLS (dashed black) ignores units and fits across the cloud — sloping upward — because high-α units happen to have high X. But within every unit the relationship is negative: raise that unit's X and its Y falls. The within (fixed-effects) estimator recovers the negative within-unit slope by demeaning each unit, immune to the time-invariant αᵢ that drives the misleading between-unit pattern."</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">6</span>)</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>beta_true <span class="op">=</span> <span class="op">-</span><span class="fl">1.0</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>units, T <span class="op">=</span> <span class="dv">6</span>, <span class="dv">8</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> plt.cm.viridis(np.linspace(<span class="fl">0.1</span>, <span class="fl">0.9</span>, units))</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.2</span>))</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>allX, allY <span class="op">=</span> [], []</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> u <span class="kw">in</span> <span class="bu">range</span>(units):</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="fl">4.0</span> <span class="op">*</span> u                          <span class="co"># unit fixed effect, correlated with X below</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> alpha <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.6</span>, T)        <span class="co"># high-alpha units have high X (confounding)</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> alpha <span class="op">+</span> beta_true <span class="op">*</span> (x <span class="op">-</span> alpha) <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.3</span>, T)  <span class="co"># within-unit slope is negative</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y, color<span class="op">=</span>colors[u], s<span class="op">=</span><span class="dv">22</span>, zorder<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>    b <span class="op">=</span> np.polyfit(x, y, <span class="dv">1</span>)                   <span class="co"># within-unit fit</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    xs <span class="op">=</span> np.linspace(x.<span class="bu">min</span>(), x.<span class="bu">max</span>(), <span class="dv">10</span>)</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    ax.plot(xs, np.polyval(b, xs), color<span class="op">=</span>colors[u], lw<span class="op">=</span><span class="fl">1.6</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>    allX.append(x)<span class="op">;</span> allY.append(y)</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>allX <span class="op">=</span> np.concatenate(allX)<span class="op">;</span> allY <span class="op">=</span> np.concatenate(allY)</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>bp <span class="op">=</span> np.polyfit(allX, allY, <span class="dv">1</span>)               <span class="co"># pooled OLS</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(allX.<span class="bu">min</span>(), allX.<span class="bu">max</span>(), <span class="dv">20</span>)</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, np.polyval(bp, xs), <span class="st">"k--"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="ss">f"pooled OLS slope = </span><span class="sc">{</span>bp[<span class="dv">0</span>]<span class="sc">:+.2f}</span><span class="ss">"</span>)</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>ax.plot([], [], color<span class="op">=</span><span class="st">"#555"</span>, lw<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="ss">f"within-unit slope ≈ </span><span class="sc">{</span>beta_true<span class="sc">:+.2f}</span><span class="ss"> (true)"</span>)</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"X (e.g. schooling)"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"Y (e.g. wage)"</span>)</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Fixed effects recovers the within-unit relationship"</span>)</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>There's an immediate corollary: a variable that **never changes** for a unit — race, gender, distance</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>to a fixed river — is demeaned to zero, so **fixed effects cannot estimate its effect**. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>The very trick that kills the confounding also kills any time-invariant regressor of interest.</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="fu">## First differencing, and a cousin</span></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>An alternative removes $\alpha_i$ by subtracting consecutive periods — **first differencing**:</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>$\Delta Y_{it}=\Delta X_{it}\beta+\Delta u_{it}$. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span> With exactly **two periods, FE and FD</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>are numerically identical**. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span> With more, the choice hinges on the errors: FE is more</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>efficient if the idiosyncratic $u_{it}$ are serially **uncorrelated**, while FD is better if they</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>behave like a **random walk** (so differencing whitens them). <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="fu">## Fixed vs random effects, and the Hausman test</span></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>A **random-effects (RE)** model instead treats $\alpha_i$ as part of a composite error</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>$v_{it}=\alpha_i+u_{it}$. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span> The bargain: <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span></span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**RE** is **more efficient** — it uses both within- and between-unit variation and *can* estimate</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>  time-invariant regressors — **but only if** the **RE assumption** holds:</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>  $\operatorname{Cov}(X_{it},\alpha_i)=0$, the individual effect is uncorrelated with the regressors.</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**FE** is **consistent regardless**, even when $\alpha_i$ correlates with $X$ — exactly the case that</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>  matters for causal work in observational data, where such correlation is the *norm*.</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>The **Hausman test** adjudicates: under the null $\operatorname{Cov}(X,\alpha)=0$, FE and RE agree;</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>**reject the null → use FE** (RE is inconsistent); fail to reject → RE for its efficiency.</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span> For causal inference the default leans FE, because the whole reason you reached for</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>panel data was a suspicion that $\alpha_i$ *is* correlated with treatment.</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="fu">## Two-way fixed effects</span></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>Add **time fixed effects** $\lambda_t$ to absorb shocks hitting all units in a period — a recession, a</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>national policy: <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>Y_{it}=\alpha_i+\lambda_t+X_{it}\beta+u_{it}.</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>Unit effects sweep away fixed *cross-unit* differences; time effects sweep away common *temporal*</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>shocks — and with treatment as the regressor this **is**</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">difference-in-differences</span><span class="co">](difference-in-differences.qmd)</span>, generalised to many units and periods.</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span> (Which is also why the <span class="co">[</span><span class="ot">staggered-adoption critique</span><span class="co">](difference-in-differences.qmd)</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>applies to TWFE here too.)</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="fu">## What fixed effects cannot fix</span></span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>FE is powerful but **not a magic bullet** — and knowing its blind spots is the mark of using it well:</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Time-*varying* confounders.** FE removes only what's constant. An unobserved trait that **changes**</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>  and correlates with treatment — a city's shifting economic climate — still biases the estimate.</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reverse causality.** If $Y$ also causes $X$ (crime → police spending), FE is biased like any OLS;</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>  demeaning doesn't fix simultaneity.</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Time-invariant regressors.** As noted, their effects are unidentifiable — they difference out.</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>The honest summary: fixed effects neutralise **time-invariant** unobserved confounding and **nothing</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>else**. That single, large class of threats is what they buy — which is why FE is usually a *foundation*</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>for a design (DiD, event study), not a complete identification strategy on its own.</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Wooldridge's job-training grants"}</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>Do training grants raise productivity? With a panel of **54 firms**, a pure cross-section would be</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>biased — grants may go to firms that are *already* well-run (high $\alpha_i$). Fixed effects differences</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>that fixed firm "skill" away, identifying the effect from firms' *changes* across years: the 1988 grant</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>is estimated to **cut the 1989 scrap rate by ~34.4%** ($e^{-0.422}-1$). <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> The effect</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>is only credible *because* the same firms were watched over time.</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Believing FE removes *all* confounding.** It removes only **time-invariant** unobservables;</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>  time-varying confounders and reverse causality remain. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Trying to estimate a time-invariant effect with FE.** Gender, race, fixed geography difference out —</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>  use RE (if its assumption is defensible) or another design. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Defaulting to random effects for efficiency.** RE is inconsistent if $\alpha_i$ correlates with</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>  $X$ — usually the case in observational data. Run Hausman; lean FE for causal claims. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span></span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring serial correlation.** It changes FE-vs-FD efficiency *and* demands clustered standard</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>  errors; un-clustered SEs badly overstate precision in panels. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span></span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Too little within-variation.** If treatment barely changes within units, FE has almost nothing to</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>  work with and estimates are imprecise. <span class="co">[</span><span class="ot">@dongli_panel</span><span class="co">]</span></span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dong Li, *Panel Data Econometrics*** — panel data and **unobserved time-invariant heterogeneity**</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>  $\alpha_i$; the model $Y_{it}=X_{it}\beta+\alpha_i+u_{it}$ and **heterogeneity bias**; the **within</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>  (fixed-effects) estimator** via demeaning; **first differencing** and FE=FD at $T=2$; **random</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  effects** and its $\operatorname{Cov}(X,\alpha)=0$ assumption, efficiency-vs-consistency, and the</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>  **Hausman test**; **two-way fixed effects**; the limits — time-varying confounders, reverse</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  causality, time-invariant regressors; and DiD as a two-period panel FE model.</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — the within estimator and the **job-training grants /</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>  scrap-rate** panel (54 firms; 1988 grant $\Rightarrow$ ~$-34.4\%$ scrap rate in 1989).</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>**The within transformation kills $\alpha_i$.** Average the model over $t$ for unit $i$:</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>$\bar Y_i=\beta_0+\bar X_i\beta+\alpha_i+\bar u_i$ (since $\bar\alpha_i=\alpha_i$). Subtract from the</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>level equation:</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>Y_{it}-\bar Y_i=(X_{it}-\bar X_i)\beta+(u_{it}-\bar u_i),</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>in which $\alpha_i$ and $\beta_0$ have disappeared. OLS on the demeaned data is the FE estimator</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>$\hat\beta_{FE}=\big(\sum_{it}\ddot X_{it}\ddot X_{it}'\big)^{-1}\sum_{it}\ddot X_{it}\ddot Y_{it}$ with</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>$\ddot X_{it}=X_{it}-\bar X_i$ — a regression on **deviations from unit means**, so only within-unit</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>covariation identifies $\beta$.</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>**FE = FD at $T=2$.** With two periods, demeaning gives $X_{i2}-\bar X_i=\tfrac12\Delta X_i$ and</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>likewise for $Y$; the factor $\tfrac12$ cancels in the OLS ratio, so $\hat\beta_{FE}=\hat\beta_{FD}$</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>exactly. This is why <span class="co">[</span><span class="ot">the 2×2 DiD</span><span class="co">](difference-in-differences.qmd)</span> can be read as either.</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>**Why Hausman points to FE on rejection.** Under $H_0:\operatorname{Cov}(X,\alpha)=0$, both estimators</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>are consistent but RE is efficient; under $H_1$ only FE is consistent. The statistic</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>$(\hat\beta_{FE}-\hat\beta_{RE})'<span class="co">[</span><span class="ot">\operatorname{Var}(\hat\beta_{FE})-\operatorname{Var}(\hat\beta_{RE})</span><span class="co">]</span>^{-1}(\hat\beta_{FE}-\hat\beta_{RE})$</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>is $\chi^2$ under $H_0$; a large value signals the estimators *disagree*, indicting RE's assumption and</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>favouring FE.</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">omitted-variable bias</span><span class="co">](../03-regression/regression-and-causality.qmd)</span> (the unobserved</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>  $\alpha_i$ FE removes), <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](../03-regression/multiple-regression.qmd)</span> (FE is OLS on</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>  dummies/deviations), and <span class="co">[</span><span class="ot">clustering</span><span class="co">](../03-regression/regression-diagnostics.qmd)</span> (panel SEs).</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">difference-in-differences</span><span class="co">](difference-in-differences.qmd)</span> (two-way FE with a treatment</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>  timing) and <span class="co">[</span><span class="ot">synthetic control</span><span class="co">](synthetic-control.qmd)</span> (when you have *one* treated unit and FE/DiD</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>  has no clean control group).</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** virtually all applied <span class="co">[</span><span class="ot">field work</span><span class="co">](../06-field-realities/index.qmd)</span> on</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>  administrative panels.</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"What is panel data, and how does the individual fixed effect $\alpha_i$ create heterogeneity bias in</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>   pooled OLS?"</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"Explain the within (fixed-effects) estimator: the demeaning transformation, why $\alpha_i$</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>   vanishes, and why only within-unit variation identifies $\beta$."</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"How does first differencing remove $\alpha_i$, and when does it equal fixed effects?"</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"Contrast random effects and fixed effects (assumptions, efficiency, consistency) and explain the</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>   Hausman test."</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"What can fixed effects NOT fix (time-varying confounders, reverse causality, time-invariant</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>   variables), and how is DiD a two-period fixed-effects design?"</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

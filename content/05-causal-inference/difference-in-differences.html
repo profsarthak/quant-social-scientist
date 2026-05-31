@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Difference-in-Differences – The Quantitative Social Scientist</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../content/05-causal-inference/panel-and-fixed-effects.html" rel="next">
+<link href="../../content/05-causal-inference/regression-discontinuity.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-a6a8d579619ec60b6cc16f651ef3cf7e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-e06e5700cfc727e31a5c8bda3c8b1a89.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">The Quantitative Social Scientist</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/00-overture/index.html"> 
+<span class="menu-text">Curriculum</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/ml-track/index.html"> 
+<span class="menu-text">ML Track</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../appendices/math/index.html"> 
+<span class="menu-text">Appendices</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">How to use this</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://profsarthak.github.io/quant-social-scientist/" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/05-causal-inference/index.html">V · The Summit: Causal Inference</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/matching-and-propensity-scores.html">The Furious Five</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/difference-in-differences.html">Difference-in-Differences</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Start here</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Quantitative Social Scientist</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to use this</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/what-quantitative-research-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Quantitative Social Science Actually Does</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/anatomy-of-a-study.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Anatomy of a Study</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/concepts-and-measurement.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Concepts &amp; Variables: The Problem of Measurement</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/variables-and-relationships.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Cast of Characters: Kinds of Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/research-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A Field Guide to Research Designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/credibility-and-failure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Makes Research Credible — and How It Fails</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/ethics-and-human-subjects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ethics and the Human-Subjects Frame</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Probability</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/what-probability-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Probability Actually Is</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/sample-spaces-and-axioms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sample Spaces, Events &amp; the Axioms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/counting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Counting: The Arithmetic of Possibility</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Probability &amp; Independence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/bayes-theorem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bayes’ Theorem: Updating Beliefs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/random-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random Variables (Discrete &amp; Continuous)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/expectation-and-variance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expectation &amp; Variance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/common-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Common Distributions and What They Model</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/covariance-and-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Joint Distributions, Covariance &amp; Correlation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-expectation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Expectation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/transformations-and-sums.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transformations &amp; Sums of Random Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/law-of-large-numbers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Law of Large Numbers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Describing Data</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/location-spread-shape.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Location, Spread &amp; Shape</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/exploratory-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory Data Analysis &amp; Visual Summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/messy-real-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Messy Real Data: What to Expect</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">II · Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">II · Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Classical Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-and-survey-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling &amp; Survey Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-distributions-clt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling Distributions &amp; the Central Limit Theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Estimation: From Sample to Best Guess</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Confidence Intervals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hypothesis Testing &amp; p-values</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/comparing-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparing Groups: ANOVA, Chi-Square &amp; Proportions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/resampling-and-nonparametric-tests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Resampling &amp; Distribution-Free Tests</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical Power &amp; Sample Size</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/replication-crisis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Replication Crisis, Made Rigorous</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-worldview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bayesian Worldview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-machinery.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Machinery: Priors, Likelihoods, Posteriors</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/credible-intervals-and-computation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Credible Intervals, Computation &amp; the Verdict</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/simple-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simple Linear Regression: The Line of Best Fit</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/multiple-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple Regression &amp; "Holding Constant"</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/gauss-markov-assumptions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Gauss–Markov Assumptions &amp; BLUE</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/inference-for-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inference for Regression Coefficients</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/functional-form.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functional Form: Logs, Polynomials, Dummies &amp; Interactions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/regression-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Diagnostics &amp; Robust Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/limited-dependent-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Limited Dependent Variables: LPM, Logit &amp; Probit</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/regression-and-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Regression Can — and Can’t — Tell You</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">IV · Predictive Modelling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">IV · The Computational Turn: Predictive Modelling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Predictive Paradigm</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/explaining-vs-predicting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Explaining to Predicting: Two Goals, Two Cultures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/bias-variance-tradeoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bias–Variance Trade-off</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/classification-and-knn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Classification: When the Outcome Is a Category</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/cross-validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Out-of-Sample Honesty: The Test Set &amp; Cross-Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regularization: Ridge &amp; Lasso</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/trees-and-forests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Trees, Forests &amp; Boosting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/interpretability-and-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Interpretability &amp; ML for Social Science</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Time Series &amp; Forecasting</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/time-series-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Time-Series Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/arima-forecasting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Forecasting with ARIMA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Causal Framework</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/potential-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Potential Outcomes &amp; the Fundamental Problem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/randomized-experiments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Randomized Experiments: The Gold Standard</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/directed-acyclic-graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Directed Acyclic Graphs (DAGs)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="true">
+ <span class="menu-text">The Furious Five</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/matching-and-propensity-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Selection on Observables: Matching &amp; Propensity Scores</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/instrumental-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Instrumental Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/regression-discontinuity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regression Discontinuity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/difference-in-differences.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Difference-in-Differences</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/panel-and-fixed-effects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Panel Data &amp; Fixed Effects</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false">
+ <span class="menu-text">Frontiers</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-16" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/synthetic-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic Control</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/causal-machine-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Causal Machine Learning: Heterogeneous Effects</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" role="navigation" aria-expanded="true">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-17" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="true">
+ <span class="menu-text">ML Track (separate)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-18" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ML Track (separate)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-19" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/math/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Mathematics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/computing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Computing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#the-canonical-22" id="toc-the-canonical-22" class="nav-link" data-scroll-target="#the-canonical-22">The canonical 2×2</a></li>
+  <li><a href="#the-one-assumption-parallel-trends" id="toc-the-one-assumption-parallel-trends" class="nav-link" data-scroll-target="#the-one-assumption-parallel-trends">The one assumption: parallel trends</a></li>
+  <li><a href="#twfe-and-the-event-study" id="toc-twfe-and-the-event-study" class="nav-link" data-scroll-target="#twfe-and-the-event-study">TWFE and the event study</a></li>
+  <li><a href="#the-did-revolution-when-twfe-lies" id="toc-the-did-revolution-when-twfe-lies" class="nav-link" data-scroll-target="#the-did-revolution-when-twfe-lies">The DiD revolution: when TWFE lies</a></li>
+  <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
+  <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
+  <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
+  <li><a href="#connections" id="toc-connections" class="nav-link" data-scroll-target="#connections">Connections</a></li>
+  <li><a href="#study-with-notebooklm" id="toc-study-with-notebooklm" class="nav-link" data-scroll-target="#study-with-notebooklm">Study with NotebookLM</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/05-causal-inference/index.html">V · The Summit: Causal Inference</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/matching-and-propensity-scores.html">The Furious Five</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/difference-in-differences.html">Difference-in-Differences</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Difference-in-Differences</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">Let each group be its own control through time — subtract away the fixed gaps and the common shocks, and what’s left is the policy.</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="lead-kernel">
+<p>When a policy hits one group and not another, you can’t just compare the two — they differed to begin with. And you can’t just track the treated group over time — everything else moved too. Difference-in- differences does <strong>both subtractions at once</strong>: the treated group’s <em>change</em> minus the control group’s <em>change</em>. The first difference erases fixed group gaps; the second erases shocks common to all. What survives is the treatment effect — <em>if</em> the groups would have moved in parallel anyway.</p>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p><a href="../../content/05-causal-inference/regression-discontinuity.html">RD</a> needs a sharp cutoff; <a href="../../content/05-causal-inference/instrumental-variables.html">IV</a> needs a clever instrument. DiD needs only a <strong>policy change</strong>, a <strong>comparison group</strong>, and <strong>data before and after</strong> — which is why it is the most widely used quasi-experimental design in economics and policy. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> It exploits a different kind of as-good-as-random variation: the <em>timing</em> of a treatment that some units get and others don’t. And it is the design where the field has most recently discovered it was doing things <em>wrong</em> — making this entry both a how-to and a cautionary tale. <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span></p>
+</section>
+<section id="the-canonical-22" class="level2">
+<h2 class="anchored" data-anchor-id="the-canonical-22">The canonical 2×2</h2>
+<p>The simplest DiD has two groups — <strong>treated</strong> (<span class="math inline">D=1</span>) and <strong>control</strong> (<span class="math inline">D=0</span>) — and two periods, <strong>before</strong> and <strong>after</strong>. The estimator double-differences four means: <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span> <span class="math display">
+\hat\delta_{DD}=\big(\bar Y_{\text{treat,post}}-\bar Y_{\text{treat,pre}}\big)
+-\big(\bar Y_{\text{ctrl,post}}-\bar Y_{\text{ctrl,pre}}\big).
+</span> Read the two subtractions: <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span></p>
+<ul>
+<li>The <strong>first difference</strong> (post − pre, <em>within</em> each group) wipes out every <strong>time-invariant</strong> group trait — the treated group can be richer, sicker, bigger; if it doesn’t change, it cancels.</li>
+<li>The <strong>second difference</strong> (treated change − control change) wipes out any <strong>shock common to both groups</strong> in that period — a recession, a seasonal swing, a nationwide trend.</li>
+</ul>
+<p>Two confounding layers removed by arithmetic, no controls required. What remains is attributed to the treatment.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Card &amp; Krueger and the minimum wage">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Card &amp; Krueger and the minimum wage
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The study that made DiD famous — and overturned a textbook prediction. In 1992 <strong>New Jersey</strong> raised its minimum wage from $4.25 to $5.05; neighbouring <strong>Pennsylvania</strong> held at $4.25. Card &amp; Krueger surveyed ~400 fast-food restaurants before and after, measuring full-time-equivalent employment: <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Pre</th>
+<th>Post</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>New Jersey</strong> (treated)</td>
+<td>20.44</td>
+<td>21.03</td>
+<td><strong>+0.59</strong></td>
+</tr>
+<tr class="even">
+<td><strong>Pennsylvania</strong> (control)</td>
+<td>23.33</td>
+<td>21.17</td>
+<td><strong>−2.16</strong></td>
+</tr>
+</tbody>
+</table>
+<p>DiD <span class="math inline">= (+0.59)-(-2.16) = \mathbf{+2.76}</span>. Employment fell in Pennsylvania (a common regional shock) but <em>rose</em> relative to it in New Jersey — the opposite of the competitive prediction that a higher minimum wage destroys jobs. Note the logic: NJ’s raw <span class="math inline">+0.59</span> alone would be misleading; only by netting out PA’s <span class="math inline">-2.16</span> regional slump does the policy’s <em>relative</em> effect appear. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+</div>
+</div>
+</section>
+<section id="the-one-assumption-parallel-trends" class="level2">
+<h2 class="anchored" data-anchor-id="the-one-assumption-parallel-trends">The one assumption: parallel trends</h2>
+<p>DiD’s entire credibility rests on <strong>parallel trends</strong>: <em>absent the treatment, the treated and control groups would have moved in parallel.</em> <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span> The control group’s change is used as the treated group’s <strong>missing counterfactual change</strong> — valid only if their paths would have stayed parallel. Two things to internalise: <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span></p>
+<ul>
+<li><strong>It is fundamentally untestable.</strong> It concerns the treated group’s <em>unobserved</em> no-treatment path after the intervention — a counterfactual we never see.</li>
+<li><strong>Pre-trends are the evidence.</strong> If the groups tracked each other <em>before</em> treatment, it’s more plausible they’d have continued. So researchers plot the pre-period and check for parallel paths — necessary support, not proof. (Levels may differ wildly; it is the <em>slopes</em> that must match.)</li>
+</ul>
+<div id="cell-fig-did" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Show the figure code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>]                       <span class="co"># pre, post</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>nj <span class="op">=</span> [<span class="fl">20.44</span>, <span class="fl">21.03</span>]             <span class="co"># treated</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>pa <span class="op">=</span> [<span class="fl">23.33</span>, <span class="fl">21.17</span>]             <span class="co"># control</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>nj_cf <span class="op">=</span> [<span class="fl">20.44</span>, <span class="fl">20.44</span> <span class="op">+</span> (pa[<span class="dv">1</span>] <span class="op">-</span> pa[<span class="dv">0</span>])]   <span class="co"># counterfactual: NJ + PA's change</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>did <span class="op">=</span> (nj[<span class="dv">1</span>] <span class="op">-</span> nj[<span class="dv">0</span>]) <span class="op">-</span> (pa[<span class="dv">1</span>] <span class="op">-</span> pa[<span class="dv">0</span>])</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.0</span>, <span class="fl">4.2</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>ax.plot(t, nj, <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#1f8a4c"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="st">"New Jersey (treated)"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>ax.plot(t, pa, <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#9aa0a6"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="st">"Pennsylvania (control)"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>ax.plot(t, nj_cf, <span class="st">"o--"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, lw<span class="op">=</span><span class="fl">2.0</span>, label<span class="op">=</span><span class="st">"NJ counterfactual (parallel)"</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">""</span>, xy<span class="op">=</span>(<span class="dv">1</span>, nj[<span class="dv">1</span>]), xytext<span class="op">=</span>(<span class="dv">1</span>, nj_cf[<span class="dv">1</span>]),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"&lt;-&gt;"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, lw<span class="op">=</span><span class="fl">2.0</span>))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">1.02</span>, (nj[<span class="dv">1</span>] <span class="op">+</span> nj_cf[<span class="dv">1</span>]) <span class="op">/</span> <span class="dv">2</span>, <span class="ss">f"DiD = </span><span class="sc">{</span>did<span class="sc">:+.2f}</span><span class="ss">"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, va<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(t)<span class="op">;</span> ax.set_xticklabels([<span class="st">"pre (Feb 1992)"</span>, <span class="st">"post (Nov 1992)"</span>])</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"FTE employment per restaurant"</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Each group its own control: subtract the common shock"</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"lower left"</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="op">-</span><span class="fl">0.15</span>, <span class="fl">1.35</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-did" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-did-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="difference-in-differences_files/figure-html/fig-did-output-1.png" width="662" height="394" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-did-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Difference-in-differences (Card–Krueger). New Jersey (treated) and Pennsylvania (control) start at different employment levels — DiD allows that. Pennsylvania’s change (−2.16) estimates the common shock both states faced; applying it to New Jersey gives the counterfactual (dashed) — where NJ would have landed with no minimum-wage hike. The gap between NJ’s actual post value and that counterfactual is the DiD effect, +2.76.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="twfe-and-the-event-study" class="level2">
+<h2 class="anchored" data-anchor-id="twfe-and-the-event-study">TWFE and the event study</h2>
+<p>In practice DiD is run as a <strong>two-way fixed effects (TWFE)</strong> regression, which generalises the four means to many units and periods: <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span> <span class="math display">
+Y_{it}=\eta_i+\theta_t+\beta D_{it}+\epsilon_{it}.
+</span> The <strong>unit fixed effects</strong> <span class="math inline">\eta_i</span> absorb all time-invariant differences between units (the first difference); the <strong>time fixed effects</strong> <span class="math inline">\theta_t</span> absorb shocks common to all units in a period (the second difference); <span class="math inline">\beta</span> is the DiD effect. <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span> It is the <a href="../../content/05-causal-inference/panel-and-fixed-effects.html">panel/fixed-effects</a> machinery of the next entry — <strong>DiD is a fixed-effects design.</strong></p>
+<p>The <strong>event study</strong> enriches this by replacing the single <span class="math inline">D_{it}</span> with dummies for periods <em>relative to treatment</em>: <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span> <span class="math display">
+Y_{it}=\eta_i+\theta_t+\sum_{\tau=-q}^{m}\delta_\tau D_{i,\tau}+\epsilon_{it}.
+</span> The <strong>leads</strong> (<span class="math inline">\tau&lt;0</span>) should be near zero — a visual <strong>parallel-trends check</strong>; the <strong>lags</strong> (<span class="math inline">\tau\ge0</span>) trace how the effect <strong>grows, fades, or plateaus</strong> after treatment. <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span> An event study is the single most persuasive DiD graphic: flat before, a clear break after.</p>
+</section>
+<section id="the-did-revolution-when-twfe-lies" class="level2">
+<h2 class="anchored" data-anchor-id="the-did-revolution-when-twfe-lies">The DiD revolution: when TWFE lies</h2>
+<p>Here is the cautionary tale, and why this entry cites a 2020s practitioner’s guide. When units are treated at <strong>different times</strong> (<strong>staggered adoption</strong>), the trusty TWFE regression can become <strong>biased — even sign-flipped.</strong> <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span></p>
+<ul>
+<li><strong>Forbidden comparisons.</strong> With staggering, TWFE implicitly uses <strong>already-treated units as controls</strong> for later-treated ones. If effects <strong>change over time</strong> (dynamic effects), those already-treated “controls” are themselves still moving <em>because of their own treatment</em>, contaminating the comparison. <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span></li>
+<li><strong>Goodman-Bacon decomposition.</strong> TWFE’s <span class="math inline">\beta</span> is a <strong>weighted average of all possible 2×2 DiDs</strong> — and in staggered designs some <strong>weights can be negative</strong>. The estimate can come out the <strong>wrong sign</strong> <em>even if every unit’s true effect is positive</em>. <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span></li>
+<li><strong>New estimators.</strong> “Forward-engineered” methods fix it by using only <strong>clean controls</strong>: <strong>Callaway–Sant’Anna</strong> (compare each treated cohort only to <strong>never-treated or not-yet-treated</strong> units), <strong>Sun–Abraham</strong> (a saturated cohort-by-time interaction), and <strong>de Chaisemartin–D’Haultfœuille</strong> (robust when treatment switches on and off). <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span></li>
+</ul>
+<p>The lesson is humbling and current: a method everyone trusted for decades was quietly mis-estimating staggered rollouts, and the corpus’s most recent source exists to set it right.</p>
+</section>
+<section id="common-pitfalls" class="level2">
+<h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
+<div class="callout callout-style-default callout-warning callout-titled" title="Where this goes wrong">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Where this goes wrong
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><p><strong>Asserting parallel trends from a good story.</strong> It’s untestable; show pre-trends / event-study leads near zero, and reason about confounders that could break parallelism. <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span></p></li>
+<li><p><strong>A control group on its own trajectory.</strong> If the control was already diverging (a differential trend), the second difference doesn’t cancel it and DiD is biased. <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span></p></li>
+<li><p><strong>Default TWFE under staggered adoption.</strong> Negative weights and forbidden comparisons can flip the sign; use Callaway–Sant’Anna / Sun–Abraham / dCDH and report a Goodman-Bacon decomposition. <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span></p></li>
+<li><p><strong>A shock that hits only one group.</strong> Parallel trends fails if something <em>else</em> changed for the treated group at the same time (a concurrent policy). <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
+<li><p><strong>Anticipation.</strong> If units change behaviour <em>before</em> treatment (expecting it), pre-periods are contaminated and leads aren’t a clean test. <span class="citation" data-cites="did_guide">(<a href="#ref-did_guide" role="doc-biblioref">Baker et al. 2025</a>)</span></p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="from-the-sources" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Who says what">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Who says what
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>DiD Practitioner’s Guide (Baker, Callaway, Cunningham, Goodman-Bacon, Sant’Anna)</strong> — the 2×2 and double-differencing; <strong>parallel trends</strong>, its untestability, and pre-trend/event-study evidence; <strong>TWFE</strong> <span class="math inline">Y_{it}=\eta_i+\theta_t+\beta D_{it}+\epsilon_{it}</span> and the <strong>event-study</strong> leads/lags; the <strong>staggered-adoption</strong> problem — <strong>forbidden comparisons</strong>, the <strong>Goodman-Bacon</strong> decomposition and <strong>negative weights</strong>, and the new <strong>Callaway–Sant’Anna / Sun–Abraham / de Chaisemartin– D’Haultfœuille</strong> estimators.</li>
+<li><strong>Cunningham, <em>The Mixtape</em></strong> — DiD intuition and the <strong>Card–Krueger</strong> minimum-wage study (NJ <span class="math inline">20.44\to21.03</span>, PA <span class="math inline">23.33\to21.17</span>, DiD <span class="math inline">=+2.76</span>).</li>
+<li><strong>Angrist &amp; Pischke</strong> — DiD as a fixed-effects regression within the credibility-revolution toolkit.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="appendix-the-mathematics" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="appendix-the-mathematics">Appendix · the mathematics</h2>
+<div class="math-appendix">
+<p><strong>Why double-differencing identifies the effect.</strong> Write potential outcomes with additive group and time components: <span class="math inline">Y_{it}(0)=\gamma_i+\lambda_t+\varepsilon_{it}</span>, and <span class="math inline">Y_{it}(1)=Y_{it}(0)+\delta</span>. <strong>Parallel trends</strong> is the statement that <span class="math inline">\lambda_t</span> is <em>common</em> across groups (the no-treatment trend is the same). Taking each group’s post−pre difference removes <span class="math inline">\gamma_i</span>; subtracting the control’s difference removes the common <span class="math inline">\lambda_{\text{post}}-\lambda_{\text{pre}}</span>, leaving exactly <span class="math inline">\delta</span>. The assumption is precisely “the <span class="math inline">\lambda_t</span> path is shared,” which is why differing <em>levels</em> <span class="math inline">\gamma_i</span> are harmless but differing <em>trends</em> are fatal.</p>
+<p><strong>TWFE recovers the 2×2.</strong> In the saturated two-period, two-group case, the OLS coefficient on <span class="math inline">D_{it}</span> in <span class="math inline">Y_{it}=\eta_i+\theta_t+\beta D_{it}+\epsilon_{it}</span> equals <span class="math inline">\hat\delta_{DD}</span> exactly — the unit dummies are the first difference, the time dummies the second.</p>
+<p><strong>Goodman-Bacon weights.</strong> With staggered timing, <span class="math inline">\hat\beta_{TWFE}=\sum_k s_k\,\hat\beta_k</span> over all 2×2 sub-experiments <span class="math inline">k</span>, with weights <span class="math inline">s_k</span> proportional to subsample size <strong>and treatment variance</strong>. Comparisons that use <strong>already-treated</strong> units as controls can receive <strong>negative</strong> <span class="math inline">s_k</span> when those controls’ effects are still evolving — so a positive-everywhere effect can aggregate to a negative <span class="math inline">\hat\beta_{TWFE}</span>. The new estimators restrict attention to clean (never- / not-yet-treated) controls, forcing non-negative weighting.</p>
+</div>
+</section>
+<section id="connections" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
+<ul>
+<li><strong>Builds on:</strong> <a href="../../content/05-causal-inference/panel-and-fixed-effects.html">panel &amp; fixed effects</a> (TWFE is its two-way special case), <a href="../../content/05-causal-inference/potential-outcomes.html">potential outcomes</a> (parallel trends as an assumption about counterfactual <em>changes</em>), and <a href="../../content/03-regression/multiple-regression.html">regression FE intuition</a>.</li>
+<li><strong>Leads to:</strong> <a href="../../content/05-causal-inference/synthetic-control.html">synthetic control</a> — what to do when <strong>no single control group</strong> has parallel trends, by <em>building</em> a weighted one.</li>
+<li><strong>Reappears in:</strong> modern applied policy work throughout <a href="../../content/06-field-realities/index.html">Part VI</a>, where staggered rollouts are the norm and the new estimators are now standard.</li>
+</ul>
+</section>
+<section id="study-with-notebooklm" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="study-with-notebooklm">Study with NotebookLM</h2>
+<ol type="1">
+<li>“Explain the canonical 2×2 DiD and how the two differences remove time-invariant group differences and common time shocks. Work the Card–Krueger numbers.”</li>
+<li>“State the parallel-trends assumption, explain why it’s untestable, and how pre-trends / event-study leads provide evidence.”</li>
+<li>“Write the two-way fixed-effects regression and explain what the unit and time fixed effects absorb. How does an event study generalise it?”</li>
+<li>“Explain the staggered-adoption problem: forbidden comparisons, the Goodman-Bacon decomposition, and how negative weights can flip the sign of TWFE.”</li>
+<li>“What do the Callaway–Sant’Anna, Sun–Abraham, and de Chaisemartin–D’Haultfœuille estimators do differently to fix staggered DiD?”</li>
+</ol>
+
+
+<!-- -->
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-did_guide" class="csl-entry" role="listitem">
+Baker, Andrew, Brantly Callaway, Scott Cunningham, Andrew Goodman-Bacon, and Pedro H. C. Sant’Anna. 2025. <span>“Difference-in-Differences: A Practitioner’s Guide.”</span> <em>Working Paper</em>.
+</div>
+<div id="ref-cunningham_mixtape" class="csl-entry" role="listitem">
+Cunningham, Scott. 2021. <em>Causal Inference: The Mixtape</em>. Yale University Press.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/profsarthak\.github\.io\/quant-social-scientist\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../content/05-causal-inference/regression-discontinuity.html" class="pagination-link" aria-label="Regression Discontinuity">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Regression Discontinuity</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../content/05-causal-inference/panel-and-fixed-effects.html" class="pagination-link" aria-label="Panel Data &amp; Fixed Effects">
+        <span class="nav-page-text">Panel Data &amp; Fixed Effects</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Difference-in-Differences"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Let each group be its own control through time — subtract away the fixed gaps and the common shocks, and what's left is the policy."</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>When a policy hits one group and not another, you can't just compare the two — they differed to begin</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>with. And you can't just track the treated group over time — everything else moved too. Difference-in-</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>differences does **both subtractions at once**: the treated group's *change* minus the control group's</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>*change*. The first difference erases fixed group gaps; the second erases shocks common to all. What</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>survives is the treatment effect — *if* the groups would have moved in parallel anyway.</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">RD</span><span class="co">](regression-discontinuity.qmd)</span> needs a sharp cutoff; <span class="co">[</span><span class="ot">IV</span><span class="co">](instrumental-variables.qmd)</span> needs a</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>clever instrument. DiD needs only a **policy change**, a **comparison group**, and **data before and</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>after** — which is why it is the most widely used quasi-experimental design in economics and policy.</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> It exploits a different kind of as-good-as-random variation: the *timing* of a</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>treatment that some units get and others don't. And it is the design where the field has most recently</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>discovered it was doing things *wrong* — making this entry both a how-to and a cautionary tale.</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="fu">## The canonical 2×2</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>The simplest DiD has two groups — **treated** ($D=1$) and **control** ($D=0$) — and two periods,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>**before** and **after**. The estimator double-differences four means: <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>\hat\delta_{DD}=\big(\bar Y_{\text{treat,post}}-\bar Y_{\text{treat,pre}}\big)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>-\big(\bar Y_{\text{ctrl,post}}-\bar Y_{\text{ctrl,pre}}\big).</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>Read the two subtractions: <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The **first difference** (post − pre, *within* each group) wipes out every **time-invariant** group</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  trait — the treated group can be richer, sicker, bigger; if it doesn't change, it cancels.</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The **second difference** (treated change − control change) wipes out any **shock common to both</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  groups** in that period — a recession, a seasonal swing, a nationwide trend.</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>Two confounding layers removed by arithmetic, no controls required. What remains is attributed to the</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>treatment.</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Card &amp; Krueger and the minimum wage"}</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>The study that made DiD famous — and overturned a textbook prediction. In 1992 **New Jersey** raised</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>its minimum wage from \$4.25 to \$5.05; neighbouring **Pennsylvania** held at \$4.25. Card &amp; Krueger</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>surveyed ~400 fast-food restaurants before and after, measuring full-time-equivalent employment:</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="pp">|</span> Pre <span class="pp">|</span> Post <span class="pp">|</span> Change <span class="pp">|</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **New Jersey** (treated) | 20.44 | 21.03 | **+0.59** <span class="pp">|</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Pennsylvania** (control) | 23.33 | 21.17 | **−2.16** <span class="pp">|</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>DiD $= (+0.59)-(-2.16) = \mathbf{+2.76}$. Employment fell in Pennsylvania (a common regional shock) but</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>*rose* relative to it in New Jersey — the opposite of the competitive prediction that a higher minimum</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>wage destroys jobs. Note the logic: NJ's raw $+0.59$ alone would be misleading; only by netting out</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>PA's $-2.16$ regional slump does the policy's *relative* effect appear. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="fu">## The one assumption: parallel trends</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>DiD's entire credibility rests on **parallel trends**: *absent the treatment, the treated and control</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>groups would have moved in parallel.* <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span> The control group's change is used as the treated</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>group's **missing counterfactual change** — valid only if their paths would have stayed parallel. Two</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>things to internalise: <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**It is fundamentally untestable.** It concerns the treated group's *unobserved* no-treatment path</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>  after the intervention — a counterfactual we never see.</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pre-trends are the evidence.** If the groups tracked each other *before* treatment, it's more</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>  plausible they'd have continued. So researchers plot the pre-period and check for parallel paths —</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>  necessary support, not proof. (Levels may differ wildly; it is the *slopes* that must match.)</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-did</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Difference-in-differences (Card–Krueger). New Jersey (treated) and Pennsylvania (control) start at different employment levels — DiD allows that. Pennsylvania's change (−2.16) estimates the common shock both states faced; applying it to New Jersey gives the counterfactual (dashed) — where NJ would have landed with no minimum-wage hike. The gap between NJ's actual post value and that counterfactual is the DiD effect, +2.76."</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>]                       <span class="co"># pre, post</span></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>nj <span class="op">=</span> [<span class="fl">20.44</span>, <span class="fl">21.03</span>]             <span class="co"># treated</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>pa <span class="op">=</span> [<span class="fl">23.33</span>, <span class="fl">21.17</span>]             <span class="co"># control</span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>nj_cf <span class="op">=</span> [<span class="fl">20.44</span>, <span class="fl">20.44</span> <span class="op">+</span> (pa[<span class="dv">1</span>] <span class="op">-</span> pa[<span class="dv">0</span>])]   <span class="co"># counterfactual: NJ + PA's change</span></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>did <span class="op">=</span> (nj[<span class="dv">1</span>] <span class="op">-</span> nj[<span class="dv">0</span>]) <span class="op">-</span> (pa[<span class="dv">1</span>] <span class="op">-</span> pa[<span class="dv">0</span>])</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.0</span>, <span class="fl">4.2</span>))</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>ax.plot(t, nj, <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#1f8a4c"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="st">"New Jersey (treated)"</span>)</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>ax.plot(t, pa, <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#9aa0a6"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="st">"Pennsylvania (control)"</span>)</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>ax.plot(t, nj_cf, <span class="st">"o--"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, lw<span class="op">=</span><span class="fl">2.0</span>, label<span class="op">=</span><span class="st">"NJ counterfactual (parallel)"</span>)</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">""</span>, xy<span class="op">=</span>(<span class="dv">1</span>, nj[<span class="dv">1</span>]), xytext<span class="op">=</span>(<span class="dv">1</span>, nj_cf[<span class="dv">1</span>]),</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"&lt;-&gt;"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, lw<span class="op">=</span><span class="fl">2.0</span>))</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">1.02</span>, (nj[<span class="dv">1</span>] <span class="op">+</span> nj_cf[<span class="dv">1</span>]) <span class="op">/</span> <span class="dv">2</span>, <span class="ss">f"DiD = </span><span class="sc">{</span>did<span class="sc">:+.2f}</span><span class="ss">"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, va<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(t)<span class="op">;</span> ax.set_xticklabels([<span class="st">"pre (Feb 1992)"</span>, <span class="st">"post (Nov 1992)"</span>])</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"FTE employment per restaurant"</span>)</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Each group its own control: subtract the common shock"</span>)</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"lower left"</span>)</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="op">-</span><span class="fl">0.15</span>, <span class="fl">1.35</span>)</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="fu">## TWFE and the event study</span></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>In practice DiD is run as a **two-way fixed effects (TWFE)** regression, which generalises the four</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>means to many units and periods: <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>Y_{it}=\eta_i+\theta_t+\beta D_{it}+\epsilon_{it}.</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>The **unit fixed effects** $\eta_i$ absorb all time-invariant differences between units (the first</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>difference); the **time fixed effects** $\theta_t$ absorb shocks common to all units in a period (the</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>second difference); $\beta$ is the DiD effect. <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span> It is the</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">panel/fixed-effects</span><span class="co">](panel-and-fixed-effects.qmd)</span> machinery of the next entry — **DiD is a</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>fixed-effects design.**</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>The **event study** enriches this by replacing the single $D_{it}$ with dummies for periods *relative</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>to treatment*: <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>Y_{it}=\eta_i+\theta_t+\sum_{\tau=-q}^{m}\delta_\tau D_{i,\tau}+\epsilon_{it}.</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>The **leads** ($\tau&lt;0$) should be near zero — a visual **parallel-trends check**; the **lags**</span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>($\tau\ge0$) trace how the effect **grows, fades, or plateaus** after treatment. <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span> An event</span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>study is the single most persuasive DiD graphic: flat before, a clear break after.</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="fu">## The DiD revolution: when TWFE lies</span></span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>Here is the cautionary tale, and why this entry cites a 2020s practitioner's guide. When units are</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>treated at **different times** (**staggered adoption**), the trusty TWFE regression can become</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>**biased — even sign-flipped.** <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forbidden comparisons.** With staggering, TWFE implicitly uses **already-treated units as controls**</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>  for later-treated ones. If effects **change over time** (dynamic effects), those already-treated</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>  "controls" are themselves still moving *because of their own treatment*, contaminating the</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>  comparison. <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Goodman-Bacon decomposition.** TWFE's $\beta$ is a **weighted average of all possible 2×2 DiDs** —</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>  and in staggered designs some **weights can be negative**. The estimate can come out the **wrong</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>  sign** *even if every unit's true effect is positive*. <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**New estimators.** "Forward-engineered" methods fix it by using only **clean controls**:</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>  **Callaway–Sant'Anna** (compare each treated cohort only to **never-treated or not-yet-treated**</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>  units), **Sun–Abraham** (a saturated cohort-by-time interaction), and</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>  **de Chaisemartin–D'Haultfœuille** (robust when treatment switches on and off). <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>The lesson is humbling and current: a method everyone trusted for decades was quietly mis-estimating</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>staggered rollouts, and the corpus's most recent source exists to set it right.</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Asserting parallel trends from a good story.** It's untestable; show pre-trends / event-study leads</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>  near zero, and reason about confounders that could break parallelism. <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A control group on its own trajectory.** If the control was already diverging (a differential</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>  trend), the second difference doesn't cancel it and DiD is biased. <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Default TWFE under staggered adoption.** Negative weights and forbidden comparisons can flip the</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>  sign; use Callaway–Sant'Anna / Sun–Abraham / dCDH and report a Goodman-Bacon decomposition.</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A shock that hits only one group.** Parallel trends fails if something *else* changed for the</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>  treated group at the same time (a concurrent policy). <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Anticipation.** If units change behaviour *before* treatment (expecting it), pre-periods are</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>  contaminated and leads aren't a clean test. <span class="co">[</span><span class="ot">@did_guide</span><span class="co">]</span></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**DiD Practitioner's Guide (Baker, Callaway, Cunningham, Goodman-Bacon, Sant'Anna)** — the 2×2 and</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>  double-differencing; **parallel trends**, its untestability, and pre-trend/event-study evidence;</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>  **TWFE** $Y_{it}=\eta_i+\theta_t+\beta D_{it}+\epsilon_{it}$ and the **event-study** leads/lags;</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>  the **staggered-adoption** problem — **forbidden comparisons**, the **Goodman-Bacon** decomposition</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>  and **negative weights**, and the new **Callaway–Sant'Anna / Sun–Abraham / de Chaisemartin–</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>  D'Haultfœuille** estimators.</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *The Mixtape*** — DiD intuition and the **Card–Krueger** minimum-wage study</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>  (NJ $20.44\to21.03$, PA $23.33\to21.17$, DiD $=+2.76$).</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke** — DiD as a fixed-effects regression within the credibility-revolution toolkit.</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>**Why double-differencing identifies the effect.** Write potential outcomes with additive group and</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>time components: $Y_{it}(0)=\gamma_i+\lambda_t+\varepsilon_{it}$, and $Y_{it}(1)=Y_{it}(0)+\delta$.</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>**Parallel trends** is the statement that $\lambda_t$ is *common* across groups (the no-treatment trend</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>is the same). Taking each group's post−pre difference removes $\gamma_i$; subtracting the control's</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>difference removes the common $\lambda_{\text{post}}-\lambda_{\text{pre}}$, leaving exactly $\delta$.</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>The assumption is precisely "the $\lambda_t$ path is shared," which is why differing *levels*</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>$\gamma_i$ are harmless but differing *trends* are fatal.</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>**TWFE recovers the 2×2.** In the saturated two-period, two-group case, the OLS coefficient on</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>$D_{it}$ in $Y_{it}=\eta_i+\theta_t+\beta D_{it}+\epsilon_{it}$ equals $\hat\delta_{DD}$ exactly — the</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>unit dummies are the first difference, the time dummies the second.</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>**Goodman-Bacon weights.** With staggered timing, $\hat\beta_{TWFE}=\sum_k s_k\,\hat\beta_k$ over all</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>2×2 sub-experiments $k$, with weights $s_k$ proportional to subsample size **and treatment variance**.</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>Comparisons that use **already-treated** units as controls can receive **negative** $s_k$ when those</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>controls' effects are still evolving — so a positive-everywhere effect can aggregate to a negative</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>$\hat\beta_{TWFE}$. The new estimators restrict attention to clean (never- / not-yet-treated) controls,</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>forcing non-negative weighting.</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">panel &amp; fixed effects</span><span class="co">](panel-and-fixed-effects.qmd)</span> (TWFE is its two-way special</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>  case), <span class="co">[</span><span class="ot">potential outcomes</span><span class="co">](potential-outcomes.qmd)</span> (parallel trends as an assumption about</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>  counterfactual *changes*), and <span class="co">[</span><span class="ot">regression FE intuition</span><span class="co">](../03-regression/multiple-regression.qmd)</span>.</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** [synthetic control](synthetic-control.qmd) — what to do when **no single control group**</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>  has parallel trends, by *building* a weighted one.</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** modern applied policy work throughout <span class="co">[</span><span class="ot">Part VI</span><span class="co">](../06-field-realities/index.qmd)</span>,</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>  where staggered rollouts are the norm and the new estimators are now standard.</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"Explain the canonical 2×2 DiD and how the two differences remove time-invariant group differences</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>   and common time shocks. Work the Card–Krueger numbers."</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"State the parallel-trends assumption, explain why it's untestable, and how pre-trends / event-study</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>   leads provide evidence."</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"Write the two-way fixed-effects regression and explain what the unit and time fixed effects absorb.</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>   How does an event study generalise it?"</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"Explain the staggered-adoption problem: forbidden comparisons, the Goodman-Bacon decomposition, and</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>   how negative weights can flip the sign of TWFE."</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"What do the Callaway–Sant'Anna, Sun–Abraham, and de Chaisemartin–D'Haultfœuille estimators do</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>   differently to fix staggered DiD?"</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Directed Acyclic Graphs (DAGs) – The Quantitative Social Scientist</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../content/05-causal-inference/matching-and-propensity-scores.html" rel="next">
+<link href="../../content/05-causal-inference/randomized-experiments.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-a6a8d579619ec60b6cc16f651ef3cf7e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-e06e5700cfc727e31a5c8bda3c8b1a89.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">The Quantitative Social Scientist</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/00-overture/index.html"> 
+<span class="menu-text">Curriculum</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/ml-track/index.html"> 
+<span class="menu-text">ML Track</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../appendices/math/index.html"> 
+<span class="menu-text">Appendices</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">How to use this</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://profsarthak.github.io/quant-social-scientist/" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/05-causal-inference/index.html">V · The Summit: Causal Inference</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/potential-outcomes.html">The Causal Framework</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/directed-acyclic-graphs.html">Directed Acyclic Graphs (DAGs)</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Start here</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Quantitative Social Scientist</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to use this</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/what-quantitative-research-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Quantitative Social Science Actually Does</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/anatomy-of-a-study.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Anatomy of a Study</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/concepts-and-measurement.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Concepts &amp; Variables: The Problem of Measurement</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/variables-and-relationships.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Cast of Characters: Kinds of Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/research-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A Field Guide to Research Designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/credibility-and-failure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Makes Research Credible — and How It Fails</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/ethics-and-human-subjects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ethics and the Human-Subjects Frame</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Probability</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/what-probability-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Probability Actually Is</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/sample-spaces-and-axioms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sample Spaces, Events &amp; the Axioms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/counting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Counting: The Arithmetic of Possibility</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Probability &amp; Independence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/bayes-theorem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bayes’ Theorem: Updating Beliefs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/random-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random Variables (Discrete &amp; Continuous)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/expectation-and-variance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expectation &amp; Variance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/common-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Common Distributions and What They Model</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/covariance-and-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Joint Distributions, Covariance &amp; Correlation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-expectation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Expectation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/transformations-and-sums.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transformations &amp; Sums of Random Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/law-of-large-numbers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Law of Large Numbers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Describing Data</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/location-spread-shape.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Location, Spread &amp; Shape</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/exploratory-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory Data Analysis &amp; Visual Summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/messy-real-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Messy Real Data: What to Expect</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">II · Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">II · Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Classical Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-and-survey-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling &amp; Survey Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-distributions-clt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling Distributions &amp; the Central Limit Theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Estimation: From Sample to Best Guess</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Confidence Intervals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hypothesis Testing &amp; p-values</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/comparing-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparing Groups: ANOVA, Chi-Square &amp; Proportions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/resampling-and-nonparametric-tests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Resampling &amp; Distribution-Free Tests</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical Power &amp; Sample Size</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/replication-crisis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Replication Crisis, Made Rigorous</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-worldview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bayesian Worldview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-machinery.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Machinery: Priors, Likelihoods, Posteriors</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/credible-intervals-and-computation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Credible Intervals, Computation &amp; the Verdict</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/simple-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simple Linear Regression: The Line of Best Fit</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/multiple-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple Regression &amp; "Holding Constant"</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/gauss-markov-assumptions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Gauss–Markov Assumptions &amp; BLUE</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/inference-for-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inference for Regression Coefficients</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/functional-form.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functional Form: Logs, Polynomials, Dummies &amp; Interactions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/regression-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Diagnostics &amp; Robust Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/limited-dependent-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Limited Dependent Variables: LPM, Logit &amp; Probit</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/regression-and-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Regression Can — and Can’t — Tell You</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">IV · Predictive Modelling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">IV · The Computational Turn: Predictive Modelling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Predictive Paradigm</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/explaining-vs-predicting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Explaining to Predicting: Two Goals, Two Cultures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/bias-variance-tradeoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bias–Variance Trade-off</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/classification-and-knn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Classification: When the Outcome Is a Category</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/cross-validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Out-of-Sample Honesty: The Test Set &amp; Cross-Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regularization: Ridge &amp; Lasso</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/trees-and-forests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Trees, Forests &amp; Boosting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/interpretability-and-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Interpretability &amp; ML for Social Science</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Time Series &amp; Forecasting</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/time-series-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Time-Series Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/arima-forecasting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Forecasting with ARIMA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="true">
+ <span class="menu-text">The Causal Framework</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/potential-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Potential Outcomes &amp; the Fundamental Problem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/randomized-experiments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Randomized Experiments: The Gold Standard</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/directed-acyclic-graphs.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Directed Acyclic Graphs (DAGs)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Furious Five</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/matching-and-propensity-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Selection on Observables: Matching &amp; Propensity Scores</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/instrumental-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Instrumental Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/regression-discontinuity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regression Discontinuity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/difference-in-differences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Difference-in-Differences</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/panel-and-fixed-effects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Panel Data &amp; Fixed Effects</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false">
+ <span class="menu-text">Frontiers</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-16" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/synthetic-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic Control</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/causal-machine-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Causal Machine Learning: Heterogeneous Effects</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" role="navigation" aria-expanded="true">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-17" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="true">
+ <span class="menu-text">ML Track (separate)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-18" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ML Track (separate)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-19" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/math/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Mathematics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/computing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Computing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#reading-the-graph" id="toc-reading-the-graph" class="nav-link" data-scroll-target="#reading-the-graph">Reading the graph</a></li>
+  <li><a href="#three-structures-and-how-association-flows" id="toc-three-structures-and-how-association-flows" class="nav-link" data-scroll-target="#three-structures-and-how-association-flows">Three structures, and how association flows</a></li>
+  <li><a href="#paths-backdoors-and-the-dam" id="toc-paths-backdoors-and-the-dam" class="nav-link" data-scroll-target="#paths-backdoors-and-the-dam">Paths, backdoors, and the dam</a></li>
+  <li><a href="#the-backdoor-criterion-the-rule-for-controls" id="toc-the-backdoor-criterion-the-rule-for-controls" class="nav-link" data-scroll-target="#the-backdoor-criterion-the-rule-for-controls">The backdoor criterion: the rule for controls</a></li>
+  <li><a href="#good-vs-bad-controls-now-derivable" id="toc-good-vs-bad-controls-now-derivable" class="nav-link" data-scroll-target="#good-vs-bad-controls-now-derivable">Good vs bad controls, now derivable</a></li>
+  <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
+  <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
+  <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
+  <li><a href="#connections" id="toc-connections" class="nav-link" data-scroll-target="#connections">Connections</a></li>
+  <li><a href="#study-with-notebooklm" id="toc-study-with-notebooklm" class="nav-link" data-scroll-target="#study-with-notebooklm">Study with NotebookLM</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/05-causal-inference/index.html">V · The Summit: Causal Inference</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/potential-outcomes.html">The Causal Framework</a></li><li class="breadcrumb-item"><a href="../../content/05-causal-inference/directed-acyclic-graphs.html">Directed Acyclic Graphs (DAGs)</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Directed Acyclic Graphs (DAGs)</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">A picture of your causal assumptions — and an algebra that tells you exactly what to control for, and what controlling would wreck.</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="lead-kernel">
+<p>A DAG is a diagram of <em>what causes what</em>, drawn before you touch the data. Its power is that it turns the murky question “which variables should I control for?” into a mechanical rule. Confounders open <strong>backdoor paths</strong> that must be closed; colliders are <strong>dams</strong> that you must not open. The same graph that justifies a control exposes the controls that would <em>manufacture</em> bias — Part III’s good-vs-bad controls, now derivable rather than memorised.</p>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p><a href="../../content/05-causal-inference/randomized-experiments.html">Randomization</a> is the gold standard, but most questions can’t be randomized — you can’t assign people a gender, a recession, or a war. Then you must reason about confounding <em>explicitly</em>, and a <strong>directed acyclic graph</strong> is the tool for it: a transparent statement of your causal assumptions that makes the consequences for estimation <strong>derivable</strong>. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> DAGs are how Cunningham bridges theory and econometrics — and they settle, with a rule instead of an argument, the question that ended <a href="../../content/03-regression/regression-and-causality.html">Part III</a>: <em>which controls help, and which ones hurt?</em></p>
+</section>
+<section id="reading-the-graph" class="level2">
+<h2 class="anchored" data-anchor-id="reading-the-graph">Reading the graph</h2>
+<p>A DAG has three ingredients: <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<ul>
+<li><strong>Nodes</strong> are random variables.</li>
+<li><strong>Directed edges (arrows)</strong> are direct causal effects: <span class="math inline">D\to Y</span> means <span class="math inline">D</span> causes <span class="math inline">Y</span>. The <strong>absence</strong> of an arrow is the strongest claim of all — a firm theoretical commitment that <em>no</em> direct effect exists.</li>
+<li><strong>Acyclic</strong> means no feedback loops: causation flows one way. Reverse causality isn’t drawn as a cycle but by <strong>splitting the variable across time</strong> (<span class="math inline">Y_1, Y_2</span>), so the arrows still point forward.</li>
+</ul>
+<p>Behind the picture sits a <strong>structural causal model</strong> — a set of equations in which each variable is generated by its <strong>parents</strong> (the nodes with arrows into it) plus a random shock. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> The graph is the qualitative skeleton of that data-generating process; drawing it forces you to make your assumptions visible and falsifiable.</p>
+</section>
+<section id="three-structures-and-how-association-flows" class="level2">
+<h2 class="anchored" data-anchor-id="three-structures-and-how-association-flows">Three structures, and how association flows</h2>
+<p>Every DAG is built from three elementary configurations, and <em>association</em> (statistical correlation, causal or not) flows through them differently: <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<ul>
+<li><strong>The chain / mediator</strong> <span class="math inline">D\to M\to Y</span>. <span class="math inline">D</span> affects <span class="math inline">Y</span> <em>only through</em> <span class="math inline">M</span>. Association flows along the chain — that flow <strong>is</strong> the causal effect.</li>
+<li><strong>The fork / confounder</strong> <span class="math inline">D\leftarrow Z\to Y</span>. A common cause <span class="math inline">Z</span> drives both. This creates a <strong>non-causal</strong> association between <span class="math inline">D</span> and <span class="math inline">Y</span>: they move together because they share an origin, not because one causes the other.</li>
+<li><strong>The collider</strong> <span class="math inline">D\to C\leftarrow Y</span>. Two arrows <em>collide</em> into a common effect. Here <span class="math inline">D</span> and <span class="math inline">Y</span> are <strong>independent</strong> — until you condition on <span class="math inline">C</span>.</li>
+</ul>
+</section>
+<section id="paths-backdoors-and-the-dam" class="level2">
+<h2 class="anchored" data-anchor-id="paths-backdoors-and-the-dam">Paths, backdoors, and the dam</h2>
+<p>A <strong>path</strong> is any sequence of edges connecting <span class="math inline">D</span> and <span class="math inline">Y</span>, ignoring arrow direction. The one you want is the <strong>direct/causal path</strong> <span class="math inline">D\to Y</span>. The troublemakers are <strong>backdoor paths</strong> — any path that leaves <span class="math inline">D</span> through an <em>incoming</em> arrow, like <span class="math inline">D\leftarrow Z\to Y</span>. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> A backdoor path is a pipe through which confounding flows, manufacturing correlation that isn’t cause.</p>
+<p>Whether a path transmits association depends on what’s on it — the intuition of <strong>d-separation</strong>: <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<ul>
+<li>A path through a <strong>confounder</strong> (a fork) is <strong>open</strong>: association flows. Conditioning on that confounder <strong>blocks</strong> it.</li>
+<li>A path through a <strong>collider</strong> is <strong>naturally blocked</strong>. The collider is a <strong>dam</strong>: it stops the flow — <em>unless</em> you condition on it (or its descendant), which <strong>opens</strong> the dam and lets spurious association through.</li>
+</ul>
+<p>This is the crucial asymmetry. <strong>Conditioning closes forks but opens colliders.</strong> Controlling is not free; it changes which pipes are open.</p>
+</section>
+<section id="the-backdoor-criterion-the-rule-for-controls" class="level2">
+<h2 class="anchored" data-anchor-id="the-backdoor-criterion-the-rule-for-controls">The backdoor criterion: the rule for controls</h2>
+<p>Putting it together gives the <strong>backdoor criterion</strong>, the formal rule for <em>what to condition on</em>: a set of variables identifies the causal effect of <span class="math inline">D</span> on <span class="math inline">Y</span> if it <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<ol type="1">
+<li><strong>closes every backdoor path</strong> (block each one by conditioning on a non-collider along it), and</li>
+<li><strong>opens no new path</strong> (never condition on a collider or a descendant of one).</li>
+</ol>
+<p>Satisfy it and the leftover association between <span class="math inline">D</span> and <span class="math inline">Y</span> is <strong>purely causal</strong>. This is selection-on-observables stated as graph surgery: the “controls” you need are exactly the ones that shut the backdoors, and not one variable more.</p>
+<div id="cell-fig-dag" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Show the figure code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.0</span>, <span class="fl">4.2</span>))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> {<span class="st">"D"</span>: (<span class="fl">0.15</span>, <span class="fl">0.30</span>), <span class="st">"Y"</span>: (<span class="fl">0.85</span>, <span class="fl">0.30</span>), <span class="st">"Z"</span>: (<span class="fl">0.50</span>, <span class="fl">0.82</span>), <span class="st">"C"</span>: (<span class="fl">0.50</span>, <span class="fl">0.04</span>)}</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, (x, y) <span class="kw">in</span> pos.items():</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> {<span class="st">"D"</span>: <span class="st">"#1f3a5f"</span>, <span class="st">"Y"</span>: <span class="st">"#1f3a5f"</span>, <span class="st">"Z"</span>: <span class="st">"#c0392b"</span>, <span class="st">"C"</span>: <span class="st">"#d98a29"</span>}[name]</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    ax.add_patch(plt.Circle((x, y), <span class="fl">0.055</span>, color<span class="op">=</span>color, zorder<span class="op">=</span><span class="dv">3</span>))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    ax.text(x, y, name, color<span class="op">=</span><span class="st">"white"</span>, ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>, zorder<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> arrow(a, b, color, style<span class="op">=</span><span class="st">"-|&gt;"</span>, lw<span class="op">=</span><span class="fl">2.0</span>, rad<span class="op">=</span><span class="fl">0.0</span>):</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    ax.annotate(<span class="st">""</span>, xy<span class="op">=</span>pos[b], xytext<span class="op">=</span>pos[a],</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span>style, color<span class="op">=</span>color, lw<span class="op">=</span>lw,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>                                shrinkA<span class="op">=</span><span class="dv">16</span>, shrinkB<span class="op">=</span><span class="dv">16</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                                connectionstyle<span class="op">=</span><span class="ss">f"arc3,rad=</span><span class="sc">{</span>rad<span class="sc">}</span><span class="ss">"</span>), zorder<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>arrow(<span class="st">"D"</span>, <span class="st">"Y"</span>, <span class="st">"#1f8a4c"</span>, lw<span class="op">=</span><span class="fl">2.8</span>)      <span class="co"># causal effect of interest</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>arrow(<span class="st">"Z"</span>, <span class="st">"D"</span>, <span class="st">"#c0392b"</span>)               <span class="co"># confounder -&gt; D</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>arrow(<span class="st">"Z"</span>, <span class="st">"Y"</span>, <span class="st">"#c0392b"</span>)               <span class="co"># confounder -&gt; Y  (backdoor path D&lt;-Z-&gt;Y)</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>arrow(<span class="st">"D"</span>, <span class="st">"C"</span>, <span class="st">"#d98a29"</span>)               <span class="co"># D -&gt; collider</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>arrow(<span class="st">"Y"</span>, <span class="st">"C"</span>, <span class="st">"#d98a29"</span>)               <span class="co"># Y -&gt; collider</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.50</span>, <span class="fl">0.40</span>, <span class="st">"causal effect"</span>, color<span class="op">=</span><span class="st">"#1f8a4c"</span>, fontsize<span class="op">=</span><span class="dv">9</span>, ha<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.50</span>, <span class="fl">0.62</span>, <span class="st">"backdoor path (close it: condition on Z)"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        fontsize<span class="op">=</span><span class="fl">8.5</span>, ha<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.50</span>, <span class="fl">0.13</span>, <span class="st">"collider — a dam (do NOT condition on C)"</span>, color<span class="op">=</span><span class="st">"#b9791f"</span>,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        fontsize<span class="op">=</span><span class="fl">8.5</span>, ha<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="dv">0</span>, <span class="dv">1</span>)<span class="op">;</span> ax.set_ylim(<span class="op">-</span><span class="fl">0.05</span>, <span class="fl">1.0</span>)<span class="op">;</span> ax.axis(<span class="st">"off"</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Confounder vs collider: what to control for"</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-dag" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="directed-acyclic-graphs_files/figure-html/fig-dag-output-1.png" width="662" height="394" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: A DAG with both a confounder and a collider. The causal effect of interest is D → Y (green). Z is a confounder opening the backdoor path D ← Z → Y (red), which you must close by conditioning on Z. C is a collider (D → C ← Y): it sits on no backdoor path and is naturally blocked, so conditioning on it would OPEN a spurious path and manufacture bias. The backdoor criterion here: control for Z, never for C.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="good-vs-bad-controls-now-derivable" class="level2">
+<h2 class="anchored" data-anchor-id="good-vs-bad-controls-now-derivable">Good vs bad controls, now derivable</h2>
+<p>The graph delivers Part III’s <a href="../../content/03-regression/regression-and-causality.html">control rules</a> as <em>theorems</em>: <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<ul>
+<li><strong>Conditioning on a mediator</strong> <span class="math inline">M</span> in <span class="math inline">D\to M\to Y</span> <strong>blocks the very causal flow you want</strong>, stripping out the indirect effect and <em>under</em>-stating the total impact. This is <strong>over-control</strong> — the occupation-in-the-wage-regression mistake, now visibly a blocked chain.</li>
+<li><strong>Conditioning on a collider</strong> <span class="math inline">C</span> <strong>opens</strong> a closed path and <strong>invents</strong> association between variables that were independent. This is selection/collider bias — the gravest control error.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled" title="Two colliders worth memorising (Cunningham)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Two colliders worth memorising (Cunningham)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Google and the gender pay gap.</strong> Google argued that once you control for <em>occupation</em> (plus location, tenure, role), the gender gap disappears. But occupation is a <strong>collider</strong>: discrimination affects which jobs women get (<span class="math inline">\text{gender}\to\text{occupation}</span>) and so does unobserved ability (<span class="math inline">\text{ability}\to\text{occupation}</span>). Conditioning on occupation opens a path between gender and ability and can <strong>mask real discrimination</strong>. The “control” that made the gap vanish is exactly the one the backdoor criterion forbids. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<p><strong>The movie-star collider</strong> (Cunningham, crediting Gabriel Rossman). Why do film stars seem to be <em>either</em> gorgeous <em>or</em> talented, rarely both? In the population, beauty and talent are independent. But stardom is a collider: <span class="math inline">\text{beauty}\to\text{star}\leftarrow\text{talent}</span>. Look only at stars (condition on the collider) and a <strong>spurious negative</strong> correlation appears — an untalented star must be beautiful, a plain star must be talented. Pure selection bias, manufactured by conditioning. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+</div>
+</div>
+</section>
+<section id="common-pitfalls" class="level2">
+<h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
+<div class="callout callout-style-default callout-warning callout-titled" title="Where this goes wrong">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Where this goes wrong
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><p><strong>“Control for everything you have.”</strong> Each control can <em>close</em> a backdoor <em>or open a collider</em>. Conditioning is surgery, not insurance. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
+<li><p><strong>Conditioning on a collider (or its descendant).</strong> It creates association from nothing — the subtlest bias in applied work, and invisible to <span class="math inline">R^2</span> or significance. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
+<li><p><strong>Controlling for a mediator when you want the total effect.</strong> You block the channel you meant to measure and under-state the effect. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
+<li><p><strong>Drawing the DAG to fit the result.</strong> The graph encodes <em>assumptions</em>; its missing arrows are claims. Draw it from theory, before estimation, and defend the absences. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
+<li><p><strong>Believing a DAG removes unobserved confounding.</strong> It only tells you what to condition on <em>given</em> the assumed structure; an omitted common cause you didn’t draw is still a backdoor left open. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="from-the-sources" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Who says what">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Who says what
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Cunningham, <em>Causal Inference: The Mixtape</em></strong> — DAGs as a causal language bridging theory and econometrics; <strong>nodes/arrows</strong>, the meaning of a missing arrow, <strong>acyclicity</strong>, and the underlying <strong>structural causal model</strong>; the three structures — <strong>chain/mediator</strong> <span class="math inline">D\to M\to Y</span>, <strong>fork/confounder</strong> <span class="math inline">D\leftarrow Z\to Y</span>, <strong>collider</strong> <span class="math inline">D\to C\leftarrow Y</span>; <strong>paths</strong>, <strong>backdoor paths</strong>, open vs blocked and colliders as <strong>dams</strong> (d-separation); the <strong>backdoor criterion</strong>; over-control from conditioning on a <strong>mediator</strong> and selection bias from conditioning on a <strong>collider</strong>; the <strong>Google/occupation</strong> gender-gap example and the <strong>movie-star</strong> (beauty → star ← talent) collider.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="appendix-the-mathematics" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="appendix-the-mathematics">Appendix · the mathematics</h2>
+<div class="math-appendix">
+<p><strong>The backdoor adjustment formula.</strong> If a set <span class="math inline">Z</span> satisfies the backdoor criterion for <span class="math inline">D\to Y</span>, the causal effect is identified by <em>conditioning then averaging over</em> <span class="math inline">Z</span>: <span class="math display">
+\Pr(Y\mid \operatorname{do}(D=d)) = \sum_{z}\Pr(Y\mid D=d, Z=z)\,\Pr(Z=z),
+</span> where <span class="math inline">\operatorname{do}(D=d)</span> denotes <em>setting</em> <span class="math inline">D</span> by intervention (not merely observing it). In means, <span class="math inline">\text{ATE}=\mathbb E_Z\big[\mathbb E[Y\mid D=1,Z]-\mathbb E[Y\mid D=0,Z]\big]</span> — exactly the <a href="../../content/05-causal-inference/matching-and-propensity-scores.html">subclassification estimator</a> of the next entry. The criterion is what <em>licenses</em> writing the causal <span class="math inline">\operatorname{do}</span>-probability as ordinary conditional probabilities you can estimate.</p>
+<p><strong>Why a collider induces dependence (algebra).</strong> Let <span class="math inline">D\perp Y</span> marginally and <span class="math inline">C=\alpha D+\beta
+Y+\varepsilon</span>. Then <span class="math inline">\operatorname{Cov}(D,Y)=0</span>, but conditional on <span class="math inline">C=c</span> we have <span class="math inline">\beta Y \approx c-\alpha D-\varepsilon</span>, so within a stratum of <span class="math inline">C</span> a higher <span class="math inline">D</span> forces a lower <span class="math inline">Y</span> — a <strong>nonzero conditional covariance</strong> created purely by conditioning. This is the same algebra as the <a href="../../content/03-regression/regression-and-causality.html">collider figure</a> in Part III, now located on the graph.</p>
+<p><strong>Acyclicity and solvability.</strong> Acyclicity guarantees the structural equations can be ordered topologically and solved recursively (each variable from its parents), so the joint distribution <strong>factorises</strong> as <span class="math inline">\prod_i \Pr(X_i\mid \text{parents}(X_i))</span> — the Markov factorisation that makes d-separation read off the graph correspond to real conditional independence in the data.</p>
+</div>
+</section>
+<section id="connections" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
+<ul>
+<li><strong>Builds on:</strong> <a href="../../content/03-regression/regression-and-causality.html">regression and causality</a> (good/bad controls and collider bias, now derived) and <a href="../../content/05-causal-inference/potential-outcomes.html">potential outcomes</a> (the backdoor adjustment <em>is</em> the conditional version of the selection-bias fix).</li>
+<li><strong>Leads to:</strong> <a href="../../content/05-causal-inference/matching-and-propensity-scores.html">matching &amp; propensity scores</a> (estimating the backdoor adjustment when the criterion holds) and the quasi-experimental designs (<a href="../../content/05-causal-inference/instrumental-variables.html">IV</a>, <a href="../../content/05-causal-inference/regression-discontinuity.html">RD</a>, <a href="../../content/05-causal-inference/difference-in-differences.html">DiD</a>) for when it <em>doesn’t</em> — when an unblockable backdoor remains.</li>
+<li><strong>Reappears in:</strong> the <a href="../../content/05-causal-inference/instrumental-variables.html">IV</a> graph (an instrument <span class="math inline">Z\to D\to Y</span> with no <span class="math inline">Z\to Y</span> arrow) and the bad-control warnings throughout Part V.</li>
+</ul>
+</section>
+<section id="study-with-notebooklm" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="study-with-notebooklm">Study with NotebookLM</h2>
+<ol type="1">
+<li>“What do nodes, arrows, and <em>missing</em> arrows mean in a DAG, and what does ‘acyclic’ encode about reverse causality?”</li>
+<li>“Define the chain (mediator), fork (confounder), and collider, and explain how association flows through each.”</li>
+<li>“What is a backdoor path, and what does it mean for a path to be open or blocked (d-separation)? Why is a collider a ‘dam’?”</li>
+<li>“State the backdoor criterion and explain why you must not condition on a collider or its descendant.”</li>
+<li>“Use Cunningham’s Google/occupation and movie-star examples to explain how conditioning on a collider creates spurious association.”</li>
+</ol>
+
+
+<!-- -->
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-cunningham_mixtape" class="csl-entry" role="listitem">
+Cunningham, Scott. 2021. <em>Causal Inference: The Mixtape</em>. Yale University Press.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/profsarthak\.github\.io\/quant-social-scientist\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../content/05-causal-inference/randomized-experiments.html" class="pagination-link" aria-label="Randomized Experiments: The Gold Standard">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Randomized Experiments: The Gold Standard</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../content/05-causal-inference/matching-and-propensity-scores.html" class="pagination-link" aria-label="Selection on Observables: Matching &amp; Propensity Scores">
+        <span class="nav-page-text">Selection on Observables: Matching &amp; Propensity Scores</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Directed Acyclic Graphs (DAGs)"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "A picture of your causal assumptions — and an algebra that tells you exactly what to control for, and what controlling would wreck."</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>A DAG is a diagram of *what causes what*, drawn before you touch the data. Its power is that it turns</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>the murky question "which variables should I control for?" into a mechanical rule. Confounders open</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>**backdoor paths** that must be closed; colliders are **dams** that you must not open. The same graph</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>that justifies a control exposes the controls that would *manufacture* bias — Part III's good-vs-bad</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>controls, now derivable rather than memorised.</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Randomization</span><span class="co">](randomized-experiments.qmd)</span> is the gold standard, but most questions can't be</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>randomized — you can't assign people a gender, a recession, or a war. Then you must reason about</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>confounding *explicitly*, and a **directed acyclic graph** is the tool for it: a transparent statement</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>of your causal assumptions that makes the consequences for estimation **derivable**. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>DAGs are how Cunningham bridges theory and econometrics — and they settle, with a rule instead of an</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>argument, the question that ended <span class="co">[</span><span class="ot">Part III</span><span class="co">](../03-regression/regression-and-causality.qmd)</span>: *which</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>controls help, and which ones hurt?*</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reading the graph</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>A DAG has three ingredients: <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Nodes** are random variables.</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Directed edges (arrows)** are direct causal effects: $D\to Y$ means $D$ causes $Y$. The **absence**</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  of an arrow is the strongest claim of all — a firm theoretical commitment that *no* direct effect</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  exists.</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Acyclic** means no feedback loops: causation flows one way. Reverse causality isn't drawn as a</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  cycle but by **splitting the variable across time** ($Y_1, Y_2$), so the arrows still point forward.</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>Behind the picture sits a **structural causal model** — a set of equations in which each variable is</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>generated by its **parents** (the nodes with arrows into it) plus a random shock. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>The graph is the qualitative skeleton of that data-generating process; drawing it forces you to make</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>your assumptions visible and falsifiable.</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="fu">## Three structures, and how association flows</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>Every DAG is built from three elementary configurations, and *association* (statistical correlation,</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>causal or not) flows through them differently: <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The chain / mediator** $D\to M\to Y$. $D$ affects $Y$ *only through* $M$. Association flows along</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  the chain — that flow **is** the causal effect.</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The fork / confounder** $D\leftarrow Z\to Y$. A common cause $Z$ drives both. This creates a</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>  **non-causal** association between $D$ and $Y$: they move together because they share an origin, not</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>  because one causes the other.</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The collider** $D\to C\leftarrow Y$. Two arrows *collide* into a common effect. Here $D$ and $Y$</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>  are **independent** — until you condition on $C$.</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="fu">## Paths, backdoors, and the dam</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>A **path** is any sequence of edges connecting $D$ and $Y$, ignoring arrow direction. The one you want</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>is the **direct/causal path** $D\to Y$. The troublemakers are **backdoor paths** — any path that</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>leaves $D$ through an *incoming* arrow, like $D\leftarrow Z\to Y$. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> A backdoor path</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>is a pipe through which confounding flows, manufacturing correlation that isn't cause.</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>Whether a path transmits association depends on what's on it — the intuition of **d-separation**:</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A path through a **confounder** (a fork) is **open**: association flows. Conditioning on that</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>  confounder **blocks** it.</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A path through a **collider** is **naturally blocked**. The collider is a **dam**: it stops the flow</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>  — *unless* you condition on it (or its descendant), which **opens** the dam and lets spurious</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>  association through.</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>This is the crucial asymmetry. **Conditioning closes forks but opens colliders.** Controlling is not</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>free; it changes which pipes are open.</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="fu">## The backdoor criterion: the rule for controls</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>Putting it together gives the **backdoor criterion**, the formal rule for *what to condition on*: a set</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>of variables identifies the causal effect of $D$ on $Y$ if it <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**closes every backdoor path** (block each one by conditioning on a non-collider along it), and</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**opens no new path** (never condition on a collider or a descendant of one).</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>Satisfy it and the leftover association between $D$ and $Y$ is **purely causal**. This is</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>selection-on-observables stated as graph surgery: the "controls" you need are exactly the ones that</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>shut the backdoors, and not one variable more.</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-dag</span></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "A DAG with both a confounder and a collider. The causal effect of interest is D → Y (green). Z is a confounder opening the backdoor path D ← Z → Y (red), which you must close by conditioning on Z. C is a collider (D → C ← Y): it sits on no backdoor path and is naturally blocked, so conditioning on it would OPEN a spurious path and manufacture bias. The backdoor criterion here: control for Z, never for C."</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.0</span>, <span class="fl">4.2</span>))</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> {<span class="st">"D"</span>: (<span class="fl">0.15</span>, <span class="fl">0.30</span>), <span class="st">"Y"</span>: (<span class="fl">0.85</span>, <span class="fl">0.30</span>), <span class="st">"Z"</span>: (<span class="fl">0.50</span>, <span class="fl">0.82</span>), <span class="st">"C"</span>: (<span class="fl">0.50</span>, <span class="fl">0.04</span>)}</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, (x, y) <span class="kw">in</span> pos.items():</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> {<span class="st">"D"</span>: <span class="st">"#1f3a5f"</span>, <span class="st">"Y"</span>: <span class="st">"#1f3a5f"</span>, <span class="st">"Z"</span>: <span class="st">"#c0392b"</span>, <span class="st">"C"</span>: <span class="st">"#d98a29"</span>}[name]</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>    ax.add_patch(plt.Circle((x, y), <span class="fl">0.055</span>, color<span class="op">=</span>color, zorder<span class="op">=</span><span class="dv">3</span>))</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>    ax.text(x, y, name, color<span class="op">=</span><span class="st">"white"</span>, ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>,</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>            fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>, zorder<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> arrow(a, b, color, style<span class="op">=</span><span class="st">"-|&gt;"</span>, lw<span class="op">=</span><span class="fl">2.0</span>, rad<span class="op">=</span><span class="fl">0.0</span>):</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>    ax.annotate(<span class="st">""</span>, xy<span class="op">=</span>pos[b], xytext<span class="op">=</span>pos[a],</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>                arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span>style, color<span class="op">=</span>color, lw<span class="op">=</span>lw,</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>                                shrinkA<span class="op">=</span><span class="dv">16</span>, shrinkB<span class="op">=</span><span class="dv">16</span>,</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>                                connectionstyle<span class="op">=</span><span class="ss">f"arc3,rad=</span><span class="sc">{</span>rad<span class="sc">}</span><span class="ss">"</span>), zorder<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>arrow(<span class="st">"D"</span>, <span class="st">"Y"</span>, <span class="st">"#1f8a4c"</span>, lw<span class="op">=</span><span class="fl">2.8</span>)      <span class="co"># causal effect of interest</span></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>arrow(<span class="st">"Z"</span>, <span class="st">"D"</span>, <span class="st">"#c0392b"</span>)               <span class="co"># confounder -&gt; D</span></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>arrow(<span class="st">"Z"</span>, <span class="st">"Y"</span>, <span class="st">"#c0392b"</span>)               <span class="co"># confounder -&gt; Y  (backdoor path D&lt;-Z-&gt;Y)</span></span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>arrow(<span class="st">"D"</span>, <span class="st">"C"</span>, <span class="st">"#d98a29"</span>)               <span class="co"># D -&gt; collider</span></span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>arrow(<span class="st">"Y"</span>, <span class="st">"C"</span>, <span class="st">"#d98a29"</span>)               <span class="co"># Y -&gt; collider</span></span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.50</span>, <span class="fl">0.40</span>, <span class="st">"causal effect"</span>, color<span class="op">=</span><span class="st">"#1f8a4c"</span>, fontsize<span class="op">=</span><span class="dv">9</span>, ha<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.50</span>, <span class="fl">0.62</span>, <span class="st">"backdoor path (close it: condition on Z)"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>,</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>        fontsize<span class="op">=</span><span class="fl">8.5</span>, ha<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.50</span>, <span class="fl">0.13</span>, <span class="st">"collider — a dam (do NOT condition on C)"</span>, color<span class="op">=</span><span class="st">"#b9791f"</span>,</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>        fontsize<span class="op">=</span><span class="fl">8.5</span>, ha<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="dv">0</span>, <span class="dv">1</span>)<span class="op">;</span> ax.set_ylim(<span class="op">-</span><span class="fl">0.05</span>, <span class="fl">1.0</span>)<span class="op">;</span> ax.axis(<span class="st">"off"</span>)</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Confounder vs collider: what to control for"</span>)</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a><span class="fu">## Good vs bad controls, now derivable</span></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>The graph delivers Part III's <span class="co">[</span><span class="ot">control rules</span><span class="co">](../03-regression/regression-and-causality.qmd)</span> as</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>*theorems*: <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Conditioning on a mediator** $M$ in $D\to M\to Y$ **blocks the very causal flow you want**,</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>  stripping out the indirect effect and *under*-stating the total impact. This is **over-control** —</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>  the occupation-in-the-wage-regression mistake, now visibly a blocked chain.</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Conditioning on a collider** $C$ **opens** a closed path and **invents** association between</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>  variables that were independent. This is selection/collider bias — the gravest control error.</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Two colliders worth memorising (Cunningham)"}</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>**Google and the gender pay gap.** Google argued that once you control for *occupation* (plus location,</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>tenure, role), the gender gap disappears. But occupation is a **collider**: discrimination affects</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>which jobs women get ($\text{gender}\to\text{occupation}$) and so does unobserved ability</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>($\text{ability}\to\text{occupation}$). Conditioning on occupation opens a path between gender and</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>ability and can **mask real discrimination**. The "control" that made the gap vanish is exactly the one</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>the backdoor criterion forbids. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>**The movie-star collider** (Cunningham, crediting Gabriel Rossman). Why do film stars seem to be</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>*either* gorgeous *or* talented, rarely both? In the population, beauty and talent are independent. But</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>stardom is a collider: $\text{beauty}\to\text{star}\leftarrow\text{talent}$. Look only at stars</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>(condition on the collider) and a **spurious negative** correlation appears — an untalented star must</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>be beautiful, a plain star must be talented. Pure selection bias, manufactured by conditioning.</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**"Control for everything you have."** Each control can *close* a backdoor *or open a collider*.</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>  Conditioning is surgery, not insurance. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Conditioning on a collider (or its descendant).** It creates association from nothing — the</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>  subtlest bias in applied work, and invisible to $R^2$ or significance. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Controlling for a mediator when you want the total effect.** You block the channel you meant to</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>  measure and under-state the effect. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Drawing the DAG to fit the result.** The graph encodes *assumptions*; its missing arrows are</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>  claims. Draw it from theory, before estimation, and defend the absences. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Believing a DAG removes unobserved confounding.** It only tells you what to condition on *given*</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>  the assumed structure; an omitted common cause you didn't draw is still a backdoor left open.</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *Causal Inference: The Mixtape*** — DAGs as a causal language bridging theory and</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>  econometrics; **nodes/arrows**, the meaning of a missing arrow, **acyclicity**, and the underlying</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>  **structural causal model**; the three structures — **chain/mediator** $D\to M\to Y$,</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>  **fork/confounder** $D\leftarrow Z\to Y$, **collider** $D\to C\leftarrow Y$; **paths**, **backdoor</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>  paths**, open vs blocked and colliders as **dams** (d-separation); the **backdoor criterion**;</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  over-control from conditioning on a **mediator** and selection bias from conditioning on a</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>  **collider**; the **Google/occupation** gender-gap example and the **movie-star** (beauty → star ←</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  talent) collider.</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>**The backdoor adjustment formula.** If a set $Z$ satisfies the backdoor criterion for $D\to Y$, the</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>causal effect is identified by *conditioning then averaging over* $Z$:</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>\Pr(Y\mid \operatorname{do}(D=d)) = \sum_{z}\Pr(Y\mid D=d, Z=z)\,\Pr(Z=z),</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>where $\operatorname{do}(D=d)$ denotes *setting* $D$ by intervention (not merely observing it). In</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>means, $\text{ATE}=\mathbb E_Z\big<span class="co">[</span><span class="ot">\mathbb E[Y\mid D=1,Z]-\mathbb E[Y\mid D=0,Z]\big</span><span class="co">]</span>$ — exactly the</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">subclassification estimator</span><span class="co">](matching-and-propensity-scores.qmd)</span> of the next entry. The criterion is</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>what *licenses* writing the causal $\operatorname{do}$-probability as ordinary conditional</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>probabilities you can estimate.</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>**Why a collider induces dependence (algebra).** Let $D\perp Y$ marginally and $C=\alpha D+\beta</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>Y+\varepsilon$. Then $\operatorname{Cov}(D,Y)=0$, but conditional on $C=c$ we have</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>$\beta Y \approx c-\alpha D-\varepsilon$, so within a stratum of $C$ a higher $D$ forces a lower $Y$ —</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>a **nonzero conditional covariance** created purely by conditioning. This is the same algebra as the</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">collider figure</span><span class="co">](../03-regression/regression-and-causality.qmd)</span> in Part III, now located on the graph.</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>**Acyclicity and solvability.** Acyclicity guarantees the structural equations can be ordered</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>topologically and solved recursively (each variable from its parents), so the joint distribution</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>**factorises** as $\prod_i \Pr(X_i\mid \text{parents}(X_i))$ — the Markov factorisation that makes</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>d-separation read off the graph correspond to real conditional independence in the data.</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">regression and causality</span><span class="co">](../03-regression/regression-and-causality.qmd)</span> (good/bad</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  controls and collider bias, now derived) and <span class="co">[</span><span class="ot">potential outcomes</span><span class="co">](potential-outcomes.qmd)</span> (the</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>  backdoor adjustment *is* the conditional version of the selection-bias fix).</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">matching &amp; propensity scores</span><span class="co">](matching-and-propensity-scores.qmd)</span> (estimating the</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>  backdoor adjustment when the criterion holds) and the quasi-experimental designs</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>  (<span class="co">[</span><span class="ot">IV</span><span class="co">](instrumental-variables.qmd)</span>, <span class="co">[</span><span class="ot">RD</span><span class="co">](regression-discontinuity.qmd)</span>,</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">DiD</span><span class="co">](difference-in-differences.qmd)</span>) for when it *doesn't* — when an unblockable backdoor remains.</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** the <span class="co">[</span><span class="ot">IV</span><span class="co">](instrumental-variables.qmd)</span> graph (an instrument $Z\to D\to Y$ with no</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>  $Z\to Y$ arrow) and the bad-control warnings throughout Part V.</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"What do nodes, arrows, and *missing* arrows mean in a DAG, and what does 'acyclic' encode about</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>   reverse causality?"</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"Define the chain (mediator), fork (confounder), and collider, and explain how association flows</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>   through each."</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"What is a backdoor path, and what does it mean for a path to be open or blocked (d-separation)?</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>   Why is a collider a 'dam'?"</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"State the backdoor criterion and explain why you must not condition on a collider or its</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>   descendant."</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"Use Cunningham's Google/occupation and movie-star examples to explain how conditioning on a</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>   collider creates spurious association."</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
