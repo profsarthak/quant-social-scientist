@@ -36,6 +36,474 @@
     ]
   },
   {
+    "objectID": "content/ml-track/support-vector-machines.html",
+    "href": "content/ml-track/support-vector-machines.html",
+    "title": "Support Vector Machines",
+    "section": "",
+    "text": "A support vector machine classifies with a single geometric idea: find the boundary that sits as far as possible from the nearest points of either class — the widest “street” between them. Only the points on the street edge (the support vectors) matter; the rest are irrelevant. A soft margin lets a few points trespass for robustness, and the kernel trick bends the straight boundary into curves while keeping the computation linear. It is one of the most elegant ideas in machine learning.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Support Vector Machines"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/support-vector-machines.html#why-it-matters",
+    "href": "content/ml-track/support-vector-machines.html#why-it-matters",
+    "title": "Support Vector Machines",
+    "section": "Why it matters",
+    "text": "Why it matters\nSVMs were the dominant classifier of the 2000s and remain a sharp tool — especially when predictors vastly outnumber observations, the p&gt;n regime where they shine. (James et al. 2021) They’re also conceptually important: the margin formalises “a confident boundary,” and the kernel trick shows how to get non-linearity for free — both ideas recur far beyond SVMs. This is the geometric counterpart to the probabilistic logistic regression you already know.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Support Vector Machines"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/support-vector-machines.html#the-maximal-margin-classifier",
+    "href": "content/ml-track/support-vector-machines.html#the-maximal-margin-classifier",
+    "title": "Support Vector Machines",
+    "section": "The maximal margin classifier",
+    "text": "The maximal margin classifier\nStart with the separable case. A hyperplane in p dimensions is a flat (p{-}1)-dimensional surface \\beta_0+\\beta_1X_1+\\dots+\\beta_pX_p=0; its sign classifies a point. (James et al. 2021) If the classes are linearly separable, infinitely many separating hyperplanes exist — so which? The maximal margin classifier picks the one with the largest margin: the greatest perpendicular distance to the nearest training points. (James et al. 2021) The widest street is the most confident, most generalisable cut.\nThe points lying exactly on the margin are the support vectors — and they alone define the boundary. Move any other point and nothing changes (as long as it stays off the street); move a support vector and the boundary shifts. (James et al. 2021) But the pure maximal margin classifier is brittle: it needs perfect separability, and it’s hypersensitive — a single new point can swing the hyperplane wildly, overfitting. (James et al. 2021) The fix is to allow a few violations.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Support Vector Machines"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/support-vector-machines.html#the-support-vector-classifier-soft-margin",
+    "href": "content/ml-track/support-vector-machines.html#the-support-vector-classifier-soft-margin",
+    "title": "Support Vector Machines",
+    "section": "The support vector classifier (soft margin)",
+    "text": "The support vector classifier (soft margin)\nThe support vector classifier relaxes the rule: let some points sit inside the margin, or even on the wrong side, via slack variables \\epsilon_i. (James et al. 2021)\n\n\\epsilon_i=0: point is on the correct side, outside the margin.\n\\epsilon_i&gt;0: inside the margin (a violation).\n\\epsilon_i&gt;1: on the wrong side of the hyperplane (misclassified).\n\nA budget C caps the total violation, \\sum_i\\epsilon_i\\le C — and C is a bias–variance dial chosen by cross-validation: (James et al. 2021)\n\nSmall budget → narrow margins, few support vectors → low bias, high variance (the boundary hugs the data).\nLarge budget → wide margins, many support vectors → high bias, low variance (a stable, smooth boundary).\n\nCrucially, only the support vectors (points on or violating the margin) shape the classifier — making SVMs robust to far-away outliers, unlike methods that fit every point. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Support Vector Machines"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/support-vector-machines.html#the-kernel-trick-curved-boundaries-linear-math",
+    "href": "content/ml-track/support-vector-machines.html#the-kernel-trick-curved-boundaries-linear-math",
+    "title": "Support Vector Machines",
+    "section": "The kernel trick: curved boundaries, linear math",
+    "text": "The kernel trick: curved boundaries, linear math\nReal boundaries are often non-linear. The SVM’s move: enlarge the feature space so a linear boundary in the bigger space becomes a curved one back in the original. (James et al. 2021) The genius is that the classifier depends on the data only through inner products \\langle x_i,x_{i'}\\rangle — so replace that inner product with a kernel K(x_i,x_{i'}), a measure of similarity that implicitly computes the inner product in a high- (even infinite-) dimensional space without ever building the features. (James et al. 2021) This is the kernel trick: (James et al. 2021)\n\nPolynomial kernel K(x_i,x_{i'})=(1+\\sum_j x_{ij}x_{i'j})^d — boundaries up to degree d.\nRadial (RBF) kernel K(x_i,x_{i'})=\\exp(-\\gamma\\sum_j (x_{ij}-x_{i'j})^2) — and because the exponential decays with distance, only nearby training points influence a test point’s prediction, giving the radial kernel a local character (a cousin of KNN). (James et al. 2021)\n\nThe figure shows both ends: a linear margin with its support vectors, and an RBF boundary curving around non-separable classes.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(7)\n\n# ---- Left: linearly separable, illustrate margin + support vectors ----\nA = rng.normal([-1.6, 0], 0.55, (25, 2))\nB = rng.normal([1.6, 0], 0.55, (25, 2))\nw = np.array([1.0, 0.0])                      # separating direction (vertical street)\n# margin half-width = distance from boundary (x=0) to nearest point each side\nmA = -A[:, 0].max(); mB = B[:, 0].min(); m = min(mA, mB)\nsvA = A[np.argmax(A[:, 0])]; svB = B[np.argmin(B[:, 0])]\n\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(7.8, 3.9))\naxL.scatter(A[:, 0], A[:, 1], s=18, color=\"#1f3a5f\", label=\"class −1\")\naxL.scatter(B[:, 0], B[:, 1], s=18, color=\"#1f8a4c\", label=\"class +1\")\naxL.axvline(0, color=\"#111\", lw=2.0)\naxL.axvline(-m, color=\"#9aa0a6\", ls=\"--\"); axL.axvline(m, color=\"#9aa0a6\", ls=\"--\")\nfor sv in (svA, svB):\n    axL.scatter(*sv, s=120, facecolors=\"none\", edgecolors=\"#c0392b\", lw=2, zorder=5)\naxL.text(0, 1.9, \"margin\", ha=\"center\", color=\"#555\", fontsize=8)\naxL.text(svB[0]+0.1, svB[1], \"support\\nvectors\", color=\"#c0392b\", fontsize=7.5)\naxL.set_title(\"Maximal margin (linear)\"); axL.legend(fontsize=7, frameon=False, loc=\"lower left\")\naxL.set_xlim(-3.4, 3.4); axL.set_ylim(-2.2, 2.4)\n\n# ---- Right: RBF kernel decision function (sum of Gaussians), non-separable ----\nt = rng.uniform(0, 2*np.pi, 60); r = rng.normal(0.6, 0.12, 60)\ninner = np.c_[r*np.cos(t), r*np.sin(t)]           # class +1: inner ring\nt2 = rng.uniform(0, 2*np.pi, 60); r2 = rng.normal(1.8, 0.18, 60)\nouter = np.c_[r2*np.cos(t2), r2*np.sin(t2)]       # class -1: outer ring\nXk = np.vstack([inner, outer]); yk = np.r_[np.ones(60), -np.ones(60)]\ngamma = 1.2\ndef decision(grid):\n    d2 = ((grid[:, None, :] - Xk[None, :, :])**2).sum(2)\n    return (np.exp(-gamma*d2) * yk).sum(1)\ngx, gy = np.meshgrid(np.linspace(-2.6, 2.6, 120), np.linspace(-2.6, 2.6, 120))\nZ = decision(np.c_[gx.ravel(), gy.ravel()]).reshape(gx.shape)\naxR.contourf(gx, gy, Z, levels=[-1e9, 0, 1e9], colors=[\"#dfeae5\", \"#e7ecf2\"], alpha=0.6)\naxR.contour(gx, gy, Z, levels=[0], colors=\"#111\", linewidths=2.0)\naxR.scatter(inner[:, 0], inner[:, 1], s=14, color=\"#1f8a4c\")\naxR.scatter(outer[:, 0], outer[:, 1], s=14, color=\"#1f3a5f\")\naxR.set_title(\"Radial (RBF) kernel — non-linear\"); axR.set_xticks([]); axR.set_yticks([])\n\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Left: a linear support-vector classifier. The boundary (solid) maximises the margin (dashed ‘street’); the support vectors (circled) are the points on the margin edges that alone determine it. Right: a radial (RBF) kernel SVM on classes that no straight line can separate — the kernel bends the boundary into a closed curve, and its distance-decay makes it local. Same underlying machine, linear vs kernelised.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Support Vector Machines"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/support-vector-machines.html#svm-vs-logistic-regression",
+    "href": "content/ml-track/support-vector-machines.html#svm-vs-logistic-regression",
+    "title": "Support Vector Machines",
+    "section": "SVM vs logistic regression",
+    "text": "SVM vs logistic regression\nThe SVM isn’t as alien to your toolkit as it looks. The support vector classifier minimises a “loss + penalty” with the hinge loss \\max[0,\\,1-y_i f(x_i)] — and the hinge loss behaves much like the logistic loss, so the two methods often give similar results. (James et al. 2021) The differences are characterful: (James et al. 2021)\n\nSVM gives a hard classification — its loss is exactly zero for points comfortably on the right side, so far-away points are ignored entirely.\nLogistic regression gives probabilities — useful when you need calibrated risk, not just a label.\n\nFor multiclass problems SVMs use one-vs-one (fit \\binom{K}{2} pairwise SVMs, majority vote of the “duels”) or one-vs-all (fit K class-vs-rest SVMs, assign to the largest margin). (James et al. 2021)\n\n\n\n\n\n\nNoteISL’s two SVM datasets\n\n\n\n\nHeart disease. The support vector classifier did slightly better than LDA; with a radial kernel, raising \\gamma improved training accuracy but overfit — \\gamma=10^{-1} looked near-perfect in training yet was worst on the test set, a vivid bias–variance lesson. (James et al. 2021)\nKhan gene expression (p=2{,}308 genes \\gg n). The classes were perfectly linearly separable — because with so many features a separating hyperplane almost always exists — so a linear kernel sufficed; added kernel flexibility would only overfit. (James et al. 2021) In high dimensions, keep it linear.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Support Vector Machines"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/support-vector-machines.html#common-pitfalls",
+    "href": "content/ml-track/support-vector-machines.html#common-pitfalls",
+    "title": "Support Vector Machines",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nUsing the hard maximal margin. It demands perfect separability and is hypersensitive; use the soft-margin classifier and tune C. (James et al. 2021)\nNot tuning C and \\gamma by CV. Both control flexibility; the Heart example shows large \\gamma overfits badly. (James et al. 2021)\nForgetting to scale features. Kernels measure distance, so unstandardised predictors let the largest-scale variable dominate — the same scaling rule as KNN. (James et al. 2021)\nReaching for a fancy kernel in high dimensions. When p\\gg n data are often already separable; a linear kernel is usually best. (James et al. 2021)\nWanting probabilities from a raw SVM. It outputs a hard label; use logistic regression (or post-hoc calibration) when you need risk. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Support Vector Machines"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/support-vector-machines.html#from-the-sources",
+    "href": "content/ml-track/support-vector-machines.html#from-the-sources",
+    "title": "Support Vector Machines",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nJames, Witten, Hastie & Tibshirani, ISL (Ch 9) — the maximal margin classifier (separating hyperplane, margin, support vectors, brittleness); the support vector classifier (slack \\epsilon_i, budget C, the bias–variance of C, only support vectors matter); the SVM with kernels — the kernel trick (inner products), polynomial (1+\\langle x,x'\\rangle)^d and radial \\exp(-\\gamma\\|x-x'\\|^2) kernels and the radial kernel’s locality; hinge vs logistic loss, hard label vs probabilities; one-vs-one / one-vs-all multiclass; the Heart (\\gamma overfitting) and Khan gene-expression (p\\gg n, linearly separable) examples.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Support Vector Machines"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/support-vector-machines.html#appendix-the-mathematics",
+    "href": "content/ml-track/support-vector-machines.html#appendix-the-mathematics",
+    "title": "Support Vector Machines",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nThe soft-margin optimisation. Maximise the margin M subject to correct-side constraints with slack: \n\\max_{\\beta,\\,\\epsilon}\\ M \\quad\\text{s.t.}\\quad\n\\|\\beta\\|=1,\\;\\; y_i(\\beta_0+\\beta^\\top x_i)\\ge M(1-\\epsilon_i),\\;\\; \\epsilon_i\\ge0,\\;\\; \\sum_i\\epsilon_i\\le C.\n Its dual depends on the data only through inner products \\langle x_i,x_{i'}\\rangle, and the solution f(x)=\\beta_0+\\sum_{i\\in\\mathcal S}\\alpha_i\\langle x,x_i\\rangle sums over the support set \\mathcal S (the \\alpha_i are nonzero only there). Replacing \\langle\\cdot,\\cdot\\rangle with K(\\cdot,\\cdot) gives the kernel SVM, f(x)=\\beta_0+\\sum_{i\\in\\mathcal S}\\alpha_i K(x,x_i) — non-linear, but still a weighted vote of similarities to the support vectors.\nHinge loss = SVM. The classifier minimises \\sum_i \\max[0,\\,1-y_i f(x_i)] + \\lambda\\|\\beta\\|^2, a loss + ridge penalty. The hinge is exactly zero once y_i f(x_i)\\ge1 (correct and confident), which is why only margin-violating points — the support vectors — enter the solution, and why the SVM gives a hard label rather than a probability.\nWhy RBF is local and infinite-dimensional. \\exp(-\\gamma\\|x-x'\\|^2) is the inner product of an infinite Taylor-feature expansion, yet computable in closed form. Its decay means K(x,x_i)\\to0 for distant x_i, so the prediction at x is dominated by nearby support vectors — large \\gamma ⇒ very local ⇒ wiggly ⇒ overfitting (the Heart lesson).",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Support Vector Machines"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/support-vector-machines.html#connections",
+    "href": "content/ml-track/support-vector-machines.html#connections",
+    "title": "Support Vector Machines",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: classification (the task and KNN’s locality), logistic regression (the loss comparison), bias–variance (C, \\gamma), and regularization (the ridge penalty in the hinge form).\nLeads to: neural networks (another route to non-linear boundaries, via learned features rather than fixed kernels).\nBridges back: an SVM is a pure predictive classifier — a boundary, not an explanation; its weights are not effects.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Support Vector Machines"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/support-vector-machines.html#study-with-notebooklm",
+    "href": "content/ml-track/support-vector-machines.html#study-with-notebooklm",
+    "title": "Support Vector Machines",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“What is the maximal margin classifier? Define the margin and support vectors, and explain why it’s brittle.”\n“How does the support vector classifier use slack variables and the budget C, and what is the bias–variance trade-off in C?”\n“Explain the kernel trick and the polynomial and radial (RBF) kernels. Why is the radial kernel local?”\n“Compare SVMs and logistic regression (hinge vs logistic loss, hard labels vs probabilities), and how SVMs handle multiclass problems.”\n“Use ISL’s Heart and Khan gene-expression examples to explain \\gamma overfitting and why a linear kernel suffices when p \\gg n.”",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Support Vector Machines"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html",
+    "href": "content/ml-track/ml-for-social-science.html",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "",
+    "text": "You now have the full predictive toolkit. This closing entry is about using it well as a social scientist — the disciplined workflow, the awkward truth that social data is usually small and noisy, the genuine jobs ML does superbly, and the boundary it must never cross. The whole track converges on one sentence: machine learning answers “what is Y given X?”, not “what happens to Y if I change D?” Keep those questions apart and ML is a powerful ally; conflate them and a model that predicts beautifully can recommend something disastrous.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html#why-it-matters",
+    "href": "content/ml-track/ml-for-social-science.html#why-it-matters",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "Why it matters",
+    "text": "Why it matters\nML is a magnificent shovel for digging through data — but, as Judea Pearl puts it, “you are smarter than your data: data do not understand causes and effects; humans do.” (Jacobucci et al. 2023) The master of metrics uses the shovel without ever mistaking the hole for the foundation of the house. (Jacobucci et al. 2023) This entry consolidates the workflow lessons scattered across Part IV, confronts the realities of social data, and draws the firm bridge back to the causal summit that the whole book defends.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html#the-workflow",
+    "href": "content/ml-track/ml-for-social-science.html#the-workflow",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "The workflow",
+    "text": "The workflow\nEverything rests on a disciplined pipeline that guards against overfitting — fitting the sample’s noise instead of the signal: (Jacobucci et al. 2023)\n\nTrain / validation / test. Fit parameters on train, choose models and tune hyperparameters on validation, and reserve test for a single, once-and-for-all honest assessment on truly unseen data. (Jacobucci et al. 2023)\nAvoid data leakage. The cardinal sin is selecting or tuning on the same data you report on — “optimism bias.” The fix is nested cross-validation: tune in an inner loop, assess in an outer loop, so the reported number never saw the tuning. (Jacobucci et al. 2023)\nCross-fitting (for causal applications) ensures the nuisance models don’t contaminate the treatment-effect estimate — the discipline double ML is built on. (Jacobucci et al. 2023)\n\nThis is the cross-validation entry’s “choices inside the loop” rule, scaled up to a whole project.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html#the-realities-of-social-data",
+    "href": "content/ml-track/ml-for-social-science.html#the-realities-of-social-data",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "The realities of social data",
+    "text": "The realities of social data\nIndustry ML lives on millions of rows. Social science usually doesn’t — and that changes everything. (Jacobucci et al. 2023)\n\nSmall n, wide p. Psychology and sociology datasets are often small with many correlated predictors — exactly where flexible methods overfit. The flexibility trap is “beating the data until it confesses.” (Jacobucci et al. 2023)\nNo Free Lunch. There is no single best algorithm for all problems. On noisy tabular social data, simple regularized models (Lasso/Ridge, well-tuned linear models) frequently match or beat black-box learners — with interpretability thrown in. (Jacobucci et al. 2023)\nThe replication ethic. Because patterns in wide data can appear by chance, “an ounce of replication is worth more than a ton of inferential statistics.” (Jacobucci et al. 2023)\n\nThe lesson echoes the bias–variance trade-off: match the flexibility to the data you actually have, not the data you wish you had.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html#what-ml-is-genuinely-good-for",
+    "href": "content/ml-track/ml-for-social-science.html#what-ml-is-genuinely-good-for",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "What ML is genuinely good for",
+    "text": "What ML is genuinely good for\nUsed for the right jobs, ML adds real value to social research: (Jacobucci et al. 2023)\n\nPrediction-policy problems. When the payoff comes from an accurate forecast to target a scarce resource — flagging students at risk of dropout, defendants’ recidivism risk, patients’ health risk — to direct interventions. (Jacobucci et al. 2023)\nMeasurement (text-as-data). Turning unstructured text or images into numbers with embeddings/transformers, creating variables that then feed ordinary causal models. (Jacobucci et al. 2023)\nExploratory pattern-finding. Tree-based methods surface interactions and nonlinearities you didn’t pre-specify — hypotheses to test later. (Jacobucci et al. 2023)\nHeterogeneous treatment effects. Causal forests estimate the CATE — for whom a treatment works — the explicit ML-for-causation bridge. (Jacobucci et al. 2023)\n\nNotice the pattern: ML supplies predictions and features; the causal question is answered by a design.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html#the-central-discipline-prediction-is-not-explanation",
+    "href": "content/ml-track/ml-for-social-science.html#the-central-discipline-prediction-is-not-explanation",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "The central discipline: prediction is not explanation",
+    "text": "The central discipline: prediction is not explanation\nHere is the line the entire book defends. Accurate prediction does not imply causal understanding. (Jacobucci et al. 2023) Two different questions: (Angrist and Pischke 2009)\n\nPrediction: what is the most likely Y given X? (ML’s home turf.)\nCausation: what happens to Y if I intervene and change D? (needs a research design.)\n\nA model can predict superbly by leaning on markers rather than causes — and a policy built on it can be harmful. (Jacobucci et al. 2023) The figure sorts problems into the two camps.\n\n\nShow the figure code\nimport matplotlib.pyplot as plt\nfrom matplotlib.patches import FancyBboxPatch\n\nfig, ax = plt.subplots(figsize=(7.6, 4.2))\nax.axis(\"off\")\n\ndef box(x, w, title, items, color):\n    ax.add_patch(FancyBboxPatch((x, 0.1), w, 0.78, boxstyle=\"round,pad=0.02\",\n                                fc=color, ec=\"#333\", lw=1.2, alpha=0.18))\n    ax.text(x + w/2, 0.82, title, ha=\"center\", fontsize=10, fontweight=\"bold\")\n    for i, it in enumerate(items):\n        ax.text(x + 0.04, 0.66 - i*0.11, it, ha=\"left\", fontsize=8.2)\n\nbox(0.04, 0.44, \"PREDICTION problem\\n“what is Y given X?”\", [\n    \"• target a scarce resource\",\n    \"  (dropout, recidivism, health risk)\",\n    \"• measurement / text-as-data\",\n    \"• forecasting demand\",\n    \"• exploratory pattern-finding\",\n    \"→ ML shines\"], \"#1f8a4c\")\n\nbox(0.52, 0.44, \"CAUSAL problem\\n“what if we change D?”\", [\n    \"• does the program work?\",\n    \"• should we treat this person?\",\n    \"• the effect of a policy / price\",\n    \"• who benefits most (CATE)\",\n    \"→ needs a research DESIGN\",\n    \"  (ML only as a tool within it)\"], \"#1f3a5f\")\n\nax.annotate(\"conflating these\\nis the fatal error\", xy=(0.5, 0.5), xytext=(0.5, -0.02),\n            ha=\"center\", fontsize=8.5, color=\"#c0392b\",\n            arrowprops=dict(arrowstyle=\"-\", color=\"#c0392b\", lw=0))\nax.set_xlim(0, 1); ax.set_ylim(-0.1, 0.95)\nax.set_title(\"Match the tool to the question\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Two kinds of question, two kinds of tool. If your decision only needs to know who or what (target the scarce resource, measure a variable, forecast demand), it’s a PREDICTION problem and ML shines. If your decision requires the EFFECT of changing something (does the program work? should we treat this person?), it’s a CAUSAL problem — and no amount of predictive accuracy substitutes for a design. The fatal error is treating a causal question as a prediction problem.\n\n\n\n\n\n\n\n\n\n\n\nNoteThe asthma–pneumonia trap\n\n\n\nThe classic cautionary tale: a model predicting death from pneumonia learned that asthmatic patients had lower risk — and was, as a prediction, correct. The reason was causal and inverted: asthmatics were rushed to the ICU and treated more aggressively, which lowered their death rate. (Jacobucci et al. 2023) A policy reading the model literally — treat asthmatics less urgently because they’re low-risk — would be lethal. The model captured a marker shaped by treatment, not a cause. This is collider/selection logic wearing a machine- learning coat, and the reason feature importance ≠ causal effect: importance tells you what helped the algorithm reduce error in this dataset, never “the causes.” (Jacobucci et al. 2023)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html#the-ethical-dimension",
+    "href": "content/ml-track/ml-for-social-science.html#the-ethical-dimension",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "The ethical dimension",
+    "text": "The ethical dimension\nOne last duty, pointing to Part VI: a deployed model encodes and amplifies the prejudices in its training data, so fairness checks across subgroups are mandatory — acting on a biased model produces systemic injustice at scale. (Jacobucci et al. 2023) Predictive power without fairness auditing is not neutral; it is harm, automated.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html#common-pitfalls",
+    "href": "content/ml-track/ml-for-social-science.html#common-pitfalls",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nTuning and reporting on the same data. Leakage inflates every number; use nested CV, keep the test set sacred. (Jacobucci et al. 2023)\nA flexible model on small wide data. It overfits; prefer regularized/simple models and replicate. (Jacobucci et al. 2023)\nTreating a causal question as a prediction problem. “Should we change D?” needs a design, not a better classifier. (Angrist and Pischke 2009)\nReading feature importance as a list of causes. It ranks predictive contribution in one dataset, not effects. (Jacobucci et al. 2023)\nDeploying without a fairness audit. Average accuracy hides subgroup harm; check it. (Jacobucci et al. 2023)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html#from-the-sources",
+    "href": "content/ml-track/ml-for-social-science.html#from-the-sources",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nJacobucci, Grimm & Zhang, ML for Social & Behavioral Research — the train/validation/test and nested-CV workflow, data leakage, cross-fitting; small-n/wide-p realities, the flexibility trap, No Free Lunch, the replication ethic; appropriate uses (prediction-policy, text-as-data, exploration, CATE); prediction ≠ explanation, markers vs causes, the asthma–pneumonia trap, feature importance ≠ causal effect; fairness/bias; Pearl (“you are smarter than your data”) and the shovel/foundation framing.\nJames, Witten, Hastie & Tibshirani, ISL — the predictive workflow and out-of-sample assessment underlying it all.\nAngrist & Pischke — the prediction vs causal question distinction and the primacy of design.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html#appendix-the-boundary-formally",
+    "href": "content/ml-track/ml-for-social-science.html#appendix-the-boundary-formally",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "Appendix · the boundary, formally",
+    "text": "Appendix · the boundary, formally\n\nWhy a great predictor can mislead a policy. ML targets \\mathbb E[Y\\mid X=x] — the observational conditional mean. A policy that intervenes needs \\mathbb E[Y\\mid \\operatorname{do}(D=d)] — the interventional mean. These coincide only under unconfoundedness. In the asthma case, \\Pr(\\text{death}\\mid \\text{asthma}) is genuinely low, but \\Pr(\\text{death}\\mid \\operatorname{do}(\\text{de-prioritise asthmatics})) is high — because the observed association ran through aggressive treatment, a path the intervention destroys. The model estimated the first; the policy needed the second.\nNested CV. Let the inner loop pick hyperparameters \\hat\\lambda(\\mathcal D_{\\text{in}}) by CV on a training fold, and the outer loop evaluate the whole procedure (including that selection) on a held-out fold. The outer estimate is unbiased for the generalisation error of the pipeline, whereas a single CV that both tunes and reports is optimistic by roughly the spread of the inner search — the multiplicity of trying many \\lambda.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html#connections",
+    "href": "content/ml-track/ml-for-social-science.html#connections",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: the whole predictive Part IV (workflow, bias–variance, interpretability) and the ML Track entries; bridges to causal ML (HTE/double ML) and the credibility ethics of Part VI.\nCloses: the ML Track, and the manual — returning the predictive culture to the service of, and subordinate to, the causal and ethical questions that motivate social science.\nThe last word: ML is a superb shovel. It is never the foundation. Prediction is not explanation; importance is not cause.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/ml-for-social-science.html#study-with-notebooklm",
+    "href": "content/ml-track/ml-for-social-science.html#study-with-notebooklm",
+    "title": "ML for Social Science: Workflow & the Bridge Home",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Describe the ML workflow for social science — train/validation/test, data leakage, and nested cross-validation — and why each step matters.”\n“Why do flexible ML models often lose to simple regularized models on small, wide social-science data (the flexibility trap, No Free Lunch, replication)?”\n“What are appropriate uses of ML in social science (prediction-policy, text-as-data, exploration, heterogeneous treatment effects)?”\n“Explain why prediction is not explanation, using the asthma–pneumonia example and the distinction between ‘what is Y given X?’ and ‘what if we change D?’.”\n“Why is feature importance not a causal effect, and why are fairness checks mandatory before deployment?”",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "ML for Social Science: Workflow & the Bridge Home"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html",
+    "href": "content/ml-track/deep-learning-neural-networks.html",
+    "title": "Deep Learning: Neural Networks",
+    "section": "",
+    "text": "Part IV kept naming neural networks as the far, opaque end of the flexibility–interpretability frontier. Here is what’s inside the box. A neuron is a weighted sum passed through a nonlinear switch; stack thousands across layers and the network learns its own features — edges, then shapes, then faces — instead of you engineering them. That representation-learning is why deep nets conquered vision and language. It is also why, on a small social-science table, they usually have nothing to offer a random forest doesn’t.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#why-it-matters",
+    "href": "content/ml-track/deep-learning-neural-networks.html#why-it-matters",
+    "title": "Deep Learning: Neural Networks",
+    "section": "Why it matters",
+    "text": "Why it matters\nDeep learning is the most consequential ML development of the century, and the one most surrounded by hype. (James et al. 2021) A social scientist needs to understand it well enough to (a) use it when the data really is unstructured (text, images, audio) and (b) resist it when a linear model or forest would do as well and explain itself. (Jacobucci et al. 2023) This entry demystifies the architecture and the training — and draws the honest line about when it actually wins.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#the-neuron",
+    "href": "content/ml-track/deep-learning-neural-networks.html#the-neuron",
+    "title": "Deep Learning: Neural Networks",
+    "section": "The neuron",
+    "text": "The neuron\nThe atom of a network is the neuron: take inputs Z, form a weighted sum plus a bias, and pass it through a nonlinear activation function \\sigma: (James et al. 2021) \nX_m=\\sigma\\big(\\alpha_{m0}+\\alpha_m^\\top Z\\big).\n That nonlinearity is non-negotiable: without it, stacking layers just composes linear maps into one linear map, and the whole network collapses to a regression. (James et al. 2021) The two activations to know: (James et al. 2021)\n\nSigmoid \\sigma(v)=1/(1+e^{-v}) — the logistic squash to (0,1), classic but prone to vanishing gradients.\nReLU \\sigma(v)=\\max(0,v) — the modern default: cheap, and effective in deep networks. Each ReLU is a hinge, and a sum of hinges builds a piecewise-linear curve (the figure).",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#feed-forward-networks-features-learned",
+    "href": "content/ml-track/deep-learning-neural-networks.html#feed-forward-networks-features-learned",
+    "title": "Deep Learning: Neural Networks",
+    "section": "Feed-forward networks: features, learned",
+    "text": "Feed-forward networks: features, learned\nA feed-forward network stacks hidden layers between input and output. (James et al. 2021) The key idea: each hidden layer’s units are learned features — “constructed regressors,” representations, embeddings — built automatically from the raw inputs rather than hand-crafted. (James et al. 2021) The output layer reads off the final representation: linear for regression, softmax for classification (probabilities over mutually exclusive classes). (James et al. 2021)\nTwo facts frame the power: (James et al. 2021)\n\nUniversal approximation. A single hidden layer with enough units can approximate any reasonable function arbitrarily well (Kuan & White, 1994). Flexibility is not the question — control is.\nDepth buys hierarchy. Width adds raw flexibility, but depth lets the network compose simple patterns into complex ones — early layers detect edges, later layers assemble them into objects. Hierarchical features are what make deep learning more than wide learning. (James et al. 2021)\n\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(7.8, 3.9))\n\n# ---- Left: network schematic ----\nlayers = [3, 5, 2]\nxpos = [0.1, 0.5, 0.9]\nfor li, (n, x) in enumerate(zip(layers, xpos)):\n    ys = np.linspace(0.15, 0.85, n)\n    for y in ys:\n        c = {0: \"#1f3a5f\", 1: \"#d98a29\", 2: \"#1f8a4c\"}[li]\n        axL.add_patch(plt.Circle((x, y), 0.045, color=c, zorder=3))\n    if li &gt; 0:\n        prev_ys = np.linspace(0.15, 0.85, layers[li-1])\n        for y in ys:\n            for py in prev_ys:\n                axL.plot([xpos[li-1], x], [py, y], color=\"#cfd3d8\", lw=0.6, zorder=1)\naxL.text(0.1, 0.95, \"inputs\", ha=\"center\", fontsize=8, color=\"#1f3a5f\")\naxL.text(0.5, 0.95, \"hidden\\n(learned features)\", ha=\"center\", fontsize=8, color=\"#b9791f\")\naxL.text(0.9, 0.95, \"output\", ha=\"center\", fontsize=8, color=\"#1f7a44\")\naxL.set_xlim(0, 1); axL.set_ylim(0.05, 1.05); axL.axis(\"off\")\naxL.set_title(\"Feed-forward network\")\n\n# ---- Right: a tiny ReLU net trained on 1-D data ----\nrng = np.random.default_rng(0)\nx = np.linspace(-3, 3, 120); ytrue = np.sin(1.2 * x) + 0.3 * x\ny = ytrue + rng.normal(0, 0.15, x.size)\nXin = x[:, None]\nH = 16\nW1 = rng.normal(0, 1.0, (1, H)); b1 = np.zeros(H)\nW2 = rng.normal(0, 0.5, (H, 1)); b2 = 0.0\nlr = 0.005\nfor step in range(4000):\n    Z = Xin @ W1 + b1; Hd = np.maximum(0, Z)            # ReLU\n    yhat = (Hd @ W2 + b2).ravel()\n    err = (yhat - y) / x.size\n    gW2 = Hd.T @ err[:, None]; gb2 = err.sum()\n    dH = (err[:, None] @ W2.T) * (Z &gt; 0)\n    gW1 = Xin.T @ dH; gb1 = dH.sum(0)\n    W2 -= lr * gW2; b2 -= lr * gb2; W1 -= lr * gW1; b1 -= lr * gb1\n\nZf = x[:, None] @ W1 + b1; fit = (np.maximum(0, Zf) @ W2 + b2).ravel()\naxR.scatter(x, y, s=8, color=\"#c9ccd1\", alpha=0.6)\naxR.plot(x, ytrue, color=\"#1f8a4c\", lw=2.0, ls=\"--\", label=\"true function\")\naxR.plot(x, fit, color=\"#1f3a5f\", lw=2.2, label=f\"{H}-unit ReLU net\")\naxR.set_title(\"Learned fit (sum of ReLU hinges)\")\naxR.set_xlabel(\"x\"); axR.set_ylabel(\"y\"); axR.legend(fontsize=8, frameon=False)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Left: a feed-forward network — inputs feed a hidden layer (each unit a weighted sum + activation), whose learned features feed the output. Right: a small ReLU network trained on noisy nonlinear data. Each hidden ReLU contributes a ‘hinge’; summed at the output they compose a smooth-looking piecewise-linear fit (blue) of the true curve (green) — universal approximation in miniature.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#training-gradient-descent-and-backpropagation",
+    "href": "content/ml-track/deep-learning-neural-networks.html#training-gradient-descent-and-backpropagation",
+    "title": "Deep Learning: Neural Networks",
+    "section": "Training: gradient descent and backpropagation",
+    "text": "Training: gradient descent and backpropagation\nTraining means finding the weights that minimise a loss (penalised least squares for regression, cross-entropy for classification). (James et al. 2021) The machinery: (James et al. 2021)\n\nGradient descent nudges every weight downhill along the loss gradient; the learning rate \\eta sets the step size (too big diverges, too small crawls).\nStochastic gradient descent (SGD) computes the gradient on small minibatches instead of the whole dataset — essential at scale; one pass through all batches is an epoch.\nBackpropagation is the efficient chain rule: it propagates the error backward through the layers to get the gradient with respect to every parameter in one sweep. (James et al. 2021)\nNon-convexity. The loss surface has local minima and saddle points — and remarkably, the noise in SGD’s minibatch sampling helps the optimiser skitter past them. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#regularization-taming-a-model-with-too-many-parameters",
+    "href": "content/ml-track/deep-learning-neural-networks.html#regularization-taming-a-model-with-too-many-parameters",
+    "title": "Deep Learning: Neural Networks",
+    "section": "Regularization: taming a model with too many parameters",
+    "text": "Regularization: taming a model with too many parameters\nA network can have more parameters than observations, so overfitting is the central danger. (James et al. 2021) The countermeasures: (James et al. 2021)\n\nWeight decay — an \\ell_2/ridge penalty shrinking weights toward zero.\nDropout — randomly zero out a fraction of units each training step, forcing redundant, robust pathways rather than fragile co-adaptations. (James et al. 2021)\nEarly stopping — watch a validation set and stop when out-of-sample error starts to rise. (James et al. 2021)\nData augmentation — manufacture new training examples by perturbing existing ones (rotate/crop an image), enlarging effective n.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#specialised-architectures-conceptually",
+    "href": "content/ml-track/deep-learning-neural-networks.html#specialised-architectures-conceptually",
+    "title": "Deep Learning: Neural Networks",
+    "section": "Specialised architectures (conceptually)",
+    "text": "Specialised architectures (conceptually)\nBeyond the plain feed-forward net: (James et al. 2021)\n\nConvolutional neural networks (CNNs) — for images: weight sharing (the same small filter slides across the image) and pooling tame pixel dimensionality; deep variants like ResNet use skip connections so gradients survive many layers.\nRecurrent neural networks (RNNs) — for sequences (text, audio): they carry a state across steps, like a nonlinear autoregression; LSTMs stabilise the information flow.\nTransformers — today’s state of the art for language (BERT, and the architecture behind large language models): self-attention weights every part of a sequence against every other, regardless of distance. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#when-neural-nets-actually-win",
+    "href": "content/ml-track/deep-learning-neural-networks.html#when-neural-nets-actually-win",
+    "title": "Deep Learning: Neural Networks",
+    "section": "When neural nets actually win",
+    "text": "When neural nets actually win\nThe practical verdict, and the reason this track keeps ML separate: neural nets are not always better. (Jacobucci et al. 2023) They shine on unstructured data — images, text, audio — where features can’t be hand-engineered, and they need very large n to train. (James et al. 2021) On the small, tabular datasets typical of social science, a well-specified linear model or random forest often matches or beats an ad-hoc network — with far more interpretability. (Jacobucci et al. 2023)\n\n\n\n\n\n\nNoteThe numbers tell the story\n\n\n\n\nBig, unstructured data: in a hedonic price study with 10 million observations, a deep network hit test R^2\\approx90\\%, beating random forests (80%) and linear models (70%). (James et al. 2021)\nSmall, tabular data: on the Wage data, plain OLS had a test MSE of 0.228 while a simple neural net trailed at 0.249. (James et al. 2021)\n\nSame method, opposite verdicts — set entirely by sample size and data type. Reach for a net when you have millions of unstructured examples; reach for a regression when you have a survey.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#common-pitfalls",
+    "href": "content/ml-track/deep-learning-neural-networks.html#common-pitfalls",
+    "title": "Deep Learning: Neural Networks",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nA neural net on small tabular data. It rarely beats a tuned forest or regression and forfeits interpretability; match the tool to n and data type. (Jacobucci et al. 2023)\nSkipping regularization. With more parameters than data, weight decay / dropout / early stopping are not optional. (James et al. 2021)\nA bad learning rate. Too large diverges, too small never converges; it’s the first thing to tune. (James et al. 2021)\nReading weights as effects. A network’s millions of weights are uninterpretable and not causal; use interpretability tools, and never confuse them with explanation. (Jacobucci et al. 2023)\nBelieving depth always helps. Past a point it adds parameters and overfitting, not signal; validate. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#from-the-sources",
+    "href": "content/ml-track/deep-learning-neural-networks.html#from-the-sources",
+    "title": "Deep Learning: Neural Networks",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nJames, Witten, Hastie & Tibshirani, ISL (Ch 10) — the neuron X_m=\\sigma(\\alpha_m^\\top Z), essential nonlinearity, sigmoid and ReLU; feed-forward nets, hidden layers as learned representations, softmax output, universal approximation (Kuan & White 1994), depth/hierarchy; SGD, minibatches/epochs, backpropagation, learning rate, non-convexity; weight decay, dropout, early stopping; CNNs (weight sharing, pooling, ResNet skip connections), RNNs/LSTMs, Transformers; when NNs win (10M-obs hedonic R^2 90% vs RF 80% vs linear 70%; Wage OLS MSE 0.228 vs NN 0.249).\nJacobucci, Grimm & Zhang — the social-science reality: on small tabular data, simpler models often match neural nets, and weights are not explanations.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#appendix-the-mathematics",
+    "href": "content/ml-track/deep-learning-neural-networks.html#appendix-the-mathematics",
+    "title": "Deep Learning: Neural Networks",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nForward pass (one hidden layer). With inputs Z\\in\\mathbb R^p, hidden weights A\\in\\mathbb\nR^{H\\times p}, output weights w: \nH_m=\\sigma\\big((AZ)_m+a_m\\big),\\qquad \\hat Y=w^\\top H + b .\n Stacking L such layers, \\hat Y is a depth-L composition of (linear \\to nonlinear) maps — flexible because of the repeated \\sigma.\nBackpropagation. For loss \\mathcal L, the chain rule gives, layer by layer from the output, \\delta^{(L)}=\\nabla_{\\hat Y}\\mathcal L and \\delta^{(\\ell)}=(W^{(\\ell+1)\\top}\\delta^{(\\ell+1)})\\odot \\sigma'(z^{(\\ell)}), with parameter gradients \\partial\\mathcal L/\\partial W^{(\\ell)}=\\delta^{(\\ell)} (h^{(\\ell-1)})^\\top. One backward sweep yields all gradients in O(\\text{#params}) — the efficiency that makes training feasible. For ReLU, \\sigma'(z)=\\mathbf 1[z&gt;0], so gradients flow only through active units (and the figure’s fit is exactly piecewise-linear).\nSGD update. \\theta \\leftarrow \\theta-\\eta\\,\\widehat{\\nabla_\\theta\\mathcal L}, the gradient estimated on a minibatch. The minibatch noise is a feature: it perturbs the trajectory enough to escape sharp local minima and saddle points, often landing in flatter, better-generalising basins.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#connections",
+    "href": "content/ml-track/deep-learning-neural-networks.html#connections",
+    "title": "Deep Learning: Neural Networks",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: logistic regression (a one-neuron sigmoid/softmax classifier), regularization (weight decay, early stopping), bias–variance (overfitting), and the accuracy–interpretability frontier (the opaque extreme).\nLeads to: unsupervised learning (autoencoders/embeddings are representation learning without labels) and the social-science workflow of ML for social science.\nBridges back: a network is the ultimate predictive black box — superb at \\hat Y, mute about why; its weights are not effects.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/deep-learning-neural-networks.html#study-with-notebooklm",
+    "href": "content/ml-track/deep-learning-neural-networks.html#study-with-notebooklm",
+    "title": "Deep Learning: Neural Networks",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Describe a single neuron and its activation function. Why is nonlinearity essential, and what are sigmoid and ReLU?”\n“What are hidden layers and learned representations? State the universal approximation idea and explain why depth helps.”\n“Explain training: gradient descent, SGD/minibatches/epochs, backpropagation, the learning rate, and non-convexity.”\n“How do weight decay, dropout, and early stopping fight overfitting? What are CNNs and RNNs for?”\n“When do neural networks win versus simpler models? Use the hedonic-price and Wage examples to contrast big-unstructured vs small-tabular data.”",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Deep Learning: Neural Networks"
+    ]
+  },
+  {
     "objectID": "content/06-field-realities/tyranny-of-metrics.html",
     "href": "content/06-field-realities/tyranny-of-metrics.html",
     "title": "The Tyranny of Metrics",
@@ -11395,11 +11863,167 @@
     ]
   },
   {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "",
+    "text": "Linear regression assumes a straight line; the world is rarely straight. The flexible methods of this entry — splines, local regression, and generalized additive models — let each predictor’s effect curve freely, while keeping the model interpretable: you can still plot what each variable does, holding the others fixed. This is the sweet spot between a rigid line and a black-box forest — flexibility you can read.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html#why-it-matters",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html#why-it-matters",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "Why it matters",
+    "text": "Why it matters\nMost flexible ML buys accuracy by becoming opaque. Splines and GAMs are the exception: they capture genuine non-linearity and stay legible, which is exactly what a social scientist needs when the shape of an effect is the finding (wages rise with age, then fall). (James et al. 2021) They also generalise the ad-hoc tricks of functional form — logs, quadratics, dummies — into a principled toolkit for learning the shape from data.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html#the-simple-extensions-and-why-they-fall-short",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html#the-simple-extensions-and-why-they-fall-short",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "The simple extensions, and why they fall short",
+    "text": "The simple extensions, and why they fall short\nTwo first attempts, both limited: (James et al. 2021)\n\nPolynomial regression adds powers (\\text{age},\\text{age}^2,\\text{age}^3,\\dots). Easy, but non-local: a wiggle in one region flexes the whole curve, and high-degree polynomials go wild at the boundaries, producing absurd tail predictions. (James et al. 2021)\nStep functions bin X into regions and fit a constant in each (dummy variables). Simple, but unless the breakpoints are natural they miss trends within a bin — a single “age 20–40” bin hides the steady wage rise inside it. (James et al. 2021)\n\nSplines fix both by being piecewise and smooth.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html#regression-splines",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html#regression-splines",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "Regression splines",
+    "text": "Regression splines\nA regression spline fits separate low-degree polynomials over regions divided by knots, stitched together with smoothness constraints. (James et al. 2021)\n\nA cubic spline is piecewise cubic, constrained so the curve and its first and second derivatives are continuous at every knot — no kinks, no jumps, visually seamless. (James et al. 2021)\nFlexibility = knots. More knots ⇒ more wiggle. A cubic spline with K knots uses K+4 degrees of freedom. (James et al. 2021)\nNatural splines fix the boundary problem: ordinary splines have high variance at the tails, so a natural spline forces the curve to be linear beyond the boundary knots, giving stable, trustworthy tail estimates. (James et al. 2021)\n\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(5)\nn = 120\nx = np.sort(rng.uniform(0, 1, n))\nf_true = lambda t: np.sin(2.2 * np.pi * t) * (t &lt; 0.7) + (0.5 - 0.8 * (t - 0.7)) * (t &gt;= 0.7)\ny = f_true(x) + rng.normal(0, 0.25, n)\n\n# Natural cubic spline via a truncated-power basis with linear tail constraints.\nknots = np.quantile(x, [0.2, 0.4, 0.6, 0.8])\ndef trunc(t, k):\n    d = (t - k); return np.where(d &gt; 0, d**3, 0.0)\ndef nat_basis(t):\n    # natural cubic spline basis (Hastie et al. form): linear + truncated-cubic differences\n    K = knots; last = K[-1]\n    cols = [np.ones_like(t), t]\n    dK = trunc(t, K[-2]) - trunc(t, last)\n    for k in K[:-1]:\n        cols.append((trunc(t, k) - trunc(t, last)) / (last - k) - dK / (last - K[-2]))\n    return np.column_stack(cols)\n\nB = nat_basis(x); coef, *_ = np.linalg.lstsq(B, y, rcond=None)\nxs = np.linspace(0, 1, 300)\nspline = nat_basis(xs) @ coef\npoly = np.polyval(np.polyfit(x, y, 10), xs)\n\nfig, ax = plt.subplots(figsize=(7.2, 4.2))\nax.scatter(x, y, s=10, color=\"#c9ccd1\", alpha=0.6, label=\"data\")\nax.plot(xs, f_true(xs), color=\"#1f8a4c\", lw=2.0, ls=\"--\", label=\"true function\")\nax.plot(xs, poly, color=\"#d98a29\", lw=1.8, label=\"degree-10 polynomial\")\nax.plot(xs, spline, color=\"#1f3a5f\", lw=2.4, label=\"natural cubic spline\")\nfor k in knots: ax.axvline(k, color=\"#9aa0a6\", ls=\":\", lw=0.8)\nax.set_ylim(-1.8, 1.8)\nax.set_xlabel(\"x\"); ax.set_ylabel(\"y\")\nax.set_title(\"Splines bend smoothly; polynomials thrash at the edges\")\nax.legend(fontsize=8, frameon=False, loc=\"lower left\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A natural cubic spline vs a global polynomial. Both fit the same curved, noisy data. The degree-10 polynomial (orange) tracks the middle adequately but swings wildly at the boundaries — its non-local nature amplifies edge noise. The natural cubic spline (blue), piecewise-cubic between knots (dashed verticals) and linear beyond the outer knots, follows the true curve (green) smoothly and stays stable at the tails. Flexibility you can trust.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html#smoothing-splines",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html#smoothing-splines",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "Smoothing splines",
+    "text": "Smoothing splines\nRegression splines make you choose knots. Smoothing splines sidestep that with a “loss + penalty” formulation — fit every point but penalise wiggliness: (James et al. 2021) \n\\min_g \\ \\sum_{i=1}^n \\big(y_i-g(x_i)\\big)^2 \\;+\\; \\lambda \\int g''(t)^2\\,dt .\n The roughness penalty \\int g''(t)^2 dt measures total curvature; \\lambda dials the trade-off between fitting the data and staying smooth. (James et al. 2021) As \\lambda runs from 0 to \\infty, the effective degrees of freedom fall from n (interpolate every point) to 2 (a straight line) — so \\lambda is a continuous flexibility knob. It’s chosen by leave-one-out cross-validation, which (as in the CV entry) has an efficient single-pass formula. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html#local-regression-loess",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html#local-regression-loess",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "Local regression (LOESS)",
+    "text": "Local regression (LOESS)\nLocal regression fits the curve at a target point x_0 using only nearby observations, weighted by distance — closest points count most. (James et al. 2021) The key knob is the span s, the fraction of data in each local neighbourhood: a small span gives a wiggly, very local fit; a large span approaches a global line. (James et al. 2021) It’s the KNN idea applied to regression — smooth, intuitive, and a natural way to let the data speak locally.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html#generalized-additive-models-gams",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html#generalized-additive-models-gams",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "Generalized additive models (GAMs)",
+    "text": "Generalized additive models (GAMs)\nThe payoff: extend all of this to many predictors while keeping interpretability, via a generalized additive model: (James et al. 2021) \ny_i=\\beta_0+f_1(x_{i1})+f_2(x_{i2})+\\dots+f_p(x_{ip})+\\epsilon_i ,\n each f_j a smooth function (spline, LOESS) learned from data. The magic is additivity: because the effects add, you can examine each f_j separately — plot the (non-linear) effect of one predictor holding the others fixed, exactly the ceteris-paribus reading of a regression coefficient, now curved. (James et al. 2021) GAMs handle classification too, via a logit link (e.g. \\Pr(\\text{wage}&gt;250\\text{k})). (James et al. 2021)\nThe cost of additivity is its blind spot: a GAM misses interactions between predictors unless you add them by hand (an x_j\\times x_k term or a bivariate smooth). (James et al. 2021) It sits one notch below trees/forests in flexibility (which find interactions automatically) and well above them in interpretability — the GAM’s reason for being.\n\n\n\n\n\n\nNoteISL’s Wage GAM\n\n\n\nPredicting wages from year, age, education: a smoothing spline for year (4 df), a smoothing spline for age (5 df), and a step function for the categorical education. The fitted effects read like a story: wage rises with age until ~60, then declines; rises slowly but steadily across 2003–2009; and climbs with education. (James et al. 2021) Three legible curves — non-linear, yet as interpretable as a table of coefficients.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html#common-pitfalls",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html#common-pitfalls",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nHigh-degree global polynomials. They thrash at the boundaries; prefer splines (and natural splines for stable tails). (James et al. 2021)\nToo many knots / too small \\lambda or span. Over-flexible fits chase noise; tune flexibility (df, \\lambda, span) by cross-validation. (James et al. 2021)\nForgetting GAM additivity. No interactions unless you add them; if effects depend on combinations, a GAM will quietly miss them. (James et al. 2021)\nReading a smooth effect as causal. A GAM’s f_j is a flexible conditional shape — still a correlation with controls, not an effect. (James et al. 2021)\nOver-interpreting wiggles at the data’s edges. Sparse-tail regions have high variance; natural splines and honest uncertainty bands matter most there. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html#from-the-sources",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html#from-the-sources",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nJames, Witten, Hastie & Tibshirani, ISL (Ch 7) — polynomial regression (non-local, wild boundaries) and step functions (binning); regression splines (knots; cubic splines with continuous first/second derivatives; natural splines linear beyond boundary knots; K knots =K+4 df); smoothing splines (RSS +\\lambda\\int g''^2, effective df from n to 2, LOOCV); local regression / LOESS (distance weights, the span); GAMs (y=\\beta_0+\\sum_j f_j(x_j), additive interpretability, logit for classification, missing interactions); the Wage GAM (year 4 df, age 5 df, education step function; wage peaks near 60).",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html#appendix-the-mathematics",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html#appendix-the-mathematics",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nTruncated-power spline basis. A cubic spline with knots \\xi_1,\\dots,\\xi_K can be written as a linear model in the basis \\{1,x,x^2,x^3,(x-\\xi_1)_+^3,\\dots,(x-\\xi_K)_+^3\\} where (t)_+=\\max(t,0). Each truncated term adds curvature only past its knot, which is what makes the fit piecewise while continuity of g,g',g'' is automatic (the cubic truncation has two vanishing derivatives at the knot). Fitting is then ordinary least squares on these K+4 columns — flexibility with the linear model’s machinery intact.\nThe smoothing-spline solution. Remarkably, the minimiser of \\sum_i (y_i-g(x_i))^2+\\lambda\\int g''(t)^2dt over all functions is a natural cubic spline with knots at every unique x_i — an n-dimensional problem with a finite, closed-form answer. The fit is linear in y: \\hat g=S_\\lambda y for a smoother matrix S_\\lambda, and the effective degrees of freedom are \\operatorname{trace}(S_\\lambda), decreasing in \\lambda. LOOCV has the leverage shortcut \\text{CV}=\\frac1n\\sum_i\\big(\\frac{y_i-\\hat g(x_i)}{1-S_{\\lambda,ii}}\\big)^2 — the same leverage-corrected residual as for linear models.\nGAM fitting (backfitting). With \\hat f_j smooth, GAMs are fit by backfitting: cycle through predictors, each time smoothing the partial residual y-\\beta_0-\\sum_{k\\ne j}\\hat f_k(x_k) against x_j to update \\hat f_j, until convergence — a coordinate-descent that reduces a p-dimensional smooth to a sequence of one-dimensional ones.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html#connections",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html#connections",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: functional form (logs/quadratics generalised), bias–variance (df/\\lambda/span as flexibility), and cross-validation (tuning).\nLeads to: support vector machines (non-linearity via kernels) and neural networks (non-linearity via learned features) — the same goal by other means, trading away the GAM’s legibility.\nBridges back: a flexible f_j is still descriptive; the shape is a conditional association, not a cause.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/beyond-linearity-splines-and-gams.html#study-with-notebooklm",
+    "href": "content/ml-track/beyond-linearity-splines-and-gams.html#study-with-notebooklm",
+    "title": "Beyond Linearity: Splines & GAMs",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Why are polynomial regression and step functions limited (non-locality, boundary behaviour, within-bin trends)?”\n“What is a regression spline? Explain knots, cubic splines (continuous first/second derivatives), and why natural splines help at the boundaries.”\n“Explain smoothing splines: the roughness penalty \\lambda\\int g''^2, effective degrees of freedom, and choosing \\lambda by LOOCV.”\n“What is local regression (LOESS) and the role of the span?”\n“Define a GAM, explain why additivity preserves interpretability, and state its main limitation. Walk through ISL’s Wage example.”",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Beyond Linearity: Splines & GAMs"
+    ]
+  },
+  {
     "objectID": "content/ml-track/index.html",
     "href": "content/ml-track/index.html",
     "title": "ML Track (separate)",
     "section": "",
-    "text": "Machine learning is kept deliberately separate from the causal main track, and bridged to it only where it earns a place. The reason is the argument made in Predictive Modelling: ML is, by default, the predictive culture. Pretending its tools answer causal questions is one of the most common and costly confusions in applied work.\nThat said, the frontier of social science increasingly uses ML in service of causal goals — estimating treatment-effect heterogeneity, handling high-dimensional controls — and this track follows that bridge carefully.",
+    "text": "Machine learning is kept deliberately separate from the causal main track, and bridged to it only where it earns a place. The reason is the argument made in Predictive Modelling: ML is, by default, the predictive culture. Pretending its tools answer causal questions is one of the most common and costly confusions in applied work.\nThat said, the frontier of social science increasingly uses ML in service of causal goals — estimating treatment-effect heterogeneity, handling high-dimensional controls — and this track follows that bridge carefully.\nThe foundations of predictive modelling — the bias–variance trade-off, cross-validation, regularization, trees/forests/boosting, and classification — live in Part IV. This track goes deeper and broader: the flexible supervised methods Part IV deferred, plus the unsupervised half of machine learning the main spine never needed. Supervised learning predicts a label Y from features X; unsupervised learning finds structure in X with no label at all.",
     "crumbs": [
       "Home",
       "ML Track (separate)",
@@ -11407,11 +12031,23 @@
     ]
   },
   {
-    "objectID": "content/ml-track/index.html#entries",
-    "href": "content/ml-track/index.html#entries",
+    "objectID": "content/ml-track/index.html#extending-the-supervised-toolkit",
+    "href": "content/ml-track/index.html#extending-the-supervised-toolkit",
     "title": "ML Track (separate)",
-    "section": "Entries",
-    "text": "Entries\n\n\n\n\n\n\n\n\nEntry\nStatus\nCore sources\n\n\n\n\nSupervised vs unsupervised learning\n🔜 Planned\nISLR\n\n\nThe bias–variance trade-off, in depth\n🔜 Planned\nISLR\n\n\nRegularisation: Lasso & Ridge\n🔜 Planned\nISLR\n\n\nTrees, forests, and boosting\n🔜 Planned\nISLR\n\n\nCross-validation & honest evaluation\n🔜 Planned\nISLR, Bruce\n\n\nML for treatment-effect heterogeneity\n🔜 Planned\nML for Experiments, ML for Social & Behavioral Research\n\n\nWhen prediction masquerades as explanation\n🔜 Planned\nISLR, Mostly Harmless",
+    "section": "Extending the Supervised Toolkit",
+    "text": "Extending the Supervised Toolkit\nThe flexible predictors beyond the linear model and the ensembles of Part IV:\n\n\n\nEntry\nStatus\nCore sources\n\n\n\n\nModel selection & dimension reduction\n✅ Written\nISL\n\n\nBeyond linearity: splines & GAMs\n✅ Written\nISL\n\n\nSupport vector machines\n✅ Written\nISL\n\n\nDeep learning: neural networks\n✅ Written\nISL, Jacobucci",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "ML Track (separate)"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/index.html#unsupervised-learning-the-social-science-lens",
+    "href": "content/ml-track/index.html#unsupervised-learning-the-social-science-lens",
+    "title": "ML Track (separate)",
+    "section": "Unsupervised Learning & the Social-Science Lens",
+    "text": "Unsupervised Learning & the Social-Science Lens\nFinding structure without a label, and the disciplined use of all of it:\n\n\n\nEntry\nStatus\nCore sources\n\n\n\n\nUnsupervised learning: PCA & clustering\n✅ Written\nISL, Bruce\n\n\nML for social science: workflow & the bridge home\n✅ Written\nJacobucci, ISL, Angrist & Pischke",
     "crumbs": [
       "Home",
       "ML Track (separate)",
@@ -11428,6 +12064,305 @@
       "Home",
       "ML Track (separate)",
       "ML Track (separate)"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/model-selection-and-dimension-reduction.html",
+    "href": "content/ml-track/model-selection-and-dimension-reduction.html",
+    "title": "Model Selection & Dimension Reduction",
+    "section": "",
+    "text": "Regularization was one answer to “too many predictors”: shrink them. This entry covers the other two. Subset selection keeps a discrete handful and drops the rest. Dimension reduction replaces the predictors with a few linear combinations that capture most of what matters. All three are the bias–variance trade-off in another costume — trading a little bias for a large cut in variance — and all become essential once predictors outnumber observations.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Model Selection & Dimension Reduction"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/model-selection-and-dimension-reduction.html#why-it-matters",
+    "href": "content/ml-track/model-selection-and-dimension-reduction.html#why-it-matters",
+    "title": "Model Selection & Dimension Reduction",
+    "section": "Why it matters",
+    "text": "Why it matters\nOrdinary least squares with many predictors predicts poorly and reads opaquely: variance explodes and no coefficient is trustworthy. (James et al. 2021) Before the flexible methods of this track, you need the classical toolkit for taming dimensionality — the discrete (subset selection), the continuous (shrinkage), and the derived (dimension reduction). It is also where you meet the p&gt;n world head-on, the regime that makes regularization not a refinement but a necessity. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Model Selection & Dimension Reduction"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/model-selection-and-dimension-reduction.html#subset-selection",
+    "href": "content/ml-track/model-selection-and-dimension-reduction.html#subset-selection",
+    "title": "Model Selection & Dimension Reduction",
+    "section": "Subset selection",
+    "text": "Subset selection\nThe direct idea: keep only the predictors most related to Y and run OLS on those. (James et al. 2021)\n\nBest-subset selection fits OLS for every combination of predictors and, for each size k, keeps the lowest-RSS model. Thorough but 2^p models — infeasible past ~30 predictors. (James et al. 2021)\nForward stepwise starts from the null model and adds the single best predictor at each step.\nBackward stepwise starts from the full model and drops the least useful — but cannot run when p&gt;n (there’s no full model to start from). (James et al. 2021)\n\n\nYou can’t choose on training error\nCritically, training RSS and R^2 cannot pick the final model — they improve monotonically with every added predictor, so they always point to the biggest model and straight into overfitting. (James et al. 2021) You need a criterion that penalises size, estimating test error: (James et al. 2021)\n\nC_p=\\tfrac1n\\big(\\text{RSS}+2d\\hat\\sigma^2\\big),\\quad\n\\text{BIC}=\\tfrac1n\\big(\\text{RSS}+\\log(n)\\,d\\hat\\sigma^2\\big),\\quad\n\\bar R^2=1-\\frac{\\text{RSS}/(n-d-1)}{\\text{TSS}/(n-1)} .\n\n\\text{AIC} is proportional to C_p for least squares; BIC’s \\log n penalty is heavier than C_p’s factor of 2 (whenever n&gt;7), so BIC favours smaller models. (James et al. 2021) Higher adjusted R^2 is better; lower C_p/BIC is better. Or skip the formulas entirely and estimate test error directly with a validation set or k-fold CV — fewer assumptions, and now the default. (James et al. 2021) The figure shows the core lesson: training error slides down forever while held-out error is U-shaped.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(3)\nn, p, k_true = 120, 14, 5\nX = rng.normal(0, 1, (n, p))\nbeta = np.zeros(p); beta[:k_true] = rng.uniform(1.0, 2.0, k_true)\ny = X @ beta + rng.normal(0, 1.5, n)\n# train/validation split\ntr, va = slice(0, 80), slice(80, n)\n\ndef ols_fit_predict(cols, Xtr, ytr, Xva):\n    A = np.c_[np.ones(Xtr.shape[0]), Xtr[:, cols]]\n    coef, *_ = np.linalg.lstsq(A, ytr, rcond=None)\n    yhat_tr = A @ coef\n    Av = np.c_[np.ones(Xva.shape[0]), Xva[:, cols]]\n    return yhat_tr, Av @ coef\n\nchosen, remaining = [], list(range(p))\ntrain_r2, val_mse, bic = [], [], []\nytr, yva = y[tr], y[va]\nfor step in range(1, p + 1):\n    best = None\n    for c in remaining:                       # forward step: add the predictor that best cuts train RSS\n        cols = chosen + [c]\n        yhat_tr, _ = ols_fit_predict(cols, X[tr], ytr, X[va])\n        rss = np.sum((ytr - yhat_tr) ** 2)\n        if best is None or rss &lt; best[0]:\n            best = (rss, c)\n    chosen.append(best[1]); remaining.remove(best[1])\n    yhat_tr, yhat_va = ols_fit_predict(chosen, X[tr], ytr, X[va])\n    rss = np.sum((ytr - yhat_tr) ** 2)\n    train_r2.append(1 - rss / np.sum((ytr - ytr.mean()) ** 2))\n    val_mse.append(np.mean((yva - yhat_va) ** 2))\n    d = len(chosen); sigma2 = rss / (len(ytr) - d - 1)\n    bic.append((rss + np.log(len(ytr)) * d * sigma2) / len(ytr))\n\nsizes = np.arange(1, p + 1)\nval_min = sizes[int(np.argmin(val_mse))]; bic_min = sizes[int(np.argmin(bic))]\n\nfig, ax1 = plt.subplots(figsize=(7.2, 4.2))\nax2 = ax1.twinx()\nax1.plot(sizes, train_r2, \"o-\", color=\"#9aa0a6\", lw=2, label=\"training R² (left)\")\nax2.plot(sizes, val_mse, \"o-\", color=\"#1f3a5f\", lw=2.2, label=\"validation MSE (right)\")\nax2.axvline(val_min, color=\"#1f8a4c\", ls=\":\", lw=1.6)\nax2.axvline(bic_min, color=\"#d98a29\", ls=\"--\", lw=1.4)\nax1.axvline(k_true, color=\"#c0392b\", lw=1.0, alpha=0.5)\nax1.text(k_true + 0.1, 0.2, f\"true size = {k_true}\", color=\"#c0392b\", fontsize=8)\nax2.text(val_min + 0.15, max(val_mse) * 0.9, f\"val min = {val_min}\", color=\"#1f8a4c\", fontsize=8)\nax1.set_xlabel(\"number of predictors in model\")\nax1.set_ylabel(\"training R²\", color=\"#6b6f76\"); ax2.set_ylabel(\"validation MSE\", color=\"#1f3a5f\")\nax1.set_title(\"Training error always falls; held-out error is U-shaped\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Choosing the number of predictors. Forward stepwise selection on simulated data where only the first few predictors carry signal. Training R² (grey) rises monotonically with model size — it can never choose. Validation MSE (blue) is U-shaped: it falls as real predictors enter, then rises as noise predictors add variance. The validation minimum (green) recovers the true model size; BIC’s heavier penalty (orange dashed minimum) lands at or below it.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Model Selection & Dimension Reduction"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/model-selection-and-dimension-reduction.html#three-philosophies-one-trade-off",
+    "href": "content/ml-track/model-selection-and-dimension-reduction.html#three-philosophies-one-trade-off",
+    "title": "Model Selection & Dimension Reduction",
+    "section": "Three philosophies, one trade-off",
+    "text": "Three philosophies, one trade-off\nIt helps to see subset selection beside the shrinkage it complements: (James et al. 2021)\n\nSubset selection — a discrete choice: a predictor is in or out. Low bias on the kept set, but the discreteness makes it high-variance (a small data change flips which subset wins).\nRidge (\\ell_2) — shrinks all coefficients toward zero, none exactly to zero: keeps every predictor but tames variance. (James et al. 2021)\nLasso (\\ell_1) — shrinks and zeroes out, performing selection continuously; the diamond constraint’s corners are what set coefficients exactly to zero. (James et al. 2021)\n\nAll three buy a large variance reduction for a little bias — the universal regularization bargain. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Model Selection & Dimension Reduction"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/model-selection-and-dimension-reduction.html#dimension-reduction-pcr-and-pls",
+    "href": "content/ml-track/model-selection-and-dimension-reduction.html#dimension-reduction-pcr-and-pls",
+    "title": "Model Selection & Dimension Reduction",
+    "section": "Dimension reduction: PCR and PLS",
+    "text": "Dimension reduction: PCR and PLS\nA different idea: don’t select among the p predictors — replace them with M&lt;p linear combinations and regress on those. (James et al. 2021)\n\nPrincipal-components regression (PCR). Take the first M principal components — the directions of maximal variance in X — and use them as predictors. PCR is unsupervised: it finds those directions without looking at Y, betting that high-variance directions in X are also the ones that predict Y. (James et al. 2021)\nPartial least squares (PLS). The supervised cousin: it builds directions that explain X and correlate with Y — the first PLS component weights each predictor by its correlation with Y. (James et al. 2021) PLS can do better when the predictive directions aren’t the highest-variance ones, though in practice it often matches PCR.\n\nFor both, standardise the predictors first (mean 0, SD 1) — otherwise a variable’s measurement scale, not its information, drives the directions. (James et al. 2021) (PCA itself returns in the unsupervised entry; here it’s a regression pre-processor.)\n\n\n\n\n\n\nNoteISL’s two datasets\n\n\n\n\nCredit (n=400, p=11): the size-penalising criteria disagree — BIC picks 4 variables, C_p/AIC pick 6, adjusted R^2 picks 7 — a clean illustration that BIC is the most parsimonious. (James et al. 2021)\nHitters (n=263, p=19, predicting baseball salary): cross-validated Lasso selects a 7-variable model with test MSE (\\approx 100,743) comparable to ridge’s — but far more interpretable for being sparse. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Model Selection & Dimension Reduction"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/model-selection-and-dimension-reduction.html#the-high-dimensional-world-pn",
+    "href": "content/ml-track/model-selection-and-dimension-reduction.html#the-high-dimensional-world-pn",
+    "title": "Model Selection & Dimension Reduction",
+    "section": "The high-dimensional world (p>n)",
+    "text": "The high-dimensional world (p&gt;n)\nModern data routinely has more predictors than observations — genomics, text, behavioural logs. (James et al. 2021) Here ordinary least squares breaks: (James et al. 2021)\n\nNo unique solution, and coefficient variance becomes infinite.\nIt fits the training data perfectly (\\text{RSS}=0) even when every predictor is pure noise — so training R^2=1 is meaningless, evidence of nothing.\nThe curse of dimensionality: test error tends to rise with each added feature unless it’s genuinely associated with Y; and extreme multicollinearity makes it impossible to say which variable is truly predictive (any one is a combination of the others). (James et al. 2021)\n\nIn this regime the less-flexible methods — Lasso, PCR, ridge — stop being optional and become the only way to get generalisable predictions. (James et al. 2021) And the hard truth: with p&gt;n you can predict, but you usually cannot identify which predictors matter — a humbling boundary that the causal cautions of this track underline.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Model Selection & Dimension Reduction"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/model-selection-and-dimension-reduction.html#common-pitfalls",
+    "href": "content/ml-track/model-selection-and-dimension-reduction.html#common-pitfalls",
+    "title": "Model Selection & Dimension Reduction",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nSelecting on training RSS/R^2. They fall monotonically and always pick the biggest model; use C_p/BIC/adjusted R^2 or cross-validation. (James et al. 2021)\nDoing selection outside the CV loop. Choosing predictors on the full data then cross-validating leaks information and flatters the estimate — selection is a choice inside the loop. (James et al. 2021)\nPCR/PLS without standardising. Unscaled predictors let the largest-scale variable dominate the components. (James et al. 2021)\nTrusting PCR when variance ≠ signal. High-variance directions need not predict Y; PLS or supervised methods may be needed. (James et al. 2021)\nReading R^2=1 in high dimensions as success. With p&gt;n a perfect fit is automatic and worthless. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Model Selection & Dimension Reduction"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/model-selection-and-dimension-reduction.html#from-the-sources",
+    "href": "content/ml-track/model-selection-and-dimension-reduction.html#from-the-sources",
+    "title": "Model Selection & Dimension Reduction",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nJames, Witten, Hastie & Tibshirani, ISL (Ch 6) — best-subset and forward/backward stepwise selection (backward needs n&gt;p); why training RSS/R^2 can’t choose; C_p, AIC, BIC, adjusted R^2 and CV; subset vs Ridge/Lasso shrinkage and the bias–variance rationale; PCR (unsupervised, max-variance directions) vs PLS (supervised), and standardising; the p&gt;n failure of OLS, the curse of dimensionality, multicollinearity, and meaningless R^2; the Credit (BIC 4 / C_p 6 / adj-R^2 7) and Hitters (Lasso 7-var, MSE \\approx 100,743) examples.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Model Selection & Dimension Reduction"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/model-selection-and-dimension-reduction.html#appendix-the-mathematics",
+    "href": "content/ml-track/model-selection-and-dimension-reduction.html#appendix-the-mathematics",
+    "title": "Model Selection & Dimension Reduction",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nWhy C_p estimates test error. Training RSS underestimates test error by roughly 2d\\hat\\sigma^2/n (one \\hat\\sigma^2 of optimism per fitted parameter). C_p=\\tfrac1n(\\text{RSS}+2d\\hat\\sigma^2) adds it back, making C_p an (approximately) unbiased estimate of test MSE. BIC replaces the 2 with \\log n, derived from a Bayesian model-evidence approximation, hence its stronger preference for small models and its consistency (it picks the true model as n\\to\\infty).\nPCR as constrained ridge. Let X=UDV^\\top (SVD). PCR keeps the first M right-singular directions v_1,\\dots,v_M and discards the rest entirely; ridge instead down-weights direction j by d_j^2/(d_j^2+\\lambda) — shrinking low-variance directions smoothly rather than truncating. PCR is the hard-threshold limit of ridge’s soft down-weighting along the principal axes — which is why both protect against the high-variance, low-eigenvalue directions that wreck OLS.\nWhy OLS dies at p&gt;n. X^\\top X is p\\times p but has rank \\le n&lt;p, so it is singular and (X^\\top X)^{-1} does not exist — infinitely many \\hat\\beta give \\text{RSS}=0. Regularization restores a unique solution by adding a full-rank penalty (\\lambda I for ridge) or restricting to M\\le\nn derived directions (PCR/PLS).",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Model Selection & Dimension Reduction"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/model-selection-and-dimension-reduction.html#connections",
+    "href": "content/ml-track/model-selection-and-dimension-reduction.html#connections",
+    "title": "Model Selection & Dimension Reduction",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: regularization (the shrinkage sibling), bias–variance (the shared rationale), cross-validation (how to choose), and multicollinearity/VIF.\nLeads to: beyond linearity (flexible forms, once you’ve chosen the features) and unsupervised learning (PCA in its own right).\nBridges back: prediction with p&gt;n can succeed while identification of which predictors matter fails — a caution sharpened in ML for social science.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Model Selection & Dimension Reduction"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/model-selection-and-dimension-reduction.html#study-with-notebooklm",
+    "href": "content/ml-track/model-selection-and-dimension-reduction.html#study-with-notebooklm",
+    "title": "Model Selection & Dimension Reduction",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Explain best-subset and forward/backward stepwise selection, and why training RSS and R² cannot pick the final model.”\n“Define C_p, AIC, BIC, and adjusted R², and explain why BIC tends to choose smaller models.”\n“Contrast subset selection, ridge, and lasso as ways to handle many predictors (discrete vs shrink vs sparse).”\n“Explain PCR and PLS: how are the directions chosen, how do they differ (unsupervised vs supervised), and why must predictors be standardised?”\n“Why does OLS fail when p &gt; n, and what makes regularization or dimension reduction essential in the high-dimensional setting?”",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Extending the Supervised Toolkit",
+      "Model Selection & Dimension Reduction"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html",
+    "href": "content/ml-track/unsupervised-learning.html",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "",
+    "text": "Everything so far had a target Y to predict. Unsupervised learning removes it: you have only the features X, and the goal is to discover structure — which variables move together (PCA), which observations group together (clustering). It is exploratory, powerful, and treacherous: with no right answer to check against, the methods will happily impose patterns on data that has none. The discipline is knowing the difference between finding structure and manufacturing it.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html#why-it-matters",
+    "href": "content/ml-track/unsupervised-learning.html#why-it-matters",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "Why it matters",
+    "text": "Why it matters\nUnsupervised learning is the data-reduction and pattern-discovery engine behind much of social science — constructing scales from many items, mapping high-dimensional survey or text data to a readable picture, finding latent typologies of people or places. (James et al. 2021) But it is harder and more subjective than supervised learning, precisely because there is no gold-standard Y to validate against. (James et al. 2021) Understanding both the power and the looseness is what separates honest exploration from clustering the noise.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html#the-unsupervised-setting",
+    "href": "content/ml-track/unsupervised-learning.html#the-unsupervised-setting",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "The unsupervised setting",
+    "text": "The unsupervised setting\nWhat changes without a label: (James et al. 2021)\n\nNo clear goal. The aim is to “discover interesting things,” not to predict a specific output — it is exploratory analysis, not estimation.\nNo validation. There is no cross-validation here: without a true answer, you can’t score a clustering as “right.” (James et al. 2021)\nSensitivity to choices. Results swing on the analyst’s decisions — scaling, distance metric, number of clusters — far more than supervised methods do. (James et al. 2021)\n\nTreat unsupervised output as a source of hypotheses, not conclusions.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html#principal-component-analysis",
+    "href": "content/ml-track/unsupervised-learning.html#principal-component-analysis",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "Principal component analysis",
+    "text": "Principal component analysis\nPCA finds a few derived variables — the principal components — that capture most of the information in many original features. (James et al. 2021)\n\nThe first principal component is the direction of maximal variance — geometrically, the line in p-space closest to the observations. (James et al. 2021)\nEach subsequent component has the largest variance subject to being orthogonal (uncorrelated) to the previous ones. (James et al. 2021)\nThe weights defining a component are its loadings; the projected observation values are its scores. (James et al. 2021)\nScaling is essential: standardise each variable to mean 0, SD 1 first, or the highest-variance variable (often just an artefact of its units) dominates the components. (James et al. 2021)\n\nHow many components to keep? The proportion of variance explained (PVE) per component, read off a scree plot, where you look for an “elbow” — the point past which extra components add little. (James et al. 2021) (This is PCR’s engine, now used in its own right for visualisation and reduction.)\n\n\n\n\n\n\nNotePCA in the wild\n\n\n\n\nUSArrests. PCA on US crime data: the first component loads roughly equally on Assault, Murder, and Rape — an overall “crime” axis — while the second isolates UrbanPop (urbanisation). Two interpretable axes from four correlated variables. (James et al. 2021)\nNCI60 gene expression (6{,}830 genes \\times 64 cancer cell lines). PCA compresses the thousands of genes into a 2-D picture in which cell lines of the same cancer type cluster together — high-dimensional structure made visible. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html#clustering-k-means",
+    "href": "content/ml-track/unsupervised-learning.html#clustering-k-means",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "Clustering: k-means",
+    "text": "Clustering: k-means\nClustering partitions observations into groups that are similar within and different between. (James et al. 2021) K-means fixes the number of clusters K and minimises within-cluster variation — the sum of squared Euclidean distances to each cluster’s centroid: (James et al. 2021)\n\nRandomly assign observations to K clusters.\nRepeat until assignments stop changing: (a) recompute each centroid (the vector of feature means); (b) reassign each point to its nearest centroid. (James et al. 2021)\n\nTwo cautions baked into the method: it finds a local optimum, so run it many times from different random starts (nstart) and keep the best; and you must choose K — typically via the elbow in a plot of within-cluster variation against K. (James et al. 2021)\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(1)\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(7.8, 3.9))\n\n# ---- Left: PCA via eigendecomposition of the covariance ----\ncov = np.array([[1.0, 0.8], [0.8, 1.0]])\nL = np.linalg.cholesky(cov)\nX = (rng.normal(size=(300, 2)) @ L.T) * np.array([1.0, 0.7])\nXc = X - X.mean(0)\nC = np.cov(Xc.T)\nvals, vecs = np.linalg.eigh(C)\norder = np.argsort(vals)[::-1]; vals, vecs = vals[order], vecs[:, order]\naxL.scatter(Xc[:, 0], Xc[:, 1], s=10, color=\"#c9ccd1\", alpha=0.7)\nfor k, c in zip(range(2), [\"#c0392b\", \"#d98a29\"]):\n    v = vecs[:, k] * np.sqrt(vals[k]) * 2.5\n    axL.annotate(\"\", xy=v, xytext=(0, 0), arrowprops=dict(arrowstyle=\"-|&gt;\", color=c, lw=2.4))\naxL.text(*(vecs[:, 0]*np.sqrt(vals[0])*2.7), \"PC1\", color=\"#c0392b\", fontsize=9)\naxL.text(*(vecs[:, 1]*np.sqrt(vals[1])*2.9), \"PC2\", color=\"#b9791f\", fontsize=9)\naxL.set_title(\"PCA: directions of maximal variance\")\naxL.set_xlabel(\"x₁\"); axL.set_ylabel(\"x₂\"); axL.set_aspect(\"equal\")\n\n# ---- Right: k-means by hand (assign / recompute) ----\ncenters0 = np.array([[-2.5, 0], [2.5, 0.5], [0, 3.0]])\npts = np.vstack([rng.normal(c, 0.7, (60, 2)) for c in centers0])\nK = 3\ncent = pts[rng.choice(len(pts), K, replace=False)]\nfor _ in range(20):\n    d = ((pts[:, None, :] - cent[None, :, :])**2).sum(2)\n    lab = d.argmin(1)\n    newc = np.array([pts[lab == k].mean(0) if np.any(lab == k) else cent[k] for k in range(K)])\n    if np.allclose(newc, cent): break\n    cent = newc\ncolors = [\"#1f3a5f\", \"#1f8a4c\", \"#b9791f\"]\nfor k in range(K):\n    axR.scatter(pts[lab == k, 0], pts[lab == k, 1], s=12, color=colors[k], alpha=0.7)\n    axR.scatter(*cent[k], marker=\"X\", s=140, color=colors[k], edgecolors=\"white\", lw=1.5, zorder=5)\naxR.set_title(\"k-means clusters (K=3) with centroids\")\naxR.set_xlabel(\"x₁\"); axR.set_ylabel(\"x₂\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Left: PCA on correlated 2-D data. The first principal component (red) points along the direction of maximal variance — the line closest to the cloud; the second (orange) is orthogonal, capturing the rest. PCA simply rotates to these axes. Right: k-means with K=3 on three blobs. Points are coloured by their assigned cluster and each centroid (✕) is the mean of its members; the algorithm iterates assign-and-recompute until the partition stabilises.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html#hierarchical-clustering",
+    "href": "content/ml-track/unsupervised-learning.html#hierarchical-clustering",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "Hierarchical clustering",
+    "text": "Hierarchical clustering\nHierarchical clustering avoids pre-specifying K. The agglomerative (bottom-up) version starts with every point its own cluster and repeatedly merges the two closest, recording the result as a dendrogram — a tree whose fusion heights show how dissimilar the merged groups were. (James et al. 2021) To measure distance between groups you pick a linkage: (James et al. 2021)\n\nComplete — the maximal pairwise dissimilarity (compact, balanced clusters).\nSingle — the minimal (can produce straggly, “trailing” chains).\nAverage — the mean pairwise dissimilarity.\nCentroid — distance between cluster centroids.\n\nThe payoff: one dendrogram yields any number of clusters — just cut the tree at a chosen height. (James et al. 2021) (Bruce & Bruce cluster the S&P 500: energy, financial, and consumer stocks fall into distinct subtrees — sectors emerging with no labels. (Bruce et al. 2020))",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html#practical-cautions",
+    "href": "content/ml-track/unsupervised-learning.html#practical-cautions",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "Practical cautions",
+    "text": "Practical cautions\nThe looseness is real, and ignoring it is how unsupervised learning misleads: (James et al. 2021)\n\nNo ground truth. You cannot validate a clustering the way you validate a classifier; treat results as hypotheses, not truths. (James et al. 2021)\nClustering the noise. Algorithms always return clusters — even when none exist. A tidy partition is not evidence of real subgroups. (James et al. 2021)\nParameter sensitivity. Scaling, the distance metric, K, and the linkage can change the answer drastically — report your choices and check robustness. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html#common-pitfalls",
+    "href": "content/ml-track/unsupervised-learning.html#common-pitfalls",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nPCA without standardising. Unscaled variables let measurement units, not information, define the components. (James et al. 2021)\nTaking clusters as real subgroups. k-means and hierarchical clustering partition any data; verify structure exists before interpreting it. (James et al. 2021)\nOne run of k-means. It converges to a local optimum; use many random restarts. (James et al. 2021)\nOver-reading the dendrogram. Only fusion heights (not horizontal proximity) encode similarity, and the linkage choice reshapes the tree. (James et al. 2021)\nTreating components or clusters as causal. They are descriptive structure in X — never effects. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html#from-the-sources",
+    "href": "content/ml-track/unsupervised-learning.html#from-the-sources",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nJames, Witten, Hastie & Tibshirani, ISL (Ch 12) — the unsupervised setting (no Y, hard to validate, subjective); PCA (first PC = max-variance/closest line, orthogonal components, loadings & scores, PVE & scree/elbow, mandatory scaling) with USArrests and NCI60; k-means (minimise within-cluster sum of squares, the iterate-assign-recompute algorithm, local optima/nstart, elbow for K); hierarchical clustering (agglomerative, dendrogram, linkage — complete/single/average/centroid, cut the tree); the cautions (no ground truth, clustering noise, parameter sensitivity).\nBruce & Bruce — applied clustering/dimension reduction, the S&P 500 hierarchical example.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html#appendix-the-mathematics",
+    "href": "content/ml-track/unsupervised-learning.html#appendix-the-mathematics",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nPCA as an eigenproblem. With standardised data X (columns mean 0, SD 1) and sample covariance C=\\tfrac1n X^\\top X, the loadings of the m-th component are the eigenvector \\phi_m of C with the m-th largest eigenvalue \\lambda_m; the scores are z_{im}=\\phi_m^\\top x_i. Because \\phi_m maximises \\operatorname{Var}(X\\phi)=\\phi^\\top C\\phi subject to \\|\\phi\\|=1 and orthogonality, the first component is the max-variance direction, and \\lambda_m is the variance along it. The PVE of component m is \\lambda_m/\\sum_k\\lambda_k. (Equivalently, via the SVD X=UDV^\\top: loadings are columns of V, scores are UD, and \\lambda_m=d_m^2/n.)\nk-means minimises within-cluster sum of squares. The objective is \n\\min_{C_1,\\dots,C_K}\\ \\sum_{k=1}^K \\sum_{i\\in C_k}\\|x_i-\\mu_k\\|^2,\\qquad \\mu_k=\\tfrac1{|C_k|}\\sum_{i\\in C_k}x_i .\n The two-step algorithm is coordinate descent: step (a) fixes assignments and the optimal centroid is the cluster mean; step (b) fixes centroids and the optimal assignment is the nearest centroid. Each step weakly decreases the objective, so it converges — but to a local minimum depending on the initialisation, hence multiple restarts.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html#connections",
+    "href": "content/ml-track/unsupervised-learning.html#connections",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: exploratory data analysis (the exploratory spirit), correlation/covariance (what PCA decomposes), and PCR (PCA as a regression pre-processor).\nLeads to: ML for social science — using PCA/clustering for measurement and typology-building, with discipline.\nBridges back: structure in X is descriptive — a principal component is not a cause, and a cluster is not a kind; the causal questions need a different toolkit.",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
+    ]
+  },
+  {
+    "objectID": "content/ml-track/unsupervised-learning.html#study-with-notebooklm",
+    "href": "content/ml-track/unsupervised-learning.html#study-with-notebooklm",
+    "title": "Unsupervised Learning: PCA & Clustering",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Why is unsupervised learning harder and more subjective than supervised learning (no Y, no validation, sensitivity to choices)?”\n“Explain PCA: the first principal component as maximal variance, loadings vs scores, the proportion of variance explained and the scree plot, and why scaling matters. Use USArrests.”\n“Describe the k-means algorithm and objective (within-cluster sum of squares), why it needs multiple restarts, and how to choose K.”\n“Explain hierarchical clustering: the dendrogram, linkage methods, and cutting the tree — and why it needn’t pre-specify K.”\n“What are the practical cautions of clustering (no ground truth, ‘clustering the noise’, parameter sensitivity)?”",
+    "crumbs": [
+      "Home",
+      "ML Track (separate)",
+      "Unsupervised Learning & the Social-Science Lens",
+      "Unsupervised Learning: PCA & Clustering"
     ]
   }
 ]
