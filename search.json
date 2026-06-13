@@ -647,6 +647,318 @@
     ]
   },
   {
+    "objectID": "content/dataframes/the-grammar-of-graphics.html",
+    "href": "content/dataframes/the-grammar-of-graphics.html",
+    "title": "The Grammar of Graphics",
+    "section": "",
+    "text": "Most people think of plots as a menu — bar chart, scatter, line — and pick one. R for Data Science teaches something deeper and more generative: every plot is a mapping from variables in a tidy table to visual properties (position, colour, size, shape), assembled from interchangeable layers. Learn the grammar and you stop memorising chart types and start composing exactly the picture your question needs.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Graphics"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-grammar-of-graphics.html#why-it-matters",
+    "href": "content/dataframes/the-grammar-of-graphics.html#why-it-matters",
+    "title": "The Grammar of Graphics",
+    "section": "Why it matters",
+    "text": "Why it matters\nVisualisation is the step that can surprise you — the one tool that shows you what you didn’t expect. (Wickham et al. 2023) But a menu of fixed chart types is a cage: it can only draw the pictures someone pre-built. ggplot2’s grammar of graphics replaces the menu with a small set of composable pieces, so the space of plots you can build is effectively unlimited — and, more importantly, each plot becomes a precise statement about which variable controls which visual channel. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Graphics"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-grammar-of-graphics.html#a-plot-is-a-mapping",
+    "href": "content/dataframes/the-grammar-of-graphics.html#a-plot-is-a-mapping",
+    "title": "The Grammar of Graphics",
+    "section": "A plot is a mapping",
+    "text": "A plot is a mapping\nThe core mental shift: a plot is a mapping of variables to aesthetics. An aesthetic is any visual property of the marks on the page — their x-position, y-position, colour, size, shape, transparency. You build a graph by saying which column drives which aesthetic. (Wickham et al. 2023)\nlibrary(tidyverse)\n\nggplot(data = mpg) +\n  geom_point(mapping = aes(x = displ, y = hwy, color = class))\nRead it as a sentence: take mpg, add a layer of points, and map engine size to the x-axis, highway mileage to the y-axis, and vehicle class to colour. Move class from color to size and the same data tells a different visual story — the mapping is the choice, not the chart type. (Wickham et al. 2023)\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(7)\nn = 60\nx = rng.uniform(1.5, 6.5, n)\ngrp = rng.integers(0, 3, n)                 # a categorical third variable\ny = 35 - 3.0 * x + grp * 2.5 + rng.normal(0, 1.5, n)\n\npalette = np.array([\"#1f3a5f\", \"#3f8f6f\", \"#9a6a2f\"])\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(8.8, 3.6))\n\n# map group -&gt; COLOR\naxL.scatter(x, y, c=palette[grp], s=34, alpha=0.85)\naxL.set_title(\"group → color\", fontsize=10.5, fontweight=\"bold\", color=\"#1f3a5f\")\naxL.set_xlabel(\"engine size\"); axL.set_ylabel(\"mileage\")\n\n# map group -&gt; SIZE\naxR.scatter(x, y, s=(grp + 1) * 45, facecolor=\"none\", edgecolor=\"#1f3a5f\", lw=1.4, alpha=0.85)\naxR.set_title(\"group → size\", fontsize=10.5, fontweight=\"bold\", color=\"#9a6a2f\")\naxR.set_xlabel(\"engine size\"); axR.set_ylabel(\"mileage\")\n\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A plot as a mapping from a variable to an aesthetic. Same x–y points; the third variable (group) is mapped to COLOR on the left and to SIZE on the right. You don’t pick a ‘chart type’ — you choose which column drives which visual channel. ggplot then handles scaling: assigning each value of the variable its own level of the aesthetic automatically.\n\n\n\n\n\nOnce you map a variable to an aesthetic, ggplot2 handles scaling for you — it “automatically assigns a unique level of the aesthetic (e.g. a specific shade of blue) to each unique value of the variable,” and draws the legend. (Wickham et al. 2023) You declare the mapping; the system works out the colours, sizes, and key.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Graphics"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-grammar-of-graphics.html#layers-all-the-way-down",
+    "href": "content/dataframes/the-grammar-of-graphics.html#layers-all-the-way-down",
+    "title": "The Grammar of Graphics",
+    "section": "Layers all the way down",
+    "text": "Layers all the way down\nThe grammar’s reach comes from its claim that the pieces are universal. The authors state it precisely: “you can uniquely describe any plot as a combination of a dataset, a geom, a set of mappings, a stat, a position adjustment, a coordinate system, and a faceting scheme.” (Wickham et al. 2023)\n\ngeom — the kind of mark (points, lines, bars, boxplots).\nmappings — which variable drives which aesthetic.\nstat — a transformation applied before drawing (a histogram’s geom is a bar, but its stat bins and counts).\nposition, coordinate system, facets — how marks are arranged, the space they live in, and how the plot is split into small multiples by a variable.\n\nYou add layers with +, the visual cousin of the pipe: each layer composes onto the last, so a complex figure is built up from simple, legible parts rather than configured through one monstrous function call. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Graphics"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-grammar-of-graphics.html#common-pitfalls",
+    "href": "content/dataframes/the-grammar-of-graphics.html#common-pitfalls",
+    "title": "The Grammar of Graphics",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nSetting an aesthetic when you meant to map it. color = \"blue\" inside aes() doesn’t paint the points blue — it creates a constant variable called “blue” and maps it, producing a red legend titled “blue.” To set a constant, put it outside aes(). Mapping vs setting is the classic confusion. (Wickham et al. 2023)\nMapping a continuous variable to a discrete aesthetic (e.g. shape), which ggplot can’t sensibly do — match the variable’s type to the aesthetic’s. (Wickham et al. 2023)\nOverloading aesthetics. Driving colour and size and shape from three different variables at once usually buries the signal. Each aesthetic is a channel; too many channels is noise. (Wickham et al. 2023)\nReaching for a chart type instead of a mapping. Ask “which variable should control position? colour?” — not “should this be a bar or a line?” The mapping is the real decision. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Graphics"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-grammar-of-graphics.html#from-the-sources",
+    "href": "content/dataframes/the-grammar-of-graphics.html#from-the-sources",
+    "title": "The Grammar of Graphics",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWickham & Grolemund, R for Data Science — ggplot2 as the grammar of graphics; a plot as a mapping of variables to aesthetics (position, colour, size, shape) via aes(); scaling as the automatic assignment of a unique aesthetic level to each value, plus the legend; and the claim that any plot is “a combination of a dataset, a geom, a set of mappings, a stat, a position adjustment, a coordinate system, and a faceting scheme,” composed in layers with +.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Graphics"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-grammar-of-graphics.html#connections",
+    "href": "content/dataframes/the-grammar-of-graphics.html#connections",
+    "title": "The Grammar of Graphics",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: the workflow (the visualize station) and tidy data (aesthetics map columns, so the table must be tidy).\nPairs with: exploratory data analysis — the statistical purpose of the plots this grammar builds.\nEchoes: the grammar of manipulation — same composable, layer-by-layer philosophy, applied to pictures instead of tables.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Graphics"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-grammar-of-graphics.html#study-with-notebooklm",
+    "href": "content/dataframes/the-grammar-of-graphics.html#study-with-notebooklm",
+    "title": "The Grammar of Graphics",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Explain the ‘grammar of graphics’: what does it mean to say a plot is a mapping of variables to aesthetics?”\n“What are the seven components Wickham & Grolemund say uniquely describe any plot, and what does each contribute?”\n“What is the difference between setting and mapping an aesthetic, and why does color = ‘blue’ inside aes() misbehave?”\n“How does ggplot2’s scaling work once a variable is mapped to an aesthetic like color?”",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Graphics"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/relational-data-and-joins.html",
+    "href": "content/dataframes/relational-data-and-joins.html",
+    "title": "Relational Data: Thinking Across Tables",
+    "section": "",
+    "text": "Data almost never arrives as a single tidy table. It comes as several — survey responses in one, respondent demographics in another, region codes in a third — linked by shared identifiers. Thinking relationally means seeing those keys and knowing how to join on them. Get joins right and scattered tables become one analysis-ready frame; get them wrong and you silently drop or duplicate observations.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Relational Data: Thinking Across Tables"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/relational-data-and-joins.html#why-it-matters",
+    "href": "content/dataframes/relational-data-and-joins.html#why-it-matters",
+    "title": "Relational Data: Thinking Across Tables",
+    "section": "Why it matters",
+    "text": "Why it matters\nThe transform station usually begins by assembling the data, because the information you need is spread across tables — “data analysis rarely involves a single data frame.” (Wickham et al. 2023) A flight has a carrier code; the carrier’s name lives in a separate airlines table. To plot delay by airline name, you must join them. The relational mindset — keys connecting tables — is the difference between an analyst who can only use pre-merged data and one who can build the dataset the question actually requires.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Relational Data: Thinking Across Tables"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/relational-data-and-joins.html#keys-how-tables-connect",
+    "href": "content/dataframes/relational-data-and-joins.html#keys-how-tables-connect",
+    "title": "Relational Data: Thinking Across Tables",
+    "section": "Keys: how tables connect",
+    "text": "Keys: how tables connect\nTables are linked by keys — variables that identify observations: (Wickham et al. 2023)\n\nA primary key uniquely identifies each observation in its own table (e.g. carrier code in the airlines table — one row per carrier).\nA foreign key is that same variable appearing in another table, where it points back to the first (e.g. carrier in the flights table — many rows per carrier).\n\nA primary key in one table matched to a foreign key in another is a relation. Verifying that your primary key really is unique — exactly one row per value — is the unglamorous check that prevents silent duplication later. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Relational Data: Thinking Across Tables"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/relational-data-and-joins.html#joins-combining-on-a-key",
+    "href": "content/dataframes/relational-data-and-joins.html#joins-combining-on-a-key",
+    "title": "Relational Data: Thinking Across Tables",
+    "section": "Joins: combining on a key",
+    "text": "Joins: combining on a key\nA join uses the key to bring columns from one table into another, matching rows where the keys agree. R for Data Science pictures a match as a dot at the intersection of a row from each table. (Wickham et al. 2023) The mutating joins add variables from one table to another, and they differ only in which unmatched rows they keep: (Wickham et al. 2023)\n\ninner_join() — keep only rows that match in both tables. Unmatched rows are dropped from both.\nleft_join() — keep all rows of the left table, filling NA where the right has no match.\nright_join() — keep all rows of the right table.\nfull_join() — keep all rows of both, NA wherever either side is missing.\n\n\n\nShow the figure code\nimport matplotlib.pyplot as plt\n\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(8.8, 3.4))\n\ndef draw_join(ax, title, rows, title_color):\n    ax.set_title(title, fontsize=10.5, fontweight=\"bold\", color=title_color)\n    ax.axis(\"off\"); ax.set_xlim(0, 1); ax.set_ylim(0, 1)\n    ax.text(0.28, 0.92, \"key  val_x  val_y\", fontsize=8, style=\"italic\", ha=\"center\")\n    for i, (k, vx, vy, present) in enumerate(rows):\n        y = 0.76 - i * 0.18\n        color = \"#e7f0e9\" if present else \"#f0e0e0\"\n        ax.add_patch(plt.Rectangle((0.10, y), 0.55, 0.14, fc=color, ec=\"#1f3a5f\", lw=1.1))\n        ax.text(0.37, y + 0.07, f\"{k}      {vx}        {vy}\", ha=\"center\", va=\"center\", fontsize=9)\n\n# inner: only keys 1,2\ndraw_join(axL, \"inner_join (matches only)\",\n          [(\"1\", \"x1\", \"y1\", True), (\"2\", \"x2\", \"y2\", True)], \"#1f3a5f\")\naxL.text(0.37, 0.04, \"rows 3 and 4 dropped\", ha=\"center\", fontsize=8, color=\"#9a6a2f\", style=\"italic\")\n\n# left: keep all of x (1,2,3), NA for 3\ndraw_join(axR, \"left_join (keep all of x)\",\n          [(\"1\", \"x1\", \"y1\", True), (\"2\", \"x2\", \"y2\", True), (\"3\", \"x3\", \"NA\", False)], \"#3f8f6f\")\naxR.text(0.37, 0.04, \"key 3 kept, y filled NA\", ha=\"center\", fontsize=8, color=\"#3f8f6f\", style=\"italic\")\n\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Two joins on a shared key. Left table x (keys 1,2,3) and right table y (keys 1,2,4). An INNER join keeps only keys present in both (1,2) — row 3 and row 4 are dropped. A LEFT join keeps every row of x (1,2,3), filling NA where y has no match (key 3); it never loses an original observation, which is why it’s the recommended default.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Relational Data: Thinking Across Tables"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/relational-data-and-joins.html#why-left_join-is-the-default",
+    "href": "content/dataframes/relational-data-and-joins.html#why-left_join-is-the-default",
+    "title": "Relational Data: Thinking Across Tables",
+    "section": "Why left_join is the default",
+    "text": "Why left_join is the default\nWickham & Grolemund give a clear rule of thumb: the left join should be your default. (Wickham et al. 2023) The reason is conservatism — it “preserves all the original observations” in your primary table even when the lookup table has no match. You started with a table of flights; a left join onto airline names keeps every flight, attaching the name where it exists and NA where it doesn’t. An inner join, by contrast, would silently delete any flight whose carrier code was missing from the airlines table — quietly changing your sample. When the left table is your analysis sample, left_join is what keeps that sample intact. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Relational Data: Thinking Across Tables"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/relational-data-and-joins.html#common-pitfalls",
+    "href": "content/dataframes/relational-data-and-joins.html#common-pitfalls",
+    "title": "Relational Data: Thinking Across Tables",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nUsing inner_join as a habit. It drops unmatched rows from both sides; if the left table is your sample, that’s silent, non-random attrition. Default to left_join and check what didn’t match. (Wickham et al. 2023)\nA non-unique “primary” key. If the key repeats in the table you thought was one-row-per-key, the join duplicates rows — your dataset quietly grows and every later count is wrong. Verify uniqueness first. (Wickham et al. 2023)\nMismatched key types or codings. \"01\" ≠ 1, \"USA\" ≠ \"US\"; keys must match exactly to join. Reconcile types and coding before joining. (Wickham et al. 2023)\nNot inspecting NAs after a left join. The NAs a left join introduces are information — they tell you which rows had no match. Ignoring them hides a data problem. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Relational Data: Thinking Across Tables"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/relational-data-and-joins.html#from-the-sources",
+    "href": "content/dataframes/relational-data-and-joins.html#from-the-sources",
+    "title": "Relational Data: Thinking Across Tables",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWickham & Grolemund, R for Data Science — relational data because “data analysis rarely involves a single data frame”; keys (primary uniquely identifies an observation in its own table; foreign points to it from another); a match pictured as a dot at the intersection; the mutating joins (inner_join keeps only matches; left_join/right_join/full_join keep unmatched rows from one or both sides); and the recommendation that left_join be the default because it preserves all original observations.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Relational Data: Thinking Across Tables"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/relational-data-and-joins.html#connections",
+    "href": "content/dataframes/relational-data-and-joins.html#connections",
+    "title": "Relational Data: Thinking Across Tables",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: tidy data (each table tidy, linked by keys) and the grammar of manipulation (joins are verbs that act across tables).\nPairs with: the workflow — assembling tables is usually the first move of transform.\nUnderwrites: any analysis whose variables come from multiple sources — merging treatment assignment, outcomes, and covariates into the single tidy frame a model or causal design requires.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Relational Data: Thinking Across Tables"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/relational-data-and-joins.html#study-with-notebooklm",
+    "href": "content/dataframes/relational-data-and-joins.html#study-with-notebooklm",
+    "title": "Relational Data: Thinking Across Tables",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Define primary key and foreign key, and explain what a ‘relation’ between two tables is.”\n“Compare inner_join, left_join, right_join, and full_join in terms of which unmatched rows each keeps.”\n“Why do Wickham & Grolemund recommend left_join as the default join?”\n“What goes wrong when a ‘primary’ key isn’t actually unique, and why does it corrupt later counts?”",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Relational Data: Thinking Across Tables"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/grammar-of-data-manipulation.html",
+    "href": "content/dataframes/grammar-of-data-manipulation.html",
+    "title": "The Grammar of Data Manipulation",
+    "section": "",
+    "text": "Once data is tidy, nearly everything you do to it is one of a few verbs: pick rows, pick columns, make new columns, sort, summarise — and, crucially, do any of these group-by-group. Chain them with the pipe and a transformation stops being a tangle of nested functions and becomes a readable sequence of actions. This is the grammar that turns “wrangling” from a fight into a sentence.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Data Manipulation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/grammar-of-data-manipulation.html#why-it-matters",
+    "href": "content/dataframes/grammar-of-data-manipulation.html#why-it-matters",
+    "title": "The Grammar of Data Manipulation",
+    "section": "Why it matters",
+    "text": "Why it matters\nThe transform station of the workflow is where you spend much of your day, and without structure it degenerates into bespoke, unreadable code. Wickham & Grolemund’s dplyr imposes a grammar: a small, consistent set of verbs that each take a data frame and return a data frame, so they compose without friction. (Wickham et al. 2023) Learn five verbs plus one grouping operator and you can express the overwhelming majority of real data transformations.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Data Manipulation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/grammar-of-data-manipulation.html#the-verbs",
+    "href": "content/dataframes/grammar-of-data-manipulation.html#the-verbs",
+    "title": "The Grammar of Data Manipulation",
+    "section": "The verbs",
+    "text": "The verbs\nEach verb does one thing, takes a data frame as its first argument, and returns a modified data frame: (Wickham et al. 2023)\n\n\n\nVerb\nWhat it does\n\n\n\n\nfilter()\nPick observations (rows) by their values\n\n\nselect()\nPick variables (columns) by their names\n\n\nmutate()\nCreate new variables as functions of existing ones\n\n\narrange()\nReorder the rows\n\n\nsummarize()\nCollapse many values down to a single summary\n\n\n\nBecause each verb’s input and output are the same kind of object — a data frame — they snap together like LEGO. The connective tissue is the pipe.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Data Manipulation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/grammar-of-data-manipulation.html#the-pipe-code-that-reads-as-then",
+    "href": "content/dataframes/grammar-of-data-manipulation.html#the-pipe-code-that-reads-as-then",
+    "title": "The Grammar of Data Manipulation",
+    "section": "The pipe: code that reads as then",
+    "text": "The pipe: code that reads as then\nThe pipe, written |&gt; and pronounced “then,” takes the result on its left and feeds it as the first argument on its right. (Wickham et al. 2023) It lets you write a transformation as the sequence of actions you’d say out loud:\nlibrary(tidyverse)\n\nflights |&gt;\n  filter(dest == \"IAH\") |&gt;            # keep flights to Houston, THEN\n  group_by(year, month, day) |&gt;       # for each day, THEN\n  summarize(avg_delay = mean(arr_delay, na.rm = TRUE)) |&gt;  # average the delay, THEN\n  arrange(desc(avg_delay))            # sort worst-first\nRead it top to bottom: take flights, then keep Houston-bound ones, then group by day, then average the delay, then sort. The authors stress that the pipe “focuses on verbs, not nouns,” making code “easier for a human to consume.” (Wickham et al. 2023)\n\n\n\n\n\n\nNoteTwo analogies for why the pipe wins\n\n\n\n\nThe Dagwood-sandwich problem. Without the pipe, the same logic nests inside-out: arrange(summarize(group_by(filter(flights, ...), ...), ...), ...). You must read it from the innermost call outward — a towering, unreadable sandwich. The pipe flattens it into reading order. (Wickham et al. 2023)\nLittle Bunny Foo Foo. Wickham & Grolemund tell the children’s rhyme to make the point: a story of hopping, then scooping up the field mice, then bopping them on the head reads naturally as a sequence — but written as nested functions (bop(scoop(hop(foo_foo)))) or as a clutter of named intermediates (foo_foo_1, foo_foo_2, …) it becomes hard to follow. The pipe tells the story in order and spares you inventing “unimportant names” for intermediate objects. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Data Manipulation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/grammar-of-data-manipulation.html#splitapplycombine",
+    "href": "content/dataframes/grammar-of-data-manipulation.html#splitapplycombine",
+    "title": "The Grammar of Data Manipulation",
+    "section": "Split–apply–combine",
+    "text": "Split–apply–combine\nThe most powerful move is summarize() paired with group_by(). Alone, group_by() changes nothing visible — it just changes the scope of the verbs that follow, from “the whole table” to “group-by-group.” (Wickham et al. 2023) That single switch implements the split–apply–combine strategy:\n\n\nShow the figure code\nimport matplotlib.pyplot as plt\n\nfig, axes = plt.subplots(1, 3, figsize=(8.8, 3.2))\nfor ax in axes:\n    ax.axis(\"off\"); ax.set_xlim(0, 1); ax.set_ylim(0, 1)\n\ndef cell(ax, x, y, text, color):\n    ax.add_patch(plt.Rectangle((x, y), 0.26, 0.13, fc=color, ec=\"#1f3a5f\", lw=1.1))\n    ax.text(x + 0.13, y + 0.065, text, ha=\"center\", va=\"center\", fontsize=8.5)\n\n# SPLIT\naxes[0].set_title(\"split\", fontsize=11, fontweight=\"bold\", color=\"#1f3a5f\")\nfor i, (g, v, c) in enumerate([(\"A\", 3, \"#dce7f0\"), (\"A\", 5, \"#dce7f0\"),\n                               (\"B\", 8, \"#e7f0e9\"), (\"B\", 6, \"#e7f0e9\")]):\n    cell(axes[0], 0.36, 0.78 - i*0.17, f\"{g}   {v}\", c)\naxes[0].text(0.49, 0.97, \"key  value\", ha=\"center\", fontsize=8, style=\"italic\")\n\n# APPLY\naxes[1].set_title(\"apply (mean)\", fontsize=11, fontweight=\"bold\", color=\"#3f8f6f\")\ncell(axes[1], 0.36, 0.62, \"A → mean\", \"#dce7f0\")\ncell(axes[1], 0.36, 0.30, \"B → mean\", \"#e7f0e9\")\n\n# COMBINE\naxes[2].set_title(\"combine\", fontsize=11, fontweight=\"bold\", color=\"#9a6a2f\")\ncell(axes[2], 0.36, 0.58, \"A   4.0\", \"#dce7f0\")\ncell(axes[2], 0.36, 0.41, \"B   7.0\", \"#e7f0e9\")\naxes[2].text(0.49, 0.78, \"one row per group\", ha=\"center\", fontsize=8, style=\"italic\")\n\n# arrows between panels\nfor x in (0.0, 0.5):\n    fig.add_artist(plt.Line2D([0.33 + x*0.0, 0.36 + x*0.0], [0.5, 0.5], lw=0))\nfig.text(0.345, 0.5, \"→\", fontsize=20, ha=\"center\", va=\"center\", color=\"#5a6b7a\")\nfig.text(0.675, 0.5, \"→\", fontsize=20, ha=\"center\", va=\"center\", color=\"#5a6b7a\")\n\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Split–apply–combine, the engine behind group_by() |&gt; summarize(). SPLIT the tidy table into groups by a key (here, group A/B); APPLY a summary (the mean) within each group; COMBINE the per-group answers back into one tidy table — one row per group. group_by() sets the scope; summarize() does the collapsing.\n\n\n\n\n\nSplit the data into groups by a key, apply a function (a summary) to each group, and combine the results back into a single data frame — one row per group. (Wickham et al. 2023) This one pattern answers an enormous share of real questions: average delay per airline, total sales per region, recidivism per prior-conviction count. It is the dataframe-native expression of “compare groups,” and it reappears the moment you reach comparing groups in inference.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Data Manipulation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/grammar-of-data-manipulation.html#common-pitfalls",
+    "href": "content/dataframes/grammar-of-data-manipulation.html#common-pitfalls",
+    "title": "The Grammar of Data Manipulation",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nForgetting na.rm in a summary. A single missing value makes mean() return NA; summaries silently collapse to nothing. Decide what missing means before you aggregate. (Wickham et al. 2023)\nLeaving data grouped. A group_by() persists; verbs downstream keep operating per-group when you meant the whole table. ungroup() when the grouped work is done. (Wickham et al. 2023)\nmutate vs summarize confusion. mutate() keeps every row (adds a column); summarize() collapses rows (one per group). Reach for the wrong one and your table is the wrong length. (Wickham et al. 2023)\nNesting instead of piping. The Dagwood sandwich is still legal R; it’s just unreadable. If you’re counting parentheses, reach for the pipe. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Data Manipulation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/grammar-of-data-manipulation.html#from-the-sources",
+    "href": "content/dataframes/grammar-of-data-manipulation.html#from-the-sources",
+    "title": "The Grammar of Data Manipulation",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWickham & Grolemund, R for Data Science — the dplyr grammar and its core verbs (filter, select, mutate, arrange, summarize); group_by() as a change of scope and the split–apply–combine strategy; the pipe (|&gt;, “then”) as code that “focuses on verbs, not nouns”; the Dagwood-sandwich problem of nested calls and the Little Bunny Foo Foo analogy for avoiding “unimportant names” for intermediate objects.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Data Manipulation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/grammar-of-data-manipulation.html#connections",
+    "href": "content/dataframes/grammar-of-data-manipulation.html#connections",
+    "title": "The Grammar of Data Manipulation",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: tidy data (the verbs assume one row per observation) and the workflow (this is the transform station).\nLeads to: the grammar of graphics (the same composable, layered thinking, applied to plots) and relational joins (verbs across tables).\nReappears as: comparing groups and every per-group summary in applied work — split–apply–combine is “compare groups” in dataframe form.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Data Manipulation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/grammar-of-data-manipulation.html#study-with-notebooklm",
+    "href": "content/dataframes/grammar-of-data-manipulation.html#study-with-notebooklm",
+    "title": "The Grammar of Data Manipulation",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“List the core dplyr verbs and what each does, and explain how the pipe lets them read as a sequence of actions.”\n“Explain split–apply–combine and the role of group_by() in changing the scope of summarize().”\n“What are the Dagwood-sandwich and Little Bunny Foo Foo analogies, and what do they teach about readable code?”\n“What is the difference between mutate() and summarize(), and when does each change the number of rows?”",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Grammar of Data Manipulation"
+    ]
+  },
+  {
     "objectID": "content/06-field-realities/research-integrity-and-data-ethics.html",
     "href": "content/06-field-realities/research-integrity-and-data-ethics.html",
     "title": "Research Integrity & Data Ethics",
@@ -12172,6 +12484,282 @@
       "VI · Doing Research in the World",
       "The Integrity of Evidence",
       "The Tyranny of Metrics"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/index.html",
+    "href": "content/dataframes/index.html",
+    "title": "Thinking in Dataframes (R)",
+    "section": "",
+    "text": "Every other Part of this book is about a method — a way of turning data into a claim. This track is about the step that comes before any method and never appears in the results section: getting the data into a shape you can think with. Experienced researchers spend the majority of their time here, and the ones who are fluent share a particular mental model — the dataframe as the unit of thought, and a small grammar of operations on it. This track teaches that model, following Hadley Wickham & Garrett Grolemund’s R for Data Science. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Thinking in Dataframes (R)"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/index.html#why-a-separate-track",
+    "href": "content/dataframes/index.html#why-a-separate-track",
+    "title": "Thinking in Dataframes (R)",
+    "section": "Why a separate track",
+    "text": "Why a separate track\nThe dataframe craft is orthogonal to the statistical ascent. Probability, inference, regression, and causal inference are a rising arc of ideas; tidying and transforming data is a skill you apply at every rung of that arc. Folding it into the spine would interrupt the argument; leaving it out would pretend the data arrives analysis-ready. So it lives here — a companion you reach for the moment you face a real, messy table. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Thinking in Dataframes (R)"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/index.html#the-whole-game",
+    "href": "content/dataframes/index.html#the-whole-game",
+    "title": "Thinking in Dataframes (R)",
+    "section": "The whole game",
+    "text": "The whole game\nR for Data Science organises everything around one picture of the data-science workflow — import → tidy → (transform ⇄ visualise ⇄ model) → communicate. (Wickham et al. 2023) Each entry below takes one piece of that picture and shows the thinking it demands.\n\n\n\nEntry\nStatus\nCore source\n\n\n\n\nThe data-science workflow: the whole game\n✅ Written\nWickham & Grolemund\n\n\nTidy data: one row, one observation\n✅ Written\nWickham & Grolemund\n\n\nThe grammar of data manipulation\n✅ Written\nWickham & Grolemund\n\n\nThe grammar of graphics\n✅ Written\nWickham & Grolemund\n\n\nRelational data: thinking across tables\n✅ Written\nWickham & Grolemund",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Thinking in Dataframes (R)"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/index.html#the-bridge-to-the-rest-of-the-book",
+    "href": "content/dataframes/index.html#the-bridge-to-the-rest-of-the-book",
+    "title": "Thinking in Dataframes (R)",
+    "section": "The bridge to the rest of the book",
+    "text": "The bridge to the rest of the book\nTidy data is what every model in this encyclopedia silently assumes: a regression expects one row per observation and one column per variable; an exploratory plot is a mapping from tidy columns to visual properties; a causal design lives or dies on whether treatment, outcome, and covariates are cleanly separated columns. Learn to think in dataframes and the rest of the book gets a great deal easier. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Thinking in Dataframes (R)"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-data-science-workflow.html",
+    "href": "content/dataframes/the-data-science-workflow.html",
+    "title": "The Data-Science Workflow: The Whole Game",
+    "section": "",
+    "text": "Before any single technique, R for Data Science hands you a map of the whole game: a repeatable pipeline that turns raw data into “understanding, insight, and knowledge.” Every method elsewhere in this book lives at one station on that map. Knowing the map keeps you oriented — you always know which step you’re on, which you’ve skipped, and why the analysis feels stuck.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Data-Science Workflow: The Whole Game"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-data-science-workflow.html#why-it-matters",
+    "href": "content/dataframes/the-data-science-workflow.html#why-it-matters",
+    "title": "The Data-Science Workflow: The Whole Game",
+    "section": "Why it matters",
+    "text": "Why it matters\nBeginners imagine data science as “run the model.” Practitioners know the model is a small, late step sitting on a mountain of unglamorous work that decides whether it means anything. Wickham & Grolemund’s contribution is to make that mountain legible — to give the whole process a shape you can hold in your head and return to. (Wickham et al. 2023) Internalise it and you stop thrashing: a confusing result becomes “I’m stuck at tidy,” not “data science is hard.”",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Data-Science Workflow: The Whole Game"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-data-science-workflow.html#the-map",
+    "href": "content/dataframes/the-data-science-workflow.html#the-map",
+    "title": "The Data-Science Workflow: The Whole Game",
+    "section": "The map",
+    "text": "The map\nThe book organises everything around a single diagram of the process. (Wickham et al. 2023)\n\n\nShow the figure code\nimport matplotlib.pyplot as plt\nfrom matplotlib.patches import FancyBboxPatch\n\nfig, ax = plt.subplots(figsize=(8.2, 3.4))\n\ndef box(x, y, w, h, label, color):\n    ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle=\"round,pad=0.02,rounding_size=0.04\",\n                                 fc=color, ec=\"#1f3a5f\", lw=1.4, zorder=2))\n    ax.text(x + w/2, y + h/2, label, ha=\"center\", va=\"center\",\n            fontsize=10.5, fontweight=\"bold\", color=\"#1c2733\", zorder=3)\n\ndef arrow(x1, y1, x2, y2):\n    ax.annotate(\"\", xy=(x2, y2), xytext=(x1, y1),\n                arrowprops=dict(arrowstyle=\"-|&gt;\", color=\"#5a6b7a\", lw=1.8))\n\nbox(0.02, 0.40, 0.14, 0.18, \"Import\", \"#dce7f0\")\nbox(0.20, 0.40, 0.14, 0.18, \"Tidy\",   \"#dce7f0\")\n# the understanding loop\nbox(0.44, 0.66, 0.16, 0.18, \"Visualize\", \"#e7f0e9\")\nbox(0.44, 0.40, 0.16, 0.18, \"Transform\", \"#e7f0e9\")\nbox(0.44, 0.14, 0.16, 0.18, \"Model\",     \"#e7f0e9\")\nbox(0.72, 0.40, 0.17, 0.18, \"Communicate\", \"#f3e9da\")\n\narrow(0.16, 0.49, 0.20, 0.49)\narrow(0.34, 0.49, 0.43, 0.55)\narrow(0.34, 0.49, 0.43, 0.49)\narrow(0.34, 0.49, 0.43, 0.43)\n# loop arrows among the three\narrow(0.52, 0.66, 0.52, 0.58)\narrow(0.52, 0.40, 0.52, 0.32)\narrow(0.60, 0.49, 0.72, 0.49)\n\nax.text(0.27, 0.30, \"wrangling\", ha=\"center\", fontsize=8.5, style=\"italic\", color=\"#9a6a2f\")\nax.add_patch(plt.Rectangle((0.19, 0.36), 0.16, 0.26, fill=False, ls=\"--\",\n                            ec=\"#9a6a2f\", lw=1.2, zorder=1))\nax.text(0.52, 0.92, \"understanding\", ha=\"center\", fontsize=8.5, style=\"italic\", color=\"#3f8f6f\")\nax.add_patch(plt.Rectangle((0.42, 0.10), 0.20, 0.78, fill=False, ls=\"--\",\n                            ec=\"#3f8f6f\", lw=1.2, zorder=1))\n\nax.set_xlim(0, 0.92); ax.set_ylim(0.05, 1.0); ax.axis(\"off\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The data-science workflow from R for Data Science. Import and Tidy get the data into R and into a consistent shape; the heart is an iterative loop of Transform ⇄ Visualize ⇄ Model (the ‘understanding’ cycle you spin many times); Communicate delivers the result to other humans. Programming underlies every step. Tidy + Transform together are ‘wrangling.’",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Data-Science Workflow: The Whole Game"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-data-science-workflow.html#the-six-steps-and-the-thinking-each-demands",
+    "href": "content/dataframes/the-data-science-workflow.html#the-six-steps-and-the-thinking-each-demands",
+    "title": "The Data-Science Workflow: The Whole Game",
+    "section": "The six steps, and the thinking each demands",
+    "text": "The six steps, and the thinking each demands\nImport. Get the data out of a file, database, or API and into R. Trivial-sounding, occasionally maddening, and strictly first: as the authors put it, “if you can’t get your data into R, you can’t do data science on it!” (Wickham et al. 2023)\nTidy. Store the data “in a consistent form that matches the semantics of the dataset with the way it is stored.” (Wickham et al. 2023) One row per observation, one column per variable — the subject of the next entry. Tidying pays off because a consistent structure lets you spend your energy on the question, not the format.\nTransform. Narrow to the observations of interest, create new variables from existing ones, and compute summaries. (Wickham et al. 2023) This is the grammar of manipulation — the verbs you apply to a tidy table.\nVisualize. A “fundamentally human activity.” A good plot “will show you things that you did not expect, or raise new questions” — and sometimes hint that “you’re asking the wrong question.” (Wickham et al. 2023) Visualisation is how the data surprises you.\nModel. Mathematical and computational tools, complementary to visualisation: they scale far better than a human brain. But the authors issue a sharp caution — a model “cannot fundamentally surprise you,” because it cannot question its own assumptions. (Wickham et al. 2023) Models answer the question you posed; only you (often via a plot) can notice it was the wrong question.\nCommunicate. “Absolutely critical.” (Wickham et al. 2023) An insight no one understands changes nothing; the analysis isn’t finished until someone else can act on it — the concern of Part VI.\n\n\n\n\n\n\nNoteWrangling, and the understanding loop\n\n\n\nTwo groupings are worth naming. Tidy + Transform is “wrangling” — so named because getting data into a workable form “often feels like a fight!” (Wickham et al. 2023) And Transform ⇄ Visualize ⇄ Model is the understanding loop: you rarely run it once. You transform, plot, fit, notice something off, and circle back — many times — before anything is ready to communicate. (Wickham et al. 2023) Underneath every box sits programming, the tool that runs the whole cycle.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Data-Science Workflow: The Whole Game"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-data-science-workflow.html#what-the-map-is-not",
+    "href": "content/dataframes/the-data-science-workflow.html#what-the-map-is-not",
+    "title": "The Data-Science Workflow: The Whole Game",
+    "section": "What the map is not",
+    "text": "What the map is not\nIt is not a one-way conveyor belt. The arrows into the understanding loop go both ways for a reason: a plot sends you back to wrangle a column you thought was clean; a model sends you back to engineer a feature. (Wickham et al. 2023) The discipline is knowing which station you’re at, so that “the analysis is broken” sharpens into a locatable problem — bad import, untidy shape, wrong transform, misleading plot, misspecified model, or unclear write-up.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Data-Science Workflow: The Whole Game"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-data-science-workflow.html#common-pitfalls",
+    "href": "content/dataframes/the-data-science-workflow.html#common-pitfalls",
+    "title": "The Data-Science Workflow: The Whole Game",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nJumping to model before tidy. A model fit on an untidy or unclean table estimates something precise about the wrong numbers. The mountain comes before the summit. (Wickham et al. 2023)\nSkipping visualize. If you never plot, you forfeit the one step that can surprise you — and you let a model’s silent assumptions stand unchecked. (Wickham et al. 2023)\nTreating wrangling as menial. It is the majority of the work and the part most determinative of whether the result is trustworthy; it deserves the same care as the analysis. (Wickham et al. 2023)\nForgetting communicate. A correct analysis nobody can follow has zero effect on the world. The last step is not optional. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Data-Science Workflow: The Whole Game"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-data-science-workflow.html#from-the-sources",
+    "href": "content/dataframes/the-data-science-workflow.html#from-the-sources",
+    "title": "The Data-Science Workflow: The Whole Game",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWickham & Grolemund, R for Data Science — data science as turning raw data into “understanding, insight, and knowledge”; the whole-game workflow diagram (import → tidy → transform ⇄ visualize ⇄ model → communicate); “if you can’t get your data into R, you can’t do data science on it!”; tidy + transform as “wrangling” (“often feels like a fight!”); visualisation as a “fundamentally human activity” that surprises you; the caution that a model “cannot fundamentally surprise you”; and communicate as “absolutely critical.”",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Data-Science Workflow: The Whole Game"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-data-science-workflow.html#connections",
+    "href": "content/dataframes/the-data-science-workflow.html#connections",
+    "title": "The Data-Science Workflow: The Whole Game",
+    "section": "Connections",
+    "text": "Connections\n\nLeads to: tidy data (the tidy station), the grammar of manipulation (transform), and the grammar of graphics (visualize).\nPairs with: exploratory data analysis (the visualize loop in statistical language) and messy real data (why import and tidy are so much work).\nCloses at: communicating quantitative findings — the final station, made into its own discipline in Part VI.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Data-Science Workflow: The Whole Game"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/the-data-science-workflow.html#study-with-notebooklm",
+    "href": "content/dataframes/the-data-science-workflow.html#study-with-notebooklm",
+    "title": "The Data-Science Workflow: The Whole Game",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Walk through the six steps of the R for Data Science workflow diagram, and explain what ‘wrangling’ and the ‘understanding’ loop refer to.”\n“Why do Wickham & Grolemund say a model ‘cannot fundamentally surprise you,’ and how is visualization complementary to modeling?”\n“Why is ‘import’ placed first and called a prerequisite for everything else?”\n“Explain why the workflow is iterative rather than a one-way pipeline, with an example of a step sending you backward.”",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "The Data-Science Workflow: The Whole Game"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/tidy-data.html",
+    "href": "content/dataframes/tidy-data.html",
+    "title": "Tidy Data: One Row, One Observation",
+    "section": "",
+    "text": "There are countless ways to arrange the same numbers in a table, and only one that every tool in the ecosystem is built to expect. Tidy data is that one shape: each variable a column, each observation a row, each value a cell. Get your data tidy and the rest of analysis stops being a fight; leave it untidy and you spend your day reshaping instead of thinking.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Tidy Data: One Row, One Observation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/tidy-data.html#why-it-matters",
+    "href": "content/dataframes/tidy-data.html#why-it-matters",
+    "title": "Tidy Data: One Row, One Observation",
+    "section": "Why it matters",
+    "text": "Why it matters\nA dataset’s meaning and its layout are two different things, and beginners conflate them. The same study can be stored a dozen ways — values spread across columns, variables crammed into one column, observations split across tables. Wickham & Grolemund’s insight is that committing to one layout pays compounding dividends: every package in the tidyverse (and most models in this book) assumes it, so a tidy table lets you “focus your struggle on the questions you care about, not fighting to get the data into the right form.” (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Tidy Data: One Row, One Observation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/tidy-data.html#the-three-rules",
+    "href": "content/dataframes/tidy-data.html#the-three-rules",
+    "title": "Tidy Data: One Row, One Observation",
+    "section": "The three rules",
+    "text": "The three rules\nA dataset is tidy if it satisfies three interlocking rules: (Wickham et al. 2023)\n\nEach variable must have its own column.\nEach observation must have its own row.\nEach value must have its own cell.\n\n\n\nShow the figure code\nimport matplotlib.pyplot as plt\n\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(8.6, 3.0))\n\ndef table(ax, title, col_labels, rows, highlight_cols=None, title_color=\"#1c2733\"):\n    ax.set_title(title, fontsize=10.5, color=title_color, fontweight=\"bold\")\n    ax.axis(\"off\")\n    t = ax.table(cellText=rows, colLabels=col_labels, loc=\"center\", cellLoc=\"center\")\n    t.auto_set_font_size(False); t.set_fontsize(9); t.scale(1, 1.5)\n    for j in range(len(col_labels)):\n        c = t[0, j]; c.set_facecolor(\"#1f3a5f\"); c.set_text_props(color=\"white\", fontweight=\"bold\")\n        if highlight_cols and j in highlight_cols:\n            c.set_facecolor(\"#9a6a2f\")\n\n# untidy: years as columns\ntable(axL, \"Untidy: headers are values\", [\"country\", \"1999\", \"2000\"],\n      [[\"A\", \"745\", \"2666\"], [\"B\", \"37737\", \"80488\"]], highlight_cols=[1, 2],\n      title_color=\"#9a6a2f\")\n# tidy\ntable(axR, \"Tidy: headers are variables\", [\"country\", \"year\", \"cases\"],\n      [[\"A\", \"1999\", \"745\"], [\"A\", \"2000\", \"2666\"],\n       [\"B\", \"1999\", \"37737\"], [\"B\", \"2000\", \"80488\"]], title_color=\"#3f8f6f\")\n\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The three rules of tidy data. Left: an untidy layout — year is spread across two column headers (the headers are values, not variable names), so a single observation is split across cells and ‘year’ has no column. Right: the tidy version — one column per variable (country, year, cases), one row per observation, one value per cell. Same numbers, a shape every tool understands.\n\n\n\n\n\nThe rules are not arbitrary aesthetics; they line up with how computers and the tidyverse vectorise work — operations run down columns, and “one observation per row” is exactly what a model, a group-by, or a plot iterates over. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Tidy Data: One Row, One Observation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/tidy-data.html#the-tolstoy-rule",
+    "href": "content/dataframes/tidy-data.html#the-tolstoy-rule",
+    "title": "Tidy Data: One Row, One Observation",
+    "section": "The Tolstoy rule",
+    "text": "The Tolstoy rule\nWhy does messy data feel endlessly varied while tidy data feels boringly uniform? The authors answer with a borrowed line from Anna Karenina: (Wickham et al. 2023)\n\n“Happy families are all alike; every unhappy family is unhappy in its own way. Tidy datasets are all alike, but every messy dataset is messy in its own way.”\n\nThis is the whole argument in one sentence. There is essentially one tidy shape, so once you know it you can learn a single set of tools and apply them everywhere. Messiness, by contrast, is infinite — values in headers, multiple variables jammed in one column, one observation smeared across rows — so ad-hoc fixes never generalise. Investing in the one tidy form is what makes your skills transferable across every future dataset. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Tidy Data: One Row, One Observation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/tidy-data.html#tidying-pivoting",
+    "href": "content/dataframes/tidy-data.html#tidying-pivoting",
+    "title": "Tidy Data: One Row, One Observation",
+    "section": "Tidying: pivoting",
+    "text": "Tidying: pivoting\nReal data arrives untidy, so tidying is a routine first move, and it usually reduces to pivoting — and the two common problems each have a direction: (Wickham et al. 2023)\n\nA variable is spread across column headers (like 1999 and 2000 above). The headers are values of a variable (year), not variable names. Pivot longer: gather those columns into a name column and a value column.\n\nlibrary(tidyverse)\n\n# values trapped in the column names -&gt; gather them into rows\ntable_untidy |&gt;\n  pivot_longer(cols = c(`1999`, `2000`),\n               names_to  = \"year\",\n               values_to = \"cases\")\n\nOne observation is split across several rows (e.g. cases and population for the same country-year sit on different rows). Pivot wider: spread the name/value pair back into one column each, reuniting the observation onto a single row. (Wickham et al. 2023)\n\ntable_long |&gt;\n  pivot_wider(names_from  = type,    # \"cases\" / \"population\"\n              values_from = count)\nPivoting longer and wider are inverses; together they reshape almost any real table into the one tidy form the rest of your tools expect.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Tidy Data: One Row, One Observation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/tidy-data.html#why-tidy-is-the-foundation-of-this-book",
+    "href": "content/dataframes/tidy-data.html#why-tidy-is-the-foundation-of-this-book",
+    "title": "Tidy Data: One Row, One Observation",
+    "section": "Why tidy is the foundation of this book",
+    "text": "Why tidy is the foundation of this book\nTidy data is the silent precondition of nearly every method in this encyclopedia. A regression wants one row per observation and one column per predictor; an exploratory plot maps tidy columns to visual properties; a causal design needs treatment, outcome, and covariates as clean, separate columns. (Wickham et al. 2023) When a modelling function throws a baffling error, the cause is very often an untidy input — a variable hiding in the headers, or two variables sharing a cell.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Tidy Data: One Row, One Observation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/tidy-data.html#common-pitfalls",
+    "href": "content/dataframes/tidy-data.html#common-pitfalls",
+    "title": "Tidy Data: One Row, One Observation",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nColumn headers that are values, not names. 2019, 2020, 2021 as separate columns means year is a variable with no column. Pivot longer. (Wickham et al. 2023)\nTwo variables in one cell. A rate cell holding \"745/19987\" packs cases and population together; separate them before you can compute anything. (Wickham et al. 2023)\nOne observation across multiple rows. If a single country-year’s cases and population sit on different rows, group-bys and joins misbehave. Pivot wider. (Wickham et al. 2023)\nTidying for the machine and forgetting the human. Tidy is the right shape for computing; a final table for readers may deliberately be untidy (wide, with year columns) because it’s easier to scan. The two audiences want different shapes. (Wickham et al. 2023)",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Tidy Data: One Row, One Observation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/tidy-data.html#from-the-sources",
+    "href": "content/dataframes/tidy-data.html#from-the-sources",
+    "title": "Tidy Data: One Row, One Observation",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWickham & Grolemund, R for Data Science — the formal definition of tidy data and its three rules (each variable a column, each observation a row, each value a cell); the Tolstoy analogy (“tidy datasets are all alike, but every messy dataset is messy in its own way”); tidy data as what lets you “focus on the questions you care about, not fighting to get the data into the right form”; and pivoting longer / wider as the core tidying operations.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Tidy Data: One Row, One Observation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/tidy-data.html#connections",
+    "href": "content/dataframes/tidy-data.html#connections",
+    "title": "Tidy Data: One Row, One Observation",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: the data-science workflow (tidy is the second station) and messy real data (the rectangular data frame and why real data isn’t tidy on arrival).\nLeads to: the grammar of data manipulation — the verbs all assume a tidy table — and relational data & joins (tidy tables linked by keys).\nUnderwrites: every modelling Part — regression onward silently requires one row per observation.",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Tidy Data: One Row, One Observation"
+    ]
+  },
+  {
+    "objectID": "content/dataframes/tidy-data.html#study-with-notebooklm",
+    "href": "content/dataframes/tidy-data.html#study-with-notebooklm",
+    "title": "Tidy Data: One Row, One Observation",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“State the three rules of tidy data and explain how the Tolstoy ‘happy families’ analogy motivates them.”\n“What problem does pivot_longer solve versus pivot_wider, and how are they inverses?”\n“Why does tidy data make the tidyverse’s tools ‘just work,’ and why is it the right shape for modeling?”\n“Give an example of a dataset that violates each of the three tidy rules, and how you’d fix it.”",
+    "crumbs": [
+      "Home",
+      "Thinking in Dataframes (R)",
+      "Tidy Data: One Row, One Observation"
     ]
   },
   {
