@@ -7960,6 +7960,253 @@
     ]
   },
   {
+    "objectID": "appendices/advanced-probability/poisson-process.html",
+    "href": "appendices/advanced-probability/poisson-process.html",
+    "title": "The Poisson Process",
+    "section": "",
+    "text": "Customers entering a bank, radioactive atoms decaying, earthquakes striking: events that pop up at random in continuous time. The Poisson process is the canonical model — a process that, at every instant, “probabilistically restarts itself.” Count its events in any window and you get a Poisson distribution; measure the gaps between events and you get the exponential — the unique memoryless waiting time. One process ties those two distributions together.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#counting-processes",
+    "href": "appendices/advanced-probability/poisson-process.html#counting-processes",
+    "title": "The Poisson Process",
+    "section": "Counting processes",
+    "text": "Counting processes\nA counting process \\{N(t),\\,t\\ge 0\\} records the total number of events that have occurred up to time t. (Ross 2014) The Poisson process of rate \\lambda&gt;0 is the most important one, pinned down by two intuitive properties: (Ross 2014)\n\nIndependent increments — counts in disjoint intervals are independent. What happens between 2:00 and 3:00 tells you nothing about 5:00–6:00.\nStationary increments — the distribution of the count in an interval depends only on its length, not when it sits. A one-hour window is statistically the same at noon or midnight.\n\nFrom these, the number of events in an interval of length t is Poisson with mean \\lambda t: (Ross 2014) \n\\Pr\\{N(t)=n\\} = e^{-\\lambda t}\\,\\frac{(\\lambda t)^n}{n!}, \\qquad n=0,1,2,\\dots\n The rate \\lambda is events per unit time; over a window of length t you expect \\lambda t of them.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#interarrival-times-are-exponential-and-thats-no-accident",
+    "href": "appendices/advanced-probability/poisson-process.html#interarrival-times-are-exponential-and-thats-no-accident",
+    "title": "The Poisson Process",
+    "section": "Interarrival times are exponential — and that’s no accident",
+    "text": "Interarrival times are exponential — and that’s no accident\nLook at the gaps between successive events — the interarrival times T_1, T_2, \\dots. Ross’s result: they are independent and identically distributed Exponential(\\lambda), each with mean 1/\\lambda. (Ross 2014) This is the process’s deepest fact, and it follows from a single idea: stationary + independent increments mean that “at any point in time, the process probabilistically restarts itself.” (Ross 2014) Since the exponential is the unique memoryless continuous distribution, it is the only law a restart-anywhere process can have — the time to the next event cannot depend on how long you’ve already waited. (Ross 2014) (This is exactly the constant-hazard, exponential-survival baseline, seen from the other side.)\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom math import factorial\n\nrng = np.random.default_rng(2)\nlam = 3.0\nT = 20.0\n# Generate arrivals by summing Exponential interarrival times\ngaps = rng.exponential(1/lam, size=int(lam*T*1.5))\ntimes = np.cumsum(gaps)\ntimes = times[times &lt; T]\n\nfig, (axT, axB) = plt.subplots(2, 1, figsize=(7.6, 5.0))\n\naxT.step(np.concatenate([[0], times]), np.arange(len(times)+1), where=\"post\", color=\"#1f3a5f\", lw=1.6)\naxT.plot(times, np.zeros_like(times), \"|\", color=\"#c0392b\", markersize=12, markeredgewidth=1.5)\naxT.set_xlim(0, T); axT.set_xlabel(\"time  t\"); axT.set_ylabel(\"N(t)\")\naxT.set_title(f\"Counting process N(t), rate λ={lam}  (red ticks = events)\")\n\n# Counts in fixed windows of width w\nw = 1.0\nedges = np.arange(0, T+w, w)\ncounts = np.histogram(times, bins=edges)[0]\nks = np.arange(0, counts.max()+2)\npmf = np.exp(-lam*w) * (lam*w)**ks / np.array([factorial(k) for k in ks])\naxB.hist(counts, bins=np.arange(-0.5, counts.max()+1.5), density=True, color=\"#9bb4d4\",\n         alpha=0.85, label=\"observed per-window counts\")\naxB.plot(ks, pmf, \"o-\", color=\"#c0392b\", lw=1.8, label=f\"Poisson(λw={lam*w:g}) pmf\")\naxB.set_xlabel(\"events per window\"); axB.set_ylabel(\"proportion\")\naxB.set_title(\"Counts per fixed window are Poisson\")\naxB.legend(fontsize=8, frameon=False)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A Poisson process of rate λ. Top: event times (ticks) scatter at random; the step function N(t) counts them. The gaps between ticks are i.i.d. Exponential(λ). Bottom: counting events in fixed windows produces a Poisson(λ·width) distribution — here a histogram of per-window counts against the Poisson pmf (red). Same process, two faces: exponential gaps, Poisson counts.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#superposition-and-thinning",
+    "href": "appendices/advanced-probability/poisson-process.html#superposition-and-thinning",
+    "title": "The Poisson Process",
+    "section": "Superposition and thinning",
+    "text": "Superposition and thinning\nTwo operations make the Poisson process beautifully closed: (Ross 2014)\n\nSuperposition. Merge two independent Poisson processes with rates \\lambda_1 and \\lambda_2 and the combined stream is Poisson with rate \\lambda_1+\\lambda_2. (All the arrivals from two doors into one shop.)\nThinning. Independently tag each event “Type I” with probability p or “Type II” with 1-p; the two sub-streams are independent Poisson processes with rates \\lambda p and \\lambda(1-p). (Ross 2014) (Split arrivals into “web” vs “phone” and each is still Poisson.)\n\nThese closure rules are why the Poisson process is the default model whenever independent streams combine or split.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#where-it-shows-up",
+    "href": "appendices/advanced-probability/poisson-process.html#where-it-shows-up",
+    "title": "The Poisson Process",
+    "section": "Where it shows up",
+    "text": "Where it shows up\nRoss names the Poisson process the standard model for “rare events” and arrivals: radioactive \\alpha-particle emissions, earthquakes, the outbreak of wars, and customers entering a bank or post office. (Ross 2014) In this book it is the continuous-time engine beneath count-data models (a Poisson regression models the rate \\lambda) and survival analysis (the exponential interarrival time is the constant-hazard duration).",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#common-pitfalls",
+    "href": "appendices/advanced-probability/poisson-process.html#common-pitfalls",
+    "title": "The Poisson Process",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nAssuming Poisson when events clump. Independent increments fail if one event makes the next more likely (“contagion”) — that’s overdispersion; use a different process / negative binomial. (Ross 2014)\nForgetting the memoryless catch. “It’s been quiet, so an arrival is overdue” is the gambler’s fallacy in continuous time — the exponential has no memory. (Ross 2014)\nMismatching rate and window. The count is Poisson(\\lambda t), not Poisson(\\lambda); keep the time units straight (the offset issue). (Ross 2014)",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#from-the-sources",
+    "href": "appendices/advanced-probability/poisson-process.html#from-the-sources",
+    "title": "The Poisson Process",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nRoss, Introduction to Probability Models — the counting process N(t) and the Poisson process of rate \\lambda (independent & stationary increments; N(t)\\sim\\text{Poisson}(\\lambda t)); interarrival times i.i.d. Exponential(\\lambda) and the “probabilistically restarts itself” / memoryless link; superposition (\\lambda_1+\\lambda_2) and thinning (\\lambda p); and the rare-event examples (radioactive decay, earthquakes, wars, arrivals).",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#connections",
+    "href": "appendices/advanced-probability/poisson-process.html#connections",
+    "title": "The Poisson Process",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: the Poisson & exponential distributions and memorylessness.\nPowers: count-data / Poisson regression (modelling the rate) and the constant-hazard core of survival analysis.\nGeneralises to: non-homogeneous and compound Poisson processes, and the continuous-time Markov chains of the next entry.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#study-with-notebooklm",
+    "href": "appendices/advanced-probability/poisson-process.html#study-with-notebooklm",
+    "title": "The Poisson Process",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Define a Poisson process via independent and stationary increments, and state the distribution of N(t).”\n“Why are the interarrival times of a Poisson process exponential, and how does the memoryless property make them the only possibility?”\n“Explain superposition and thinning of Poisson processes with examples.”\n“What real-world ‘rare event’ phenomena does Ross model with the Poisson process, and how does it connect to Poisson regression and survival analysis?”",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html",
+    "href": "appendices/advanced-probability/markov-chains.html",
+    "title": "Markov Chains",
+    "section": "",
+    "text": "A Markov chain is a system that moves between states where “the future depends on the present, but not the past.” Knowing where you are now is enough; the route that got you here is irrelevant. That one assumption — the Markov property — makes the whole future computable from a single transition matrix, and leads to a beautiful result: run many chains long enough and they converge to the same stationary distribution, no matter where they started. That convergence is the engine under MCMC.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#the-markov-property",
+    "href": "appendices/advanced-probability/markov-chains.html#the-markov-property",
+    "title": "Markov Chains",
+    "section": "The Markov property",
+    "text": "The Markov property\nA Markov chain \\{X_n\\} takes values in a set of states, and obeys: (Ross 2014) \n\\Pr\\{X_{n+1}=j \\mid X_n=i, X_{n-1}=i_{n-1},\\dots,X_0=i_0\\} = \\Pr\\{X_{n+1}=j\\mid X_n=i\\} = P_{ij}.\n In words — “the future depends on the present, not the past.” (Ross 2014) The entire history collapses to the current state. That’s a strong assumption, but a stunning number of systems satisfy it (or can be made to by enlarging the state), and it’s what makes the chain tractable.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#the-transition-matrix",
+    "href": "appendices/advanced-probability/markov-chains.html#the-transition-matrix",
+    "title": "Markov Chains",
+    "section": "The transition matrix",
+    "text": "The transition matrix\nAll the dynamics live in the transition probability matrix \\mathbf P, whose entry P_{ij} is the probability of moving from state i to state j in one step. (Ross 2014) Each row is a probability distribution: P_{ij}\\ge 0 and \\sum_j P_{ij}=1 (from any state you must go somewhere). (Ross 2014)\nMulti-step transitions are just matrix powers. The Chapman–Kolmogorov equations, P^{n+m}_{ij}=\\sum_k P^{n}_{ik}P^{m}_{kj}, say that to get from i to j in n+m steps you pass through some intermediate state k — and they imply the clean rule (Ross 2014) \n\\mathbf P^{(n)} = \\mathbf P^{\\,n}.\n The n-step transition matrix is the one-step matrix raised to the n-th power. Want the state distribution after n steps? Multiply your starting distribution by \\mathbf P^n.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#classifying-states",
+    "href": "appendices/advanced-probability/markov-chains.html#classifying-states",
+    "title": "Markov Chains",
+    "section": "Classifying states",
+    "text": "Classifying states\nNot all states behave alike: (Ross 2014)\n\nRecurrent vs transient. A state is recurrent if, starting there, you return to it with probability 1; transient if there’s positive probability you never come back. In a finite chain, at least one state must be recurrent. (Ross 2014)\nPeriodicity. A state has period d if returns are only possible at multiples of d; period 1 is aperiodic. (Ross 2014)\n\nThese distinctions decide whether the chain settles down.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#the-stationary-distribution",
+    "href": "appendices/advanced-probability/markov-chains.html#the-stationary-distribution",
+    "title": "Markov Chains",
+    "section": "The stationary distribution",
+    "text": "The stationary distribution\nThe payoff. For well-behaved chains, the probability of being in state j after many steps converges to a limit \\pi_j that does not depend on where you started. (Ross 2014) If the chain is irreducible (you can get from any state to any other) and ergodic (aperiodic and positive recurrent), it converges to a unique stationary distribution \\pi, the solution of (Ross 2014) \n\\pi_j = \\sum_i \\pi_i\\,P_{ij}, \\qquad \\sum_j \\pi_j = 1.\n \\pi is the distribution that reproduces itself under one more step (\\pi\\mathbf P=\\pi) — an equilibrium the chain forgets its way toward.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# A 3-state transition matrix (e.g. sunny/cloudy/rainy)\nP = np.array([[0.7, 0.2, 0.1],\n              [0.3, 0.4, 0.3],\n              [0.2, 0.3, 0.5]])\n\n# Stationary distribution: left eigenvector with eigenvalue 1\nvals, vecs = np.linalg.eig(P.T)\npi = np.real(vecs[:, np.argmin(np.abs(vals - 1))]); pi = pi / pi.sum()\n\nsteps = 12\nstart_a = np.array([1.0, 0.0, 0.0])\nstart_b = np.array([0.0, 0.0, 1.0])\ndef evolve(d):\n    out = [d]\n    for _ in range(steps):\n        d = d @ P; out.append(d)\n    return np.array(out)\nA, B = evolve(start_a), evolve(start_b)\n\nfig, ax = plt.subplots(figsize=(7.4, 4.0))\ncolors = [\"#1f3a5f\", \"#3f8f6f\", \"#9a6a2f\"]\nfor s in range(3):\n    ax.plot(A[:, s], \"-o\", color=colors[s], ms=3, lw=1.6, label=f\"state {s} (start A)\")\n    ax.plot(B[:, s], \"--s\", color=colors[s], ms=3, lw=1.2, alpha=0.7)\n    ax.axhline(pi[s], color=colors[s], ls=\":\", lw=1.0)\nax.set_xlabel(\"step n\"); ax.set_ylabel(\"probability of each state\")\nax.set_title(\"Two different starts → the same stationary distribution\")\nax.legend(fontsize=7.5, frameon=False, ncol=3, loc=\"upper center\")\nax.set_ylim(0, 1)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Forgetting the start. A 3-state weather chain run from two very different initial distributions (one starts certain of state 0, the other certain of state 2). Both distributions evolve under repeated multiplication by P and converge to the SAME stationary distribution π (dashed) within a handful of steps. Irreducible + aperiodic chains lose all memory of where they began — the fact MCMC exploits.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#signature-examples",
+    "href": "appendices/advanced-probability/markov-chains.html#signature-examples",
+    "title": "Markov Chains",
+    "section": "Signature examples",
+    "text": "Signature examples\nRoss’s classics: (Ross 2014)\n\nWeather in the “Land of Oz” — a chain over {rain, nice, snow}, predicting tomorrow from today.\nRandom walks — a particle stepping \\pm 1 on a line; the symmetric walk (p=0.5) is recurrent (returns to the origin with probability 1), a surprisingly delicate fact.\nGambler’s ruin — bet $1 repeatedly until you hit $0 (broke) or $N (goal): a chain with two absorbing states, and the question is the probability of each fate.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#common-pitfalls",
+    "href": "appendices/advanced-probability/markov-chains.html#common-pitfalls",
+    "title": "Markov Chains",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nAssuming the Markov property holds. If the future genuinely depends on more than the present, enlarge the state (e.g. include yesterday) — or it isn’t a Markov chain. (Ross 2014)\nExpecting convergence without the conditions. A periodic or reducible chain may never settle to a unique \\pi; check irreducibility and aperiodicity. (Ross 2014)\nConfusing a stationary distribution with an absorbing state. Gambler’s ruin absorbs; it doesn’t mix to an interior equilibrium. (Ross 2014)\nReading \\pi as “where the chain is.” \\pi is the long-run distribution over states, not a single destination — the chain keeps moving, visiting state j a fraction \\pi_j of the time.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#from-the-sources",
+    "href": "appendices/advanced-probability/markov-chains.html#from-the-sources",
+    "title": "Markov Chains",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nRoss, Introduction to Probability Models — the Markov property (“future depends on the present, not the past”); the transition matrix P_{ij} (rows sum to 1); Chapman–Kolmogorov and \\mathbf P^{(n)}=\\mathbf P^n; recurrent vs transient states and periodicity; the stationary / limiting distribution \\pi=\\pi\\mathbf P under irreducibility + ergodicity; and the Land of Oz weather, random walk (symmetric → recurrent), and gambler’s ruin examples.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#connections",
+    "href": "appendices/advanced-probability/markov-chains.html#connections",
+    "title": "Markov Chains",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: conditional probability (the transition probabilities) and matrix algebra.\nPowers: MCMC — Markov chain Monte Carlo constructs a chain whose stationary distribution is the Bayesian posterior, then samples by running it.\nCousin of: the Poisson process (its continuous-time relative) and the state-space view of time series.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#study-with-notebooklm",
+    "href": "appendices/advanced-probability/markov-chains.html#study-with-notebooklm",
+    "title": "Markov Chains",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“State the Markov property and explain what it means that ‘the future depends only on the present.’”\n“What is the transition matrix, and how do the Chapman–Kolmogorov equations give n-step transitions as matrix powers?”\n“Distinguish recurrent vs transient states and periodicity; why do they matter for long-run behaviour?”\n“What is a stationary distribution, under what conditions does a chain converge to a unique one, and how is this the basis of MCMC?”\n“Explain the random-walk and gambler’s-ruin examples — what makes the symmetric random walk recurrent?”",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "How to use this",
@@ -8017,6 +8264,175 @@
       "Home",
       "Start here",
       "How to use this"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/index.html",
+    "href": "appendices/advanced-probability/index.html",
+    "title": "Appendix · Advanced Probability",
+    "section": "",
+    "text": "The Foundations probability sub-chapter covers everything the inference, regression, and causal parts actually require. This appendix goes one level deeper, into the stochastic-process and order-statistic material from Sheldon Ross’s Introduction to Probability Models and A First Course in Probability — optional for the main arc, but foundational for queueing, reliability, time-series theory, and the mathematics of extremes.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Appendix · Advanced Probability"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/index.html#entries",
+    "href": "appendices/advanced-probability/index.html#entries",
+    "title": "Appendix · Advanced Probability",
+    "section": "Entries",
+    "text": "Entries\n\n\n\nEntry\nStatus\nCore source\n\n\n\n\nThe Poisson process\n✅ Written\nRoss, Probability Models\n\n\nMarkov chains\n✅ Written\nRoss, Probability Models\n\n\nOrder statistics\n✅ Written\nRoss, A First Course",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Appendix · Advanced Probability"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/index.html#where-this-connects",
+    "href": "appendices/advanced-probability/index.html#where-this-connects",
+    "title": "Appendix · Advanced Probability",
+    "section": "Where this connects",
+    "text": "Where this connects\n\nThe Poisson process is the continuous-time engine behind count data and survival/hazard models — its interarrival times are the exponential durations of survival analysis.\nMarkov chains are the theory under MCMC (the “MC” is Markov chain) and many time-series models.\nOrder statistics underpin the median, quantiles, extremes, and the rank-based nonparametric tests.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Appendix · Advanced Probability"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/order-statistics.html",
+    "href": "appendices/advanced-probability/order-statistics.html",
+    "title": "Order Statistics",
+    "section": "",
+    "text": "Take n random draws and sort them. The sorted values — the order statistics — have their own distributions, and they answer questions the raw draws can’t: how big is the largest of n floods? how small the weakest link? where does the median sit? The minimum and maximum are easy (one line each); the general k-th value follows a clean combinatorial formula; and the whole apparatus underwrites quantiles, reliability theory, and rank-based tests.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Order Statistics"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/order-statistics.html#definition",
+    "href": "appendices/advanced-probability/order-statistics.html#definition",
+    "title": "Order Statistics",
+    "section": "Definition",
+    "text": "Definition\nGiven n i.i.d. continuous variables X_1,\\dots,X_n, the order statistics are the same values sorted into increasing order: (Ross 2018) \nX_{(1)} \\le X_{(2)} \\le \\cdots \\le X_{(n)}.\n So X_{(1)} is the minimum, X_{(n)} the maximum, and X_{(j)} the j-th smallest. For an odd sample of size 2n+1, the middle value X_{(n+1)} is the sample median. (Ross 2018) Sorting discards which unit gave which value but keeps the full picture of spread and extremes.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Order Statistics"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/order-statistics.html#minimum-and-maximum-the-easy-ones",
+    "href": "appendices/advanced-probability/order-statistics.html#minimum-and-maximum-the-easy-ones",
+    "title": "Order Statistics",
+    "section": "Minimum and maximum: the easy ones",
+    "text": "Minimum and maximum: the easy ones\nThe extremes follow from one observation about independence: (Ross 2018)\n\nThe maximum is \\le x iff every draw is \\le x, so \nF_{X_{(n)}}(x) = \\Pr\\{X_{(n)}\\le x\\} = [F(x)]^n.\n\nThe minimum is &gt;x iff every draw is &gt;x, so \\Pr\\{X_{(1)}&gt;x\\}=[1-F(x)]^n and hence \nF_{X_{(1)}}(x) = 1 - [1-F(x)]^n.\n\n\nA famous consequence: the minimum of n independent Exponential(\\lambda) variables is itself Exponential(n\\lambda) — n competing memoryless clocks fail n times as fast. (Ross 2018) (That’s the Poisson-process superposition seen through the first arrival.)",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Order Statistics"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/order-statistics.html#the-general-k-th-order-statistic",
+    "href": "appendices/advanced-probability/order-statistics.html#the-general-k-th-order-statistic",
+    "title": "Order Statistics",
+    "section": "The general k-th order statistic",
+    "text": "The general k-th order statistic\nFor the value in position j, Ross gives an intuitive derivation. For X_{(j)}=x, you need exactly: j-1 values below x, n-j values above x, and one equal to x. (Ross 2018) Counting the ways to assign the n draws to those three roles (a multinomial coefficient) gives the density: \nf_{X_{(j)}}(x) = \\frac{n!}{(j-1)!\\,(n-j)!}\\,[F(x)]^{\\,j-1}\\,[1-F(x)]^{\\,n-j}\\,f(x).\n (Ross 2018) Worked example: for n=3 draws from a Uniform(0,1), the median X_{(2)} has density f(x)=6x(1-x), giving \\Pr\\{\\tfrac14&lt;X_{(2)}&lt;\\tfrac34\\}=\\tfrac{11}{16}. (Ross 2018)\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom math import factorial\n\nn = 5\nx = np.linspace(0, 1, 400)\n\ndef beta_pdf(x, a, b):                  # Beta(a,b) density by hand (a,b integers)\n    coef = factorial(a + b - 1) / (factorial(a - 1) * factorial(b - 1))\n    return coef * x**(a - 1) * (1 - x)**(b - 1)\n\nfig, ax = plt.subplots(figsize=(7.4, 4.0))\nlabels = [\"min  $X_{(1)}$\", \"$X_{(2)}$\", \"median  $X_{(3)}$\", \"$X_{(4)}$\", \"max  $X_{(5)}$\"]\ncolors = [\"#c0392b\", \"#9a6a2f\", \"#1f3a5f\", \"#3f8f6f\", \"#7a3f8f\"]\nfor k in range(1, n + 1):\n    ax.plot(x, beta_pdf(x, k, n - k + 1), color=colors[k-1], lw=2.2, label=labels[k-1])\nax.set_xlabel(\"value\"); ax.set_ylabel(\"density\")\nax.set_title(\"Each order statistic of a uniform sample is a Beta distribution\")\nax.legend(fontsize=8.5, frameon=False)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Order-statistic densities for n = 5 uniform draws. The k-th order statistic of a Uniform(0,1) sample is a Beta(k, n−k+1) distribution. The minimum (k=1) piles up near 0, the maximum (k=5) near 1, and the median (k=3) is symmetric and concentrated in the middle — each ‘slot’ of the sorted sample has its own predictable shape. Sorting turns one flat distribution into n distinct ones.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Order Statistics"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/order-statistics.html#range-and-spacings",
+    "href": "appendices/advanced-probability/order-statistics.html#range-and-spacings",
+    "title": "Order Statistics",
+    "section": "Range and spacings",
+    "text": "Range and spacings\nOrder statistics quantify a sample’s spread: (Ross 2018)\n\nThe sample range R = X_{(n)} - X_{(1)} has \\Pr\\{R\\le a\\}=n\\int_{-\\infty}^{\\infty}[F(x+a)-F(x)]^{n-1}f(x)\\,dx. For a Uniform(0,1) sample, R is Beta(n-1,2) with density n(n-1)a^{n-2}(1-a). (Ross 2018)\nThe spacings Y_i = X_{(i)}-X_{(i-1)} are the gaps between consecutive sorted values; for the uniform they are exchangeable (their joint law is symmetric). (Ross 2018)",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Order Statistics"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/order-statistics.html#why-it-matters",
+    "href": "appendices/advanced-probability/order-statistics.html#why-it-matters",
+    "title": "Order Statistics",
+    "section": "Why it matters",
+    "text": "Why it matters\nOrder statistics are the theory beneath several things this book uses constantly: (Ross 2018)\n\nMedian & quantiles. They give the mathematics of the median, quartiles, percentiles — the robust summaries — without assuming any distributional form.\nReliability / extremes. A series system fails when its weakest link does (X_{(1)}); a parallel system survives as long as its strongest component holds (X_{(n)}); a k-out-of-n system works if at least k components do — modelled by X_{(n-k+1)}. (Ross 2018) This is the math of floods, fatigue, and record values.\nRank-based statistics. Nonparametric tests like the Wilcoxon rank-sum use the ordering of the data, not the raw values — order statistics are what make them distribution-free. (Ross 2018)",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Order Statistics"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/order-statistics.html#common-pitfalls",
+    "href": "appendices/advanced-probability/order-statistics.html#common-pitfalls",
+    "title": "Order Statistics",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nTreating the max like a typical value. X_{(n)} has its own (right-shifted) distribution; the expected maximum of n draws grows with n and is nothing like the mean. (Ross 2018)\nForgetting order statistics are dependent. X_{(1)}\\le X_{(2)}\\le\\cdots by construction, so they are not independent even when the raw draws are. (Ross 2018)\nAssuming the simple formulas without continuity / independence. The clean CDFs assume i.i.d. continuous draws (ties have probability 0). (Ross 2018)",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Order Statistics"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/order-statistics.html#from-the-sources",
+    "href": "appendices/advanced-probability/order-statistics.html#from-the-sources",
+    "title": "Order Statistics",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nRoss, A First Course in Probability — order statistics X_{(1)}\\le\\cdots\\le X_{(n)} (min, max, median); the extreme CDFs [F(x)]^n and 1-[1-F(x)]^n (and the min of exponentials being Exponential(n\\lambda)); the k-th-order-statistic density via the “j-1 below, n-j above, one equal” multinomial logic (the n=3 uniform median example, 11/16); the range (Beta(n-1,2) for the uniform) and spacings (exchangeable); and the applications to quantiles, reliability (series/parallel/k-out-of-n), rank tests, and records (Ignatov’s theorem).",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Order Statistics"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/order-statistics.html#connections",
+    "href": "appendices/advanced-probability/order-statistics.html#connections",
+    "title": "Order Statistics",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: random variables & CDFs and transformations.\nUnderwrites: location & quantiles, rank-based / nonparametric tests, and extreme-value / reliability analysis.\nPairs with: the Poisson process (first-arrival = minimum) and the Beta distribution (the law of uniform order statistics).",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Order Statistics"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/order-statistics.html#study-with-notebooklm",
+    "href": "appendices/advanced-probability/order-statistics.html#study-with-notebooklm",
+    "title": "Order Statistics",
+    "section": "Study with NotebookLM",
+    "text": "Study with NotebookLM\n\n“Define order statistics and derive the CDFs of the minimum and maximum; why is the min of n exponentials exponential with rate nλ?”\n“State the density of the k-th order statistic and explain the ‘j-1 below, n-j above, one equal’ counting argument.”\n“What is the sample range, and what is its distribution for a uniform sample?”\n“How do order statistics underpin quantiles, reliability theory (series/parallel/k-out-of-n), and rank-based nonparametric tests?”",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Order Statistics"
     ]
   },
   {
