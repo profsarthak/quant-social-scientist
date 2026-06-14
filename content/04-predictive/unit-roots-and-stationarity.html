@@ -1,0 +1,2440 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Unit Roots &amp; Stationarity Testing – The Quantitative Social Scientist</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../content/04-predictive/arima-forecasting.html" rel="next">
+<link href="../../content/04-predictive/time-series-fundamentals.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-a6a8d579619ec60b6cc16f651ef3cf7e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-e06e5700cfc727e31a5c8bda3c8b1a89.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">The Quantitative Social Scientist</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/00-overture/index.html"> 
+<span class="menu-text">Curriculum</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/ml-track/index.html"> 
+<span class="menu-text">ML Track</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../content/dataframes/index.html"> 
+<span class="menu-text">Dataframes</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../appendices/math/index.html"> 
+<span class="menu-text">Appendices</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">How to use this</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://profsarthak.github.io/quant-social-scientist/" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/04-predictive/index.html">IV · Predictive Modelling</a></li><li class="breadcrumb-item"><a href="../../content/04-predictive/time-series-fundamentals.html">Time Series &amp; Forecasting</a></li><li class="breadcrumb-item"><a href="../../content/04-predictive/unit-roots-and-stationarity.html">Unit Roots &amp; Stationarity Testing</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Start here</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Quantitative Social Scientist</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to use this</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">0 · Overture: How Research Works</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/what-quantitative-research-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Quantitative Social Science Actually Does</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/anatomy-of-a-study.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Anatomy of a Study</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/concepts-and-measurement.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Concepts &amp; Variables: The Problem of Measurement</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/variables-and-relationships.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Cast of Characters: Kinds of Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/research-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A Field Guide to Research Designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/qualitative-evidence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A Field Guide to Qualitative Evidence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/mixed-methods-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mixed Methods: Combining the Two Traditions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/credibility-and-failure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Makes Research Credible — and How It Fails</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/00-overture/ethics-and-human-subjects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ethics and the Human-Subjects Frame</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">I · Foundations: Probability &amp; Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Probability</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/what-probability-is.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Probability Actually Is</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/sample-spaces-and-axioms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sample Spaces, Events &amp; the Axioms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/counting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Counting: The Arithmetic of Possibility</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Probability &amp; Independence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/bayes-theorem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bayes’ Theorem: Updating Beliefs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/random-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random Variables (Discrete &amp; Continuous)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/expectation-and-variance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expectation &amp; Variance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/common-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Common Distributions and What They Model</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/covariance-and-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Joint Distributions, Covariance &amp; Correlation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/conditional-expectation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional Expectation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/transformations-and-sums.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transformations &amp; Sums of Random Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/moment-generating-functions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Moment Generating Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/law-of-large-numbers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Law of Large Numbers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/inequalities-and-convergence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inequalities &amp; Modes of Convergence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/simulation-and-monte-carlo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simulation &amp; Monte Carlo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Describing Data</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/location-spread-shape.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Location, Spread &amp; Shape</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/exploratory-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory Data Analysis &amp; Visual Summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/01-foundations/messy-real-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Messy Real Data: What to Expect</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">II · Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">II · Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Classical Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-and-survey-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling &amp; Survey Design</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/sampling-distributions-clt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling Distributions &amp; the Central Limit Theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Estimation: From Sample to Best Guess</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/maximum-likelihood.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Maximum Likelihood Estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Confidence Intervals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hypothesis Testing &amp; p-values</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/effect-sizes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Effect Sizes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/comparing-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparing Groups: ANOVA, Chi-Square &amp; Proportions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/resampling-and-nonparametric-tests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Resampling &amp; Distribution-Free Tests</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/the-bootstrap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bootstrap</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical Power &amp; Sample Size</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/multiple-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple Testing &amp; the False-Discovery Rate</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/replication-crisis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Replication Crisis, Made Rigorous</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-worldview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bayesian Worldview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/bayesian-machinery.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Machinery: Priors, Likelihoods, Posteriors</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/02-inference/credible-intervals-and-computation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Credible Intervals, Computation &amp; the Verdict</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">III · Statistical Modelling: Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/simple-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simple Linear Regression: The Line of Best Fit</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/multiple-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple Regression &amp; "Holding Constant"</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/gauss-markov-assumptions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Gauss–Markov Assumptions &amp; BLUE</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/inference-for-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inference for Regression Coefficients</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/functional-form.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functional Form: Logs, Polynomials, Dummies &amp; Interactions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/regression-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Diagnostics &amp; Robust Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/mixed-effects-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mixed-Effects &amp; Multilevel Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/limited-dependent-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Limited Dependent Variables: LPM, Logit &amp; Probit</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/generalized-linear-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Generalized Linear Models: One Family</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/count-data-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Count-Data Models: Poisson &amp; Negative Binomial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/survival-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Survival &amp; Event-History Analysis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/factor-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Factor Analysis: Measuring the Unseen</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/structural-equation-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Structural Equation Modeling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/regression-and-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What Regression Can — and Can’t — Tell You</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">IV · Predictive Modelling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">IV · The Computational Turn: Predictive Modelling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Predictive Paradigm</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/explaining-vs-predicting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Explaining to Predicting: Two Goals, Two Cultures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/bias-variance-tradeoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Bias–Variance Trade-off</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/classification-and-knn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Classification: When the Outcome Is a Category</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/cross-validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Out-of-Sample Honesty: The Test Set &amp; Cross-Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regularization: Ridge &amp; Lasso</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/trees-and-forests.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Trees, Forests &amp; Boosting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/interpretability-and-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Interpretability &amp; ML for Social Science</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+ <span class="menu-text">Time Series &amp; Forecasting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/time-series-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Time-Series Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/unit-roots-and-stationarity.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Unit Roots &amp; Stationarity Testing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/arima-forecasting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Forecasting with ARIMA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/var-and-impulse-responses.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Autoregression: VAR, Granger &amp; Impulse Responses</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/cointegration-and-error-correction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Cointegration &amp; Error-Correction Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/volatility-arch-garch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Volatility: ARCH &amp; GARCH Models</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">V · The Summit: Causal Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Causal Framework</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/potential-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Potential Outcomes &amp; the Fundamental Problem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/randomized-experiments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Randomized Experiments: The Gold Standard</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/directed-acyclic-graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Directed Acyclic Graphs (DAGs)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Furious Five</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/matching-and-propensity-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Selection on Observables: Matching &amp; Propensity Scores</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/instrumental-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Instrumental Variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/regression-discontinuity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regression Discontinuity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/difference-in-differences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Difference-in-Differences</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/panel-and-fixed-effects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Panel Data &amp; Fixed Effects</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false">
+ <span class="menu-text">Frontiers</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-16" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/synthetic-control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic Control</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/causal-machine-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Causal Machine Learning: Heterogeneous Effects</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/combining-and-triangulating-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Combining &amp; Triangulating Designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/05-causal-inference/sensitivity-and-external-validity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sensitivity Analysis &amp; External Validity</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" role="navigation" aria-expanded="true">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-17" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">VI · Doing Research in the World</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Integrity of Evidence</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-18" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/tyranny-of-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Tyranny of Metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/questionable-research-practices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Questionable Research Practices &amp; Researcher Degrees of Freedom</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/open-and-reproducible-science.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Open &amp; Reproducible Science</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/research-integrity-and-data-ethics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Research Integrity &amp; Data Ethics</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="false">
+ <span class="menu-text">From Analysis to Action</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-19" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/communicating-quantitative-findings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Communicating Quantitative Findings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/from-evidence-to-decision.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From Evidence to Decision</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/systems-thinking.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Thinking in Systems: Feedback, Stocks &amp; Leverage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/06-field-realities/limits-of-quantification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Limits of Quantification</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-20" role="navigation" aria-expanded="true">
+ <span class="menu-text">ML Track (separate)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-20" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-20" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ML Track (separate)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-21" role="navigation" aria-expanded="false">
+ <span class="menu-text">Extending the Supervised Toolkit</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-21" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-21" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/model-selection-and-dimension-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Model Selection &amp; Dimension Reduction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/beyond-linearity-splines-and-gams.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Beyond Linearity: Splines &amp; GAMs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/generative-classifiers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Generative Classifiers: LDA, QDA &amp; Naive Bayes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support Vector Machines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/deep-learning-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Learning: Neural Networks</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-22" role="navigation" aria-expanded="false">
+ <span class="menu-text">Unsupervised Learning &amp; the Social-Science Lens</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-22" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-22" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/unsupervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsupervised Learning: PCA &amp; Clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/ml-for-social-science.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ML for Social Science: Workflow &amp; the Bridge Home</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-23" role="navigation" aria-expanded="true">
+ <span class="menu-text">Thinking in Dataframes (R)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-23" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-23" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Thinking in Dataframes (R)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-24" role="navigation" aria-expanded="false">
+ <span class="menu-text">The Whole Game</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-24" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-24" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/the-data-science-workflow.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Data-Science Workflow: The Whole Game</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tidy Data: One Row, One Observation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-25" role="navigation" aria-expanded="false">
+ <span class="menu-text">Transform</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-25" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-25" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/grammar-of-data-manipulation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Grammar of Data Manipulation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/logical-numbers-and-summaries.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Logical Vectors, Numbers &amp; Summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/strings-and-regular-expressions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Strings &amp; Regular Expressions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/factors-categorical-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Factors: Categorical Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/dates-and-times.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dates &amp; Times</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/missing-values.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Missing Values</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/relational-data-and-joins.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Relational Data: Thinking Across Tables</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-26" role="navigation" aria-expanded="false">
+ <span class="menu-text">Visualize</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-26" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-26" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/the-grammar-of-graphics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Grammar of Graphics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/exploratory-visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory Visualization: Variation &amp; Covariation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-27" role="navigation" aria-expanded="false">
+ <span class="menu-text">Import</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-27" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-27" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/importing-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Importing Data: Getting It Into R</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/beyond-flat-files.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Beyond Flat Files: Spreadsheets, Databases, JSON &amp; the Web</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-28" role="navigation" aria-expanded="false">
+ <span class="menu-text">Program</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-28" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-28" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/writing-functions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Writing Functions: Don’t Repeat Yourself</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/iteration-and-functional-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Iteration &amp; Functional Programming</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-29" role="navigation" aria-expanded="false">
+ <span class="menu-text">Communicate</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-29" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-29" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/dataframes/reproducible-reports-with-quarto.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reproducible Reports with Quarto</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-30" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-30" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-30" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/math/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Mathematics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/computing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Computing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-31" role="navigation" aria-expanded="false">
+ <span class="menu-text">Advanced Probability</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-31" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-31" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/advanced-probability/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix · Advanced Probability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/advanced-probability/poisson-process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Poisson Process</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/advanced-probability/markov-chains.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Markov Chains</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../appendices/advanced-probability/order-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Order Statistics</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#the-augmented-dickeyfuller-test" id="toc-the-augmented-dickeyfuller-test" class="nav-link" data-scroll-target="#the-augmented-dickeyfuller-test">The Augmented Dickey–Fuller test</a></li>
+  <li><a href="#why-the-t-table-doesnt-apply" id="toc-why-the-t-table-doesnt-apply" class="nav-link" data-scroll-target="#why-the-t-table-doesnt-apply">Why the <span class="math inline">t</span>-table doesn’t apply</a></li>
+  <li><a href="#kpss-testing-stationarity-as-the-null" id="toc-kpss-testing-stationarity-as-the-null" class="nav-link" data-scroll-target="#kpss-testing-stationarity-as-the-null">KPSS: testing stationarity as the null</a></li>
+  <li><a href="#phillipsperron-the-nonparametric-route" id="toc-phillipsperron-the-nonparametric-route" class="nav-link" data-scroll-target="#phillipsperron-the-nonparametric-route">Phillips–Perron: the nonparametric route</a></li>
+  <li><a href="#two-ways-to-be-non-stationary-ts-vs-ds" id="toc-two-ways-to-be-non-stationary-ts-vs-ds" class="nav-link" data-scroll-target="#two-ways-to-be-non-stationary-ts-vs-ds">Two ways to be non-stationary: TS vs DS</a></li>
+  <li><a href="#the-low-power-problem" id="toc-the-low-power-problem" class="nav-link" data-scroll-target="#the-low-power-problem">The low-power problem</a></li>
+  <li><a href="#structural-breaks-the-perron-critique" id="toc-structural-breaks-the-perron-critique" class="nav-link" data-scroll-target="#structural-breaks-the-perron-critique">Structural breaks: the Perron critique</a></li>
+  <li><a href="#seasonal-unit-roots-and-sarima" id="toc-seasonal-unit-roots-and-sarima" class="nav-link" data-scroll-target="#seasonal-unit-roots-and-sarima">Seasonal unit roots and SARIMA</a></li>
+  <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
+  <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
+  <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
+  <li><a href="#connections" id="toc-connections" class="nav-link" data-scroll-target="#connections">Connections</a></li>
+  <li><a href="#study-with-notebooklm" id="toc-study-with-notebooklm" class="nav-link" data-scroll-target="#study-with-notebooklm">Study with NotebookLM</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/04-predictive/index.html">IV · Predictive Modelling</a></li><li class="breadcrumb-item"><a href="../../content/04-predictive/time-series-fundamentals.html">Time Series &amp; Forecasting</a></li><li class="breadcrumb-item"><a href="../../content/04-predictive/unit-roots-and-stationarity.html">Unit Roots &amp; Stationarity Testing</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Unit Roots &amp; Stationarity Testing</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">One decision governs every time-series model — difference, or don’t? — and the tests that answer it are subtler, and weaker, than they look.</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="lead-kernel">
+<p><a href="../../content/04-predictive/time-series-fundamentals.html">Spurious regression</a> makes the question unavoidable: <em>is this series stationary, or does it have a unit root?</em> Get it right and standard inference returns; get it wrong and you either chase phantom trends or destroy real ones. But the tests that decide are <strong>non-standard</strong> (the usual <span class="math inline">t</span>-table doesn’t apply), <strong>directional</strong> (which hypothesis is the null matters), and <strong>famously low-powered</strong> (they often can’t tell a near-unit-root from a unit root). This entry is the careful machinery behind a deceptively simple “to difference or not.”</p>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p>The <a href="../../content/04-predictive/time-series-fundamentals.html">previous entry</a> introduced the unit root and the one-line Dickey–Fuller test. Real data force three complications it glossed over. First, economic errors are <strong>serially correlated</strong>, so the basic test is biased. Second, the choice between <em>trend-stationary</em> and <em>difference-stationary</em> changes your long-run forecasts entirely — and the wrong “fix” injects new pathologies. Third, the tests are weak enough that a confident verdict often isn’t available. Knowing how the tests work — and how they fail — is what separates mechanical differencing from judgement.</p>
+</section>
+<section id="the-augmented-dickeyfuller-test" class="level2">
+<h2 class="anchored" data-anchor-id="the-augmented-dickeyfuller-test">The Augmented Dickey–Fuller test</h2>
+<p>The basic Dickey–Fuller regression <span class="math inline">\Delta y_t = a_0 + \gamma y_{t-1} + \epsilon_t</span> assumes <span class="math inline">\epsilon_t</span> is <a href="../../content/04-predictive/time-series-fundamentals.html">white noise</a>. Most economic series violate that — and if the residuals are correlated, <span class="math inline">\gamma</span> and its standard error are <strong>poorly estimated</strong> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. The fix is to <strong>augment</strong> the regression with <strong>lagged differences</strong> of <span class="math inline">y</span>, which “soak up” the serial correlation until the remaining error is white noise <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>:</p>
+<p><span class="math display">
+\Delta y_t = a_0 + \gamma\,y_{t-1} + \sum_{i=2}^{p}\beta_i\,\Delta y_{t-i+1} + \epsilon_t .
+</span></p>
+<p>The null of a <strong>unit root is <span class="math inline">\gamma = 0</span></strong> (since <span class="math inline">\gamma = \rho_1 - 1</span>); the test statistic is the <span class="math inline">t</span>-ratio on <span class="math inline">\gamma</span>, but read against <em>special</em> critical values (below).</p>
+<p><strong>The three test regressions.</strong> Which deterministic terms to include is a real decision, because the critical values differ for each <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Specification</th>
+<th>Regression</th>
+<th>Statistic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Pure random walk</strong> (no constant)</td>
+<td><span class="math inline">\Delta y_t = \gamma y_{t-1} + \sum \beta_i \Delta y_{t-i+1} + \epsilon_t</span></td>
+<td><span class="math inline">\tau</span></td>
+</tr>
+<tr class="even">
+<td><strong>With drift</strong> (constant)</td>
+<td><span class="math inline">\Delta y_t = a_0 + \gamma y_{t-1} + \cdots</span></td>
+<td><span class="math inline">\tau_\mu</span></td>
+</tr>
+<tr class="odd">
+<td><strong>With drift &amp; linear trend</strong></td>
+<td><span class="math inline">\Delta y_t = a_0 + \gamma y_{t-1} + a_2 t + \cdots</span></td>
+<td><span class="math inline">\tau_\tau</span></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Choosing among them is crucial</strong> and asymmetric: including <em>unnecessary</em> deterministic regressors <strong>reduces power</strong>, but <em>omitting</em> a needed one (e.g.&nbsp;a trend in a trending series) gives a test with <strong>zero power as the sample grows</strong> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. Enders’ advice: <strong>plot the series first</strong>, match the specification to what you see, and use a <strong>general-to-specific</strong> strategy — start generously lagged and prune insignificant lags <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</p>
+</section>
+<section id="why-the-t-table-doesnt-apply" class="level2">
+<h2 class="anchored" data-anchor-id="why-the-t-table-doesnt-apply">Why the <span class="math inline">t</span>-table doesn’t apply</h2>
+<p>You cannot read the ADF statistic against the normal or <span class="math inline">t</span> distribution, because their theory <strong>assumes stationary variables</strong> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. Under the null, the series’ variance grows without bound, the OLS estimator of <span class="math inline">\rho</span> is <strong>biased below unity</strong>, and the statistic does <strong>not</strong> converge to a standard normal <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. Its true distribution — the <strong>Dickey–Fuller distribution</strong> — is obtained by <strong>Monte Carlo simulation</strong> and is <strong>skewed left</strong>: for the drift case the statistic centres near <span class="math inline">-1.53</span>, not <span class="math inline">0</span>, so the 5% critical value sits around <span class="math inline">-2.9</span> rather than the familiar <span class="math inline">-1.65</span> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. Using the wrong table massively over-rejects.</p>
+</section>
+<section id="kpss-testing-stationarity-as-the-null" class="level2">
+<h2 class="anchored" data-anchor-id="kpss-testing-stationarity-as-the-null">KPSS: testing stationarity as the null</h2>
+<p>ADF puts the <em>unit root</em> on trial (null = non-stationary). The <strong>KPSS</strong> test (Kwiatkowski–Phillips–Schmidt–Shin) <strong>reverses the burden of proof</strong>: its null is <strong>stationarity</strong>, the alternative a unit root <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. Because both tests are low-powered, they are best used <strong>together, as confirmatory analysis</strong> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>ADF result</th>
+<th>KPSS result</th>
+<th>Conclusion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fails to reject unit root</td>
+<td>Rejects stationarity</td>
+<td><strong>Strong evidence of a unit root</strong></td>
+</tr>
+<tr class="even">
+<td>Rejects unit root</td>
+<td>Fails to reject stationarity</td>
+<td><strong>Strong evidence of stationarity</strong></td>
+</tr>
+<tr class="odd">
+<td>Both fail to reject (or both reject)</td>
+<td>—</td>
+<td>Data <strong>“not sufficiently informative”</strong></td>
+</tr>
+</tbody>
+</table>
+<p>That last row is the honest one: sometimes the series simply cannot adjudicate between the two, and the right answer is <em>“we can’t tell.”</em></p>
+</section>
+<section id="phillipsperron-the-nonparametric-route" class="level2">
+<h2 class="anchored" data-anchor-id="phillipsperron-the-nonparametric-route">Phillips–Perron: the nonparametric route</h2>
+<p>The <strong>Phillips–Perron (PP)</strong> test attacks the same serial-correlation problem differently. Instead of adding lagged differences, it runs the <em>basic</em> DF regression and applies a <strong>nonparametric correction</strong> to the statistic itself, based on the residuals <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. PP was once favoured for series with large negative MA components, but Enders notes it generally <strong>does not perform as well as the ADF</strong> test with a modified-AIC lag choice <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</p>
+</section>
+<section id="two-ways-to-be-non-stationary-ts-vs-ds" class="level2">
+<h2 class="anchored" data-anchor-id="two-ways-to-be-non-stationary-ts-vs-ds">Two ways to be non-stationary: TS vs DS</h2>
+<p>A trending series can be non-stationary in two fundamentally different ways, and <strong>distinguishing them is vital for long-run forecasting</strong> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>:</p>
+<ul>
+<li><strong>Difference-stationary (DS).</strong> An I(1) series with a <em>stochastic</em> trend; stationary only after <strong>differencing</strong> (<span class="math inline">y_t - y_{t-1}</span>). Shocks are <strong>permanent</strong>.</li>
+<li><strong>Trend-stationary (TS).</strong> Stationary once a <em>deterministic</em> trend is removed (<span class="math inline">y_t - a_0 - a_2 t</span>). Shocks are <strong>transitory</strong> — the series returns to its trend line.</li>
+</ul>
+<p>The mis-specification costs run <strong>both ways</strong> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>:</p>
+<ul>
+<li><strong>Differencing a TS series (over-differencing)</strong> injects a <strong>non-invertible (unit) root into the MA part</strong> of the model — a needless pathology that wrecks estimation.</li>
+<li><strong>Detrending a DS series</strong> fails to remove the stochastic trend, leaving the series <strong>still non-stationary.</strong></li>
+</ul>
+<p>You must diagnose <em>which</em> kind you have; you cannot safely apply both fixes.</p>
+</section>
+<section id="the-low-power-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-low-power-problem">The low-power problem</h2>
+<p>Here is the practical warning. Unit-root tests have <strong>low power</strong>: when a series is genuinely stationary but its largest root is <em>close</em> to 1, they routinely <strong>fail to reject</strong> the false unit-root null <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. Enders’ example is sobering — with 100 observations and a true AR coefficient of <span class="math inline">0.95</span>, the ADF test correctly rejects a unit root only <strong>12.7% of the time</strong> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. A “fail to reject” is therefore <strong>weak</strong> evidence: it may mean a unit root, or merely a persistent stationary series the test can’t resolve.</p>
+<div id="cell-fig-adf-power" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Show the figure code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">7</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>T, n_sim <span class="op">=</span> <span class="dv">100</span>, <span class="dv">600</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>crit_5 <span class="op">=</span> <span class="op">-</span><span class="fl">2.89</span>                      <span class="co"># DF τ_μ 5% critical value, n≈100</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>rhos <span class="op">=</span> np.array([<span class="fl">1.00</span>, <span class="fl">0.99</span>, <span class="fl">0.97</span>, <span class="fl">0.95</span>, <span class="fl">0.90</span>, <span class="fl">0.85</span>, <span class="fl">0.80</span>, <span class="fl">0.70</span>])</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> df_tau(y):</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Drift-form Dickey–Fuller t-stat on gamma, OLS by hand."""</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    dy <span class="op">=</span> np.diff(y)                 <span class="co"># Delta y_t</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    ylag <span class="op">=</span> y[:<span class="op">-</span><span class="dv">1</span>]                   <span class="co"># y_{t-1}</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> np.column_stack([np.ones_like(ylag), ylag])   <span class="co"># [const, level]</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    beta, <span class="op">*</span>_ <span class="op">=</span> np.linalg.lstsq(X, dy, rcond<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    resid <span class="op">=</span> dy <span class="op">-</span> X <span class="op">@</span> beta</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    s2 <span class="op">=</span> resid <span class="op">@</span> resid <span class="op">/</span> (<span class="bu">len</span>(dy) <span class="op">-</span> <span class="dv">2</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    covb <span class="op">=</span> s2 <span class="op">*</span> np.linalg.inv(X.T <span class="op">@</span> X)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> beta[<span class="dv">1</span>] <span class="op">/</span> np.sqrt(covb[<span class="dv">1</span>, <span class="dv">1</span>])            <span class="co"># gamma / se(gamma)</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>power <span class="op">=</span> []</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> rho <span class="kw">in</span> rhos:</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    rejects <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_sim):</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> np.empty(T)<span class="op">;</span> y[<span class="dv">0</span>] <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        e <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, T)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, T):</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>            y[t] <span class="op">=</span> rho <span class="op">*</span> y[t<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> e[t]</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> df_tau(y) <span class="op">&lt;</span> crit_5:</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>            rejects <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    power.append(rejects <span class="op">/</span> n_sim)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>power <span class="op">=</span> np.array(power)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.2</span>))</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>ax.plot(rhos, power <span class="op">*</span> <span class="dv">100</span>, <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#1f4e79"</span>, lw<span class="op">=</span><span class="fl">2.2</span>, ms<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">5</span>, color<span class="op">=</span><span class="st">"#9aa0a6"</span>, ls<span class="op">=</span><span class="st">":"</span>, lw<span class="op">=</span><span class="fl">1.2</span>)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.70</span>, <span class="dv">7</span>, <span class="st">"test size ≈ 5%"</span>, color<span class="op">=</span><span class="st">"#6b7280"</span>, fontsize<span class="op">=</span><span class="fl">8.5</span>)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="fl">1.0</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.3</span>)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.985</span>, <span class="dv">80</span>, <span class="st">"true unit root"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, fontsize<span class="op">=</span><span class="fl">8.5</span>, rotation<span class="op">=</span><span class="dv">90</span>, va<span class="op">=</span><span class="st">"top"</span>)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>i95 <span class="op">=</span> <span class="bu">int</span>(np.where(rhos <span class="op">==</span> <span class="fl">0.95</span>)[<span class="dv">0</span>][<span class="dv">0</span>])</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="ss">f"ρ=0.95: rejects only </span><span class="sc">{</span>power[i95]<span class="op">*</span><span class="dv">100</span><span class="sc">:.0f}</span><span class="ss">%"</span>,</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>            xy<span class="op">=</span>(<span class="fl">0.95</span>, power[i95]<span class="op">*</span><span class="dv">100</span>), xytext<span class="op">=</span>(<span class="fl">0.86</span>, <span class="dv">55</span>),</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>), fontsize<span class="op">=</span><span class="fl">8.5</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>)</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"true AR(1) coefficient  ρ  (1 = unit root)"</span>)</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"</span><span class="sc">% o</span><span class="st">f samples rejecting the unit-root null"</span>)</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"ADF power collapses near a unit root (T = 100)"</span>)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>ax.invert_xaxis()<span class="op">;</span> ax.set_ylim(<span class="dv">0</span>, <span class="dv">100</span>)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-adf-power" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-adf-power-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="unit-roots-and-stationarity_files/figure-html/fig-adf-power-output-1.png" width="680" height="394" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adf-power-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: The low power of the ADF test, simulated by hand. For each true AR(1) coefficient ρ we generate 600 series of length 100, run the drift-form Dickey–Fuller regression Δy = a₀ + γ·y₋₁ + ε by hand, and reject the unit-root null when the τ-statistic falls below the 5% critical value (≈ −2.89). At ρ = 1 the rejection rate is the test’s size (~5%); as ρ falls the test <em>should</em> reject, but power climbs only slowly — near ρ = 0.95 it is dismal (Enders reports ~12.7%). ‘Fail to reject’ is weak evidence: a near-unit-root stationary series looks just like a unit root.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="structural-breaks-the-perron-critique" class="level2">
+<h2 class="anchored" data-anchor-id="structural-breaks-the-perron-critique">Structural breaks: the Perron critique</h2>
+<p>The low-power problem has a famous twist. <strong>Perron (1989)</strong> argued that many macroeconomic series are really <strong>trend-stationary with a few structural breaks</strong>, <em>not</em> unit-root processes <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. The mechanism: a single permanent shift in the mean makes a stationary series <em>look</em> non-stationary to an ADF test, <strong>biasing it toward not rejecting</strong> the unit root <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. Perron’s remedy is to build the <strong>known break date</strong> into the test regression with <strong>dummy variables</strong> for the pulse (<span class="math inline">DP</span>, a one-period spike) and level (<span class="math inline">DL</span>, a permanent shift) changes <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>:</p>
+<p><span class="math display">
+y_t = a_0 + a_1 y_{t-1} + a_2 t + \mu_1 DP + \mu_2 DL + \epsilon_t .
+</span></p>
+<p>The lesson generalises: <strong>what looks like a unit root may be a stable process with a break</strong> — always ask whether a regime change, not a stochastic trend, is doing the work.</p>
+</section>
+<section id="seasonal-unit-roots-and-sarima" class="level2">
+<h2 class="anchored" data-anchor-id="seasonal-unit-roots-and-sarima">Seasonal unit roots and SARIMA</h2>
+<p>Seasonality comes in two flavours: <strong>deterministic</strong> (captured by seasonal dummies) or <strong>stochastic</strong> (requiring <strong>seasonal differencing</strong>) <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. For quarterly data the seasonal difference is <span class="math inline">\Delta_4 y_t = y_t - y_{t-4}</span> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. The <strong>HEGY</strong> test (Hylleberg et al.&nbsp;1990) distinguishes non-seasonal, semi-annual, and seasonal unit roots <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. A model with both regular and seasonal structure is a <strong>multiplicative SARIMA</strong>, written <span class="math inline">\text{ARIMA}(p,d,q)(P,D,Q)_s</span> — the uppercase <span class="math inline">(P,D,Q)</span> are the seasonal AR, differencing, and MA orders and <span class="math inline">s</span> the seasonal period <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</p>
+</section>
+<section id="common-pitfalls" class="level2">
+<h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
+<div class="callout callout-style-default callout-warning callout-titled" title="Where this goes wrong">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Where this goes wrong
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Reading the ADF statistic off the <span class="math inline">t</span>-table.</strong> The distribution is non-standard and left-skewed; use Dickey–Fuller critical values, or you will massively over-reject. <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span></li>
+<li><strong>Omitting a needed trend term.</strong> A trending series tested without a trend regressor yields a test with <em>zero</em> power asymptotically. Match the specification to a plot of the data. <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span></li>
+<li><strong>Treating “fail to reject” as proof of a unit root.</strong> With low power, non-rejection is weak evidence; confirm with KPSS, and accept “not informative” when that’s the truth. <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span></li>
+<li><strong>Over-differencing a trend-stationary series.</strong> It plants a non-invertible MA unit root; difference only when the data are difference-stationary. <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span></li>
+<li><strong>Ignoring structural breaks.</strong> A break can manufacture a spurious unit root (Perron); test for the break rather than blindly differencing. <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="from-the-sources" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Who says what">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Who says what
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Enders, <em>Applied Econometric Time Series</em></strong> — the ADF test and <em>why</em> lagged differences are added (whitening serially correlated errors); the <strong>three test regressions</strong> (<span class="math inline">\tau</span>, <span class="math inline">\tau_\mu</span>, <span class="math inline">\tau_\tau</span>) and the asymmetric cost of including/omitting deterministic terms; the <strong>non-standard DF distribution</strong> (Monte-Carlo critical values, left-skew, <span class="math inline">\approx -1.53</span> centring); the <strong>KPSS</strong> stationarity-null test and confirmatory ADF+KPSS analysis (incl.&nbsp;“not sufficiently informative”); <strong>Phillips–Perron</strong> as a nonparametric alternative; <strong>trend- vs difference-stationary</strong> and the over-/under-differencing pathologies; the <strong>low-power</strong> result (12.7% at <span class="math inline">\rho=0.95</span>, <span class="math inline">T=100</span>); the <strong>Perron</strong> structural-break critique and its dummy-augmented regression; <strong>seasonal differencing</strong>, HEGY, and SARIMA <span class="math inline">(p,d,q)(P,D,Q)_s</span> notation.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="appendix-the-mathematics" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="appendix-the-mathematics">Appendix · the mathematics</h2>
+<div class="math-appendix">
+<p><strong>Why <span class="math inline">\gamma = 0</span> is the unit-root null.</strong> Start from <span class="math inline">y_t = \rho y_{t-1} + \epsilon_t</span> and subtract <span class="math inline">y_{t-1}</span>: <span class="math inline">\Delta y_t = (\rho-1)y_{t-1} + \epsilon_t = \gamma y_{t-1} + \epsilon_t</span>. A unit root <span class="math inline">\rho = 1</span> is exactly <span class="math inline">\gamma = 0</span>; stationarity (<span class="math inline">|\rho|&lt;1</span>) is <span class="math inline">\gamma &lt; 0</span>. The one-sided alternative <span class="math inline">\gamma &lt; 0</span> is why the DF rejection region is the <em>left</em> tail.</p>
+<p><strong>Why OLS is biased downward.</strong> Under <span class="math inline">\rho = 1</span> the regressor <span class="math inline">y_{t-1}</span> is itself I(1), so the usual <span class="math inline">\sqrt T</span>-asymptotics fail; <span class="math inline">\hat\rho</span> converges at rate <span class="math inline">T</span> (super-consistency) to a <em>non-normal</em> functional of Brownian motion, with a mean below 1 in finite samples — the <strong>Dickey–Fuller distribution</strong>. Its quantiles must be tabulated by simulation.</p>
+<p><strong>ADF lag choice.</strong> Choose <span class="math inline">p</span> (number of augmenting lags) large enough that <span class="math inline">\epsilon_t</span> is white noise — checked with the <a href="../../content/04-predictive/arima-forecasting.html">Ljung–Box test</a> — but no larger, since extra lags cost power. Information criteria (AIC, or Enders’ preferred <strong>MAIC</strong>) or general-to-specific pruning both work.</p>
+<p><strong>The HEGY idea.</strong> Seasonal differencing <span class="math inline">\Delta_s = 1 - L^s</span> factors into <span class="math inline">(1-L)</span> and seasonal-frequency roots; HEGY tests each factor separately, so you difference <em>only</em> at the frequencies that actually carry a unit root — avoiding the over-differencing <span class="math inline">\Delta_s</span> would force everywhere.</p>
+</div>
+</section>
+<section id="connections" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
+<ul>
+<li><strong>Builds on:</strong> <a href="../../content/04-predictive/time-series-fundamentals.html">time-series fundamentals</a> (unit roots, the random walk, differencing, white noise) and <a href="../../content/02-inference/hypothesis-testing.html">hypothesis testing</a> (null, power, critical values — here all made non-standard).</li>
+<li><strong>Feeds:</strong> <a href="../../content/04-predictive/arima-forecasting.html">ARIMA</a> (the test decides the “<span class="math inline">d</span>”), and is the gateway to <a href="../../content/04-predictive/cointegration-and-error-correction.html">cointegration</a> (which asks whether <em>several</em> I(1) series share a trend).</li>
+<li><strong>Echoes:</strong> <a href="../../content/02-inference/statistical-power.html">statistical power</a> — the low-power problem is a power problem, with unusually high stakes.</li>
+</ul>
+</section>
+<section id="study-with-notebooklm" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="study-with-notebooklm">Study with NotebookLM</h2>
+<ol type="1">
+<li>“Why does the Augmented Dickey–Fuller test add lagged differences, and what are the three test regressions and their statistics?”</li>
+<li>“Why can’t we use standard t critical values for a unit-root test — what is the Dickey–Fuller distribution and how is it obtained?”</li>
+<li>“Contrast the ADF and KPSS nulls and explain how they’re used together as confirmatory analysis, including the ‘not informative’ outcome.”</li>
+<li>“Distinguish trend-stationary from difference-stationary processes and explain the cost of over-differencing vs detrending the wrong one.”</li>
+<li>“Explain the low-power problem and the Perron critique — how can a structural break masquerade as a unit root?”</li>
+</ol>
+
+
+<!-- -->
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-enders_time_series" class="csl-entry" role="listitem">
+Enders, Walter. 2014. <em>Applied Econometric Time Series</em>. 4th ed. Wiley.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/profsarthak\.github\.io\/quant-social-scientist\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../content/04-predictive/time-series-fundamentals.html" class="pagination-link" aria-label="Time-Series Fundamentals">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Time-Series Fundamentals</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../content/04-predictive/arima-forecasting.html" class="pagination-link" aria-label="Forecasting with ARIMA">
+        <span class="nav-page-text">Forecasting with ARIMA</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Unit Roots &amp; Stationarity Testing"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "One decision governs every time-series model — difference, or don't? — and the tests that answer it are subtler, and weaker, than they look."</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Spurious regression</span><span class="co">](time-series-fundamentals.qmd)</span> makes the question unavoidable: *is this series</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>stationary, or does it have a unit root?* Get it right and standard inference returns; get it wrong and</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>you either chase phantom trends or destroy real ones. But the tests that decide are **non-standard** (the</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>usual $t$-table doesn't apply), **directional** (which hypothesis is the null matters), and **famously</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>low-powered** (they often can't tell a near-unit-root from a unit root). This entry is the careful</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>machinery behind a deceptively simple "to difference or not."</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>The <span class="co">[</span><span class="ot">previous entry</span><span class="co">](time-series-fundamentals.qmd)</span> introduced the unit root and the one-line Dickey–Fuller</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>test. Real data force three complications it glossed over. First, economic errors are **serially</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>correlated**, so the basic test is biased. Second, the choice between *trend-stationary* and</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>*difference-stationary* changes your long-run forecasts entirely — and the wrong "fix" injects new</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>pathologies. Third, the tests are weak enough that a confident verdict often isn't available. Knowing how</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>the tests work — and how they fail — is what separates mechanical differencing from judgement.</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Augmented Dickey–Fuller test</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>The basic Dickey–Fuller regression $\Delta y_t = a_0 + \gamma y_{t-1} + \epsilon_t$ assumes $\epsilon_t$</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>is <span class="co">[</span><span class="ot">white noise</span><span class="co">](time-series-fundamentals.qmd)</span>. Most economic series violate that — and if the residuals</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>are correlated, $\gamma$ and its standard error are **poorly estimated** <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. The fix is</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>to **augment** the regression with **lagged differences** of $y$, which "soak up" the serial correlation</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>until the remaining error is white noise <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>:</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>\Delta y_t = a_0 + \gamma\,y_{t-1} + \sum_{i=2}^{p}\beta_i\,\Delta y_{t-i+1} + \epsilon_t .</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>The null of a **unit root is $\gamma = 0$** (since $\gamma = \rho_1 - 1$); the test statistic is the</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>$t$-ratio on $\gamma$, but read against *special* critical values (below).</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>**The three test regressions.** Which deterministic terms to include is a real decision, because the</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>critical values differ for each <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>:</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Specification <span class="pp">|</span> Regression <span class="pp">|</span> Statistic <span class="pp">|</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Pure random walk** (no constant) <span class="pp">|</span> $\Delta y_t = \gamma y_{t-1} + \sum \beta_i \Delta y_{t-i+1} + \epsilon_t$ <span class="pp">|</span> $\tau$ <span class="pp">|</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **With drift** (constant) <span class="pp">|</span> $\Delta y_t = a_0 + \gamma y_{t-1} + \cdots$ <span class="pp">|</span> $\tau_\mu$ <span class="pp">|</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **With drift &amp; linear trend** <span class="pp">|</span> $\Delta y_t = a_0 + \gamma y_{t-1} + a_2 t + \cdots$ <span class="pp">|</span> $\tau_\tau$ <span class="pp">|</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>**Choosing among them is crucial** and asymmetric: including *unnecessary* deterministic regressors</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>**reduces power**, but *omitting* a needed one (e.g. a trend in a trending series) gives a test with</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>**zero power as the sample grows** [@enders_time_series]. Enders' advice: **plot the series first**, match</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>the specification to what you see, and use a **general-to-specific** strategy — start generously lagged and</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>prune insignificant lags <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why the $t$-table doesn't apply</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>You cannot read the ADF statistic against the normal or $t$ distribution, because their theory **assumes</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>stationary variables** <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. Under the null, the series' variance grows without bound, the</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>OLS estimator of $\rho$ is **biased below unity**, and the statistic does **not** converge to a standard</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>normal <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. Its true distribution — the **Dickey–Fuller distribution** — is obtained by</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>**Monte Carlo simulation** and is **skewed left**: for the drift case the statistic centres near $-1.53$,</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>not $0$, so the 5% critical value sits around $-2.9$ rather than the familiar $-1.65$ <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>Using the wrong table massively over-rejects.</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="fu">## KPSS: testing stationarity as the null</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>ADF puts the *unit root* on trial (null = non-stationary). The **KPSS** test (Kwiatkowski–Phillips–Schmidt–Shin)</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>**reverses the burden of proof**: its null is **stationarity**, the alternative a unit root</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. Because both tests are low-powered, they are best used **together, as confirmatory</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>analysis** <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>:</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> ADF result <span class="pp">|</span> KPSS result <span class="pp">|</span> Conclusion <span class="pp">|</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Fails to reject unit root <span class="pp">|</span> Rejects stationarity <span class="pp">|</span> **Strong evidence of a unit root** <span class="pp">|</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Rejects unit root <span class="pp">|</span> Fails to reject stationarity <span class="pp">|</span> **Strong evidence of stationarity** <span class="pp">|</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Both fail to reject (or both reject) <span class="pp">|</span> — <span class="pp">|</span> Data **"not sufficiently informative"** <span class="pp">|</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>That last row is the honest one: sometimes the series simply cannot adjudicate between the two, and the</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>right answer is *"we can't tell."*</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="fu">## Phillips–Perron: the nonparametric route</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>The **Phillips–Perron (PP)** test attacks the same serial-correlation problem differently. Instead of</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>adding lagged differences, it runs the *basic* DF regression and applies a **nonparametric correction** to</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>the statistic itself, based on the residuals <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. PP was once favoured for series with</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>large negative MA components, but Enders notes it generally **does not perform as well as the ADF** test</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>with a modified-AIC lag choice <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="fu">## Two ways to be non-stationary: TS vs DS</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>A trending series can be non-stationary in two fundamentally different ways, and **distinguishing them is</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>vital for long-run forecasting** <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>:</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Difference-stationary (DS).** An I(1) series with a *stochastic* trend; stationary only after</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>  **differencing** ($y_t - y_{t-1}$). Shocks are **permanent**.</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Trend-stationary (TS).** Stationary once a *deterministic* trend is removed ($y_t - a_0 - a_2 t$).</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>  Shocks are **transitory** — the series returns to its trend line.</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>The mis-specification costs run **both ways** <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>:</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Differencing a TS series (over-differencing)** injects a **non-invertible (unit) root into the MA</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>  part** of the model — a needless pathology that wrecks estimation.</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Detrending a DS series** fails to remove the stochastic trend, leaving the series **still</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>  non-stationary.**</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>You must diagnose *which* kind you have; you cannot safely apply both fixes.</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a><span class="fu">## The low-power problem</span></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>Here is the practical warning. Unit-root tests have **low power**: when a series is genuinely stationary</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>but its largest root is *close* to 1, they routinely **fail to reject** the false unit-root null</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. Enders' example is sobering — with 100 observations and a true AR coefficient of</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>$0.95$, the ADF test correctly rejects a unit root only **12.7% of the time** <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. A</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>"fail to reject" is therefore **weak** evidence: it may mean a unit root, or merely a persistent</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>stationary series the test can't resolve.</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-adf-power</span></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "The low power of the ADF test, simulated by hand. For each true AR(1) coefficient ρ we generate 600 series of length 100, run the drift-form Dickey–Fuller regression Δy = a₀ + γ·y₋₁ + ε by hand, and reject the unit-root null when the τ-statistic falls below the 5% critical value (≈ −2.89). At ρ = 1 the rejection rate is the test's size (~5%); as ρ falls the test *should* reject, but power climbs only slowly — near ρ = 0.95 it is dismal (Enders reports ~12.7%). 'Fail to reject' is weak evidence: a near-unit-root stationary series looks just like a unit root."</span></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">7</span>)</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>T, n_sim <span class="op">=</span> <span class="dv">100</span>, <span class="dv">600</span></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>crit_5 <span class="op">=</span> <span class="op">-</span><span class="fl">2.89</span>                      <span class="co"># DF τ_μ 5% critical value, n≈100</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>rhos <span class="op">=</span> np.array([<span class="fl">1.00</span>, <span class="fl">0.99</span>, <span class="fl">0.97</span>, <span class="fl">0.95</span>, <span class="fl">0.90</span>, <span class="fl">0.85</span>, <span class="fl">0.80</span>, <span class="fl">0.70</span>])</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> df_tau(y):</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Drift-form Dickey–Fuller t-stat on gamma, OLS by hand."""</span></span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>    dy <span class="op">=</span> np.diff(y)                 <span class="co"># Delta y_t</span></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>    ylag <span class="op">=</span> y[:<span class="op">-</span><span class="dv">1</span>]                   <span class="co"># y_{t-1}</span></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> np.column_stack([np.ones_like(ylag), ylag])   <span class="co"># [const, level]</span></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>    beta, <span class="op">*</span>_ <span class="op">=</span> np.linalg.lstsq(X, dy, rcond<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>    resid <span class="op">=</span> dy <span class="op">-</span> X <span class="op">@</span> beta</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>    s2 <span class="op">=</span> resid <span class="op">@</span> resid <span class="op">/</span> (<span class="bu">len</span>(dy) <span class="op">-</span> <span class="dv">2</span>)</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>    covb <span class="op">=</span> s2 <span class="op">*</span> np.linalg.inv(X.T <span class="op">@</span> X)</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> beta[<span class="dv">1</span>] <span class="op">/</span> np.sqrt(covb[<span class="dv">1</span>, <span class="dv">1</span>])            <span class="co"># gamma / se(gamma)</span></span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>power <span class="op">=</span> []</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> rho <span class="kw">in</span> rhos:</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>    rejects <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_sim):</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> np.empty(T)<span class="op">;</span> y[<span class="dv">0</span>] <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>        e <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, T)</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, T):</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>            y[t] <span class="op">=</span> rho <span class="op">*</span> y[t<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> e[t]</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> df_tau(y) <span class="op">&lt;</span> crit_5:</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>            rejects <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>    power.append(rejects <span class="op">/</span> n_sim)</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>power <span class="op">=</span> np.array(power)</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.2</span>))</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>ax.plot(rhos, power <span class="op">*</span> <span class="dv">100</span>, <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#1f4e79"</span>, lw<span class="op">=</span><span class="fl">2.2</span>, ms<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">5</span>, color<span class="op">=</span><span class="st">"#9aa0a6"</span>, ls<span class="op">=</span><span class="st">":"</span>, lw<span class="op">=</span><span class="fl">1.2</span>)</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.70</span>, <span class="dv">7</span>, <span class="st">"test size ≈ 5%"</span>, color<span class="op">=</span><span class="st">"#6b7280"</span>, fontsize<span class="op">=</span><span class="fl">8.5</span>)</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="fl">1.0</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.3</span>)</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.985</span>, <span class="dv">80</span>, <span class="st">"true unit root"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>, fontsize<span class="op">=</span><span class="fl">8.5</span>, rotation<span class="op">=</span><span class="dv">90</span>, va<span class="op">=</span><span class="st">"top"</span>)</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>i95 <span class="op">=</span> <span class="bu">int</span>(np.where(rhos <span class="op">==</span> <span class="fl">0.95</span>)[<span class="dv">0</span>][<span class="dv">0</span>])</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="ss">f"ρ=0.95: rejects only </span><span class="sc">{</span>power[i95]<span class="op">*</span><span class="dv">100</span><span class="sc">:.0f}</span><span class="ss">%"</span>,</span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>            xy<span class="op">=</span>(<span class="fl">0.95</span>, power[i95]<span class="op">*</span><span class="dv">100</span>), xytext<span class="op">=</span>(<span class="fl">0.86</span>, <span class="dv">55</span>),</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>), fontsize<span class="op">=</span><span class="fl">8.5</span>, color<span class="op">=</span><span class="st">"#c0392b"</span>)</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"true AR(1) coefficient  ρ  (1 = unit root)"</span>)</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"</span><span class="sc">% o</span><span class="st">f samples rejecting the unit-root null"</span>)</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"ADF power collapses near a unit root (T = 100)"</span>)</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>ax.invert_xaxis()<span class="op">;</span> ax.set_ylim(<span class="dv">0</span>, <span class="dv">100</span>)</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="fu">## Structural breaks: the Perron critique</span></span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>The low-power problem has a famous twist. **Perron (1989)** argued that many macroeconomic series are</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>really **trend-stationary with a few structural breaks**, *not* unit-root processes <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>The mechanism: a single permanent shift in the mean makes a stationary series *look* non-stationary to an</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>ADF test, **biasing it toward not rejecting** the unit root <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. Perron's remedy is to</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>build the **known break date** into the test regression with **dummy variables** for the pulse ($DP$, a</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>one-period spike) and level ($DL$, a permanent shift) changes <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>:</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>y_t = a_0 + a_1 y_{t-1} + a_2 t + \mu_1 DP + \mu_2 DL + \epsilon_t .</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>The lesson generalises: **what looks like a unit root may be a stable process with a break** — always ask</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>whether a regime change, not a stochastic trend, is doing the work.</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a><span class="fu">## Seasonal unit roots and SARIMA</span></span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>Seasonality comes in two flavours: **deterministic** (captured by seasonal dummies) or **stochastic**</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>(requiring **seasonal differencing**) <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. For quarterly data the seasonal difference is</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>$\Delta_4 y_t = y_t - y_{t-4}$ <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. The **HEGY** test (Hylleberg et al. 1990) distinguishes</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>non-seasonal, semi-annual, and seasonal unit roots <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. A model with both regular and</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>seasonal structure is a **multiplicative SARIMA**, written $\text{ARIMA}(p,d,q)(P,D,Q)_s$ — the uppercase</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>$(P,D,Q)$ are the seasonal AR, differencing, and MA orders and $s$ the seasonal period</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading the ADF statistic off the $t$-table.** The distribution is non-standard and left-skewed; use</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  Dickey–Fuller critical values, or you will massively over-reject. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Omitting a needed trend term.** A trending series tested without a trend regressor yields a test with</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>  *zero* power asymptotically. Match the specification to a plot of the data. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating "fail to reject" as proof of a unit root.** With low power, non-rejection is weak evidence;</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>  confirm with KPSS, and accept "not informative" when that's the truth. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Over-differencing a trend-stationary series.** It plants a non-invertible MA unit root; difference</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>  only when the data are difference-stationary. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring structural breaks.** A break can manufacture a spurious unit root (Perron); test for the</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>  break rather than blindly differencing. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Enders, *Applied Econometric Time Series*** — the ADF test and *why* lagged differences are added</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>  (whitening serially correlated errors); the **three test regressions** ($\tau$, $\tau_\mu$, $\tau_\tau$)</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>  and the asymmetric cost of including/omitting deterministic terms; the **non-standard DF distribution**</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>  (Monte-Carlo critical values, left-skew, $\approx -1.53$ centring); the **KPSS** stationarity-null test</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>  and confirmatory ADF+KPSS analysis (incl. "not sufficiently informative"); **Phillips–Perron** as a</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>  nonparametric alternative; **trend- vs difference-stationary** and the over-/under-differencing</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>  pathologies; the **low-power** result (12.7% at $\rho=0.95$, $T=100$); the **Perron** structural-break</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>  critique and its dummy-augmented regression; **seasonal differencing**, HEGY, and SARIMA</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>  $(p,d,q)(P,D,Q)_s$ notation.</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>**Why $\gamma = 0$ is the unit-root null.** Start from $y_t = \rho y_{t-1} + \epsilon_t$ and subtract</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>$y_{t-1}$: $\Delta y_t = (\rho-1)y_{t-1} + \epsilon_t = \gamma y_{t-1} + \epsilon_t$. A unit root</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>$\rho = 1$ is exactly $\gamma = 0$; stationarity ($|\rho|&lt;1$) is $\gamma &lt; 0$. The one-sided alternative</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>$\gamma &lt; 0$ is why the DF rejection region is the *left* tail.</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>**Why OLS is biased downward.** Under $\rho = 1$ the regressor $y_{t-1}$ is itself I(1), so the usual</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>$\sqrt T$-asymptotics fail; $\hat\rho$ converges at rate $T$ (super-consistency) to a *non-normal*</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>functional of Brownian motion, with a mean below 1 in finite samples — the **Dickey–Fuller distribution**.</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>Its quantiles must be tabulated by simulation.</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>**ADF lag choice.** Choose $p$ (number of augmenting lags) large enough that $\epsilon_t$ is white noise —</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>checked with the <span class="co">[</span><span class="ot">Ljung–Box test</span><span class="co">](arima-forecasting.qmd)</span> — but no larger, since extra lags cost power.</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>Information criteria (AIC, or Enders' preferred **MAIC**) or general-to-specific pruning both work.</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>**The HEGY idea.** Seasonal differencing $\Delta_s = 1 - L^s$ factors into $(1-L)$ and seasonal-frequency</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>roots; HEGY tests each factor separately, so you difference *only* at the frequencies that actually carry</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>a unit root — avoiding the over-differencing $\Delta_s$ would force everywhere.</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">time-series fundamentals</span><span class="co">](time-series-fundamentals.qmd)</span> (unit roots, the random walk,</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>  differencing, white noise) and <span class="co">[</span><span class="ot">hypothesis testing</span><span class="co">](../02-inference/hypothesis-testing.qmd)</span> (null,</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>  power, critical values — here all made non-standard).</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Feeds:** <span class="co">[</span><span class="ot">ARIMA</span><span class="co">](arima-forecasting.qmd)</span> (the test decides the "$d$"), and is the gateway to</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">cointegration</span><span class="co">](cointegration-and-error-correction.qmd)</span> (which asks whether *several* I(1) series share</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>  a trend).</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Echoes:** <span class="co">[</span><span class="ot">statistical power</span><span class="co">](../02-inference/statistical-power.qmd)</span> — the low-power problem is a</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>  power problem, with unusually high stakes.</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a><span class="fu">## Study with NotebookLM {.unnumbered}</span></span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>"Why does the Augmented Dickey–Fuller test add lagged differences, and what are the three test</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>   regressions and their statistics?"</span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>"Why can't we use standard t critical values for a unit-root test — what is the Dickey–Fuller</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>   distribution and how is it obtained?"</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>"Contrast the ADF and KPSS nulls and explain how they're used together as confirmatory analysis,</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>   including the 'not informative' outcome."</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>"Distinguish trend-stationary from difference-stationary processes and explain the cost of</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>   over-differencing vs detrending the wrong one."</span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>"Explain the low-power problem and the Perron critique — how can a structural break masquerade as a</span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>   unit root?"</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
