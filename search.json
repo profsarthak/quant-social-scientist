@@ -1848,6 +1848,351 @@
     ]
   },
   {
+    "objectID": "content/complexity/small-world-networks.html",
+    "href": "content/complexity/small-world-networks.html",
+    "title": "Small Worlds: The Watts–Strogatz Model",
+    "section": "",
+    "text": "Erdős–Rényi gives short paths but no clustering; a regular lattice gives clustering but long paths. Real social networks have both — your friends know each other (high clustering) and a stranger is six handshakes away (short paths). Watts & Strogatz (1998) showed the resolution is almost embarrassingly simple: take a clustered lattice and rewire a tiny fraction of edges at random. Those few shortcuts collapse the distances while leaving the clustering nearly intact.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Small Worlds: The Watts–Strogatz Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/small-world-networks.html#why-it-matters",
+    "href": "content/complexity/small-world-networks.html#why-it-matters",
+    "title": "Small Worlds: The Watts–Strogatz Model",
+    "section": "Why it matters",
+    "text": "Why it matters\nThe “small-world” property — short global paths plus dense local clustering — is one of the most robust empirical facts about social networks, and it governs how fast information, disease, and behaviour spread. WS is the minimal model that produces it, and the lesson generalises: a little randomness goes a very long way in a structured system.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Small Worlds: The Watts–Strogatz Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/small-world-networks.html#the-puzzle",
+    "href": "content/complexity/small-world-networks.html#the-puzzle",
+    "title": "Small Worlds: The Watts–Strogatz Model",
+    "section": "The puzzle",
+    "text": "The puzzle\nTwo reference points bracket the problem (Barabási 2016):\n\nA regular ring lattice (each node tied to its nearest neighbours) has high clustering but path lengths that grow linearly with N — a big, “large” world.\nA random graph has short (logarithmic) paths but negligible clustering.\n\nReal networks want the short paths of the random graph and the clustering of the lattice at once.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Small Worlds: The Watts–Strogatz Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/small-world-networks.html#the-model-order-plus-a-pinch-of-randomness",
+    "href": "content/complexity/small-world-networks.html#the-model-order-plus-a-pinch-of-randomness",
+    "title": "Small Worlds: The Watts–Strogatz Model",
+    "section": "The model: order plus a pinch of randomness",
+    "text": "The model: order plus a pinch of randomness\nWatts–Strogatz interpolates between them (Barabási 2016):\n\nStart from a ring lattice — each node connected to its k nearest neighbours (high clustering, long paths).\nRewire each edge with probability p — detach one end and reconnect it to a node chosen uniformly at random from the whole network.\n\nEach rewired edge is a shortcut linking otherwise-distant regions (Barabási 2016).\n\n\nShow the figure code (clustering & path length vs rewiring, by hand)\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom collections import deque\n\nrng = np.random.default_rng(1)\nN, half = 100, 3            # ring lattice: each node tied to 3 neighbours each side (degree 6)\n\ndef ring():\n    A = np.zeros((N, N), int)\n    for i in range(N):\n        for j in range(1, half+1):\n            A[i, (i+j) % N] = A[(i+j) % N, i] = 1\n    return A\n\ndef rewire(A, p):\n    A = A.copy()\n    for i in range(N):\n        for j in range(1, half+1):\n            nb = (i+j) % N\n            if A[i, nb] and rng.random() &lt; p:\n                A[i, nb] = A[nb, i] = 0\n                cand = np.where((A[i] == 0))[0]; cand = cand[(cand != i)]\n                if len(cand):\n                    t = rng.choice(cand); A[i, t] = A[t, i] = 1\n                else:\n                    A[i, nb] = A[nb, i] = 1\n    return A\n\ndef clustering(A):\n    adj = [np.where(A[i])[0] for i in range(N)]; Cs = []\n    for i in range(N):\n        nb = adj[i]; k = len(nb)\n        if k &lt; 2: continue\n        tri = sum(A[a, b] for x, a in enumerate(nb) for b in nb[x+1:])\n        Cs.append(2*tri/(k*(k-1)))\n    return np.mean(Cs)\n\ndef avg_path(A):\n    adj = [np.where(A[i])[0] for i in range(N)]; tot = cnt = 0\n    for s in range(N):\n        d = np.full(N, -1); d[s] = 0; q = deque([s])\n        while q:\n            u = q.popleft()\n            for v in adj[u]:\n                if d[v] &lt; 0: d[v] = d[u]+1; q.append(v)\n        dd = d[d &gt; 0]; tot += dd.sum(); cnt += len(dd)\n    return tot/cnt\n\nA0 = ring(); C0, L0 = clustering(A0), avg_path(A0)\nps = np.logspace(-3, 0, 14)\nCr, Lr = [], []\nfor p in ps:\n    cs, ls = [], []\n    for _ in range(6):\n        A = rewire(A0, p); cs.append(clustering(A)); ls.append(avg_path(A))\n    Cr.append(np.mean(cs)/C0); Lr.append(np.mean(ls)/L0)\n\nfig, ax = plt.subplots(figsize=(7.2, 4.2))\nax.semilogx(ps, Cr, \"o-\", color=\"#d98a29\", lw=2, label=\"C(p)/C(0)  — clustering (stays high)\")\nax.semilogx(ps, Lr, \"s-\", color=\"#1f4e79\", lw=2, label=\"L(p)/L(0)  — path length (falls fast)\")\nax.axvspan(0.004, 0.1, color=\"#1f8a4c\", alpha=0.08)\nax.text(0.012, 0.45, \"small-world\\nregime\", color=\"#1f8a4c\", fontsize=8.5, ha=\"center\")\nax.set_xlabel(\"rewiring probability  p\"); ax.set_ylabel(\"value relative to the ring lattice\")\nax.set_title(\"A few random shortcuts: short paths, clustering intact\")\nax.legend(fontsize=8, frameon=False); ax.set_ylim(0, 1.05)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The Watts–Strogatz small-world regime, computed by hand. Starting from a ring lattice (p=0), we rewire each edge with probability p and measure two things relative to the lattice: the average clustering C(p)/C(0) and the average path length L(p)/L(0) (both averaged over several realisations; log-scale p). The key is the GAP: even a tiny rewiring (p≈0.01) collapses the path length toward its random-graph value (blue falls fast), while the clustering stays almost untouched (orange stays high). In that wide intermediate band the network is a ‘small world’ — locally clustered yet globally short. Six degrees of separation needs only a few random shortcuts.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Small Worlds: The Watts–Strogatz Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/small-world-networks.html#from-order-to-randomness",
+    "href": "content/complexity/small-world-networks.html#from-order-to-randomness",
+    "title": "Small Worlds: The Watts–Strogatz Model",
+    "section": "From order to randomness",
+    "text": "From order to randomness\nAs p sweeps from 0 to 1 (Barabási 2016):\n\np=0 (regular): a pure lattice — high clustering, long paths.\nintermediate p (small-world): short paths and high clustering — the regime real social networks inhabit, and where “six degrees of separation” lives (Barabási 2016).\np=1 (random): every edge rewired — an Erdős–Rényi graph, short paths but low clustering.\n\nThe striking part is how early the path length drops: a rewiring of just p\\approx 0.01 already makes the world small, because each shortcut helps many pairs at once (Barabási 2016).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Small Worlds: The Watts–Strogatz Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/small-world-networks.html#the-limitation-that-opened-the-next-door",
+    "href": "content/complexity/small-world-networks.html#the-limitation-that-opened-the-next-door",
+    "title": "Small Worlds: The Watts–Strogatz Model",
+    "section": "The limitation that opened the next door",
+    "text": "The limitation that opened the next door\nWS captures clustering and short paths, but its degree distribution stays nearly uniform — it still cannot generate hubs (Barabási 2016). That missing ingredient — the heavy-tailed, hub-dominated degree distribution of real networks — is exactly what the Barabási–Albert scale-free model was built to explain (Barabási 2016).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Small Worlds: The Watts–Strogatz Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/small-world-networks.html#common-pitfalls",
+    "href": "content/complexity/small-world-networks.html#common-pitfalls",
+    "title": "Small Worlds: The Watts–Strogatz Model",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nReading WS as a model of degree. It explains clustering + short paths, not hubs; its degrees are near-uniform. Use scale-free models for hub structure. (Barabási 2016)\nThinking you need many shortcuts. A tiny rewiring already shrinks the world; the effect is highly nonlinear in p. (Barabási 2016)\nConfusing ‘small-world’ with ‘random’. A random graph is not a small world — it lacks the clustering. The small world is the intermediate regime. (Barabási 2016)",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Small Worlds: The Watts–Strogatz Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/small-world-networks.html#from-the-sources",
+    "href": "content/complexity/small-world-networks.html#from-the-sources",
+    "title": "Small Worlds: The Watts–Strogatz Model",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nBarabási, Network Science (with Menczer) — the small-world property as short paths + high clustering; the ring-lattice → random-rewiring construction; how even p\\approx0.01 collapses the path length while clustering persists (“six degrees”); the p:0\\to1 regimes (lattice → small-world → ER); and the limitation (no hubs) that motivated the scale-free model.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Small Worlds: The Watts–Strogatz Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/small-world-networks.html#appendix-the-mathematics",
+    "href": "content/complexity/small-world-networks.html#appendix-the-mathematics",
+    "title": "Small Worlds: The Watts–Strogatz Model",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nWhy path length drops so fast. In the ring, reaching a node d steps away costs \\sim d/k hops, so L\\sim N/k — linear in N. A single random shortcut creates a “wormhole” that, once you’re near one end, lets you jump across the whole ring; with pNk/2 shortcuts the typical distance falls to L\\sim \\ln N/\\ln k, the random-graph scaling. Because one shortcut shortens paths for many pairs, the collapse begins at vanishingly small p — the hallmark of the model.\nWhy clustering survives. Rewiring touches only a fraction p of edges, so a node keeps \\approx(1-p) of its lattice triangles; clustering degrades roughly as C(p)\\approx C(0)(1-p)^3 — slowly for small p. The gap between the fast-falling L(p) and the slow-falling C(p) is the small-world regime.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Small Worlds: The Watts–Strogatz Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/small-world-networks.html#connections",
+    "href": "content/complexity/small-world-networks.html#connections",
+    "title": "Small Worlds: The Watts–Strogatz Model",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: network structure & metrics (clustering and path length) and Erdős–Rényi (the p=1 limit, and the short-path benchmark).\nLeads to: scale-free networks (the hubs WS can’t make) and spreading on networks (short paths accelerate diffusion).\nEchoes: Milgram’s “six degrees” experiment and the everyday surprise of the small world.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Small Worlds: The Watts–Strogatz Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/random-graphs-erdos-renyi.html",
+    "href": "content/complexity/random-graphs-erdos-renyi.html",
+    "title": "Random Graphs: The Erdős–Rényi Model",
+    "section": "",
+    "text": "Before you can say a real network is special, you need a baseline of pure randomness. The Erdős–Rényi (ER) model supplies it: take N nodes and connect each pair independently with probability p. ER gets one thing profoundly right — a giant component that snaps into existence at a critical average degree — and two things wrong (no hubs, no clustering), and those failures are exactly what motivated the small-world and scale-free models that followed.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Random Graphs: The Erdős–Rényi Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/random-graphs-erdos-renyi.html#why-it-matters",
+    "href": "content/complexity/random-graphs-erdos-renyi.html#why-it-matters",
+    "title": "Random Graphs: The Erdős–Rényi Model",
+    "section": "Why it matters",
+    "text": "Why it matters\nER is the null model of network science — the “what would this look like by chance?” against which real structure is judged (it underlies the modularity null). And its phase transition is a first, clean example of emergence: a global property (system-wide connectivity) appearing abruptly from a smooth change in a local parameter — the theme of the whole Dynamics cluster.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Random Graphs: The Erdős–Rényi Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/random-graphs-erdos-renyi.html#the-gnp-model",
+    "href": "content/complexity/random-graphs-erdos-renyi.html#the-gnp-model",
+    "title": "Random Graphs: The Erdős–Rényi Model",
+    "section": "The G(N,p) model",
+    "text": "The G(N,p) model\nStart with N isolated nodes; connect each of the \\binom{N}{2} possible pairs with fixed probability p (Barabási 2016). Larger p means more edges; the average degree is \\langle k\\rangle = p(N-1).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Random Graphs: The Erdős–Rényi Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/random-graphs-erdos-renyi.html#degree-distribution-poisson-and-peaked",
+    "href": "content/complexity/random-graphs-erdos-renyi.html#degree-distribution-poisson-and-peaked",
+    "title": "Random Graphs: The Erdős–Rényi Model",
+    "section": "Degree distribution: Poisson and peaked",
+    "text": "Degree distribution: Poisson and peaked\nFor large sparse ER graphs the degree distribution is Poisson (Barabási 2016):\n\np_k = e^{-\\langle k\\rangle}\\frac{\\langle k\\rangle^{k}}{k!}.\n\nIt is peaked at \\langle k\\rangle — most nodes have roughly the same degree, so the average degree is a genuine characteristic scale of the network (Barabási 2016). (Hold that thought: the scale-free entry is named for the absence of such a scale.)",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Random Graphs: The Erdős–Rényi Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/random-graphs-erdos-renyi.html#the-giant-component-phase-transition",
+    "href": "content/complexity/random-graphs-erdos-renyi.html#the-giant-component-phase-transition",
+    "title": "Random Graphs: The Erdős–Rényi Model",
+    "section": "The giant-component phase transition",
+    "text": "The giant-component phase transition\nER’s signature result: macroscopic connectivity depends sharply on \\langle k\\rangle (Barabási 2016). A giant component — one cluster holding a finite fraction of all nodes — emerges suddenly when \\langle k\\rangle &gt; 1; below that threshold the graph is a dust of tiny isolated pieces (Barabási 2016).\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom collections import deque\n\nrng = np.random.default_rng(0)\nN = 600\nkbars = np.linspace(0.1, 4.0, 26)\n\ndef giant_fraction(kbar):\n    p = kbar/(N-1)\n    U = rng.random((N, N)); A = (U &lt; p); A = np.triu(A, 1); A = A | A.T\n    adj = [np.where(A[i])[0] for i in range(N)]\n    seen = np.zeros(N, bool); largest = 0\n    for s in range(N):\n        if not seen[s]:\n            q = deque([s]); seen[s] = True; cnt = 0\n            while q:\n                u = q.popleft(); cnt += 1\n                for v in adj[u]:\n                    if not seen[v]: seen[v] = True; q.append(v)\n            largest = max(largest, cnt)\n    return largest/N\n\nfrac = [giant_fraction(kb) for kb in kbars]\n\nfig, ax = plt.subplots(figsize=(7.2, 4.2))\nax.plot(kbars, frac, \"o-\", color=\"#1f4e79\", lw=2, ms=4)\nax.axvline(1.0, color=\"#c0392b\", ls=\"--\", lw=1.6)\nax.text(1.05, 0.08, \"critical ⟨k⟩ = 1\", color=\"#c0392b\", fontsize=9)\nax.set_xlabel(\"average degree ⟨k⟩\"); ax.set_ylabel(\"giant-component size (fraction of N)\")\nax.set_title(\"Connectivity appears all at once: the ER phase transition\")\nax.set_ylim(0, 1)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The Erdős–Rényi giant-component phase transition, simulated by hand. For each average degree ⟨k⟩ we build a random graph (each edge an independent coin flip), find the largest connected component with BFS, and plot its size as a fraction of the network. Below ⟨k⟩ = 1 (red line) the graph is fragmented — the largest piece is a vanishing fraction. Right at ⟨k⟩ = 1 a giant component abruptly appears and then rapidly engulfs almost everyone. One smooth knob (the average number of friends), one sharp qualitative change: a phase transition, and a textbook case of emergence.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Random Graphs: The Erdős–Rényi Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/random-graphs-erdos-renyi.html#short-paths",
+    "href": "content/complexity/random-graphs-erdos-renyi.html#short-paths",
+    "title": "Random Graphs: The Erdős–Rényi Model",
+    "section": "Short paths",
+    "text": "Short paths\nRandom graphs have very short distances: the average path length scales as \\langle d\\rangle \\approx \\ln N/\\ln\\langle k\\rangle (Barabási 2016) — logarithmically in network size, so even billions of nodes sit a few hops apart. This part ER gets right, and it is half of the “small world.”",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Random Graphs: The Erdős–Rényi Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/random-graphs-erdos-renyi.html#why-er-fails-on-real-networks",
+    "href": "content/complexity/random-graphs-erdos-renyi.html#why-er-fails-on-real-networks",
+    "title": "Random Graphs: The Erdős–Rényi Model",
+    "section": "Why ER fails on real networks",
+    "text": "Why ER fails on real networks\nThe other half it gets wrong (Barabási 2016):\n\nNo hubs. The Poisson tail decays faster than exponentially (\\sim 1/k!), so a node with vastly more links than average is essentially forbidden — yet real networks (the Internet, the web, citation graphs) are built around hubs (Barabási 2016).\nLow clustering. ER’s clustering coefficient is just C = p (Barabási 2016) — vanishingly small in a large sparse network, whereas real social networks have high clustering (triadic closure). Your friends being friends is not a coincidence ER can produce.\n\nThese two failures are precisely the gaps filled by Watts–Strogatz (clustering) and Barabási–Albert (hubs).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Random Graphs: The Erdős–Rényi Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/random-graphs-erdos-renyi.html#common-pitfalls",
+    "href": "content/complexity/random-graphs-erdos-renyi.html#common-pitfalls",
+    "title": "Random Graphs: The Erdős–Rényi Model",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nUsing ER as a model of a real network. It is a null model, not a description — real networks have hubs and clustering it can’t produce. (Barabási 2016)\nExpecting connectivity to scale smoothly. Below \\langle k\\rangle=1 adding edges barely connects anything; cross the threshold and the network integrates abruptly. (Barabási 2016)\nReading the average degree as typical in real data. It is typical in ER (Poisson), but meaningless for the heavy-tailed degree distributions of real networks. (Barabási 2016)",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Random Graphs: The Erdős–Rényi Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/random-graphs-erdos-renyi.html#from-the-sources",
+    "href": "content/complexity/random-graphs-erdos-renyi.html#from-the-sources",
+    "title": "Random Graphs: The Erdős–Rényi Model",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nBarabási, Network Science — the G(N,p) model; the Poisson degree distribution with characteristic scale \\langle k\\rangle; the giant-component phase transition at \\langle k\\rangle=1; the logarithmic average path length \\ln N/\\ln\\langle k\\rangle; and ER’s failures — no hubs (1/k! tail) and low clustering (C=p) — motivating small-world and scale-free models.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Random Graphs: The Erdős–Rényi Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/random-graphs-erdos-renyi.html#appendix-the-mathematics",
+    "href": "content/complexity/random-graphs-erdos-renyi.html#appendix-the-mathematics",
+    "title": "Random Graphs: The Erdős–Rényi Model",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nPoisson degree distribution. Each node has N-1 potential neighbours, each present with probability p, so degree is Binomial(N-1,p). For large N, small p, fixed \\langle k\\rangle=p(N-1), the Binomial converges to Poisson(\\langle k\\rangle) — hence the 1/k! tail that forbids hubs.\nThe \\langle k\\rangle = 1 threshold (branching intuition). Follow a random edge: the expected number of new neighbours it leads to is \\langle k\\rangle. If \\langle k\\rangle&lt;1 the branching process dies out (small components); if \\langle k\\rangle&gt;1 it survives with positive probability, seeding a component that grows with N — the giant component. The transition at \\langle k\\rangle=1 is the percolation threshold, the same mathematics as epidemic R_0=1 (spreading on networks).\nClustering C=p. Two neighbours of a node are themselves connected with probability exactly p (edges are independent), so the expected local clustering is p — independent of degree, and tiny when p\\sim\n\\langle k\\rangle/N.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Random Graphs: The Erdős–Rényi Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/random-graphs-erdos-renyi.html#connections",
+    "href": "content/complexity/random-graphs-erdos-renyi.html#connections",
+    "title": "Random Graphs: The Erdős–Rényi Model",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: network structure & metrics (components, clustering, path length) and common distributions (Binomial → Poisson).\nContrasts with: Watts–Strogatz (adds the missing clustering) and scale-free networks (adds the missing hubs).\nEchoes: the epidemic threshold (percolation = the \\langle k\\rangle=1 transition) and emergence (a phase transition from a smooth parameter).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Random Graphs: The Erdős–Rényi Model"
+    ]
+  },
+  {
+    "objectID": "content/complexity/index.html",
+    "href": "content/complexity/index.html",
+    "title": "Complexity Science",
+    "section": "",
+    "text": "Most of this manual works reductively: isolate a relationship, hold other things constant, estimate a clean effect. Complexity science is the counter-discipline. It studies systems where the interesting behaviour — a market crash, a traffic jam, a flock, a norm cascade, an epidemic — is emergent: it lives in the interactions, not in any component, and it changes over time as the parts adapt. For a social scientist, that is most of the interesting world.\nThis track assembles complexity science from three disciplines, each with a distinct, practical job.\nThe arc is structure → measurement → dynamics: the mindset tells you to look at the whole, networks let you measure its connective tissue, and complexity theory explains how it moves.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "Complexity Science"
+    ]
+  },
+  {
+    "objectID": "content/complexity/index.html#the-mindset-systems-thinking",
+    "href": "content/complexity/index.html#the-mindset-systems-thinking",
+    "title": "Complexity Science",
+    "section": "The Mindset · Systems Thinking",
+    "text": "The Mindset · Systems Thinking\nThe holistic lens, from Donella Meadows. (Relocated here from Part VI.)\n\n\n\nEntry\nStatus\nCore source\n\n\n\n\nThinking in systems: feedback, stocks & leverage\n✅ Written\nMeadows\n\n\nSystems traps & leverage points\n✅ Written\nMeadows\n\n\nWhy systems work: resilience, self-organisation & hierarchy\n✅ Written\nMeadows\n\n\nWhy systems surprise us: events, behaviour & structure\n✅ Written\nMeadows\n\n\nDancing with systems: the practitioner’s wisdoms\n✅ Written\nMeadows",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "Complexity Science"
+    ]
+  },
+  {
+    "objectID": "content/complexity/index.html#the-tool-network-analysis",
+    "href": "content/complexity/index.html#the-tool-network-analysis",
+    "title": "Complexity Science",
+    "section": "The Tool · Network Analysis",
+    "text": "The Tool · Network Analysis\nThe mathematics of connection, from Menczer, Fortunato & Davis, A First Course in Network Science (the hands-on how) and Barabási, Network Science (the structural why).\n\n\n\nEntry\nStatus\nCore source\n\n\n\n\nGraphs: the language of connection\n✅ Written\nMenczer, Barabási\n\n\nNetwork structure & metrics\n✅ Written\nMenczer, Barabási\n\n\nCentrality: who matters in a network\n✅ Written\nMenczer, Barabási\n\n\nCommunity detection & homophily\n✅ Written\nMenczer, Barabási\n\n\nRandom graphs: Erdős–Rényi\n✅ Written\nBarabási\n\n\nSmall worlds: Watts–Strogatz\n✅ Written\nBarabási\n\n\nScale-free networks: Barabási–Albert\n✅ Written\nBarabási\n\n\nSpreading on networks: contagion & diffusion\n✅ Written\nBarabási, Menczer",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "Complexity Science"
+    ]
+  },
+  {
+    "objectID": "content/complexity/index.html#the-dynamics-complexity-emergence",
+    "href": "content/complexity/index.html#the-dynamics-complexity-emergence",
+    "title": "Complexity Science",
+    "section": "The Dynamics · Complexity & Emergence",
+    "text": "The Dynamics · Complexity & Emergence\nHow structure becomes behaviour: emergence, agent-based models, chaos, power laws, criticality, adaptation, cellular automata. (Planned — awaiting a complexity-theory text in the corpus; candidates include Mitchell’s Complexity: A Guided Tour, Sayama, Miller & Page, Strogatz.)",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "Complexity Science"
+    ]
+  },
+  {
+    "objectID": "content/complexity/index.html#where-this-fits-in-the-rest-of-qss",
+    "href": "content/complexity/index.html#where-this-fits-in-the-rest-of-qss",
+    "title": "Complexity Science",
+    "section": "Where this fits in the rest of QSS",
+    "text": "Where this fits in the rest of QSS\nComplexity science is not a detour — it reuses and extends the manual’s machinery:\n\nNetworks are graphs you’ve already met: the DAGs of causal inference and the path diagrams of SEM are directed graphs; relational data is a graph in tables.\nDynamics rests on simulation: the Monte Carlo and agent-based methods here are the same simulation mindset, pointed at emergence.\nSystems thinking sharpens field judgement: it deepens the tyranny of metrics (Goodhart as a feedback loop) and from evidence to decision.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "Complexity Science"
+    ]
+  },
+  {
+    "objectID": "content/complexity/index.html#sources",
+    "href": "content/complexity/index.html#sources",
+    "title": "Complexity Science",
+    "section": "Sources",
+    "text": "Sources\n\nDonella Meadows, Thinking in Systems: A Primer — the systems-thinking pillar.\nMenczer, Fortunato & Davis, A First Course in Network Science — network algorithms and metrics.\nAlbert-László Barabási, Network Science — random, small-world, and scale-free network structure.\n(Complexity-theory text: to be added.)",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "Complexity Science"
+    ]
+  },
+  {
     "objectID": "content/complexity/dancing-with-systems.html",
     "href": "content/complexity/dancing-with-systems.html",
     "title": "Dancing with Systems: The Practitioner’s Wisdoms",
@@ -1949,6 +2294,162 @@
       "Complexity Science",
       "The Mindset · Systems Thinking",
       "Dancing with Systems: The Practitioner's Wisdoms"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html",
+    "href": "content/complexity/centrality.html",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "",
+    "text": "Ask “who is the most important node?” and the network gives different answers depending on what you mean. Degree rewards popularity; betweenness rewards brokerage; closeness rewards reach; eigenvector and PageRank reward prestige. A low-degree person who is the only bridge between two communities is nearly invisible to one measure and dominant in another — and knowing which to use is the whole skill.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html#why-it-matters",
+    "href": "content/complexity/centrality.html#why-it-matters",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "Why it matters",
+    "text": "Why it matters\n“Who should we vaccinate / target / monitor / promote?” is a centrality question, and choosing the wrong measure points you at the wrong node. The broker who controls information flow, the hub everyone follows, and the node that reaches everyone fastest are different people — centrality makes the distinction precise.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html#degree-centrality-popularity",
+    "href": "content/complexity/centrality.html#degree-centrality-popularity",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "Degree centrality — popularity",
+    "text": "Degree centrality — popularity\nThe simplest measure: the number of connections, normalised by the maximum possible (Menczer et al. 2020):\n\nc_D(i) = \\frac{k_i}{N-1}, \\qquad k_i = \\sum_j A_{ij}.\n\nIt captures popularity, activity, exposure — the hubs of a social network, the major airports of a flight network (Menczer et al. 2020). Local and cheap, but blind to where in the structure those edges sit.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html#betweenness-centrality-brokerage",
+    "href": "content/complexity/centrality.html#betweenness-centrality-brokerage",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "Betweenness centrality — brokerage",
+    "text": "Betweenness centrality — brokerage\nBetweenness measures how often a node sits on the shortest paths between other pairs (Menczer et al. 2020):\n\nb_i = \\sum_{h\\ne j\\ne i} \\frac{\\sigma_{hj}(i)}{\\sigma_{hj}},\n\nwhere \\sigma_{hj} is the number of shortest paths from h to j and \\sigma_{hj}(i) how many pass through i. It quantifies brokerage, gatekeeping, control of flow — the bridges between communities (Menczer et al. 2020). Its signature case: a low-degree individual who is the only link between two social circles (spanning a structural hole) has very high betweenness, because all communication between the groups must pass through them (Menczer et al. 2020). It is computed from BFS all-pairs shortest paths (Menczer et al. 2020).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html#closeness-centrality-reach",
+    "href": "content/complexity/centrality.html#closeness-centrality-reach",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "Closeness centrality — reach",
+    "text": "Closeness centrality — reach\nCloseness is the inverse of the total distance to everyone else (Menczer et al. 2020):\n\ng_i = \\frac{1}{\\sum_{j\\ne i}\\ell_{ij}}.\n\nHigh closeness means a node can reach the whole network in few hops — the most efficient seed for spreading a rumour or diffusing information fast (Menczer et al. 2020).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html#eigenvector-centrality-prestige-by-association",
+    "href": "content/complexity/centrality.html#eigenvector-centrality-prestige-by-association",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "Eigenvector centrality — prestige by association",
+    "text": "Eigenvector centrality — prestige by association\nDegree counts neighbours; eigenvector centrality weights them by their importance — “a node is important if its neighbours are important” (Menczer et al. 2020). An endorsement from a high-status node counts more than one from the periphery; an academic is influential for being cited by the highly cited (Menczer et al. 2020). Formally it is the leading eigenvector of the adjacency matrix:\n\nA\\mathbf{v} = \\lambda \\mathbf{v} \\quad(\\lambda = \\text{largest eigenvalue}),\n\nand c_E(i) = v_i (Menczer et al. 2020).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html#pagerank-the-directed-random-walk-variant",
+    "href": "content/complexity/centrality.html#pagerank-the-directed-random-walk-variant",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "PageRank — the directed, random-walk variant",
+    "text": "PageRank — the directed, random-walk variant\nPageRank (Google’s founders) adapts eigenvector centrality to directed networks via a random walker: importance is the long-run probability the walker is at a node (Barabási 2016). The fix that makes it work is a damping factor \\alpha (≈0.85): with probability \\alpha the walker follows an out-link, and with probability 1-\\alpha it teleports to a random node — which handles dangling nodes (no out-links) that would otherwise trap the walker and drain importance (Barabási 2016). The transition operator is T = \\alpha A D^{-1} + \\tfrac{1-\\alpha}{n}J, and PageRank is its stationary distribution (Barabási 2016). A page can have high degree but low PageRank if its links come only from unimportant pages (Barabási 2016).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html#when-centralities-disagree-and-how-to-choose",
+    "href": "content/complexity/centrality.html#when-centralities-disagree-and-how-to-choose",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "When centralities disagree — and how to choose",
+    "text": "When centralities disagree — and how to choose\n\n\nShow the figure code (betweenness via Brandes; eigenvector via power iteration — by hand)\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom collections import deque\n\nrng = np.random.default_rng(2)\nA = np.zeros((15, 15), int)\ndef connect(nodes, p):\n    for a in range(len(nodes)):\n        for b in range(a+1, len(nodes)):\n            if rng.random() &lt; p: A[nodes[a], nodes[b]] = A[nodes[b], nodes[a]] = 1\ncluA, cluB, bridge = list(range(0, 7)), list(range(7, 14)), 14\nconnect(cluA, 0.6); connect(cluB, 0.6)\nfor u in (cluA[0], cluA[1]): A[u, cluA[(cluA.index(u)+1)]] = A[cluA[(cluA.index(u)+1)], u] = 1  # ensure connected\nA[bridge, 3] = A[3, bridge] = 1; A[bridge, 10] = A[10, bridge] = 1   # the ONLY A-B link\nN = 15; adj = [np.where(A[i])[0] for i in range(N)]\n\n# degree\ndeg = A.sum(1).astype(float)\n\n# betweenness via Brandes (unweighted)\nbtw = np.zeros(N)\nfor s in range(N):\n    S = []; P = [[] for _ in range(N)]; sigma = np.zeros(N); sigma[s] = 1\n    d = np.full(N, -1); d[s] = 0; Q = deque([s])\n    while Q:\n        v = Q.popleft(); S.append(v)\n        for w in adj[v]:\n            if d[w] &lt; 0: d[w] = d[v]+1; Q.append(w)\n            if d[w] == d[v]+1: sigma[w] += sigma[v]; P[w].append(v)\n    delta = np.zeros(N)\n    while S:\n        w = S.pop()\n        for v in P[w]: delta[v] += (sigma[v]/sigma[w])*(1+delta[w])\n        if w != s: btw[w] += delta[w]\nbtw /= 2\n\n# eigenvector centrality via power iteration\nv = np.ones(N)\nfor _ in range(200):\n    v = A @ v; v /= np.linalg.norm(v)\neig = v\n\nfig, axes = plt.subplots(1, 3, figsize=(10.2, 3.8))\nang = {}; posA = np.c_[0.2+0.12*np.cos(np.linspace(0,2*np.pi,7,endpoint=False)),\n                       0.5+0.22*np.sin(np.linspace(0,2*np.pi,7,endpoint=False))]\nposB = np.c_[0.8+0.12*np.cos(np.linspace(0,2*np.pi,7,endpoint=False)),\n             0.5+0.22*np.sin(np.linspace(0,2*np.pi,7,endpoint=False))]\npos = np.vstack([posA, posB, [[0.5, 0.5]]])\nfor ax, score, name in zip(axes, [deg, btw, eig], [\"degree\", \"betweenness\", \"eigenvector\"]):\n    for i in range(N):\n        for j in adj[i]:\n            if j &gt; i: ax.plot(*zip(pos[i], pos[j]), color=\"#dadee2\", lw=0.7, zorder=1)\n    s = 60 + 1400*(score/score.max())\n    ax.scatter(pos[:,0], pos[:,1], s=s, color=\"#1f4e79\", zorder=2)\n    ax.scatter(*pos[bridge], s=60+1400*(score[bridge]/score.max()), facecolor=\"#1f4e79\",\n               edgecolor=\"#c0392b\", linewidth=2.5, zorder=3)\n    ax.set_title(name); ax.axis(\"off\"); ax.set_xlim(0,1); ax.set_ylim(0.15,0.85)\nfig.suptitle(\"Same network, three notions of 'important' — watch the bridge node (red outline)\", fontsize=11)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The same network scored by three centralities (node size ∝ score), computed by hand. Two dense communities are joined by a single BRIDGE node (red outline). Degree (left): the bridge is tiny — it has only two connections. Betweenness (middle): the bridge is the LARGEST node — every shortest path between the communities runs through it (Brandes’ algorithm). Eigenvector (right): the bridge shrinks again and the well-connected core of each community lights up — prestige by association. Same node, three verdicts. Choosing the centrality is choosing the definition of ‘important.’\n\n\n\n\n\nThe measures disagree because they capture different things (Barabási 2016). The selection rule (Menczer et al. 2020; Barabási 2016):\n\n\n\n\n\n\n\n\nUse…\n…to find\nExample\n\n\n\n\nDegree\nlocal popularity / activity\nmost-followed account\n\n\nBetweenness\nchokepoints / flow controllers\nthe broker between cliques\n\n\nCloseness\nfast reach / accessibility\nbest seed for diffusion\n\n\nEigenvector / PageRank\nglobal prestige / ranking\nmost-cited-by-the-cited; web ranking",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html#common-pitfalls",
+    "href": "content/complexity/centrality.html#common-pitfalls",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nDefaulting to degree. It misses brokers and prestige; the most structurally important node often isn’t the most connected. (Menczer et al. 2020)\nBetweenness on disconnected graphs. Undefined across components and dominated by a few bridges; compute within the giant component and interpret carefully. (Menczer et al. 2020)\nEigenvector centrality on directed/disconnected graphs. It can concentrate on one component or fail to converge — use PageRank (with damping) for directed networks. (Barabási 2016)\nForgetting normalisation. Raw betweenness scales with N^2; normalise before comparing networks of different size. (Menczer et al. 2020)\nEquating high degree with influence. A hub linked only by unimportant nodes has low PageRank — quantity isn’t quality. (Barabási 2016)",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html#from-the-sources",
+    "href": "content/complexity/centrality.html#from-the-sources",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nMenczer, Fortunato & Davis, A First Course in Network Science — degree c_D=k_i/(N-1); betweenness b_i=\\sum \\sigma_{hj}(i)/\\sigma_{hj} (brokerage / structural holes, via BFS); closeness g_i=1/\\sum_j\\ell_{ij}; eigenvector centrality as the leading eigenvector of A; and that the measures disagree, with a selection rule by research question.\nBarabási, Network Science — PageRank as the damped random-walk variant for directed graphs (T=\\alpha AD^{-1}+\\tfrac{1-\\alpha}{n}J), handling dangling nodes, and high-degree-but-low-PageRank.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html#appendix-the-mathematics",
+    "href": "content/complexity/centrality.html#appendix-the-mathematics",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nBrandes’ algorithm (the code). Naïvely, betweenness needs all shortest paths through each node — O(N^3). Brandes computes it in O(NL) by, for each source s: a BFS that records the shortest-path counts \\sigma_s(v) and predecessors, then a reverse-BFS accumulation of the dependency \\delta_s(v)=\\sum_{w:\\,v\\in\\text{pred}(w)} \\tfrac{\\sigma_s(v)}{\\sigma_s(w)}(1+\\delta_s(w)). Summing \\delta_s(v) over all sources s gives b_v (halved for undirected graphs) — exactly the loop in the figure.\nEigenvector centrality and power iteration. A\\mathbf v=\\lambda\\mathbf v for the largest \\lambda; by Perron–Frobenius, for a connected graph the leading eigenvector is positive, so v_i\\ge0 are valid scores. Power iteration — repeatedly \\mathbf v\\leftarrow A\\mathbf v/\\|A\\mathbf v\\| — converges to it because the dominant eigendirection grows fastest. PageRank is the same idea on the stochastic operator T, whose stationary distribution (leading eigenvector, \\lambda=1) is guaranteed unique by the teleportation term.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
+    ]
+  },
+  {
+    "objectID": "content/complexity/centrality.html#connections",
+    "href": "content/complexity/centrality.html#connections",
+    "title": "Centrality: Who Matters in a Network",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: network structure & metrics (betweenness/closeness use BFS distances) and graphs & the adjacency matrix (eigenvector/PageRank are spectral).\nLeads to: community detection (centrality finds nodes; communities find groups) and spreading on networks (central nodes are the superspreaders).\nEchoes: the leading eigenvector (PCA/factor analysis) — the same spectral idea in a different guise.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Centrality: Who Matters in a Network"
     ]
   },
   {
@@ -16743,75 +17244,666 @@
     ]
   },
   {
-    "objectID": "content/complexity/index.html",
-    "href": "content/complexity/index.html",
-    "title": "Complexity Science",
+    "objectID": "content/complexity/community-detection.html",
+    "href": "content/complexity/community-detection.html",
+    "title": "Community Detection & Homophily",
     "section": "",
-    "text": "Most of this manual works reductively: isolate a relationship, hold other things constant, estimate a clean effect. Complexity science is the counter-discipline. It studies systems where the interesting behaviour — a market crash, a traffic jam, a flock, a norm cascade, an epidemic — is emergent: it lives in the interactions, not in any component, and it changes over time as the parts adapt. For a social scientist, that is most of the interesting world.\nThis track assembles complexity science from three disciplines, each with a distinct, practical job.\nThe arc is structure → measurement → dynamics: the mindset tells you to look at the whole, networks let you measure its connective tissue, and complexity theory explains how it moves.",
+    "text": "Networks aren’t uniform — they clump. A community is a set of nodes more densely connected to each other than to the rest, and finding communities reveals the social circles, political factions, topic clusters, and echo chambers that organise a system (Menczer et al. 2020). The standard tool is modularity (a score for any proposed grouping) maximised by the Louvain algorithm — and the clumping itself is usually driven by homophily, the pull of like toward like.",
     "crumbs": [
       "Home",
       "Complexity Science",
-      "Complexity Science"
+      "The Tool · Network Analysis",
+      "Community Detection & Homophily"
     ]
   },
   {
-    "objectID": "content/complexity/index.html#the-mindset-systems-thinking",
-    "href": "content/complexity/index.html#the-mindset-systems-thinking",
-    "title": "Complexity Science",
-    "section": "The Mindset · Systems Thinking",
-    "text": "The Mindset · Systems Thinking\nThe holistic lens, from Donella Meadows. (Relocated here from Part VI.)\n\n\n\nEntry\nStatus\nCore source\n\n\n\n\nThinking in systems: feedback, stocks & leverage\n✅ Written\nMeadows\n\n\nSystems traps & leverage points\n✅ Written\nMeadows\n\n\nWhy systems work: resilience, self-organisation & hierarchy\n✅ Written\nMeadows\n\n\nWhy systems surprise us: events, behaviour & structure\n✅ Written\nMeadows\n\n\nDancing with systems: the practitioner’s wisdoms\n✅ Written\nMeadows",
+    "objectID": "content/complexity/community-detection.html#why-it-matters",
+    "href": "content/complexity/community-detection.html#why-it-matters",
+    "title": "Community Detection & Homophily",
+    "section": "Why it matters",
+    "text": "Why it matters\nCommunity structure is where networks meet the social questions this manual cares about: polarisation, segregation, filter bubbles, in-group/out-group dynamics. Detecting it lets you classify nodes by role — core members versus boundary/bridge nodes — and turns “is this network polarised?” into a measurable quantity.",
     "crumbs": [
       "Home",
       "Complexity Science",
-      "Complexity Science"
+      "The Tool · Network Analysis",
+      "Community Detection & Homophily"
     ]
   },
   {
-    "objectID": "content/complexity/index.html#the-tool-network-analysis",
-    "href": "content/complexity/index.html#the-tool-network-analysis",
-    "title": "Complexity Science",
-    "section": "The Tool · Network Analysis",
-    "text": "The Tool · Network Analysis\nThe mathematics of connection, from Menczer, Fortunato & Davis, A First Course in Network Science (the hands-on how) and Barabási, Network Science (the structural why).\n\n\n\n\n\n\n\n\nEntry\nStatus\nCore source\n\n\n\n\nGraphs: the language of connection\n🛠 Building\nMenczer, Barabási\n\n\nNetwork structure & metrics\n🛠 Building\nMenczer\n\n\nCentrality: who matters in a network\n🛠 Building\nMenczer\n\n\nCommunity detection & homophily\n🛠 Building\nMenczer, Barabási\n\n\nRandom graphs: Erdős–Rényi\n🛠 Building\nBarabási\n\n\nSmall worlds: Watts–Strogatz\n🛠 Building\nBarabási\n\n\nScale-free networks: Barabási–Albert\n🛠 Building\nBarabási\n\n\nSpreading on networks: contagion & diffusion\n🛠 Building\nBarabási, Menczer",
+    "objectID": "content/complexity/community-detection.html#what-a-community-is",
+    "href": "content/complexity/community-detection.html#what-a-community-is",
+    "title": "Community Detection & Homophily",
+    "section": "What a community is",
+    "text": "What a community is\nA community (module, cluster) is a group of nodes connected more densely internally than to the outside (Menczer et al. 2020). Socially they are friendship circles, liberal-vs-conservative blog blocs, web topic clusters, and echo chambers of like-minded exposure (Menczer et al. 2020). Knowing the partition lets you separate core members from boundary nodes that broker between groups (Menczer et al. 2020).",
     "crumbs": [
       "Home",
       "Complexity Science",
-      "Complexity Science"
+      "The Tool · Network Analysis",
+      "Community Detection & Homophily"
     ]
   },
   {
-    "objectID": "content/complexity/index.html#the-dynamics-complexity-emergence",
-    "href": "content/complexity/index.html#the-dynamics-complexity-emergence",
-    "title": "Complexity Science",
-    "section": "The Dynamics · Complexity & Emergence",
-    "text": "The Dynamics · Complexity & Emergence\nHow structure becomes behaviour: emergence, agent-based models, chaos, power laws, criticality, adaptation, cellular automata. (Planned — awaiting a complexity-theory text in the corpus; candidates include Mitchell’s Complexity: A Guided Tour, Sayama, Miller & Page, Strogatz.)",
+    "objectID": "content/complexity/community-detection.html#modularity-scoring-a-partition",
+    "href": "content/complexity/community-detection.html#modularity-scoring-a-partition",
+    "title": "Community Detection & Homophily",
+    "section": "Modularity: scoring a partition",
+    "text": "Modularity: scoring a partition\nModularity Q measures how much denser the within-community links are than expected by chance (Menczer et al. 2020). “By chance” means a configuration model — a randomised network preserving each node’s degree but rewiring at random (Menczer et al. 2020). For an undirected network:\n\nQ = \\frac{1}{2m}\\sum_{i,j}\\Big[A_{ij} - \\frac{k_i k_j}{2m}\\Big]\\,\\delta(c_i, c_j),\n\nwith m edges, degrees k_i, and \\delta(c_i,c_j)=1 when i,j share a community (Menczer et al. 2020). The bracket is observed minus expected internal connection; a high Q means internal links far exceed random fluctuation — a good partition (Menczer et al. 2020).",
     "crumbs": [
       "Home",
       "Complexity Science",
-      "Complexity Science"
+      "The Tool · Network Analysis",
+      "Community Detection & Homophily"
     ]
   },
   {
-    "objectID": "content/complexity/index.html#where-this-fits-in-the-rest-of-qss",
-    "href": "content/complexity/index.html#where-this-fits-in-the-rest-of-qss",
-    "title": "Complexity Science",
-    "section": "Where this fits in the rest of QSS",
-    "text": "Where this fits in the rest of QSS\nComplexity science is not a detour — it reuses and extends the manual’s machinery:\n\nNetworks are graphs you’ve already met: the DAGs of causal inference and the path diagrams of SEM are directed graphs; relational data is a graph in tables.\nDynamics rests on simulation: the Monte Carlo and agent-based methods here are the same simulation mindset, pointed at emergence.\nSystems thinking sharpens field judgement: it deepens the tyranny of metrics (Goodhart as a feedback loop) and from evidence to decision.",
+    "objectID": "content/complexity/community-detection.html#louvain-finding-the-partition",
+    "href": "content/complexity/community-detection.html#louvain-finding-the-partition",
+    "title": "Community Detection & Homophily",
+    "section": "Louvain: finding the partition",
+    "text": "Louvain: finding the partition\nMaximising Q over all partitions is intractable, so the Louvain method greedily approximates it — and is parameter-free and scales to millions of nodes (Menczer et al. 2020):\n\nLocal optimisation. Start every node in its own community; repeatedly move each node into the neighbouring community that most increases Q (\\Delta Q) until no move helps (Menczer et al. 2020).\nAggregation. Collapse each community into a super-node, building a smaller meta-network whose edge weights sum the underlying links (Menczer et al. 2020).\nRecurse the two phases on the meta-network until Q can’t improve (Menczer et al. 2020).\n\n\n\nShow the figure code (modularity + Louvain local-moving, by hand)\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(1)\nsizes = [13, 13, 13]; N = sum(sizes)\nlabel_true = np.concatenate([[g]*s for g, s in enumerate(sizes)])\nA = np.zeros((N, N), int)\nfor i in range(N):\n    for j in range(i+1, N):\n        p = 0.45 if label_true[i] == label_true[j] else 0.02\n        if rng.random() &lt; p: A[i, j] = A[j, i] = 1\nk = A.sum(1); m = A.sum() / 2; adj = [np.where(A[i])[0] for i in range(N)]\n\ndef modularity(comm):\n    Q = 0.0\n    for i in range(N):\n        for j in range(N):\n            if comm[i] == comm[j]:\n                Q += A[i, j] - k[i]*k[j]/(2*m)\n    return Q/(2*m)\n\n# Louvain phase 1: local moving\ncomm = np.arange(N)\nimproved = True\nwhile improved:\n    improved = False\n    for i in rng.permutation(N):\n        nbr_comms = set(comm[adj[i]]) | {comm[i]}\n        best, bestgain = comm[i], 0.0\n        for c in nbr_comms:\n            kin = sum(1 for nb in adj[i] if comm[nb] == c)          # i's edges into c\n            sigtot = k[(comm == c)].sum() - (k[i] if comm[i] == c else 0)\n            gain = kin - k[i]*sigtot/(2*m)                          # ∝ ΔQ\n            if gain &gt; bestgain + 1e-9: best, bestgain = c, gain\n        if best != comm[i]: comm[i] = best; improved = True\n\n# relabel communities 0..K-1\n_, comm = np.unique(comm, return_inverse=True)\nQ_det = modularity(comm)\nQ_rand = modularity(rng.integers(0, comm.max()+1, N))\n\n# layout: clusters apart, jitter within\nctr = {c: (np.cos(2*np.pi*c/(comm.max()+1)), np.sin(2*np.pi*c/(comm.max()+1))) for c in range(comm.max()+1)}\npos = np.array([ctr[comm[i]] for i in range(N)]) + rng.normal(0, 0.18, (N, 2))\n\nfig, ax = plt.subplots(figsize=(7.0, 4.6))\nfor i in range(N):\n    for j in adj[i]:\n        if j &gt; i: ax.plot(*zip(pos[i], pos[j]), color=\"#dde1e5\", lw=0.5, zorder=1)\nax.scatter(pos[:,0], pos[:,1], c=comm, cmap=\"Set1\", s=90, zorder=2, edgecolor=\"white\")\nax.set_title(f\"Louvain recovers the communities:  Q = {Q_det:.2f}  (random partition Q = {Q_rand:.2f})\")\nax.axis(\"off\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Community detection by hand. A network is planted with three groups (dense within, sparse between), then the Louvain local-moving step — repeatedly moving each node to the neighbouring community that most raises modularity — recovers them from scratch (every node starts in its own community). Node colour = detected community; the layout places communities apart. The recovered partition scores modularity Q ≈ 0.6, versus ≈ 0 for a random partition of the same network: modularity quantifies how much more clustered the structure is than chance.",
     "crumbs": [
       "Home",
       "Complexity Science",
-      "Complexity Science"
+      "The Tool · Network Analysis",
+      "Community Detection & Homophily"
     ]
   },
   {
-    "objectID": "content/complexity/index.html#sources",
-    "href": "content/complexity/index.html#sources",
-    "title": "Complexity Science",
-    "section": "Sources",
-    "text": "Sources\n\nDonella Meadows, Thinking in Systems: A Primer — the systems-thinking pillar.\nMenczer, Fortunato & Davis, A First Course in Network Science — network algorithms and metrics.\nAlbert-László Barabási, Network Science — random, small-world, and scale-free network structure.\n(Complexity-theory text: to be added.)",
+    "objectID": "content/complexity/community-detection.html#homophily-and-assortativity",
+    "href": "content/complexity/community-detection.html#homophily-and-assortativity",
+    "title": "Community Detection & Homophily",
+    "section": "Homophily and assortativity",
+    "text": "Homophily and assortativity\nWhy do communities form? Largely homophily — the tendency to connect with similar others (“birds of a feather”) (Menczer et al. 2020). The technical measure is assortativity: the correlation between the attributes of connected nodes (Barabási 2016):\n\nAssortative mixing — similar connects to similar (hubs to hubs). Most human social networks are assortative (Barabási 2016).\nDisassortative mixing — dissimilar connects (hubs to peripheral nodes), common in biological and technological networks (Barabási 2016).\n\nThe social consequence is direct: homophily and assortative mixing naturally produce segregated clusters, and with them polarisation and filter bubbles (Menczer et al. 2020) — the network-structural root of the Schelling-style segregation the Dynamics cluster will simulate.",
     "crumbs": [
       "Home",
       "Complexity Science",
-      "Complexity Science"
+      "The Tool · Network Analysis",
+      "Community Detection & Homophily"
+    ]
+  },
+  {
+    "objectID": "content/complexity/community-detection.html#cautions",
+    "href": "content/complexity/community-detection.html#cautions",
+    "title": "Community Detection & Homophily",
+    "section": "Cautions",
+    "text": "Cautions\n\n\n\n\n\n\nWarningCommunity detection is genuinely hard\n\n\n\n\nResolution limit. Modularity optimisation can’t see small communities — it merges any whose total links fall below \\sqrt{2m} into larger ones (Menczer et al. 2020).\nIll-posed. There is no unique definition of a community, so different algorithms give different answers (Menczer et al. 2020).\nDegeneracy. Large networks have many distinct partitions with near-optimal Q, so a single “true” community structure may not exist (Menczer et al. 2020).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Community Detection & Homophily"
+    ]
+  },
+  {
+    "objectID": "content/complexity/community-detection.html#common-pitfalls",
+    "href": "content/complexity/community-detection.html#common-pitfalls",
+    "title": "Community Detection & Homophily",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nReifying the partition. Treat the output as a useful grouping, not the truth — run multiple algorithms/seeds and compare. (Menczer et al. 2020)\nIgnoring the resolution limit. If you need fine structure, use multi-resolution methods, not vanilla modularity. (Menczer et al. 2020)\nReading communities as causal groups. Homophily (selection) and influence both produce clusters; the partition alone can’t separate them. (Menczer et al. 2020)\nComparing Q across networks. Q depends on size and density; don’t rank different networks by raw modularity. (Barabási 2016)",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Community Detection & Homophily"
+    ]
+  },
+  {
+    "objectID": "content/complexity/community-detection.html#from-the-sources",
+    "href": "content/complexity/community-detection.html#from-the-sources",
+    "title": "Community Detection & Homophily",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nMenczer, Fortunato & Davis, A First Course in Network Science — communities as denser-within groups (factions, echo chambers); modularity Q=\\frac{1}{2m}\\sum_{ij}[A_{ij}-k_ik_j/2m]\\delta(c_i,c_j) vs the configuration null; the Louvain local-moving + aggregation algorithm; homophily; and the resolution limit, ill-posedness, and degeneracy cautions.\nBarabási, Network Science — assortativity (assortative vs disassortative mixing) and the size/density dependence of modularity.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Community Detection & Homophily"
+    ]
+  },
+  {
+    "objectID": "content/complexity/community-detection.html#appendix-the-mathematics",
+    "href": "content/complexity/community-detection.html#appendix-the-mathematics",
+    "title": "Community Detection & Homophily",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nWhy k_ik_j/2m is “expected.” In the configuration model, a stub of node i connects to a stub of node j with probability \\propto k_j; summing over i’s k_i stubs gives an expected k_ik_j/2m edges between i and j. Modularity sums (actual - expected) over within-community pairs, so Q&gt;0 means communities have more internal edges than a degree-matched random graph.\nThe local-moving gain (the code). Moving isolated node i into community C changes modularity by \\Delta Q \\propto k_{i,C} - \\frac{k_i\\,\\Sigma_{\\text{tot}}(C)}{2m}, where k_{i,C} is i’s edge count into C and \\Sigma_{\\text{tot}}(C) the total degree of C. Greedily picking the C that maximises this is one Louvain sweep — exactly the loop above. Aggregation then repeats it on the community graph, giving Louvain’s near-linear scaling.\nResolution limit, sketched. Because the null term scales with the whole network’s 2m, two small but clearly separate modules can look like noise relative to the global expectation and get merged once their internal links drop below \\sim\\sqrt{2m} — a global yardstick applied to local structure.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Community Detection & Homophily"
+    ]
+  },
+  {
+    "objectID": "content/complexity/community-detection.html#connections",
+    "href": "content/complexity/community-detection.html#connections",
+    "title": "Community Detection & Homophily",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: network structure & metrics (density, clustering) and centrality (boundary/bridge nodes between communities).\nRelates to: factor analysis / spectral methods (spectral community detection is the same eigen-idea) and unsupervised clustering.\nLeads to: scale-free networks and spreading on networks — community structure shapes how things diffuse.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Community Detection & Homophily"
+    ]
+  },
+  {
+    "objectID": "content/complexity/graphs-language-of-connection.html",
+    "href": "content/complexity/graphs-language-of-connection.html",
+    "title": "Graphs: The Language of Connection",
+    "section": "",
+    "text": "A network strips a system down to its connective tissue: nodes (the components) and edges (their interactions). That deliberate simplification is powerful — friendship, collaboration, citation, trade, and contagion are all the same object, a graph, and once you write it as an adjacency matrix every structural question becomes a matter of counting and linear algebra. This entry is the vocabulary the rest of the Network Analysis sub-track is built on.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Graphs: The Language of Connection"
+    ]
+  },
+  {
+    "objectID": "content/complexity/graphs-language-of-connection.html#why-it-matters",
+    "href": "content/complexity/graphs-language-of-connection.html#why-it-matters",
+    "title": "Graphs: The Language of Connection",
+    "section": "Why it matters",
+    "text": "Why it matters\nSocial science is dense with relational data — who trusts whom, which firms trade, which papers cite which — and the variables-in-a-table mindset throws the relationships away. The graph keeps them, and turns “how is this system wired?” into precise, computable questions. It is also a structure you’ve already met elsewhere in this manual: causal DAGs and SEM path diagrams are graphs.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Graphs: The Language of Connection"
+    ]
+  },
+  {
+    "objectID": "content/complexity/graphs-language-of-connection.html#what-a-network-is",
+    "href": "content/complexity/graphs-language-of-connection.html#what-a-network-is",
+    "title": "Graphs: The Language of Connection",
+    "section": "What a network is",
+    "text": "What a network is\nA network (graph) is a set of nodes (vertices) and the edges (links) between them (Menczer et al. 2020). The edges come in flavours that change everything downstream (Menczer et al. 2020; Barabási 2016):\n\nUndirected vs directed. Undirected edges are mutual (a friendship, a power line); directed edges point from a source to a target (a hyperlink, a phone call, “follows” on social media).\nUnweighted vs weighted. Unweighted edges are binary (present/absent); weighted edges carry an intensity — trade volume between countries, messages exchanged between people.\nBipartite. Two distinct node types with edges only between the types — actors and the films they appeared in, authors and papers, voters and bills. Projecting a bipartite graph onto one type yields a co-affiliation network (co-stars, co-authors).\n\nTypical social-science graphs: friendship (Facebook), collaboration (co-authorship), citation (papers citing papers), trade (countries) (Menczer et al. 2020).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Graphs: The Language of Connection"
+    ]
+  },
+  {
+    "objectID": "content/complexity/graphs-language-of-connection.html#the-adjacency-matrix-and-degree",
+    "href": "content/complexity/graphs-language-of-connection.html#the-adjacency-matrix-and-degree",
+    "title": "Graphs: The Language of Connection",
+    "section": "The adjacency matrix and degree",
+    "text": "The adjacency matrix and degree\nThe workhorse representation is the adjacency matrix A: an N\\times N matrix with A_{ij}=1 if an edge joins nodes i and j, and 0 otherwise (Barabási 2016). (For an undirected graph A is symmetric; for a weighted graph A_{ij} holds the weight.) The matrix is the graph — and it makes the graph computable.\nThe first quantity it gives is the degree k_i, the number of edges at node i — simply the row (or column) sum (Menczer et al. 2020):\n\nk_i = \\sum_{j=1}^{N} A_{ij}.\n\nFor directed graphs the degree splits into in-degree k_i^{\\text{in}} (incoming) and out-degree k_i^{\\text{out}} (outgoing) — column and row sums respectively (Menczer et al. 2020). Aggregating over all nodes gives the degree distribution p_k — the probability a random node has degree k (Barabási 2016) — the single most informative summary of a network’s structure, and the star of the scale-free entry.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nlabels = [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\"]\nedges = [(0,1),(0,2),(0,3),(0,4),(1,2),(2,3),(3,4),(4,5),(1,6)]   # A is a hub\nN = len(labels)\nA = np.zeros((N, N), int)\nfor i, j in edges:\n    A[i, j] = A[j, i] = 1\ndeg = A.sum(1)\n\nang = np.linspace(0, 2*np.pi, N, endpoint=False) + np.pi/2\npos = np.c_[np.cos(ang), np.sin(ang)]\n\nfig, (axG, axM) = plt.subplots(1, 2, figsize=(8.8, 4.2), gridspec_kw={\"width_ratios\":[1.1,1]})\nfor i, j in edges:\n    axG.plot(*zip(pos[i], pos[j]), color=\"#9aa0a6\", lw=1.4, zorder=1)\naxG.scatter(pos[:,0], pos[:,1], s=600 + 220*deg, color=\"#1f4e79\", zorder=2)\nfor k, (x, y) in enumerate(pos):\n    axG.text(x, y, f\"{labels[k]}\\n(k={deg[k]})\", ha=\"center\", va=\"center\", color=\"white\",\n             fontsize=8.5, fontweight=\"bold\", zorder=3)\naxG.set_title(\"A network\"); axG.axis(\"off\"); axG.set_xlim(-1.4,1.4); axG.set_ylim(-1.4,1.4)\n\naxM.imshow(A, cmap=\"Blues\", vmin=0, vmax=1)\naxM.set_xticks(range(N)); axM.set_xticklabels(labels, fontsize=8)\naxM.set_yticks(range(N)); axM.set_yticklabels(labels, fontsize=8)\nfor i in range(N):\n    for j in range(N):\n        axM.text(j, i, A[i,j], ha=\"center\", va=\"center\", fontsize=7,\n                 color=\"white\" if A[i,j] else \"#bbb\")\naxM.set_title(\"its adjacency matrix A\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A small undirected social network (left) and its adjacency matrix (right), built by hand. Each node is drawn on a circle; an edge {i,j} lights up cells A[i,j] and A[j,i] (the matrix is symmetric for an undirected graph). A node’s degree is its row sum — the dark cells in its row — so node A (4 edges) is the hub and node F (1 edge) is a pendant. Everything the sub-track measures — paths, clustering, centrality, communities — is computed from this matrix.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Graphs: The Language of Connection"
+    ]
+  },
+  {
+    "objectID": "content/complexity/graphs-language-of-connection.html#common-pitfalls",
+    "href": "content/complexity/graphs-language-of-connection.html#common-pitfalls",
+    "title": "Graphs: The Language of Connection",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nIgnoring directedness. Treating a “follows” or citation graph as undirected discards real information (influence flows one way). Match the graph type to the relation. (Barabási 2016)\nThrowing away weights. Binarising a weighted network (trade, messaging) loses intensity that often carries the signal. (Menczer et al. 2020)\nProjecting a bipartite graph carelessly. A co-authorship projection inflates clustering (every paper becomes a clique); account for it. (Menczer et al. 2020)\nConfusing the matrix’s zeros. A_{ij}=0 means “no observed edge,” which in sampled social data may mean “unobserved,” not “no relationship.” (Menczer et al. 2020)",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Graphs: The Language of Connection"
+    ]
+  },
+  {
+    "objectID": "content/complexity/graphs-language-of-connection.html#from-the-sources",
+    "href": "content/complexity/graphs-language-of-connection.html#from-the-sources",
+    "title": "Graphs: The Language of Connection",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nMenczer, Fortunato & Davis, A First Course in Network Science — nodes/edges; directed/undirected, weighted, bipartite types with social examples; the degree k_i=\\sum_j A_{ij}, in/out-degree, and the degree distribution p_k.\nBarabási, Network Science — the adjacency matrix A (A_{ij}=1 for an edge), symmetry for undirected graphs, and the degree distribution as the network’s defining structural summary.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Graphs: The Language of Connection"
+    ]
+  },
+  {
+    "objectID": "content/complexity/graphs-language-of-connection.html#appendix-the-mathematics",
+    "href": "content/complexity/graphs-language-of-connection.html#appendix-the-mathematics",
+    "title": "Graphs: The Language of Connection",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nThe adjacency matrix is a computational engine. Beyond storing edges, A encodes paths: the (i,j) entry of A^k counts the number of walks of length k from i to j. So \\operatorname{tr}(A^2)/2 = number of edges, and \\operatorname{tr}(A^3)/6 = number of triangles — the raw material for the clustering coefficient. Many network metrics are spectral: the leading eigenvector of A is eigenvector centrality, and the eigenvalues govern spreading thresholds.\nSparsity. Real networks are sparse: the number of edges L \\ll \\binom{N}{2}, so A is mostly zeros. In practice one stores an adjacency list (each node’s neighbours) rather than the full N\\times N matrix — O(N+L) memory instead of O(N^2) — which is what makes BFS and the other algorithms scale.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Graphs: The Language of Connection"
+    ]
+  },
+  {
+    "objectID": "content/complexity/graphs-language-of-connection.html#connections",
+    "href": "content/complexity/graphs-language-of-connection.html#connections",
+    "title": "Graphs: The Language of Connection",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: linear algebra (the adjacency matrix) — and connects to structures you’ve met: causal DAGs (directed graphs), SEM path diagrams, and relational data (a graph stored as tables).\nLeads to: network structure & metrics (paths, density, clustering), centrality, and the network models (Erdős–Rényi, small-world, scale-free).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Graphs: The Language of Connection"
+    ]
+  },
+  {
+    "objectID": "content/complexity/network-structure-and-metrics.html",
+    "href": "content/complexity/network-structure-and-metrics.html",
+    "title": "Network Structure & Metrics",
+    "section": "",
+    "text": "With the adjacency matrix in hand, a small vocabulary of metrics characterises a network’s shape: distances (how many hops separate nodes), components (what’s reachable from what), density (how many of the possible edges exist), and clustering (how tightly neighbourhoods close into triangles). All of them are computed by walking the graph — the breadth-first search that ripples outward from a node.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Network Structure & Metrics"
+    ]
+  },
+  {
+    "objectID": "content/complexity/network-structure-and-metrics.html#why-it-matters",
+    "href": "content/complexity/network-structure-and-metrics.html#why-it-matters",
+    "title": "Network Structure & Metrics",
+    "section": "Why it matters",
+    "text": "Why it matters\nThese metrics turn “what does this network look like?” into defensible numbers — and the combinations are diagnostic: short distances plus high clustering is the signature of a small world; a single giant component signals an integrated system. They are the measurements every later entry builds on.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Network Structure & Metrics"
+    ]
+  },
+  {
+    "objectID": "content/complexity/network-structure-and-metrics.html#paths-distance-diameter",
+    "href": "content/complexity/network-structure-and-metrics.html#paths-distance-diameter",
+    "title": "Network Structure & Metrics",
+    "section": "Paths, distance, diameter",
+    "text": "Paths, distance, diameter\nA path is a sequence of edges; its length is the number of edges (Menczer et al. 2020). The distance (shortest path) between two nodes is the minimum number of edges connecting them (Menczer et al. 2020). Two summaries follow (Barabási 2016):\n\nDiameter d_{\\max} — the largest shortest-path distance between any pair: the network’s “width.”\nAverage path length \\langle\\ell\\rangle = \\frac{1}{N(N-1)}\\sum_{i\\ne j}\\ell_{ij} — the typical separation. Famously small in social networks (the “six degrees” phenomenon).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Network Structure & Metrics"
+    ]
+  },
+  {
+    "objectID": "content/complexity/network-structure-and-metrics.html#components-and-the-giant-component",
+    "href": "content/complexity/network-structure-and-metrics.html#components-and-the-giant-component",
+    "title": "Network Structure & Metrics",
+    "section": "Components and the giant component",
+    "text": "Components and the giant component\nA connected component is a maximal set of nodes all reachable from one another (Menczer et al. 2020). Real networks typically have one giant component holding the vast majority of nodes, plus small fragments and isolates (Barabási 2016). Distances are only defined within a component, so most analysis runs on the giant component.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Network Structure & Metrics"
+    ]
+  },
+  {
+    "objectID": "content/complexity/network-structure-and-metrics.html#density",
+    "href": "content/complexity/network-structure-and-metrics.html#density",
+    "title": "Network Structure & Metrics",
+    "section": "Density",
+    "text": "Density\nDensity is the fraction of possible edges that actually exist (Menczer et al. 2020):\n\nd = \\frac{L}{L_{\\max}} = \\frac{2L}{N(N-1)},\n\nwith L edges and N nodes. The headline fact: real networks are sparse, d \\ll 1 — a person has hundreds of friends, not millions (Barabási 2016). Sparsity is what makes networks computable (store an adjacency list, not the full matrix).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Network Structure & Metrics"
+    ]
+  },
+  {
+    "objectID": "content/complexity/network-structure-and-metrics.html#clustering-do-your-friends-know-each-other",
+    "href": "content/complexity/network-structure-and-metrics.html#clustering-do-your-friends-know-each-other",
+    "title": "Network Structure & Metrics",
+    "section": "Clustering: do your friends know each other?",
+    "text": "Clustering: do your friends know each other?\nThe clustering coefficient measures how much a node’s neighbourhood closes into triangles (Menczer et al. 2020). The local clustering of node i is the fraction of its neighbour-pairs that are themselves connected (Menczer et al. 2020):\n\nC_i = \\frac{2\\,\\tau(i)}{k_i(k_i-1)},\n\nwhere \\tau(i) is the number of triangles through i and k_i its degree. The network’s average clustering \\langle C\\rangle averages C_i over all nodes (Menczer et al. 2020). High clustering is the fingerprint of triadic closure — “friends of friends are likely to be friends” — and of tightly knit communities (Menczer et al. 2020).\n\n\nShow the figure code (BFS + metrics by hand)\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom collections import deque\n\nrng = np.random.default_rng(7)\nN = 70\npos = rng.random((N, 2))\nDm = np.sqrt(((pos[:, None, :] - pos[None, :, :])**2).sum(-1))\nA = ((Dm &lt; 0.21) & (Dm &gt; 0)).astype(int)\nadj = [np.where(A[i])[0] for i in range(N)]\n\ndef bfs(src):\n    dist = np.full(N, -1); dist[src] = 0; q = deque([src])\n    while q:\n        u = q.popleft()\n        for v in adj[u]:\n            if dist[v] &lt; 0:\n                dist[v] = dist[u] + 1; q.append(v)\n    return dist\n\n# connected components -&gt; giant\nseen = np.zeros(N, bool); comps = []\nfor i in range(N):\n    if not seen[i]:\n        m = np.where(bfs(i) &gt;= 0)[0]; seen[m] = True; comps.append(m)\ngiant = max(comps, key=len)\nsrc = giant[np.argmin(pos[giant, 0])]               # a left-side source for nice ripples\ndist = bfs(src)\n\n# all-pairs shortest paths within the giant component\nalld = []\nfor s in giant:\n    d = bfs(s)\n    alld += [d[t] for t in giant if t &gt; s]\nalld = np.array(alld)\ndiam, avg_l = alld.max(), alld.mean()\n\nng = len(giant); sub = A[np.ix_(giant, giant)]; L = sub.sum() // 2\ndensity = 2*L / (ng*(ng-1))\nCs = []\nfor i in giant:\n    nb = [v for v in adj[i] if v in set(giant)]; k = len(nb)\n    if k &lt; 2: continue\n    tri = sum(A[a, b] for x, a in enumerate(nb) for b in nb[x+1:])\n    Cs.append(2*tri / (k*(k-1)))\navgC = np.mean(Cs)\n\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(9.2, 4.3), gridspec_kw={\"width_ratios\":[1.25,1]})\nfor i in range(N):\n    for j in adj[i]:\n        if j &gt; i: axL.plot(*zip(pos[i], pos[j]), color=\"#d4d8dc\", lw=0.6, zorder=1)\nout = dist &lt; 0\naxL.scatter(pos[out,0], pos[out,1], s=25, color=\"#cfcfcf\", zorder=2)\nsc = axL.scatter(pos[~out,0], pos[~out,1], c=dist[~out], s=45, cmap=\"viridis\", zorder=3)\naxL.scatter(*pos[src], s=140, color=\"#c0392b\", edgecolor=\"white\", zorder=4)\naxL.set_title(\"BFS ripples: hop-distance from the source\"); axL.axis(\"off\")\nfig.colorbar(sc, ax=axL, shrink=0.8, label=\"distance (hops)\")\n\naxR.hist(alld, bins=range(1, diam+2), color=\"#1f4e79\", alpha=0.8, align=\"left\", rwidth=0.85)\naxR.axvline(avg_l, color=\"#1f8a4c\", lw=2, label=f\"⟨ℓ⟩ = {avg_l:.2f}\")\naxR.axvline(diam, color=\"#c0392b\", lw=2, ls=\"--\", label=f\"diameter = {diam}\")\naxR.set_xlabel(\"shortest-path length\"); axR.set_ylabel(\"# of node pairs\")\naxR.set_title(f\"density = {density:.3f},  ⟨C⟩ = {avgC:.2f}\"); axR.legend(fontsize=8, frameon=False)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Walking a network with breadth-first search, by hand. The graph is a random geometric network (nodes linked if they’re close), drawn at its true coordinates. Left: BFS from the red source colours every node by its hop-distance — the ‘ripples’ spreading outward layer by layer, exactly how BFS finds shortest paths. Grey nodes are outside the source’s connected component. Right: the distribution of all-pairs shortest paths in the giant component, with the average path length ⟨ℓ⟩ and the diameter (the longest shortest path) marked. The density and average clustering are computed from the same adjacency matrix.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Network Structure & Metrics"
+    ]
+  },
+  {
+    "objectID": "content/complexity/network-structure-and-metrics.html#how-theyre-computed-breadth-first-search",
+    "href": "content/complexity/network-structure-and-metrics.html#how-theyre-computed-breadth-first-search",
+    "title": "Network Structure & Metrics",
+    "section": "How they’re computed: breadth-first search",
+    "text": "How they’re computed: breadth-first search\nAll the distance-based metrics come from breadth-first search (BFS) (Menczer et al. 2020). From a source, BFS explores the network layer by layer — neighbours, then neighbours-of-neighbours — “like ripples spreading in a pond” (Menczer et al. 2020). It finds shortest paths and connected components in one sweep; to get all-pairs distances (for diameter and \\langle\\ell\\rangle) you run BFS from every node (Menczer et al. 2020).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Network Structure & Metrics"
+    ]
+  },
+  {
+    "objectID": "content/complexity/network-structure-and-metrics.html#common-pitfalls",
+    "href": "content/complexity/network-structure-and-metrics.html#common-pitfalls",
+    "title": "Network Structure & Metrics",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nComputing distances across components. Nodes in different components have infinite distance; restrict path metrics to the giant component (or report reachability). (Menczer et al. 2020)\nComparing densities across sizes. Density falls mechanically as N grows for a fixed average degree; compare average degree, not raw density, across networks of different size. (Barabási 2016)\nClustering on tiny-degree nodes. C_i is undefined for k_i&lt;2; handle those before averaging. (Menczer et al. 2020)\nAll-pairs BFS on huge graphs. It is O(N(N+L)) — fine for thousands of nodes, infeasible for millions; use sampling or approximate diameters at scale. (Menczer et al. 2020)\nReading high clustering as causal. Triadic closure is one generator of triangles; so is a bipartite projection or homophily. (Menczer et al. 2020)",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Network Structure & Metrics"
+    ]
+  },
+  {
+    "objectID": "content/complexity/network-structure-and-metrics.html#from-the-sources",
+    "href": "content/complexity/network-structure-and-metrics.html#from-the-sources",
+    "title": "Network Structure & Metrics",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nMenczer, Fortunato & Davis, A First Course in Network Science — paths, shortest-path distance, connected components; density d=2L/[N(N-1)]; the clustering coefficient C_i=2\\tau(i)/[k_i(k_i-1)] and average clustering, with triadic closure; and BFS (“ripples in a pond”) as the engine for shortest paths, components, and all-pairs distances.\nBarabási, Network Science — diameter and average path length; the giant component; and the sparsity of real networks (d\\ll1).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Network Structure & Metrics"
+    ]
+  },
+  {
+    "objectID": "content/complexity/network-structure-and-metrics.html#appendix-the-mathematics",
+    "href": "content/complexity/network-structure-and-metrics.html#appendix-the-mathematics",
+    "title": "Network Structure & Metrics",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nBFS correctness and cost. BFS visits nodes in non-decreasing distance from the source, so the first time it reaches a node it does so by a shortest path — correctness follows from processing the frontier in FIFO order. Each node and edge is touched once, giving O(N+L) per source and O(N(N+L)) for all-pairs.\nCounting triangles with the matrix. The number of triangles through i is \\tau(i)=\\tfrac12\\sum_{j,k}A_{ij}A_{jk}A_{ki}, i.e. \\tfrac12 (A^3)_{ii}. So local clustering is C_i=(A^3)_{ii}/[k_i(k_i-1)] and the total triangle count is \\tfrac16\\operatorname{tr}(A^3) — the adjacency-matrix-powers identity at work.\nSmall-world preview. A random graph of the same size has short paths (\\langle\\ell\\rangle\\sim\\ln N/\\ln\\langle k\\rangle) but low clustering; a lattice has high clustering but long paths. Real social networks have both short paths and high clustering — the puzzle the Watts–Strogatz model resolves.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Network Structure & Metrics"
+    ]
+  },
+  {
+    "objectID": "content/complexity/network-structure-and-metrics.html#connections",
+    "href": "content/complexity/network-structure-and-metrics.html#connections",
+    "title": "Network Structure & Metrics",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: graphs & the adjacency matrix (everything here is a matrix computation) and BFS / algorithms.\nLeads to: centrality (importance, also distance-based), community detection (dense subgroups), and the small-world model (short paths + high clustering together).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Network Structure & Metrics"
+    ]
+  },
+  {
+    "objectID": "content/complexity/scale-free-networks.html",
+    "href": "content/complexity/scale-free-networks.html",
+    "title": "Scale-Free Networks: Barabási–Albert & Preferential Attachment",
+    "section": "",
+    "text": "Erdős–Rényi and Watts–Strogatz both produce networks where every node has roughly the same degree. Real networks don’t: a handful of hubs dominate while most nodes are sparsely connected — a power-law degree distribution. Barabási & Albert (1999) showed two simple dynamics generate it: networks grow, and new nodes attach preferentially to the already-popular. The result is scale-free structure, with profound consequences for robustness, spreading, and fragility.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Scale-Free Networks: Barabási–Albert & Preferential Attachment"
+    ]
+  },
+  {
+    "objectID": "content/complexity/scale-free-networks.html#why-it-matters",
+    "href": "content/complexity/scale-free-networks.html#why-it-matters",
+    "title": "Scale-Free Networks: Barabási–Albert & Preferential Attachment",
+    "section": "Why it matters",
+    "text": "Why it matters\nHubs change everything: how short the network is to cross, how epidemics spread, what breaks it. The Internet, the web, citation networks, protein interactions, and trade are all hub-dominated — so a model that explains where hubs come from is foundational. It is also a clean story of emergence through a dynamical rule, the bridge to the Dynamics cluster.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Scale-Free Networks: Barabási–Albert & Preferential Attachment"
+    ]
+  },
+  {
+    "objectID": "content/complexity/scale-free-networks.html#two-ingredients-and-you-need-both",
+    "href": "content/complexity/scale-free-networks.html#two-ingredients-and-you-need-both",
+    "title": "Scale-Free Networks: Barabási–Albert & Preferential Attachment",
+    "section": "Two ingredients — and you need both",
+    "text": "Two ingredients — and you need both\nBarabási & Albert identified two mechanisms (Barabási 2016):\n\nGrowth. Real networks are not fixed — they expand over time as new nodes join (new papers, new web pages, new people) (Barabási 2016).\nPreferential attachment. A new node links not at random but preferentially to well-connected nodes: the probability of attaching to node i is proportional to its degree, \\Pi(k_i) = k_i/\\sum_j k_j (Barabási 2016). This is “the rich get richer” — the Matthew effect / cumulative advantage (Barabási 2016).\n\nBoth are essential (Barabási 2016):\n\nGrowth alone (new nodes attaching randomly) gives an exponential distribution — no hubs.\nPreferential attachment alone (fixed N) eventually makes a complete graph.\n\nOnly growth + linear preferential attachment yields a stationary power law.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Scale-Free Networks: Barabási–Albert & Preferential Attachment"
+    ]
+  },
+  {
+    "objectID": "content/complexity/scale-free-networks.html#the-power-law-and-scale-free",
+    "href": "content/complexity/scale-free-networks.html#the-power-law-and-scale-free",
+    "title": "Scale-Free Networks: Barabási–Albert & Preferential Attachment",
+    "section": "The power law and “scale-free”",
+    "text": "The power law and “scale-free”\nThe combination produces a power-law degree distribution (Barabási 2016):\n\np_k \\sim k^{-\\gamma}, \\qquad \\gamma = 3 \\text{ (the BA exponent)}.\n\nScale-free means no characteristic scale: unlike ER, where the average degree is typical, here the mean is not representative — for \\gamma&lt;3 the second moment \\langle k^2\\rangle diverges, so fluctuations around the mean can be arbitrarily large (Barabási 2016). A few massive hubs coexist with a vast majority of tiny-degree nodes — a structure forbidden by ER’s peaked Poisson (Barabási 2016).\n\n\nShow the figure code (growing a BA network by hand)\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(3)\nN, m = 4000, 2\n\n# Barabási–Albert by hand: growth + preferential attachment\ndeg = np.zeros(N, int)\nrepeated = []                          # node appears once per edge-endpoint (∝ degree)\nfor i in range(m+1):                   # seed: small clique\n    for j in range(i+1, m+1):\n        deg[i]+=1; deg[j]+=1; repeated += [i, j]\nfor new in range(m+1, N):\n    targets = set()\n    while len(targets) &lt; m:\n        targets.add(repeated[rng.integers(len(repeated))])    # preferential pick\n    for t in targets:\n        deg[new]+=1; deg[t]+=1; repeated += [new, t]\ndeg_ba = deg\n\n# Erdős–Rényi with the same average degree (~2m)\nkbar = deg_ba.mean()\ndeg_er = rng.poisson(kbar, N)          # ER degree ≈ Poisson(&lt;k&gt;)\n\ndef dist(d):\n    vals, cnt = np.unique(d[d &gt; 0], return_counts=True)\n    return vals, cnt/cnt.sum()\n\nkb, pb = dist(deg_ba); ke, pe = dist(deg_er)\nfig, ax = plt.subplots(figsize=(7.2, 4.3))\nax.loglog(ke, pe, \"s\", color=\"#d98a29\", ms=5, label=\"Erdős–Rényi (Poisson, peaked)\")\nax.loglog(kb, pb, \"o\", color=\"#1f4e79\", ms=5, label=\"Barabási–Albert (power law, hubs)\")\nks = np.array([3, 200]); ax.loglog(ks, 0.7*ks**(-3.0), \"--\", color=\"#555\", lw=1.2, label=\"slope −3 reference\")\nax.set_xlabel(\"degree  k\"); ax.set_ylabel(\"p(k)\")\nax.set_title(f\"Degree distributions: hub (max k={deg_ba.max()}) vs no hub (max k={deg_er.max()})\")\nax.legend(fontsize=8, frameon=False)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Why scale-free is different, on a log–log plot. A Barabási–Albert network is grown by hand (each new node attaches to 2 existing nodes, chosen with probability ∝ their degree) and its degree distribution (blue) is compared to an Erdős–Rényi graph of the same average degree (orange). ER is peaked: nearly every node sits near the mean, and nothing exceeds ~3× it — a straight cliff. BA is a straight LINE on log–log: a power law spanning two decades, with a heavy tail of hubs (the most-connected node has 50–100× the average). Same number of edges, utterly different architecture — the mean is meaningless for BA.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Scale-Free Networks: Barabási–Albert & Preferential Attachment"
+    ]
+  },
+  {
+    "objectID": "content/complexity/scale-free-networks.html#ultra-small-worlds",
+    "href": "content/complexity/scale-free-networks.html#ultra-small-worlds",
+    "title": "Scale-Free Networks: Barabási–Albert & Preferential Attachment",
+    "section": "Ultra-small worlds",
+    "text": "Ultra-small worlds\nRandom networks are “small worlds”; scale-free networks are ultra-small. For 2&lt;\\gamma&lt;3 the hubs act as bridges, shrinking the average distance to scale as \\ln\\ln N rather than \\ln N (Barabási 2016) — so even enormous networks are essentially a couple of hops across, via the hubs.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Scale-Free Networks: Barabási–Albert & Preferential Attachment"
+    ]
+  },
+  {
+    "objectID": "content/complexity/scale-free-networks.html#robust-and-fragile-the-achilles-heel",
+    "href": "content/complexity/scale-free-networks.html#robust-and-fragile-the-achilles-heel",
+    "title": "Scale-Free Networks: Barabási–Albert & Preferential Attachment",
+    "section": "Robust and fragile: the Achilles’ heel",
+    "text": "Robust and fragile: the Achilles’ heel\nThe hub structure creates a stark robustness–fragility trade-off (Barabási 2016):\n\nRobust to random failure. Since almost every node is low-degree, a random removal (a router glitch) almost certainly hits an unimportant node — the giant component survives (Barabási 2016).\nFragile to targeted attack. Removing a few hubs rapidly fragments the network into isolated pieces — its Achilles’ heel (Barabási 2016).\n\nThe consequences are concrete (Barabási 2016): the Internet shrugs off random failures but is vulnerable to coordinated attacks on backbone hubs; and on a scale-free network there is no epidemic threshold — a disease can persist however low its infectiousness, because the hubs reliably catch and rebroadcast it (the subject of spreading on networks).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Scale-Free Networks: Barabási–Albert & Preferential Attachment"
+    ]
+  },
+  {
+    "objectID": "content/complexity/scale-free-networks.html#common-pitfalls",
+    "href": "content/complexity/scale-free-networks.html#common-pitfalls",
+    "title": "Scale-Free Networks: Barabási–Albert & Preferential Attachment",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nClaiming a power law from a straight-ish log–log plot. Power laws are over-diagnosed — lognormal and other heavy tails look similar; fit and test properly (Clauset–Shalizi–Newman). (Barabási 2016) (Full treatment in the Dynamics cluster’s power-laws entry.)\nUsing the mean degree as typical. For scale-free networks the mean is not representative and the variance can diverge — summarise the whole distribution. (Barabási 2016)\nAssuming preferential attachment is the only generator. Fitness, copying, and optimisation also produce power laws; the mechanism isn’t identified by the distribution alone. (Barabási 2016)\nForgetting growth. Preferential attachment on a fixed network does not give a power law. (Barabási 2016)",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Scale-Free Networks: Barabási–Albert & Preferential Attachment"
+    ]
+  },
+  {
+    "objectID": "content/complexity/scale-free-networks.html#from-the-sources",
+    "href": "content/complexity/scale-free-networks.html#from-the-sources",
+    "title": "Scale-Free Networks: Barabási–Albert & Preferential Attachment",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nBarabási, Network Science — growth + preferential attachment (\\Pi(k_i)\\propto k_i, the Matthew effect) and that both are required; the power law p_k\\sim k^{-\\gamma} with \\gamma=3 and the scale-free (no-characteristic-scale, diverging \\langle k^2\\rangle) meaning; hubs vs the Poisson; the ultra-small-world (\\ln\\ln N); and the robustness–fragility trade-off (random failure vs hub attack) with the Internet and no-epidemic-threshold implications.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Scale-Free Networks: Barabási–Albert & Preferential Attachment"
+    ]
+  },
+  {
+    "objectID": "content/complexity/scale-free-networks.html#appendix-the-mathematics",
+    "href": "content/complexity/scale-free-networks.html#appendix-the-mathematics",
+    "title": "Scale-Free Networks: Barabási–Albert & Preferential Attachment",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nWhy \\gamma=3 (continuum sketch). Add one node with m links per step; node i’s degree grows as \\frac{dk_i}{dt}=m\\,\\frac{k_i}{\\sum_j k_j}=m\\,\\frac{k_i}{2mt}=\\frac{k_i}{2t}, so k_i(t)=m\\sqrt{t/t_i} where t_i is i’s birth time. Older nodes (t_i small) end up with the highest degree — first-mover advantage. Inverting and differentiating the distribution of birth times gives p_k\\sim k^{-3}. Linear preferential attachment is exactly what makes the exponent 3; sublinear gives a stretched exponential, superlinear a single dominant hub.\nWhy no epidemic threshold. The epidemic threshold on a network scales as \\lambda_c \\sim \\langle k\\rangle/\\langle k^2\\rangle. For scale-free networks with \\gamma\\le3, \\langle k^2\\rangle\\to\\infty, so \\lambda_c\\to0 — any positive infectiousness can spread. Hubs are the mechanism: they are quickly infected and then expose enormous numbers of others.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Scale-Free Networks: Barabási–Albert & Preferential Attachment"
+    ]
+  },
+  {
+    "objectID": "content/complexity/scale-free-networks.html#connections",
+    "href": "content/complexity/scale-free-networks.html#connections",
+    "title": "Scale-Free Networks: Barabási–Albert & Preferential Attachment",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: Erdős–Rényi (the peaked Poisson it overturns) and graphs & degree (the degree distribution p_k).\nLeads to: spreading on networks (hubs as superspreaders; no threshold) and the Dynamics cluster’s power-laws & criticality entry (heavy tails done rigorously).\nEchoes: preferential attachment ≈ cumulative advantage — the “success-to-the-successful” systems trap in network form.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Scale-Free Networks: Barabási–Albert & Preferential Attachment"
+    ]
+  },
+  {
+    "objectID": "content/complexity/spreading-on-networks.html",
+    "href": "content/complexity/spreading-on-networks.html",
+    "title": "Spreading on Networks: Contagion & Diffusion",
+    "section": "",
+    "text": "Classical epidemiology assumes everyone mixes with everyone. Real contagion — viral, informational, behavioural — moves node by node along the edges of a contact network, so structure is destiny. The hubs are superspreaders that abolish the usual safety threshold; weak ties carry novelty between communities; and behaviours spread by a different rule than germs. This entry — the capstone of the Network Analysis sub-track — is where everything before it pays off.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Spreading on Networks: Contagion & Diffusion"
+    ]
+  },
+  {
+    "objectID": "content/complexity/spreading-on-networks.html#why-it-matters",
+    "href": "content/complexity/spreading-on-networks.html#why-it-matters",
+    "title": "Spreading on Networks: Contagion & Diffusion",
+    "section": "Why it matters",
+    "text": "Why it matters\nEpidemics, viral marketing, the diffusion of innovations, the cascade of a protest or a bank run — all are spreading processes on networks, and the network determines who to vaccinate, who to seed, and why some good ideas never catch on. It also connects straight back to causal inference: peer effects and contagion are why SUTVA (no interference between units) so often fails in social data.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Spreading on Networks: Contagion & Diffusion"
+    ]
+  },
+  {
+    "objectID": "content/complexity/spreading-on-networks.html#epidemic-models-run-on-a-graph",
+    "href": "content/complexity/spreading-on-networks.html#epidemic-models-run-on-a-graph",
+    "title": "Spreading on Networks: Contagion & Diffusion",
+    "section": "Epidemic models, run on a graph",
+    "text": "Epidemic models, run on a graph\nThe compartmental models, but evolving node by node with transmission along edges at probability \\beta (Barabási 2016; Menczer et al. 2020):\n\nSI — susceptible → infected, and infected forever. The simplest baseline.\nSIS — no immunity (a cold): infected nodes recover back to susceptible and can be reinfected.\nSIR — permanent immunity or removal: susceptible → infectious → removed (recovered/dead, no longer transmitting).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Spreading on Networks: Contagion & Diffusion"
+    ]
+  },
+  {
+    "objectID": "content/complexity/spreading-on-networks.html#hubs-and-the-missing-threshold",
+    "href": "content/complexity/spreading-on-networks.html#hubs-and-the-missing-threshold",
+    "title": "Spreading on Networks: Contagion & Diffusion",
+    "section": "Hubs and the missing threshold",
+    "text": "Hubs and the missing threshold\nNetwork topology sets the speed and reach (Barabási 2016):\n\nHubs are superspreaders. A high-degree node is infected early (many exposures) and, once infected, rebroadcasts to enormous numbers of others; many shortest paths run through hubs, shrinking the distance the contagion must travel (Barabási 2016).\nNo epidemic threshold on scale-free networks (Pastor-Satorras & Vespignani). In a random network a disease must be “contagious enough” to persist; on a scale-free network the hubs let a disease linger and spread no matter how low its infectiousness (Barabási 2016). The usual safety margin simply vanishes.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Spreading on Networks: Contagion & Diffusion"
+    ]
+  },
+  {
+    "objectID": "content/complexity/spreading-on-networks.html#simple-vs-complex-contagion",
+    "href": "content/complexity/spreading-on-networks.html#simple-vs-complex-contagion",
+    "title": "Spreading on Networks: Contagion & Diffusion",
+    "section": "Simple vs complex contagion",
+    "text": "Simple vs complex contagion\nCrucially, information and behaviour spread by different rules (Menczer et al. 2020):\n\nSimple contagion — germs and simple information (a rumour) transmit on a single contact (Menczer et al. 2020).\nComplex contagion — behaviours, norms, and technology adoption need multiple reinforcing contacts: a node adopts only when a threshold fraction q of its neighbours already has (Granovetter threshold models, the Watts global-cascade model) (Menczer et al. 2020).\n\nThis flips the value of network structure (Menczer et al. 2020): the long-range shortcuts that make a small world great for simple contagion are ineffective for complex contagion, which needs social reinforcement and so spreads better through densely clustered ties where neighbours share friends (Menczer et al. 2020). Tight communities can block a cascade — why some innovations never diffuse.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Spreading on Networks: Contagion & Diffusion"
+    ]
+  },
+  {
+    "objectID": "content/complexity/spreading-on-networks.html#the-strength-of-weak-ties",
+    "href": "content/complexity/spreading-on-networks.html#the-strength-of-weak-ties",
+    "title": "Spreading on Networks: Contagion & Diffusion",
+    "section": "The strength of weak ties",
+    "text": "The strength of weak ties\nGranovetter’s classic insight (Menczer et al. 2020): strong ties (close friends) are redundant — they sit inside the same dense cluster, all knowing each other. Weak ties (acquaintances) act as local bridges between communities, and so are the main conduits of novel information — job leads, news from distant parts of the network (Menczer et al. 2020). The counterintuitive moral: for reach and novelty, your acquaintances matter more than your friends.\n\n\nShow the figure code (BA network + SIR by hand)\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(5)\nN, m = 1500, 2\n# grow a Barabási–Albert network\ndeg = np.zeros(N, int); repeated = []; nbrs = [set() for _ in range(N)]\nfor i in range(m+1):\n    for j in range(i+1, m+1):\n        nbrs[i].add(j); nbrs[j].add(i); deg[i]+=1; deg[j]+=1; repeated += [i, j]\nfor new in range(m+1, N):\n    tg = set()\n    while len(tg) &lt; m: tg.add(repeated[rng.integers(len(repeated))])\n    for t in tg:\n        nbrs[new].add(t); nbrs[t].add(new); deg[new]+=1; deg[t]+=1; repeated += [new, t]\nadj = [np.fromiter(s, int) for s in nbrs]\n\ndef sir(immune, beta=0.06, gamma=0.12, T=60):\n    state = np.zeros(N, int)                  # 0=S 1=I 2=R\n    state[list(immune)] = 2\n    ever = np.zeros(N, bool)\n    seed = rng.choice(np.where(state == 0)[0]); state[seed] = 1; ever[seed] = True\n    curve = []\n    for _ in range(T):\n        inf = np.where(state == 1)[0]\n        ns = state.copy()\n        for u in inf:\n            for v in adj[u]:\n                if state[v] == 0 and rng.random() &lt; beta: ns[v] = 1; ever[v] = True\n            if rng.random() &lt; gamma: ns[u] = 2\n        state = ns; curve.append(ever.mean())\n    return np.array(curve)\n\nnv = int(0.08*N)\nrand_immune = set(rng.choice(N, nv, replace=False))\nhub_immune = set(np.argsort(deg)[-nv:])\nnone = np.mean([sir(set()) for _ in range(5)], axis=0)\nrandc = np.mean([sir(rand_immune) for _ in range(5)], axis=0)\nhubc = np.mean([sir(hub_immune) for _ in range(5)], axis=0)\n\nfig, ax = plt.subplots(figsize=(7.2, 4.2))\nax.plot(none, color=\"#c0392b\", lw=2.2, label=\"no immunisation\")\nax.plot(randc, color=\"#d98a29\", lw=2.2, label=\"random 8% immunised\")\nax.plot(hubc, color=\"#1f8a4c\", lw=2.4, label=\"top-8% HUBS immunised\")\nax.set_xlabel(\"time\"); ax.set_ylabel(\"cumulative fraction infected\")\nax.set_title(\"Vaccinate the hubs: same budget, the epidemic collapses\")\nax.legend(fontsize=8.5, frameon=False, loc=\"center right\"); ax.set_ylim(0, 1)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Why you vaccinate the hubs, simulated. An SIR epidemic runs on a scale-free network (grown by preferential attachment). With NO immunisation (red) the outbreak infects most of the network. Immunising 8% of nodes at RANDOM (orange) barely helps — a random node is almost always low-degree, so the hubs survive and keep spreading. Immunising the SAME 8%, but chosen as the highest-degree HUBS (green), collapses the epidemic to a small cluster: removing the superspreaders shatters the transmission backbone. Same vaccine budget, opposite outcome — structure, not quantity, decides.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Spreading on Networks: Contagion & Diffusion"
+    ]
+  },
+  {
+    "objectID": "content/complexity/spreading-on-networks.html#practical-implications",
+    "href": "content/complexity/spreading-on-networks.html#practical-implications",
+    "title": "Spreading on Networks: Contagion & Diffusion",
+    "section": "Practical implications",
+    "text": "Practical implications\nThe structure points straight at policy (Barabási 2016; Menczer et al. 2020):\n\nTargeted immunisation. Vaccinating a small fraction of hubs fragments the network and stops a pandemic far more effectively than random vaccination (Barabási 2016) — the figure’s lesson.\nSeeding diffusion. In marketing, target influentials with access to easily-influenced others to seed a cascade; but for complex contagion, seed clustered communities for reinforcement (Menczer et al. 2020).\nWhy innovations stall. Densely closed communities can block cascades — a diagnosis for failed diffusion (Menczer et al. 2020).",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Spreading on Networks: Contagion & Diffusion"
+    ]
+  },
+  {
+    "objectID": "content/complexity/spreading-on-networks.html#common-pitfalls",
+    "href": "content/complexity/spreading-on-networks.html#common-pitfalls",
+    "title": "Spreading on Networks: Contagion & Diffusion",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nAssuming well-mixing. Network structure changes the threshold, the speed, and who matters; the mean-field SIR can badly mislead. (Barabási 2016)\nTreating behaviour like a virus. Adoption is complex contagion (needs reinforcement); long-range shortcuts that spread rumours fast may fail to spread behaviour. (Menczer et al. 2020)\nRandom vaccination on a scale-free network. It wastes doses on low-degree nodes and misses the hubs doing the spreading. (Barabási 2016)\nIgnoring interference in causal studies. Contagion violates SUTVA — one unit’s treatment spills to its neighbours. (Menczer et al. 2020)",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Spreading on Networks: Contagion & Diffusion"
+    ]
+  },
+  {
+    "objectID": "content/complexity/spreading-on-networks.html#from-the-sources",
+    "href": "content/complexity/spreading-on-networks.html#from-the-sources",
+    "title": "Spreading on Networks: Contagion & Diffusion",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nBarabási, Network Science — SI/SIS/SIR on networks with edge transmission; hubs as superspreaders; the absence of an epidemic threshold on scale-free networks (Pastor-Satorras & Vespignani); and targeted (hub) immunisation.\nMenczer, Fortunato & Davis, A First Course in Network Science — simple vs complex contagion (Granovetter thresholds, Watts cascades; clusters vs shortcuts), the strength of weak ties (bridges, novel information), and seeding/diffusion implications.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Spreading on Networks: Contagion & Diffusion"
+    ]
+  },
+  {
+    "objectID": "content/complexity/spreading-on-networks.html#appendix-the-mathematics",
+    "href": "content/complexity/spreading-on-networks.html#appendix-the-mathematics",
+    "title": "Spreading on Networks: Contagion & Diffusion",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nSIR on a network. Each infected node u infects each susceptible neighbour independently with probability \\beta per step and recovers with probability \\gamma — exactly the loop in the code. The mean-field epidemic threshold is \\lambda_c=\\beta/\\gamma \\sim \\langle k\\rangle/\\langle k^2\\rangle: an outbreak grows only if \\lambda&gt;\\lambda_c. On scale-free networks \\langle k^2\\rangle\\to\\infty, so \\lambda_c\\to0 — no threshold. Targeted immunisation works by removing the high-k nodes that make \\langle k^2\\rangle explode, restoring a finite threshold.\nComplex-contagion threshold. In Watts’ model a node with fraction \\phi of adopting neighbours adopts iff \\phi\\ge q. A global cascade requires a connected “vulnerable” cluster (nodes with low enough threshold relative to degree); too few or too many connections both suppress cascades, so there is a cascade window in (q,\\langle k\\rangle) — unlike simple contagion, more connectivity is not always more spread.\nWhy weak ties carry novelty. A strong tie sits in a triangle (its endpoints share neighbours), so its information is redundant. A weak tie that is a local bridge is the only short path between two clusters, so it is the unique conduit for whatever one cluster knows and the other doesn’t.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Spreading on Networks: Contagion & Diffusion"
+    ]
+  },
+  {
+    "objectID": "content/complexity/spreading-on-networks.html#connections",
+    "href": "content/complexity/spreading-on-networks.html#connections",
+    "title": "Spreading on Networks: Contagion & Diffusion",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: scale-free networks (hubs, no threshold), small worlds (shortcuts speed simple contagion), and community structure (clusters reinforce complex contagion).\nConnects to: Erdős–Rényi percolation (the \\langle k\\rangle=1 threshold is the epidemic threshold) and causal interference / SUTVA.\nLeads to: the Dynamics cluster — agent-based models make these spreading rules into full simulations of social behaviour.",
+    "crumbs": [
+      "Home",
+      "Complexity Science",
+      "The Tool · Network Analysis",
+      "Spreading on Networks: Contagion & Diffusion"
     ]
   },
   {
