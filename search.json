@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "The Quantitative Social Scientist",
     "section": "",
-    "text": "◆ PROFSARTHAK · QSS · n=169 ENTRIES · CORPUS-GROUNDED · REV 2026-07\nThis is a reference you grow into, not a course you finish. It walks the road from basic probability to the academic rigour of causal inference and the messy realities of field and client work — always intuition first, examples second, and mathematics used in a common-sense way to explain principles and deviations, with the full derivations kept in an appendix you can reach for but never have to wade through.\nIt is self-contained — every idea, with a runnable figure, lives on the page — and built on a curated library of canonical sources (Wooldridge, Angrist & Pischke, Cunningham, Gerber & Green, Ross, ISLR, Meadows, Barabási, Mitchell, and more), with explicit per-source attribution throughout. See How to use this.",
+    "text": "◆ PROFSARTHAK · QSS · n=172 ENTRIES · CORPUS-GROUNDED · REV 2026-07\nThis is a reference you grow into, not a course you finish. It walks the road from basic probability to the academic rigour of causal inference and the messy realities of field and client work — always intuition first, examples second, and mathematics used in a common-sense way to explain principles and deviations, with the full derivations kept in an appendix you can reach for but never have to wade through.\nIt is self-contained — every idea, with a runnable figure, lives on the page — and built on a curated library of canonical sources (Wooldridge, Angrist & Pischke, Cunningham, Gerber & Green, Ross, ISLR, Meadows, Barabási, Mitchell, and more), with explicit per-source attribution throughout. See How to use this.",
     "crumbs": [
       "Home",
       "Start here",
@@ -10723,452 +10723,341 @@
     ]
   },
   {
-    "objectID": "appendices/computing/regressions-in-r.html",
-    "href": "appendices/computing/regressions-in-r.html",
-    "title": "Reading & Running Regressions in R",
+    "objectID": "appendices/computing/reproducible-quarto.html",
+    "href": "appendices/computing/reproducible-quarto.html",
+    "title": "Reproducible Analysis with Quarto",
     "section": "",
-    "text": "Fitting a regression in R is one line; the skill is reading the output. lm(y ~ x1 + x2, data) estimates the model, summary() prints the coefficient table, and broom::tidy() turns that table into a tidy data frame you can plot or filter. This entry is a reference for the output, not a theory of regression — the theory lives in Part III and the matrix algebra in OLS in matrix form. Here: what each column means, and how to show it honestly.",
+    "text": "A result you cannot regenerate is a claim, not a finding. Quarto is a literate-document system that keeps your writing, your code, and the figures/tables that code produces in one source file, so “the analysis” and “the write-up” are the same artefact — and re-rendering reproduces every number from scratch. This page is the tool; the scientific practice it serves (open data, preregistration, honest replication) lives in open & reproducible science. Fittingly, every page of this site — including this one — is a Quarto document.",
     "crumbs": [
       "Home",
       "Appendices",
       "Computing",
-      "Reading & Running Regressions in R"
+      "Reproducible Analysis with Quarto"
     ]
   },
   {
-    "objectID": "appendices/computing/regressions-in-r.html#the-model-formula",
-    "href": "appendices/computing/regressions-in-r.html#the-model-formula",
-    "title": "Reading & Running Regressions in R",
-    "section": "The model formula",
-    "text": "The model formula\nR’s modelling verbs share one interface: the formula. y ~ x1 + x2 reads “y explained by x1 and x2”; the intercept is included automatically. A few idioms cover most needs: (McNulty 2021)\nlibrary(broom)\n\n# fit: outcome ~ predictors, from a data frame\nm &lt;- lm(wage ~ educ + exper + female, data = survey)\n\n# formula idioms\nlm(y ~ x1 + x2,      data = d)   # additive\nlm(y ~ x1 * x2,      data = d)   # x1, x2, and their interaction (x1:x2)\nlm(y ~ poly(x, 2),   data = d)   # quadratic in x\nlm(y ~ factor(grp),  data = d)   # categorical -&gt; dummies, first level = baseline\nlm(y ~ . - id,       data = d)   # every column except id\nA categorical predictor becomes a set of indicator columns automatically; R holds one level out as the reference, and every other level’s coefficient is a contrast against that baseline — the single most common source of “why is my category missing?” confusion. (James et al. 2021)",
+    "objectID": "appendices/computing/reproducible-quarto.html#prose-code-and-output-in-one-file",
+    "href": "appendices/computing/reproducible-quarto.html#prose-code-and-output-in-one-file",
+    "title": "Reproducible Analysis with Quarto",
+    "section": "Prose, code, and output in one file",
+    "text": "Prose, code, and output in one file\nA Quarto document (.qmd) is Markdown with two additions: a YAML header for metadata, and code chunks that execute and drop their output inline. (Wickham et al. 2023)\n---\ntitle: \"Wage gaps, revisited\"\nformat: html\n---\n\nWe fit a simple model and read off the gap.\n\n```{r}\nm &lt;- lm(wage ~ educ + female, data = survey)\ncoef(m)[\"female\"]\n```\nRender it and the code runs, the result is captured, and prose + output become one HTML (or PDF, or Word) page. Change the data or the model, re-render, and the narrative updates itself — there is no copy-paste step where a stale number can survive. That closed loop is reproducibility. (Wickham et al. 2023)",
     "crumbs": [
       "Home",
       "Appendices",
       "Computing",
-      "Reading & Running Regressions in R"
+      "Reproducible Analysis with Quarto"
     ]
   },
   {
-    "objectID": "appendices/computing/regressions-in-r.html#reading-summary",
-    "href": "appendices/computing/regressions-in-r.html#reading-summary",
-    "title": "Reading & Running Regressions in R",
-    "section": "Reading summary()",
-    "text": "Reading summary()\nsummary(m) prints the table everyone stares at. The columns, decoded: (McNulty 2021; Wooldridge 2019)\nsummary(m)\n#&gt; Coefficients:\n#&gt;              Estimate Std. Error t value Pr(&gt;|t|)\n#&gt; (Intercept)   1.9421     0.2033    9.55  &lt; 2e-16 ***\n#&gt; educ          0.4127     0.0158   26.12  &lt; 2e-16 ***\n#&gt; exper         0.0051     0.0049    1.04  0.29863\n#&gt; female       -0.3311     0.0921   -3.60  0.00033 ***\n#&gt; Residual standard error: 1.41 on 996 degrees of freedom\n#&gt; Multiple R-squared: 0.318,  Adjusted R-squared: 0.316\n#&gt; F-statistic: 154.7 on 3 and 996 DF,  p-value: &lt; 2.2e-16\n\nEstimate — the fitted coefficient \\hat\\beta_j: the change in the outcome for a one-unit change in that predictor, holding the others fixed. The intercept is the fitted outcome when every predictor is zero.\nStd. Error — the estimated standard deviation of that coefficient across hypothetical repeated samples; the ruler for how precisely it is pinned down. It is \\sqrt{\\hat\\sigma^2\\,[(X^\\top X)^{-1}]_{jj}} from the matrix formula. (Wooldridge 2019)\nt value = Estimate / Std. Error — how many standard errors the estimate sits from zero.\nPr(&gt;|t|) — the two-sided p-value for H_0:\\beta_j=0. The stars are a significance shorthand, not an importance ranking. (McNulty 2021)\nResidual standard error — \\hat\\sigma, the typical size of a residual, in the outcome’s units.\nR-squared / Adjusted — the share of outcome variance the model explains; adjusted penalises extra regressors so it can fall when you add a useless one. (James et al. 2021)\nF-statistic — the joint test that all slopes are zero at once (the model-vs-intercept comparison).",
+    "objectID": "appendices/computing/reproducible-quarto.html#chunk-options-control-what-the-reader-sees",
+    "href": "appendices/computing/reproducible-quarto.html#chunk-options-control-what-the-reader-sees",
+    "title": "Reproducible Analysis with Quarto",
+    "section": "Chunk options control what the reader sees",
+    "text": "Chunk options control what the reader sees\nEach chunk carries options (the #| lines) that decide what appears — code, output, figures, warnings: (Wickham et al. 2023)\n#| label: fig-gap\n#| fig-cap: \"The estimated wage gap.\"\n#| echo: false        # run the code but hide it\n#| warning: false      # suppress warnings from the output\nThis is why the figures in this encyclopedia default to folded code (code-fold: true): the plot shows, the code is one click away — reproducible and readable.",
     "crumbs": [
       "Home",
       "Appendices",
       "Computing",
-      "Reading & Running Regressions in R"
+      "Reproducible Analysis with Quarto"
     ]
   },
   {
-    "objectID": "appendices/computing/regressions-in-r.html#tidy-output-you-can-compute-with",
-    "href": "appendices/computing/regressions-in-r.html#tidy-output-you-can-compute-with",
-    "title": "Reading & Running Regressions in R",
-    "section": "Tidy output you can compute with",
-    "text": "Tidy output you can compute with\nsummary() prints; it does not return something you can plot. broom turns model objects into tidy data frames — the bridge from a fitted model back into the tidyverse workflow: (McNulty 2021)\ntidy(m, conf.int = TRUE)   # one row per coefficient: estimate, std.error, statistic, p.value, conf.low/high\nglance(m)                  # one row for the whole model: r.squared, adj.r.squared, sigma, statistic, AIC, BIC, nobs\naugment(m)                 # original data + .fitted, .resid, .hat (leverage), .cooksd\ntidy(..., conf.int = TRUE) is the one to remember: a coefficient plus its 95% interval, ready to plot. A coefficient plot — each estimate as a dot with its confidence interval as a whisker — communicates a model far better than a wall of stars, because it shows effect size and uncertainty together and lets a reader see at a glance which intervals clear zero. (Kaplan 2024)\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(5)\nn = 600\neduc   = rng.normal(13, 2.5, n)\nexper  = rng.normal(0, 1.0, n)              # a near-null control: no real effect\nfemale = rng.integers(0, 2, n).astype(float)\nX = np.column_stack([np.ones(n), educ, exper, female])\nbeta_true = np.array([2.0, 0.40, 0.00, -0.33])  # exper's true coefficient is zero\ny = X @ beta_true + rng.normal(0, 1.4, n)\n\n# OLS by the normal equations = exactly what lm() computes\nbeta = np.linalg.solve(X.T @ X, X.T @ y)\nresid = y - X @ beta\nsigma2 = resid @ resid / (n - X.shape[1])\ncov = sigma2 * np.linalg.inv(X.T @ X)\nse = np.sqrt(np.diag(cov))\nlo, hi = beta - 1.96 * se, beta + 1.96 * se\n\nterms = [\"(Intercept)\", \"educ\", \"exper\", \"female\"]\nypos = np.arange(len(terms))[::-1]                 # intercept on top\n# highlight the coefficients whose 95% interval clears zero\nclears0 = (lo &gt; 0) | (hi &lt; 0)\ncolors = [\"#e8531d\" if c else \"#8a8a7e\" for c in clears0]\n\nfig, ax = plt.subplots(figsize=(7.4, 3.8))\nax.axvline(0, color=\"#5e5e54\", lw=1.2, ls=(0, (4, 3)))\nfor yi, b, l, h, c in zip(ypos, beta, lo, hi, colors):\n    ax.plot([l, h], [yi, yi], color=c, lw=2.4, solid_capstyle=\"round\")\n    ax.plot(b, yi, \"o\", color=c, ms=7, markeredgecolor=\"#161613\", markeredgewidth=1.0)\nax.set_yticks(ypos); ax.set_yticklabels(terms)\nax.set_xlabel(\"coefficient estimate  (95% CI)\")\nax.set_title(\"Show the interval, not the stars\")\nax.set_ylim(-0.6, len(terms) - 0.4)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A coefficient plot — the honest way to show a regression. Each dot is an estimate; each whisker its 95% confidence interval; the dashed line is zero (no effect). An interval that crosses zero is ‘not significant’ — but the plot shows the whole story a p-value hides: the effect’s size, its sign, and how precisely it is pinned down. Here the estimates and standard errors are computed by hand from the normal equations (the same numbers lm()/broom::tidy() would return); only the drawing is Python. This is the shape broom::tidy(m, conf.int = TRUE) |&gt; ggplot(aes(estimate, term)) + geom_pointrange() produces in R.",
+    "objectID": "appendices/computing/reproducible-quarto.html#freeze-cache-the-expensive-execution",
+    "href": "appendices/computing/reproducible-quarto.html#freeze-cache-the-expensive-execution",
+    "title": "Reproducible Analysis with Quarto",
+    "section": "freeze: cache the expensive execution",
+    "text": "freeze: cache the expensive execution\nRe-running every simulation on every render is wasteful, and worse, it needs the full toolchain (R, Python, their packages) on whatever machine builds the site. Quarto’s freeze stores each document’s executed results in a _freeze/ folder; a document only re-executes when its own source changes. (Wickham et al. 2023) This site sets freeze: auto and commits _freeze/, so the public build renders from cached results without needing Python at all — the reason a plain static host can serve computed figures.",
     "crumbs": [
       "Home",
       "Appendices",
       "Computing",
-      "Reading & Running Regressions in R"
+      "Reproducible Analysis with Quarto"
     ]
   },
   {
-    "objectID": "appendices/computing/regressions-in-r.html#predictions-and-a-first-diagnostic-look",
-    "href": "appendices/computing/regressions-in-r.html#predictions-and-a-first-diagnostic-look",
-    "title": "Reading & Running Regressions in R",
-    "section": "Predictions and a first diagnostic look",
-    "text": "Predictions and a first diagnostic look\npredict(m, newdata = data.frame(educ = 16, exper = 10, female = 0),\n        interval = \"confidence\")     # fitted value + CI for the mean\npredict(m, newdata = nd, interval = \"prediction\")   # wider: CI for a new individual\nplot(m)                              # 4 base diagnostic plots: residuals-vs-fitted, QQ, scale-location, leverage\nThe plot(m) panel is the quickest read on the assumptions: a curved residuals-vs-fitted plot flags functional-form problems; a fanning shape flags heteroskedasticity; the QQ plot checks residual normality; the leverage panel flags influential points (the .hat and .cooksd from augment()). (McNulty 2021)",
+    "objectID": "appendices/computing/reproducible-quarto.html#the-render-publish-loop",
+    "href": "appendices/computing/reproducible-quarto.html#the-render-publish-loop",
+    "title": "Reproducible Analysis with Quarto",
+    "section": "The render → publish loop",
+    "text": "The render → publish loop\nquarto render          # execute changed docs, build the whole site into _site/\nquarto preview         # live-reloading local preview while you write\nFrom there, _site/ is static files: push them to any host. This project wraps that in a script that renders, mirrors _site to a public repo, and pushes — the same loop, automated.",
     "crumbs": [
       "Home",
       "Appendices",
       "Computing",
-      "Reading & Running Regressions in R"
+      "Reproducible Analysis with Quarto"
     ]
   },
   {
-    "objectID": "appendices/computing/regressions-in-r.html#common-pitfalls",
-    "href": "appendices/computing/regressions-in-r.html#common-pitfalls",
-    "title": "Reading & Running Regressions in R",
+    "objectID": "appendices/computing/reproducible-quarto.html#reproducibility-has-a-mechanism-the-seed",
+    "href": "appendices/computing/reproducible-quarto.html#reproducibility-has-a-mechanism-the-seed",
+    "title": "Reproducible Analysis with Quarto",
+    "section": "Reproducibility has a mechanism: the seed",
+    "text": "Reproducibility has a mechanism: the seed\nAny analysis with randomness — a simulation, a bootstrap, a train/test split — is only reproducible if the random numbers are. Setting a seed makes a pseudo-random stream deterministic: same seed, same draws, every run, every machine. Every figure in this encyclopedia seeds its generator for exactly this reason.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\ndef walk(rng, n=250):\n    return np.cumsum(rng.normal(size=n))\n\n# same seed, two separate generators -&gt; identical streams\na = walk(np.random.default_rng(42))\nb = walk(np.random.default_rng(42))\nassert np.array_equal(a, b)          # reproducibility, proven\n\n# no shared seed -&gt; different every run\nc = walk(np.random.default_rng(1))\nd = walk(np.random.default_rng(7))\n\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(8.4, 3.9), sharey=True)\n\naxL.plot(a, color=\"#161613\", lw=3.0, label=\"run 1\")\naxL.plot(b, color=\"#e8531d\", lw=1.5, ls=(0, (5, 4)), label=\"run 2 (same seed)\")\naxL.set_title(\"Same seed → identical\", fontsize=10)\naxL.legend(fontsize=8.5, frameon=False, loc=\"upper left\")\n\naxR.plot(c, color=\"#161613\", lw=2.0, label=\"run 1\")\naxR.plot(d, color=\"#8a8a7e\", lw=2.0, label=\"run 2 (different seed)\")\naxR.set_title(\"No shared seed → different\", fontsize=10)\naxR.legend(fontsize=8.5, frameon=False, loc=\"upper left\")\n\nfor ax in (axL, axR):\n    ax.set_xlabel(\"step\")\naxL.set_ylabel(\"cumulative value\")\nfig.suptitle(\"Reproducibility is a property of seeded computation\", fontsize=11)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Why every figure here is seeded. Left: two independent runs of the same random walk with the same seed (default_rng(42)) — the dashed second run traces the first exactly, so you see one line; the code asserts the two arrays are byte-identical. Right: two runs with no shared seed diverge completely. Reproducibility is not a property of careful people; it is a property of seeded computation. A reader who reruns this document gets pixel-identical figures.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Reproducible Analysis with Quarto"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/reproducible-quarto.html#common-pitfalls",
+    "href": "appendices/computing/reproducible-quarto.html#common-pitfalls",
+    "title": "Reproducible Analysis with Quarto",
     "section": "Common pitfalls",
-    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere R regression output gets misread\n\n\n\n\nReading stars as importance. *** means “precisely estimated as non-zero,” not “big” or “matters most.” A tiny, useless coefficient can be *** in a huge sample; a large, decision-relevant one can be n.s. in a small one. Report the estimate and its interval, not the star count. (McNulty 2021)\nForgetting the reference category. With factor(grp), the omitted level is folded into the intercept and every shown coefficient is a contrast against it. “Region B = 2.1” means relative to region A, not in absolute terms. Change the baseline with relevel() when a different comparison reads better. (James et al. 2021)\nDefault standard errors under heteroskedasticity. lm()/summary() report classical SEs that assume constant error variance. When that fails, the estimates are still fine but the SEs (and p-values) are wrong — use lmtest::coeftest(m, vcov = sandwich::vcovHC(m)) for robust errors. R will not warn you. (Wooldridge 2019)\nPredicting outside the data’s range. predict() will happily extrapolate a fitted line far beyond where any data supported it; the interval widens but the model’s form was never tested out there.\nUsing a literal ```{r} chunk here. This is a Quarto note, not an R gotcha: in this encyclopedia the R is shown for reading, not executed (there is no R engine wired in), so R appears in plain ```r blocks. The one executable figure per entry is Python.",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere reproducibility quietly breaks\n\n\n\n\nHidden state from out-of-order execution. Running chunks interactively in a different order than they appear lets a result depend on something defined below it. The fix is the discipline Quarto enforces on render: top-to-bottom, from a clean session. If it only works in your console, it is not reproducible.\nUnseeded randomness. A bootstrap or simulation without a seed gives a different answer every render — the figure above is the whole argument. Seed it. (Kaplan 2024)\nAbsolute paths. read_csv(\"C:/Users/me/data.csv\") runs on exactly one machine. Use project-relative paths so the document travels.\nForgetting to commit _freeze/. If the cache is gitignored, a machine without the full toolchain cannot rebuild the site. Commit it (this project does) — or accept that every builder needs R/Python installed.\nEnvironment drift. “Reproducible” up to package versions: a result can shift when a dependency updates. Record versions (a lockfile, or sessionInfo()) for analyses that must survive the years.",
     "crumbs": [
       "Home",
       "Appendices",
       "Computing",
-      "Reading & Running Regressions in R"
+      "Reproducible Analysis with Quarto"
     ]
   },
   {
-    "objectID": "appendices/computing/regressions-in-r.html#from-the-sources",
-    "href": "appendices/computing/regressions-in-r.html#from-the-sources",
-    "title": "Reading & Running Regressions in R",
+    "objectID": "appendices/computing/reproducible-quarto.html#from-the-sources",
+    "href": "appendices/computing/reproducible-quarto.html#from-the-sources",
+    "title": "Reproducible Analysis with Quarto",
     "section": "From the sources",
-    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nMcNulty, Explanatory Statistical Modeling in R — the lm() → summary() → broom (tidy/glance/ augment) workflow; decoding the coefficient table (estimate, SE, t, p, residual SE, R^2, F); the base plot(m) diagnostics; and the “explanatory, not predictive” framing of reading a fitted model.\nJames, Witten, Hastie & Tibshirani, ISLR (the R labs) — the formula interface, factor/dummy handling and the reference level, interactions and poly(), and adjusted R^2.\nWooldridge, Introductory Econometrics — the interpretation of each coefficient as a ceteris-paribus effect, the standard error as \\sqrt{\\hat\\sigma^2[(X^\\top X)^{-1}]_{jj}}, and the heteroskedasticity caveat on default SEs.\nKaplan, Lessons in Statistical Thinking — the case for showing effects with confidence intervals (the coefficient plot) rather than significance stars.",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nWickham, Çetinkaya-Rundel & Grolemund, R for Data Science (2e), the Quarto chapters — the literate document (YAML + Markdown + code chunks), chunk options (echo, warning, fig-cap, labels), output formats, and the workflow argument for keeping code and prose together.\nKaplan, Lessons in Statistical Thinking — the case that computation (and its randomness) must be reproducible to be trustworthy, and the seed as the mechanism.\nThis repository — a live example: freeze: auto with a committed _freeze/, a render → mirror → push script, and every figure seeded.",
     "crumbs": [
       "Home",
       "Appendices",
       "Computing",
-      "Reading & Running Regressions in R"
+      "Reproducible Analysis with Quarto"
     ]
   },
   {
-    "objectID": "appendices/computing/regressions-in-r.html#connections",
-    "href": "appendices/computing/regressions-in-r.html#connections",
-    "title": "Reading & Running Regressions in R",
+    "objectID": "appendices/computing/reproducible-quarto.html#connections",
+    "href": "appendices/computing/reproducible-quarto.html#connections",
+    "title": "Reproducible Analysis with Quarto",
     "section": "Connections",
-    "text": "Connections\n\nBuilds on: the tidyverse data-science workflow (get the data into a tidy data frame first) and multiple regression (what the numbers mean).\nThe math underneath: OLS in matrix form — lm() solves the normal equations, and the reported SEs are the diagonal of \\hat\\sigma^2(X^\\top X)^{-1}.\nReads with: inference for regression (t- and F-tests), regression diagnostics (plot(m), leverage, Cook’s distance), and heteroskedasticity & robust errors.",
+    "text": "Connections\n\nServes: open & reproducible science — the tool behind the practice (this page is the how; that entry is the why).\nRuns: the R from getting started in R and the Python from Python for simulation & ML, both inside .qmd documents.\nPairs with: the Thinking in Dataframes track, whose analyses live in exactly this kind of document.",
     "crumbs": [
       "Home",
       "Appendices",
       "Computing",
-      "Reading & Running Regressions in R"
+      "Reproducible Analysis with Quarto"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/poisson-process.html",
-    "href": "appendices/advanced-probability/poisson-process.html",
-    "title": "The Poisson Process",
+    "objectID": "appendices/computing/python-for-sim-and-ml.html",
+    "href": "appendices/computing/python-for-sim-and-ml.html",
+    "title": "Python for Simulation & ML",
     "section": "",
-    "text": "Customers entering a bank, radioactive atoms decaying, earthquakes striking: events that pop up at random in continuous time. The Poisson process is the canonical model — a process that, at every instant, “probabilistically restarts itself.” Count its events in any window and you get a Poisson distribution; measure the gaps between events and you get the exponential — the unique memoryless waiting time. One process ties those two distributions together.",
+    "text": "Where the corpus is R-first for statistics, it turns to Python for two jobs: simulation (numpy’s fast vectorised arrays and random-number engine) and machine learning (scikit-learn’s uniform fit/predict API). Every figure in this encyclopedia is built by hand with numpy + matplotlib — no plotting library doing the thinking for you — precisely so the computation is legible. This is that stack, and where each piece earns its place.",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "The Poisson Process"
+      "Computing",
+      "Python for Simulation & ML"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/poisson-process.html#counting-processes",
-    "href": "appendices/advanced-probability/poisson-process.html#counting-processes",
-    "title": "The Poisson Process",
-    "section": "Counting processes",
-    "text": "Counting processes\nA counting process \\{N(t),\\,t\\ge 0\\} records the total number of events that have occurred up to time t. (Ross 2014) The Poisson process of rate \\lambda&gt;0 is the most important one, pinned down by two intuitive properties: (Ross 2014)\n\nIndependent increments — counts in disjoint intervals are independent. What happens between 2:00 and 3:00 tells you nothing about 5:00–6:00.\nStationary increments — the distribution of the count in an interval depends only on its length, not when it sits. A one-hour window is statistically the same at noon or midnight.\n\nFrom these, the number of events in an interval of length t is Poisson with mean \\lambda t: (Ross 2014) \n\\Pr\\{N(t)=n\\} = e^{-\\lambda t}\\,\\frac{(\\lambda t)^n}{n!}, \\qquad n=0,1,2,\\dots\n The rate \\lambda is events per unit time; over a window of length t you expect \\lambda t of them.",
+    "objectID": "appendices/computing/python-for-sim-and-ml.html#numpy-think-in-arrays",
+    "href": "appendices/computing/python-for-sim-and-ml.html#numpy-think-in-arrays",
+    "title": "Python for Simulation & ML",
+    "section": "numpy: think in arrays",
+    "text": "numpy: think in arrays\nnumpy’s ndarray is Python’s answer to R’s vector: a homogeneous block of numbers that operations run over all at once, in fast compiled code, with no Python loop. (Bruce et al. 2020)\nimport numpy as np\n\nx = np.array([4, 8, 15, 16, 23, 42])\nx * 2                    # array([ 8, 16, 30, 32, 46, 84]) — vectorised\nx[x &gt; 15]                # array([16, 23, 42])            — boolean mask\nx.mean(), x.std()        # reductions over the whole array\nM = np.ones((3, 2))      # a 3x2 matrix of ones\nM @ M.T                  # matrix multiply (the @ operator)\nBroadcasting is the one idea to internalise: numpy stretches mismatched-but-compatible shapes so data - data.mean(axis=0) centres every column without a loop. It is the source of numpy’s speed and, occasionally, of silent bugs (below).",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "The Poisson Process"
+      "Computing",
+      "Python for Simulation & ML"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/poisson-process.html#interarrival-times-are-exponential-and-thats-no-accident",
-    "href": "appendices/advanced-probability/poisson-process.html#interarrival-times-are-exponential-and-thats-no-accident",
-    "title": "The Poisson Process",
-    "section": "Interarrival times are exponential — and that’s no accident",
-    "text": "Interarrival times are exponential — and that’s no accident\nLook at the gaps between successive events — the interarrival times T_1, T_2, \\dots. Ross’s result: they are independent and identically distributed Exponential(\\lambda), each with mean 1/\\lambda. (Ross 2014) This is the process’s deepest fact, and it follows from a single idea: stationary + independent increments mean that “at any point in time, the process probabilistically restarts itself.” (Ross 2014) Since the exponential is the unique memoryless continuous distribution, it is the only law a restart-anywhere process can have — the time to the next event cannot depend on how long you’ve already waited. (Ross 2014) (This is exactly the constant-hazard, exponential-survival baseline, seen from the other side.)\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom math import factorial\n\nrng = np.random.default_rng(2)\nlam = 3.0\nT = 20.0\n# Generate arrivals by summing Exponential interarrival times\ngaps = rng.exponential(1/lam, size=int(lam*T*1.5))\ntimes = np.cumsum(gaps)\ntimes = times[times &lt; T]\n\nfig, (axT, axB) = plt.subplots(2, 1, figsize=(7.6, 5.0))\n\naxT.step(np.concatenate([[0], times]), np.arange(len(times)+1), where=\"post\", color=\"#161613\", lw=1.6)\naxT.plot(times, np.zeros_like(times), \"|\", color=\"#e8531d\", markersize=12, markeredgewidth=1.5)\naxT.set_xlim(0, T); axT.set_xlabel(\"time  t\"); axT.set_ylabel(\"N(t)\")\naxT.set_title(f\"Counting process N(t), rate λ={lam}  (red ticks = events)\")\n\n# Counts in fixed windows of width w\nw = 1.0\nedges = np.arange(0, T+w, w)\ncounts = np.histogram(times, bins=edges)[0]\nks = np.arange(0, counts.max()+2)\npmf = np.exp(-lam*w) * (lam*w)**ks / np.array([factorial(k) for k in ks])\naxB.hist(counts, bins=np.arange(-0.5, counts.max()+1.5), density=True, color=\"#b7b6a8\",\n         alpha=0.85, label=\"observed per-window counts\")\naxB.plot(ks, pmf, \"o-\", color=\"#e8531d\", lw=1.8, label=f\"Poisson(λw={lam*w:g}) pmf\")\naxB.set_xlabel(\"events per window\"); axB.set_ylabel(\"proportion\")\naxB.set_title(\"Counts per fixed window are Poisson\")\naxB.legend(fontsize=8, frameon=False)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A Poisson process of rate λ. Top: event times (ticks) scatter at random; the step function N(t) counts them. The gaps between ticks are i.i.d. Exponential(λ). Bottom: counting events in fixed windows produces a Poisson(λ·width) distribution — here a histogram of per-window counts against the Poisson pmf (red). Same process, two faces: exponential gaps, Poisson counts.",
+    "objectID": "appendices/computing/python-for-sim-and-ml.html#randomness-and-simulation",
+    "href": "appendices/computing/python-for-sim-and-ml.html#randomness-and-simulation",
+    "title": "Python for Simulation & ML",
+    "section": "Randomness and simulation",
+    "text": "Randomness and simulation\nSimulation is numpy’s quiet superpower. The modern interface is a generator seeded for reproducibility: (Bruce et al. 2020)\nrng = np.random.default_rng(42)     # seeded generator\nrng.normal(0, 1, size=1000)         # draws from N(0,1)\nrng.integers(0, 6, size=10)         # dice\nrng.choice(data, size=100, replace=True)   # a bootstrap resample\nDraw, compute a statistic, repeat — that loop is the bootstrap, a permutation test, and every Monte-Carlo argument in the book. The figure below is the canonical example.",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "The Poisson Process"
+      "Computing",
+      "Python for Simulation & ML"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/poisson-process.html#superposition-and-thinning",
-    "href": "appendices/advanced-probability/poisson-process.html#superposition-and-thinning",
-    "title": "The Poisson Process",
-    "section": "Superposition and thinning",
-    "text": "Superposition and thinning\nTwo operations make the Poisson process beautifully closed: (Ross 2014)\n\nSuperposition. Merge two independent Poisson processes with rates \\lambda_1 and \\lambda_2 and the combined stream is Poisson with rate \\lambda_1+\\lambda_2. (All the arrivals from two doors into one shop.)\nThinning. Independently tag each event “Type I” with probability p or “Type II” with 1-p; the two sub-streams are independent Poisson processes with rates \\lambda p and \\lambda(1-p). (Ross 2014) (Split arrivals into “web” vs “phone” and each is still Poisson.)\n\nThese closure rules are why the Poisson process is the default model whenever independent streams combine or split.",
+    "objectID": "appendices/computing/python-for-sim-and-ml.html#linear-algebra-done-right",
+    "href": "appendices/computing/python-for-sim-and-ml.html#linear-algebra-done-right",
+    "title": "Python for Simulation & ML",
+    "section": "Linear algebra, done right",
+    "text": "Linear algebra, done right\nnp.linalg is where the matrix formulas become code — and it is why those entries solve rather than invert:\nbeta = np.linalg.solve(X.T @ X, X.T @ y)   # normal equations — do this\nbeta = np.linalg.inv(X.T @ X) @ X.T @ y    # mathematically equal, numerically worse\nsolve (and lstsq, or a QR/SVD) is faster and more stable than forming an explicit inverse — the practical lesson from OLS in matrix form, in one line.",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "The Poisson Process"
+      "Computing",
+      "Python for Simulation & ML"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/poisson-process.html#where-it-shows-up",
-    "href": "appendices/advanced-probability/poisson-process.html#where-it-shows-up",
-    "title": "The Poisson Process",
-    "section": "Where it shows up",
-    "text": "Where it shows up\nRoss names the Poisson process the standard model for “rare events” and arrivals: radioactive \\alpha-particle emissions, earthquakes, the outbreak of wars, and customers entering a bank or post office. (Ross 2014) In this book it is the continuous-time engine beneath count-data models (a Poisson regression models the rate \\lambda) and survival analysis (the exponential interarrival time is the constant-hazard duration).",
+    "objectID": "appendices/computing/python-for-sim-and-ml.html#matplotlib-is-the-figure-engine",
+    "href": "appendices/computing/python-for-sim-and-ml.html#matplotlib-is-the-figure-engine",
+    "title": "Python for Simulation & ML",
+    "section": "matplotlib is the figure engine",
+    "text": "matplotlib is the figure engine\nEvery plot in this encyclopedia is matplotlib, written by hand: a figure, one or more axes, and explicit marks. No seaborn, no ggplot-style grammar — just the primitives, so the code says exactly what the picture means. That is a deliberate house choice, not a limitation.",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "The Poisson Process"
+      "Computing",
+      "Python for Simulation & ML"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/poisson-process.html#common-pitfalls",
-    "href": "appendices/advanced-probability/poisson-process.html#common-pitfalls",
-    "title": "The Poisson Process",
+    "objectID": "appendices/computing/python-for-sim-and-ml.html#where-scikit-learn-fits",
+    "href": "appendices/computing/python-for-sim-and-ml.html#where-scikit-learn-fits",
+    "title": "Python for Simulation & ML",
+    "section": "Where scikit-learn fits",
+    "text": "Where scikit-learn fits\nFor applied machine learning — the ML track put to work — scikit-learn gives every model the same three-verb interface, which is most of what makes Python pleasant for ML: (Murphy 2012; James et al. 2021)\nfrom sklearn.linear_model import Lasso\nfrom sklearn.model_selection import train_test_split\n\nXtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=0)\nmodel = Lasso(alpha=0.1).fit(Xtr, ytr)     # fit\npred  = model.predict(Xte)                  # predict\nmodel.score(Xte, yte)                       # evaluate\nfit / predict / score is the same for a random forest, a gradient booster, or a logistic regression — you swap the estimator and the workflow is unchanged. The concepts behind them live in the ML track; this is the tooling that runs them.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(0)\nN = 4000\npts = rng.random((N, 2))                       # N points in the unit square\ninside = (pts[:, 0]**2 + pts[:, 1]**2) &lt;= 1.0  # inside the quarter circle?\npi_running = 4.0 * np.cumsum(inside) / np.arange(1, N + 1)\n\nfig, (axL, axR) = plt.subplots(1, 2, figsize=(8.6, 4.2),\n                               gridspec_kw={\"width_ratios\": [1, 1.15]})\n\n# Left: the drops\naxL.scatter(pts[inside, 0], pts[inside, 1], s=5, color=\"#e8531d\", alpha=0.7, label=\"inside\")\naxL.scatter(pts[~inside, 0], pts[~inside, 1], s=5, color=\"#b7b6a8\", alpha=0.7, label=\"outside\")\ntheta = np.linspace(0, np.pi / 2, 100)\naxL.plot(np.cos(theta), np.sin(theta), color=\"#161613\", lw=2.0)\naxL.set_aspect(\"equal\"); axL.set_xlim(0, 1); axL.set_ylim(0, 1)\naxL.set_title(f\"{N} random points  →  π ≈ {pi_running[-1]:.3f}\", fontsize=10)\naxL.legend(fontsize=8, frameon=False, loc=\"upper right\")\naxL.grid(False)\n\n# Right: convergence\naxR.plot(np.arange(1, N + 1), pi_running, color=\"#e8531d\", lw=1.6)\naxR.axhline(np.pi, color=\"#161613\", lw=1.2, ls=(0, (4, 3)))\naxR.text(N, np.pi + 0.04, \" π\", color=\"#161613\", fontsize=10, va=\"bottom\", ha=\"right\")\naxR.set_xscale(\"log\")\naxR.set_ylim(2.6, 3.7)\naxR.set_xlabel(\"number of draws (log scale)\"); axR.set_ylabel(\"running estimate of π\")\naxR.set_title(\"The estimate converges (LLN)\", fontsize=10)\n\nfig.suptitle(\"Monte-Carlo π: random points and counting, nothing else\", fontsize=11)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Monte-Carlo estimation of π — simulation in one screen of numpy. Left: N random points dropped in the unit square; the fraction landing inside the quarter-circle (orange) is an estimate of its area, π/4, so 4× that fraction estimates π. Right: the running estimate over N draws converges on π (dashed line) at the √N rate the Law of Large Numbers guarantees. No formula for π is used — only random points and counting. This is the whole idea of Monte-Carlo methods, and the reason numpy’s vectorised RNG matters.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Python for Simulation & ML"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/python-for-sim-and-ml.html#common-pitfalls",
+    "href": "appendices/computing/python-for-sim-and-ml.html#common-pitfalls",
+    "title": "Python for Simulation & ML",
     "section": "Common pitfalls",
-    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nAssuming Poisson when events clump. Independent increments fail if one event makes the next more likely (“contagion”) — that’s overdispersion; use a different process / negative binomial. (Ross 2014)\nForgetting the memoryless catch. “It’s been quiet, so an arrival is overdue” is the gambler’s fallacy in continuous time — the exponential has no memory. (Ross 2014)\nMismatching rate and window. The count is Poisson(\\lambda t), not Poisson(\\lambda); keep the time units straight (the offset issue). (Ross 2014)",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere the Python stack bites\n\n\n\n\nFloat equality. 0.1 + 0.2 == 0.3 is False. Compare with np.isclose(a, b), never ==, for floating-point results.\nBroadcasting surprises. A (n,) vector and an (n,1) column broadcast to an (n,n) matrix — rarely what you meant. Check .shape when an operation returns something suspiciously large.\nViews vs copies. Slicing an array returns a view; writing to it mutates the original. Use .copy() when you need independence, or track down a “why did my data change?” bug.\nLeakage in scikit-learn. Fit scalers/imputers on the training split only, then apply to test — do it on the full data and your cross-validation score is optimistic. Use a Pipeline so the preprocessing is refit inside each fold. (James et al. 2021)\nReaching for heavy libraries reflexively. A histogram, a bootstrap, a projection — these are a few lines of numpy. Pulling in seaborn/pandas/sklearn for a one-liner adds dependencies and hides the mechanism the figure is meant to show.",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "The Poisson Process"
+      "Computing",
+      "Python for Simulation & ML"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/poisson-process.html#from-the-sources",
-    "href": "appendices/advanced-probability/poisson-process.html#from-the-sources",
-    "title": "The Poisson Process",
+    "objectID": "appendices/computing/python-for-sim-and-ml.html#from-the-sources",
+    "href": "appendices/computing/python-for-sim-and-ml.html#from-the-sources",
+    "title": "Python for Simulation & ML",
     "section": "From the sources",
-    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nRoss, Introduction to Probability Models — the counting process N(t) and the Poisson process of rate \\lambda (independent & stationary increments; N(t)\\sim\\text{Poisson}(\\lambda t)); interarrival times i.i.d. Exponential(\\lambda) and the “probabilistically restarts itself” / memoryless link; superposition (\\lambda_1+\\lambda_2) and thinning (\\lambda p); and the rare-event examples (radioactive decay, earthquakes, wars, arrivals).",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nBruce, Bruce & Gedeck, Practical Statistics for Data Scientists — the numpy/pandas idiom for data work and the resampling (bootstrap, permutation) simulations that vectorised RNG makes cheap.\nMurphy, Machine Learning: A Probabilistic Perspective, and James et al., ISLR — the models behind scikit-learn’s estimators, the train/test discipline, and the leakage caution.\nThis repository — every figure is hand-built numpy + matplotlib; the Monte-Carlo π above is the template for “simulate, then plot.”",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "The Poisson Process"
+      "Computing",
+      "Python for Simulation & ML"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/poisson-process.html#connections",
-    "href": "appendices/advanced-probability/poisson-process.html#connections",
-    "title": "The Poisson Process",
+    "objectID": "appendices/computing/python-for-sim-and-ml.html#connections",
+    "href": "appendices/computing/python-for-sim-and-ml.html#connections",
+    "title": "Python for Simulation & ML",
     "section": "Connections",
-    "text": "Connections\n\nBuilds on: the Poisson & exponential distributions and memorylessness.\nPowers: count-data / Poisson regression (modelling the rate) and the constant-hazard core of survival analysis.\nGeneralises to: non-homogeneous and compound Poisson processes, and the continuous-time Markov chains of the next entry.",
+    "text": "Connections\n\nRuns: the ML track (concepts → scikit-learn estimators) and every Monte-Carlo / simulation argument.\nImplements: OLS in matrix form (np.linalg.solve) and the bootstrap (rng.choice).\nPairs with: getting started in R (the other half of the toolkit) and reproducible analysis with Quarto (where both run, seeded).",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "The Poisson Process"
+      "Computing",
+      "Python for Simulation & ML"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/markov-chains.html",
-    "href": "appendices/advanced-probability/markov-chains.html",
-    "title": "Markov Chains",
+    "objectID": "appendices/computing/getting-started-in-r.html",
+    "href": "appendices/computing/getting-started-in-r.html",
+    "title": "Getting Started in R",
     "section": "",
-    "text": "A Markov chain is a system that moves between states where “the future depends on the present, but not the past.” Knowing where you are now is enough; the route that got you here is irrelevant. That one assumption — the Markov property — makes the whole future computable from a single transition matrix, and leads to a beautiful result: run many chains long enough and they converge to the same stationary distribution, no matter where they started. That convergence is the engine under MCMC.",
+    "text": "R rewards a small amount of the right knowledge. You do not need the whole language; you need to think in vectors, keep your data in a data frame, chain steps with the pipe, and wrap anything you repeat in a function. Those four ideas carry most applied work. This is the on-ramp — the language itself; the tidyverse wrangling verbs and reading a regression build on top of it.",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "Markov Chains"
+      "Computing",
+      "Getting Started in R"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/markov-chains.html#the-markov-property",
-    "href": "appendices/advanced-probability/markov-chains.html#the-markov-property",
-    "title": "Markov Chains",
-    "section": "The Markov property",
-    "text": "The Markov property\nA Markov chain \\{X_n\\} takes values in a set of states, and obeys: (Ross 2014) \n\\Pr\\{X_{n+1}=j \\mid X_n=i, X_{n-1}=i_{n-1},\\dots,X_0=i_0\\} = \\Pr\\{X_{n+1}=j\\mid X_n=i\\} = P_{ij}.\n In words — “the future depends on the present, not the past.” (Ross 2014) The entire history collapses to the current state. That’s a strong assumption, but a stunning number of systems satisfy it (or can be made to by enlarging the state), and it’s what makes the chain tractable.",
+    "objectID": "appendices/computing/getting-started-in-r.html#r-thinks-in-vectors",
+    "href": "appendices/computing/getting-started-in-r.html#r-thinks-in-vectors",
+    "title": "Getting Started in R",
+    "section": "R thinks in vectors",
+    "text": "R thinks in vectors\nThe single most important habit: R operates on whole vectors at once, not element by element. A vector is made with c(), and arithmetic is vectorised — it applies to every element without a loop. (Kaplan 2024)\nx &lt;- c(4, 8, 15, 16, 23, 42)   # a numeric vector;  &lt;- is assignment\nx * 2                          # 8 16 30 32 46 84   — no loop needed\nmean(x); sd(x); length(x)      # summaries take the whole vector\nx[x &gt; 15]                      # 16 23 42            — logical subsetting\nWriting a for loop where a vectorised expression would do is the most common beginner’s tell; R is faster and clearer when you let the vector operation speak. The main atomic types are numeric, character (\"text\"), logical (TRUE/FALSE), and factor (categorical — a character with a fixed set of levels, which is how R encodes groups for models). (McNulty 2021)",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "Markov Chains"
+      "Computing",
+      "Getting Started in R"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/markov-chains.html#the-transition-matrix",
-    "href": "appendices/advanced-probability/markov-chains.html#the-transition-matrix",
-    "title": "Markov Chains",
-    "section": "The transition matrix",
-    "text": "The transition matrix\nAll the dynamics live in the transition probability matrix \\mathbf P, whose entry P_{ij} is the probability of moving from state i to state j in one step. (Ross 2014) Each row is a probability distribution: P_{ij}\\ge 0 and \\sum_j P_{ij}=1 (from any state you must go somewhere). (Ross 2014)\nMulti-step transitions are just matrix powers. The Chapman–Kolmogorov equations, P^{n+m}_{ij}=\\sum_k P^{n}_{ik}P^{m}_{kj}, say that to get from i to j in n+m steps you pass through some intermediate state k — and they imply the clean rule (Ross 2014) \n\\mathbf P^{(n)} = \\mathbf P^{\\,n}.\n The n-step transition matrix is the one-step matrix raised to the n-th power. Want the state distribution after n steps? Multiply your starting distribution by \\mathbf P^n.",
+    "objectID": "appendices/computing/getting-started-in-r.html#keep-your-data-in-a-data-frame",
+    "href": "appendices/computing/getting-started-in-r.html#keep-your-data-in-a-data-frame",
+    "title": "Getting Started in R",
+    "section": "Keep your data in a data frame",
+    "text": "Keep your data in a data frame\nA data frame (or its modern form, the tibble) is R’s table: named columns that can hold different types, all the same length — one row per observation, one column per variable. It is the object every modelling and plotting verb expects. (Dayal 2020)\nd &lt;- data.frame(\n  name = c(\"Ann\", \"Ben\", \"Cy\"),\n  age  = c(31, 25, 40),\n  group = factor(c(\"T\", \"C\", \"T\"))\n)\nd$age            # a column, by name ($)\nd[d$group == \"T\", ]   # rows where group is T, all columns\nnrow(d); names(d)     # dimensions and column names\nLoad real data with the readr package (read_csv(\"file.csv\")); everything downstream assumes it arrived as a tidy data frame. (Llaudet and Imai 2022)",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "Markov Chains"
+      "Computing",
+      "Getting Started in R"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/markov-chains.html#classifying-states",
-    "href": "appendices/advanced-probability/markov-chains.html#classifying-states",
-    "title": "Markov Chains",
-    "section": "Classifying states",
-    "text": "Classifying states\nNot all states behave alike: (Ross 2014)\n\nRecurrent vs transient. A state is recurrent if, starting there, you return to it with probability 1; transient if there’s positive probability you never come back. In a finite chain, at least one state must be recurrent. (Ross 2014)\nPeriodicity. A state has period d if returns are only possible at multiples of d; period 1 is aperiodic. (Ross 2014)\n\nThese distinctions decide whether the chain settles down.",
+    "objectID": "appendices/computing/getting-started-in-r.html#the-pipe-and-writing-functions",
+    "href": "appendices/computing/getting-started-in-r.html#the-pipe-and-writing-functions",
+    "title": "Getting Started in R",
+    "section": "The pipe, and writing functions",
+    "text": "The pipe, and writing functions\nThe pipe |&gt; passes the thing on its left as the first argument of the function on its right, so a sequence of steps reads top-to-bottom instead of inside-out: (Kaplan 2024)\n# nested (hard to read)           # piped (reads as steps)\nround(mean(x, na.rm = TRUE), 2)   x |&gt; mean(na.rm = TRUE) |&gt; round(2)\nAnd when you find yourself copying a block of code with one thing changed, make it a function:\nz_score &lt;- function(v) {          # v is the argument\n  (v - mean(v)) / sd(v)           # last expression is returned\n}\nz_score(x)\nFunctions plus vectorisation are the whole game: express the operation once, apply it to any vector.",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "Markov Chains"
+      "Computing",
+      "Getting Started in R"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/markov-chains.html#the-stationary-distribution",
-    "href": "appendices/advanced-probability/markov-chains.html#the-stationary-distribution",
-    "title": "Markov Chains",
-    "section": "The stationary distribution",
-    "text": "The stationary distribution\nThe payoff. For well-behaved chains, the probability of being in state j after many steps converges to a limit \\pi_j that does not depend on where you started. (Ross 2014) If the chain is irreducible (you can get from any state to any other) and ergodic (aperiodic and positive recurrent), it converges to a unique stationary distribution \\pi, the solution of (Ross 2014) \n\\pi_j = \\sum_i \\pi_i\\,P_{ij}, \\qquad \\sum_j \\pi_j = 1.\n \\pi is the distribution that reproduces itself under one more step (\\pi\\mathbf P=\\pi) — an equilibrium the chain forgets its way toward.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# A 3-state transition matrix (e.g. sunny/cloudy/rainy)\nP = np.array([[0.7, 0.2, 0.1],\n              [0.3, 0.4, 0.3],\n              [0.2, 0.3, 0.5]])\n\n# Stationary distribution: left eigenvector with eigenvalue 1\nvals, vecs = np.linalg.eig(P.T)\npi = np.real(vecs[:, np.argmin(np.abs(vals - 1))]); pi = pi / pi.sum()\n\nsteps = 12\nstart_a = np.array([1.0, 0.0, 0.0])\nstart_b = np.array([0.0, 0.0, 1.0])\ndef evolve(d):\n    out = [d]\n    for _ in range(steps):\n        d = d @ P; out.append(d)\n    return np.array(out)\nA, B = evolve(start_a), evolve(start_b)\n\nfig, ax = plt.subplots(figsize=(7.4, 4.0))\ncolors = [\"#161613\", \"#5e5e54\", \"#8a8a7e\"]\nfor s in range(3):\n    ax.plot(A[:, s], \"-o\", color=colors[s], ms=3, lw=1.6, label=f\"state {s} (start A)\")\n    ax.plot(B[:, s], \"--s\", color=colors[s], ms=3, lw=1.2, alpha=0.7)\n    ax.axhline(pi[s], color=colors[s], ls=\":\", lw=1.0)\nax.set_xlabel(\"step n\"); ax.set_ylabel(\"probability of each state\")\nax.set_title(\"Two different starts → the same stationary distribution\")\nax.legend(fontsize=7.5, frameon=False, ncol=3, loc=\"upper center\")\nax.set_ylim(0, 1)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Forgetting the start. A 3-state weather chain run from two very different initial distributions (one starts certain of state 0, the other certain of state 2). Both distributions evolve under repeated multiplication by P and converge to the SAME stationary distribution π (dashed) within a handful of steps. Irreducible + aperiodic chains lose all memory of where they began — the fact MCMC exploits.",
+    "objectID": "appendices/computing/getting-started-in-r.html#compute-then-look-always",
+    "href": "appendices/computing/getting-started-in-r.html#compute-then-look-always",
+    "title": "Getting Started in R",
+    "section": "Compute, then look — always",
+    "text": "Compute, then look — always\nThe reason social scientists learn to simulate and plot, not just compute summaries, is that summaries hide shape. Anscombe’s quartet is the classic demonstration, and it is a one-line lesson worth internalising before any modelling. (Dayal 2015)\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nx123 = np.array([10, 8, 13, 9, 11, 14, 6, 4, 12, 7, 5])\ndata = {\n    \"I\":   (x123, np.array([8.04,6.95,7.58,8.81,8.33,9.96,7.24,4.26,10.84,4.82,5.68])),\n    \"II\":  (x123, np.array([9.14,8.14,8.74,8.77,9.26,8.10,6.13,3.10,9.13,7.26,4.74])),\n    \"III\": (x123, np.array([7.46,6.77,12.74,7.11,7.81,8.84,6.08,5.39,8.15,6.42,5.73])),\n    \"IV\":  (np.array([8,8,8,8,8,8,8,19,8,8,8]),\n            np.array([6.58,5.76,7.71,8.84,8.47,7.04,5.25,12.50,5.56,7.91,6.89])),\n}\nxs = np.linspace(3, 20, 50)\n\nfig, axes = plt.subplots(2, 2, figsize=(7.8, 5.4), sharex=True, sharey=True)\nfor ax, (name, (x, y)) in zip(axes.flat, data.items()):\n    b1 = np.cov(x, y, bias=True)[0, 1] / np.var(x)     # slope, by hand\n    b0 = y.mean() - b1 * x.mean()\n    r = np.corrcoef(x, y)[0, 1]\n    ax.plot(xs, b0 + b1 * xs, color=\"#e8531d\", lw=2.0, zorder=1)\n    ax.scatter(x, y, s=28, color=\"#161613\", zorder=2, edgecolor=\"#f4f3ec\", linewidth=0.6)\n    ax.set_title(f\"Set {name}:  r = {r:.2f},  ŷ = {b0:.1f} + {b1:.2f}x\", fontsize=9)\n    ax.set_xlim(2, 20); ax.set_ylim(2, 14)\nfig.suptitle(\"Same statistics, four different realities — so plot the data\", fontsize=11)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Anscombe’s quartet: four datasets with near-identical summary statistics — same mean of x and y, same variance, same correlation (r ≈ 0.82), and the same fitted line ŷ = 3 + 0.5x (orange) — yet four completely different stories. Only the scatter reveals the curve, the outlier, and the leverage point. This is why every figure in this encyclopedia is a plot, not a table of moments: the number can be identical while the reality is not. Compute, then look.",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "Markov Chains"
+      "Computing",
+      "Getting Started in R"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/markov-chains.html#signature-examples",
-    "href": "appendices/advanced-probability/markov-chains.html#signature-examples",
-    "title": "Markov Chains",
-    "section": "Signature examples",
-    "text": "Signature examples\nRoss’s classics: (Ross 2014)\n\nWeather in the “Land of Oz” — a chain over {rain, nice, snow}, predicting tomorrow from today.\nRandom walks — a particle stepping \\pm 1 on a line; the symmetric walk (p=0.5) is recurrent (returns to the origin with probability 1), a surprisingly delicate fact.\nGambler’s ruin — bet $1 repeatedly until you hit $0 (broke) or $N (goal): a chain with two absorbing states, and the question is the probability of each fate.",
-    "crumbs": [
-      "Home",
-      "Appendices",
-      "Advanced Probability",
-      "Markov Chains"
-    ]
-  },
-  {
-    "objectID": "appendices/advanced-probability/markov-chains.html#common-pitfalls",
-    "href": "appendices/advanced-probability/markov-chains.html#common-pitfalls",
-    "title": "Markov Chains",
+    "objectID": "appendices/computing/getting-started-in-r.html#common-pitfalls",
+    "href": "appendices/computing/getting-started-in-r.html#common-pitfalls",
+    "title": "Getting Started in R",
     "section": "Common pitfalls",
-    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nAssuming the Markov property holds. If the future genuinely depends on more than the present, enlarge the state (e.g. include yesterday) — or it isn’t a Markov chain. (Ross 2014)\nExpecting convergence without the conditions. A periodic or reducible chain may never settle to a unique \\pi; check irreducibility and aperiodicity. (Ross 2014)\nConfusing a stationary distribution with an absorbing state. Gambler’s ruin absorbs; it doesn’t mix to an interior equilibrium. (Ross 2014)\nReading \\pi as “where the chain is.” \\pi is the long-run distribution over states, not a single destination — the chain keeps moving, visiting state j a fraction \\pi_j of the time.",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere new R users trip\n\n\n\n\nLooping instead of vectorising. for (i in 1:length(x)) x[i] &lt;- x[i]*2 is slow and un-R; write x * 2. Reach for a loop only when each step truly depends on the last. (Kaplan 2024)\nConfusing &lt;-, =, and ==. &lt;- assigns, == tests equality, and a single = assigns inside a function call (an argument). Mixing them up produces silent surprises, not errors.\nNA propagates. Any arithmetic touching a missing value returns NA. mean(x) on a vector with one NA is NA — you must ask for mean(x, na.rm = TRUE). R makes you acknowledge missingness on purpose.\nRecycling. Operating on vectors of different lengths silently recycles the shorter one. c(1,2,3,4) + c(0,10) gives 1 12 3 14, not an error — occasionally handy, often a bug.\nFactor surprises. A grouping variable read as text may need factor(); and a factor’s reference level (the one folded into the intercept) is the first alphabetically unless you set it — the source of “why is my category missing from the regression?” (McNulty 2021)",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "Markov Chains"
+      "Computing",
+      "Getting Started in R"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/markov-chains.html#from-the-sources",
-    "href": "appendices/advanced-probability/markov-chains.html#from-the-sources",
-    "title": "Markov Chains",
+    "objectID": "appendices/computing/getting-started-in-r.html#from-the-sources",
+    "href": "appendices/computing/getting-started-in-r.html#from-the-sources",
+    "title": "Getting Started in R",
     "section": "From the sources",
-    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nRoss, Introduction to Probability Models — the Markov property (“future depends on the present, not the past”); the transition matrix P_{ij} (rows sum to 1); Chapman–Kolmogorov and \\mathbf P^{(n)}=\\mathbf P^n; recurrent vs transient states and periodicity; the stationary / limiting distribution \\pi=\\pi\\mathbf P under irreducibility + ergodicity; and the Land of Oz weather, random walk (symmetric → recurrent), and gambler’s ruin examples.",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nKaplan, Lessons in Statistical Thinking — R as a vector language for statistics: vectorised operations, the pipe, and writing small functions, taught with the mosaic idiom.\nDayal, An Introduction to R for Quantitative Economics and Quantitative Economics with R — the learn-by-simulation ethos (Anscombe’s quartet, spurious regression) and the data-frame-centred workflow for economics.\nMcNulty, Explanatory Statistical Modeling in R — atomic types and factors, and how the reference level of a factor enters a model.\nLlaudet & Imai, Data Analysis for Social Science — the friendly first-contact path: load a data frame, subset it, summarise it, and plot it.",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "Markov Chains"
+      "Computing",
+      "Getting Started in R"
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/markov-chains.html#connections",
-    "href": "appendices/advanced-probability/markov-chains.html#connections",
-    "title": "Markov Chains",
+    "objectID": "appendices/computing/getting-started-in-r.html#connections",
+    "href": "appendices/computing/getting-started-in-r.html#connections",
+    "title": "Getting Started in R",
     "section": "Connections",
-    "text": "Connections\n\nBuilds on: conditional probability (the transition probabilities) and matrix algebra.\nPowers: MCMC — Markov chain Monte Carlo constructs a chain whose stationary distribution is the Bayesian posterior, then samples by running it.\nCousin of: the Poisson process (its continuous-time relative) and the state-space view of time series.",
+    "text": "Connections\n\nLeads to: the Thinking in Dataframes track (the tidyverse verbs for wrangling), and reading & running regressions in R (once the data is in a frame).\nPairs with: reproducible analysis with Quarto (where this R actually runs) and the computing appendix index.\nMotivates: exploratory data analysis — the Anscombe lesson is the whole reason EDA precedes modelling.",
     "crumbs": [
       "Home",
       "Appendices",
-      "Advanced Probability",
-      "Markov Chains"
-    ]
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "How to use this",
-    "section": "",
-    "text": "A reusable, growing reference for becoming a quantitative social science researcher. It is opinionated about pedagogy: intuition and use-cases lead, mathematics follows only where it clarifies a principle or a deviation, and the full derivations live in appendices. The goal is a reader who can move from undergraduate foundations to the academic rigour of causal research and the realities of field and client work.\nIt is designed to be self-contained: every concept you need is on the page, with one runnable figure to make it concrete and explicit links up and down the curriculum. You should never have to leave the document to follow an argument.",
-    "crumbs": [
-      "Home",
-      "Start here",
-      "How to use this"
-    ]
-  },
-  {
-    "objectID": "about.html#what-this-is",
-    "href": "about.html#what-this-is",
-    "title": "How to use this",
-    "section": "",
-    "text": "A reusable, growing reference for becoming a quantitative social science researcher. It is opinionated about pedagogy: intuition and use-cases lead, mathematics follows only where it clarifies a principle or a deviation, and the full derivations live in appendices. The goal is a reader who can move from undergraduate foundations to the academic rigour of causal research and the realities of field and client work.\nIt is designed to be self-contained: every concept you need is on the page, with one runnable figure to make it concrete and explicit links up and down the curriculum. You should never have to leave the document to follow an argument.",
-    "crumbs": [
-      "Home",
-      "Start here",
-      "How to use this"
-    ]
-  },
-  {
-    "objectID": "about.html#how-to-read-it",
-    "href": "about.html#how-to-read-it",
-    "title": "How to use this",
-    "section": "How to read it",
-    "text": "How to read it\n\nFollow the spine, or jump in. The Parts (0 → VI) build in order, but each article stands on its own and links to its prerequisites — so you can start anywhere and follow the Connections back to whatever you’re missing.\nRead the intuition first; treat the math as optional depth. The argument is carried by the prose and the figure. The tinted Appendix · the mathematics block is there when you want the derivation and skippable when you don’t.\nUse the tracks for breadth. Beyond the main spine, parallel tracks go deep on the ML Track, Thinking in Dataframes (R), and Complexity Science (systems, networks, emergence).",
-    "crumbs": [
-      "Home",
-      "Start here",
-      "How to use this"
-    ]
-  },
-  {
-    "objectID": "about.html#the-source-library",
-    "href": "about.html#the-source-library",
-    "title": "How to use this",
-    "section": "The source library",
-    "text": "The source library\nThis encyclopedia is built from a locked library of canonical texts — it is a structured, intuition-first synthesis of those sources, not a replacement for them. Every article carries a From the sources note giving explicit per-source attribution, so any claim can be traced back and read further. The library spans:\n\n\n\n\n\n\n\nTheme\nKey sources\n\n\n\n\nProbability\nRoss A First Course; Grinstead & Snell; Ross Probability Models\n\n\nApplied statistics\nPractical Statistics for Data Scientists; Statistics Done Wrong; Albers\n\n\nEconometrics\nWooldridge; Angrist & Pischke Mastering ’Metrics & Mostly Harmless; Panel Data; Moffatt Experimetrics\n\n\nBayesian\nLambert A Student’s Guide to Bayesian Statistics\n\n\nCausal inference\nCunningham The Mixtape; Gerber & Green Field Experiments; Pearl Book of Why & Primer; the DiD Practitioner’s Guide; Chernozhukov et al.\n\n\nMachine learning\nISLR; ML for Social & Behavioral Research; Murphy Probabilistic Perspective\n\n\nComplexity science\nMeadows Thinking in Systems; Menczer Network Science; Barabási Network Science; Mitchell Complexity; Miller & Page; Sayama; Strogatz; Epstein & Axtell\n\n\nComputing (R)\nWickham & Grolemund R for Data Science; Dayal\n\n\nMethods & critique\nBryman Social Research Methods; Muller The Tyranny of Metrics",
-    "crumbs": [
-      "Home",
-      "Start here",
-      "How to use this"
-    ]
-  },
-  {
-    "objectID": "about.html#the-house-style-for-contributors-including-future-me",
-    "href": "about.html#the-house-style-for-contributors-including-future-me",
-    "title": "How to use this",
-    "section": "The house style (for contributors — including future-me)",
-    "text": "The house style (for contributors — including future-me)\nArticles are written to a fixed template so the encyclopedia stays coherent as it grows:\n\nIn one sentence — a single italic intuition kernel under the title.\nWhy it matters — the motivating use-case before any notation.\nIntuition — plain language, concrete examples, analogies that hold up.\nWorked examples — taken from the source library, with real studies where possible.\nOne runnable figure — a numpy/matplotlib simulation built by hand, never a black box.\nThe math, where it earns its place — inline and minimal; if a derivation is longer than the idea it supports, it goes to the appendix.\nCommon pitfalls — how the concept is misused in practice (the Statistics Done Wrong lens is a recurring guest).\nFrom the sources — explicit per-source attribution.\nAppendix · the full mathematics — wrapped in a tinted block the reader may skip.\nConnections — links up and down the curriculum.\n\nMath uses common sense first and proof second: notation is introduced because the prose demanded it, never to decorate.",
-    "crumbs": [
-      "Home",
-      "Start here",
-      "How to use this"
-    ]
-  },
-  {
-    "objectID": "about.html#building-locally",
-    "href": "about.html#building-locally",
-    "title": "How to use this",
-    "section": "Building locally",
-    "text": "Building locally\n# Render the whole site\nquarto render\n\n# Live-preview while editing\nquarto preview\nExecutable code blocks (e.g. simulations) run on a Python virtual environment in .venv/ with numpy and matplotlib. R support can be added per-document later — Quarto handles both engines in the same project.",
-    "crumbs": [
-      "Home",
-      "Start here",
-      "How to use this"
-    ]
-  },
-  {
-    "objectID": "appendices/advanced-probability/index.html",
-    "href": "appendices/advanced-probability/index.html",
-    "title": "Appendix · Advanced Probability",
-    "section": "",
-    "text": "◆ QSS · APPENDIX / ADVANCED PROBABILITY · 3 LIVE · 3 PLANNED\nThe Foundations probability sub-chapter covers everything the inference, regression, and causal parts actually require. This appendix goes one level deeper, into the stochastic-process and order-statistic material from Sheldon Ross’s Introduction to Probability Models and A First Course in Probability — optional for the main arc, but foundational for queueing, reliability, time-series theory, and the mathematics of extremes.",
-    "crumbs": [
-      "Home",
-      "Appendices",
-      "Advanced Probability",
-      "Appendix · Advanced Probability"
-    ]
-  },
-  {
-    "objectID": "appendices/advanced-probability/index.html#entries",
-    "href": "appendices/advanced-probability/index.html#entries",
-    "title": "Appendix · Advanced Probability",
-    "section": "Entries",
-    "text": "Entries\n\n\n The Poisson Process Events in continuous time: interarrival times, the memoryless property, superposition — the engine behind count and survival models. \n\n\n Markov Chains Memoryless state-to-state dynamics: transition matrices and stationary distributions — the theory under MCMC. \n\n\n Order Statistics The probability of sorted data: min, max, median, range — the basis of quantiles, extremes, and rank tests.",
-    "crumbs": [
-      "Home",
-      "Appendices",
-      "Advanced Probability",
-      "Appendix · Advanced Probability"
-    ]
-  },
-  {
-    "objectID": "appendices/advanced-probability/index.html#planned",
-    "href": "appendices/advanced-probability/index.html#planned",
-    "title": "Appendix · Advanced Probability",
-    "section": "Planned",
-    "text": "Planned\nDeeper Ross Probability Models topics, sourced and queued:\n\nRenewal theory PLANNED — when interarrivals aren’t exponential: the renewal-reward theorem and long-run rates.\nQueueing (M/M/1 and beyond) PLANNED — arrivals meet service: utilisation, waiting times, and Little’s law.\nBrownian motion PLANNED — the continuous-time limit under the CLT, and the scaffolding of continuous-time finance and diffusion.",
-    "crumbs": [
-      "Home",
-      "Appendices",
-      "Advanced Probability",
-      "Appendix · Advanced Probability"
-    ]
-  },
-  {
-    "objectID": "appendices/advanced-probability/index.html#where-this-connects",
-    "href": "appendices/advanced-probability/index.html#where-this-connects",
-    "title": "Appendix · Advanced Probability",
-    "section": "Where this connects",
-    "text": "Where this connects\n\nThe Poisson process is the continuous-time engine behind count data and survival/hazard models — its interarrival times are the exponential durations of survival analysis.\nMarkov chains are the theory under MCMC (the “MC” is Markov chain) and many time-series models.\nOrder statistics underpin the median, quantiles, extremes, and the rank-based nonparametric tests.",
-    "crumbs": [
-      "Home",
-      "Appendices",
-      "Advanced Probability",
-      "Appendix · Advanced Probability"
+      "Computing",
+      "Getting Started in R"
     ]
   },
   {
@@ -11289,11 +11178,356 @@
     ]
   },
   {
+    "objectID": "appendices/advanced-probability/index.html",
+    "href": "appendices/advanced-probability/index.html",
+    "title": "Appendix · Advanced Probability",
+    "section": "",
+    "text": "◆ QSS · APPENDIX / ADVANCED PROBABILITY · 3 LIVE · 3 PLANNED\nThe Foundations probability sub-chapter covers everything the inference, regression, and causal parts actually require. This appendix goes one level deeper, into the stochastic-process and order-statistic material from Sheldon Ross’s Introduction to Probability Models and A First Course in Probability — optional for the main arc, but foundational for queueing, reliability, time-series theory, and the mathematics of extremes.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Appendix · Advanced Probability"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/index.html#entries",
+    "href": "appendices/advanced-probability/index.html#entries",
+    "title": "Appendix · Advanced Probability",
+    "section": "Entries",
+    "text": "Entries\n\n\n The Poisson Process Events in continuous time: interarrival times, the memoryless property, superposition — the engine behind count and survival models. \n\n\n Markov Chains Memoryless state-to-state dynamics: transition matrices and stationary distributions — the theory under MCMC. \n\n\n Order Statistics The probability of sorted data: min, max, median, range — the basis of quantiles, extremes, and rank tests.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Appendix · Advanced Probability"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/index.html#planned",
+    "href": "appendices/advanced-probability/index.html#planned",
+    "title": "Appendix · Advanced Probability",
+    "section": "Planned",
+    "text": "Planned\nDeeper Ross Probability Models topics, sourced and queued:\n\nRenewal theory PLANNED — when interarrivals aren’t exponential: the renewal-reward theorem and long-run rates.\nQueueing (M/M/1 and beyond) PLANNED — arrivals meet service: utilisation, waiting times, and Little’s law.\nBrownian motion PLANNED — the continuous-time limit under the CLT, and the scaffolding of continuous-time finance and diffusion.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Appendix · Advanced Probability"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/index.html#where-this-connects",
+    "href": "appendices/advanced-probability/index.html#where-this-connects",
+    "title": "Appendix · Advanced Probability",
+    "section": "Where this connects",
+    "text": "Where this connects\n\nThe Poisson process is the continuous-time engine behind count data and survival/hazard models — its interarrival times are the exponential durations of survival analysis.\nMarkov chains are the theory under MCMC (the “MC” is Markov chain) and many time-series models.\nOrder statistics underpin the median, quantiles, extremes, and the rank-based nonparametric tests.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Appendix · Advanced Probability"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "How to use this",
+    "section": "",
+    "text": "A reusable, growing reference for becoming a quantitative social science researcher. It is opinionated about pedagogy: intuition and use-cases lead, mathematics follows only where it clarifies a principle or a deviation, and the full derivations live in appendices. The goal is a reader who can move from undergraduate foundations to the academic rigour of causal research and the realities of field and client work.\nIt is designed to be self-contained: every concept you need is on the page, with one runnable figure to make it concrete and explicit links up and down the curriculum. You should never have to leave the document to follow an argument.",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "How to use this"
+    ]
+  },
+  {
+    "objectID": "about.html#what-this-is",
+    "href": "about.html#what-this-is",
+    "title": "How to use this",
+    "section": "",
+    "text": "A reusable, growing reference for becoming a quantitative social science researcher. It is opinionated about pedagogy: intuition and use-cases lead, mathematics follows only where it clarifies a principle or a deviation, and the full derivations live in appendices. The goal is a reader who can move from undergraduate foundations to the academic rigour of causal research and the realities of field and client work.\nIt is designed to be self-contained: every concept you need is on the page, with one runnable figure to make it concrete and explicit links up and down the curriculum. You should never have to leave the document to follow an argument.",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "How to use this"
+    ]
+  },
+  {
+    "objectID": "about.html#how-to-read-it",
+    "href": "about.html#how-to-read-it",
+    "title": "How to use this",
+    "section": "How to read it",
+    "text": "How to read it\n\nFollow the spine, or jump in. The Parts (0 → VI) build in order, but each article stands on its own and links to its prerequisites — so you can start anywhere and follow the Connections back to whatever you’re missing.\nRead the intuition first; treat the math as optional depth. The argument is carried by the prose and the figure. The tinted Appendix · the mathematics block is there when you want the derivation and skippable when you don’t.\nUse the tracks for breadth. Beyond the main spine, parallel tracks go deep on the ML Track, Thinking in Dataframes (R), and Complexity Science (systems, networks, emergence).",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "How to use this"
+    ]
+  },
+  {
+    "objectID": "about.html#the-source-library",
+    "href": "about.html#the-source-library",
+    "title": "How to use this",
+    "section": "The source library",
+    "text": "The source library\nThis encyclopedia is built from a locked library of canonical texts — it is a structured, intuition-first synthesis of those sources, not a replacement for them. Every article carries a From the sources note giving explicit per-source attribution, so any claim can be traced back and read further. The library spans:\n\n\n\n\n\n\n\nTheme\nKey sources\n\n\n\n\nProbability\nRoss A First Course; Grinstead & Snell; Ross Probability Models\n\n\nApplied statistics\nPractical Statistics for Data Scientists; Statistics Done Wrong; Albers\n\n\nEconometrics\nWooldridge; Angrist & Pischke Mastering ’Metrics & Mostly Harmless; Panel Data; Moffatt Experimetrics\n\n\nBayesian\nLambert A Student’s Guide to Bayesian Statistics\n\n\nCausal inference\nCunningham The Mixtape; Gerber & Green Field Experiments; Pearl Book of Why & Primer; the DiD Practitioner’s Guide; Chernozhukov et al.\n\n\nMachine learning\nISLR; ML for Social & Behavioral Research; Murphy Probabilistic Perspective\n\n\nComplexity science\nMeadows Thinking in Systems; Menczer Network Science; Barabási Network Science; Mitchell Complexity; Miller & Page; Sayama; Strogatz; Epstein & Axtell\n\n\nComputing (R)\nWickham & Grolemund R for Data Science; Dayal\n\n\nMethods & critique\nBryman Social Research Methods; Muller The Tyranny of Metrics",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "How to use this"
+    ]
+  },
+  {
+    "objectID": "about.html#the-house-style-for-contributors-including-future-me",
+    "href": "about.html#the-house-style-for-contributors-including-future-me",
+    "title": "How to use this",
+    "section": "The house style (for contributors — including future-me)",
+    "text": "The house style (for contributors — including future-me)\nArticles are written to a fixed template so the encyclopedia stays coherent as it grows:\n\nIn one sentence — a single italic intuition kernel under the title.\nWhy it matters — the motivating use-case before any notation.\nIntuition — plain language, concrete examples, analogies that hold up.\nWorked examples — taken from the source library, with real studies where possible.\nOne runnable figure — a numpy/matplotlib simulation built by hand, never a black box.\nThe math, where it earns its place — inline and minimal; if a derivation is longer than the idea it supports, it goes to the appendix.\nCommon pitfalls — how the concept is misused in practice (the Statistics Done Wrong lens is a recurring guest).\nFrom the sources — explicit per-source attribution.\nAppendix · the full mathematics — wrapped in a tinted block the reader may skip.\nConnections — links up and down the curriculum.\n\nMath uses common sense first and proof second: notation is introduced because the prose demanded it, never to decorate.",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "How to use this"
+    ]
+  },
+  {
+    "objectID": "about.html#building-locally",
+    "href": "about.html#building-locally",
+    "title": "How to use this",
+    "section": "Building locally",
+    "text": "Building locally\n# Render the whole site\nquarto render\n\n# Live-preview while editing\nquarto preview\nExecutable code blocks (e.g. simulations) run on a Python virtual environment in .venv/ with numpy and matplotlib. R support can be added per-document later — Quarto handles both engines in the same project.",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "How to use this"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html",
+    "href": "appendices/advanced-probability/markov-chains.html",
+    "title": "Markov Chains",
+    "section": "",
+    "text": "A Markov chain is a system that moves between states where “the future depends on the present, but not the past.” Knowing where you are now is enough; the route that got you here is irrelevant. That one assumption — the Markov property — makes the whole future computable from a single transition matrix, and leads to a beautiful result: run many chains long enough and they converge to the same stationary distribution, no matter where they started. That convergence is the engine under MCMC.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#the-markov-property",
+    "href": "appendices/advanced-probability/markov-chains.html#the-markov-property",
+    "title": "Markov Chains",
+    "section": "The Markov property",
+    "text": "The Markov property\nA Markov chain \\{X_n\\} takes values in a set of states, and obeys: (Ross 2014) \n\\Pr\\{X_{n+1}=j \\mid X_n=i, X_{n-1}=i_{n-1},\\dots,X_0=i_0\\} = \\Pr\\{X_{n+1}=j\\mid X_n=i\\} = P_{ij}.\n In words — “the future depends on the present, not the past.” (Ross 2014) The entire history collapses to the current state. That’s a strong assumption, but a stunning number of systems satisfy it (or can be made to by enlarging the state), and it’s what makes the chain tractable.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#the-transition-matrix",
+    "href": "appendices/advanced-probability/markov-chains.html#the-transition-matrix",
+    "title": "Markov Chains",
+    "section": "The transition matrix",
+    "text": "The transition matrix\nAll the dynamics live in the transition probability matrix \\mathbf P, whose entry P_{ij} is the probability of moving from state i to state j in one step. (Ross 2014) Each row is a probability distribution: P_{ij}\\ge 0 and \\sum_j P_{ij}=1 (from any state you must go somewhere). (Ross 2014)\nMulti-step transitions are just matrix powers. The Chapman–Kolmogorov equations, P^{n+m}_{ij}=\\sum_k P^{n}_{ik}P^{m}_{kj}, say that to get from i to j in n+m steps you pass through some intermediate state k — and they imply the clean rule (Ross 2014) \n\\mathbf P^{(n)} = \\mathbf P^{\\,n}.\n The n-step transition matrix is the one-step matrix raised to the n-th power. Want the state distribution after n steps? Multiply your starting distribution by \\mathbf P^n.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#classifying-states",
+    "href": "appendices/advanced-probability/markov-chains.html#classifying-states",
+    "title": "Markov Chains",
+    "section": "Classifying states",
+    "text": "Classifying states\nNot all states behave alike: (Ross 2014)\n\nRecurrent vs transient. A state is recurrent if, starting there, you return to it with probability 1; transient if there’s positive probability you never come back. In a finite chain, at least one state must be recurrent. (Ross 2014)\nPeriodicity. A state has period d if returns are only possible at multiples of d; period 1 is aperiodic. (Ross 2014)\n\nThese distinctions decide whether the chain settles down.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#the-stationary-distribution",
+    "href": "appendices/advanced-probability/markov-chains.html#the-stationary-distribution",
+    "title": "Markov Chains",
+    "section": "The stationary distribution",
+    "text": "The stationary distribution\nThe payoff. For well-behaved chains, the probability of being in state j after many steps converges to a limit \\pi_j that does not depend on where you started. (Ross 2014) If the chain is irreducible (you can get from any state to any other) and ergodic (aperiodic and positive recurrent), it converges to a unique stationary distribution \\pi, the solution of (Ross 2014) \n\\pi_j = \\sum_i \\pi_i\\,P_{ij}, \\qquad \\sum_j \\pi_j = 1.\n \\pi is the distribution that reproduces itself under one more step (\\pi\\mathbf P=\\pi) — an equilibrium the chain forgets its way toward.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# A 3-state transition matrix (e.g. sunny/cloudy/rainy)\nP = np.array([[0.7, 0.2, 0.1],\n              [0.3, 0.4, 0.3],\n              [0.2, 0.3, 0.5]])\n\n# Stationary distribution: left eigenvector with eigenvalue 1\nvals, vecs = np.linalg.eig(P.T)\npi = np.real(vecs[:, np.argmin(np.abs(vals - 1))]); pi = pi / pi.sum()\n\nsteps = 12\nstart_a = np.array([1.0, 0.0, 0.0])\nstart_b = np.array([0.0, 0.0, 1.0])\ndef evolve(d):\n    out = [d]\n    for _ in range(steps):\n        d = d @ P; out.append(d)\n    return np.array(out)\nA, B = evolve(start_a), evolve(start_b)\n\nfig, ax = plt.subplots(figsize=(7.4, 4.0))\ncolors = [\"#161613\", \"#5e5e54\", \"#8a8a7e\"]\nfor s in range(3):\n    ax.plot(A[:, s], \"-o\", color=colors[s], ms=3, lw=1.6, label=f\"state {s} (start A)\")\n    ax.plot(B[:, s], \"--s\", color=colors[s], ms=3, lw=1.2, alpha=0.7)\n    ax.axhline(pi[s], color=colors[s], ls=\":\", lw=1.0)\nax.set_xlabel(\"step n\"); ax.set_ylabel(\"probability of each state\")\nax.set_title(\"Two different starts → the same stationary distribution\")\nax.legend(fontsize=7.5, frameon=False, ncol=3, loc=\"upper center\")\nax.set_ylim(0, 1)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Forgetting the start. A 3-state weather chain run from two very different initial distributions (one starts certain of state 0, the other certain of state 2). Both distributions evolve under repeated multiplication by P and converge to the SAME stationary distribution π (dashed) within a handful of steps. Irreducible + aperiodic chains lose all memory of where they began — the fact MCMC exploits.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#signature-examples",
+    "href": "appendices/advanced-probability/markov-chains.html#signature-examples",
+    "title": "Markov Chains",
+    "section": "Signature examples",
+    "text": "Signature examples\nRoss’s classics: (Ross 2014)\n\nWeather in the “Land of Oz” — a chain over {rain, nice, snow}, predicting tomorrow from today.\nRandom walks — a particle stepping \\pm 1 on a line; the symmetric walk (p=0.5) is recurrent (returns to the origin with probability 1), a surprisingly delicate fact.\nGambler’s ruin — bet $1 repeatedly until you hit $0 (broke) or $N (goal): a chain with two absorbing states, and the question is the probability of each fate.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#common-pitfalls",
+    "href": "appendices/advanced-probability/markov-chains.html#common-pitfalls",
+    "title": "Markov Chains",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nAssuming the Markov property holds. If the future genuinely depends on more than the present, enlarge the state (e.g. include yesterday) — or it isn’t a Markov chain. (Ross 2014)\nExpecting convergence without the conditions. A periodic or reducible chain may never settle to a unique \\pi; check irreducibility and aperiodicity. (Ross 2014)\nConfusing a stationary distribution with an absorbing state. Gambler’s ruin absorbs; it doesn’t mix to an interior equilibrium. (Ross 2014)\nReading \\pi as “where the chain is.” \\pi is the long-run distribution over states, not a single destination — the chain keeps moving, visiting state j a fraction \\pi_j of the time.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#from-the-sources",
+    "href": "appendices/advanced-probability/markov-chains.html#from-the-sources",
+    "title": "Markov Chains",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nRoss, Introduction to Probability Models — the Markov property (“future depends on the present, not the past”); the transition matrix P_{ij} (rows sum to 1); Chapman–Kolmogorov and \\mathbf P^{(n)}=\\mathbf P^n; recurrent vs transient states and periodicity; the stationary / limiting distribution \\pi=\\pi\\mathbf P under irreducibility + ergodicity; and the Land of Oz weather, random walk (symmetric → recurrent), and gambler’s ruin examples.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/markov-chains.html#connections",
+    "href": "appendices/advanced-probability/markov-chains.html#connections",
+    "title": "Markov Chains",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: conditional probability (the transition probabilities) and matrix algebra.\nPowers: MCMC — Markov chain Monte Carlo constructs a chain whose stationary distribution is the Bayesian posterior, then samples by running it.\nCousin of: the Poisson process (its continuous-time relative) and the state-space view of time series.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Markov Chains"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html",
+    "href": "appendices/advanced-probability/poisson-process.html",
+    "title": "The Poisson Process",
+    "section": "",
+    "text": "Customers entering a bank, radioactive atoms decaying, earthquakes striking: events that pop up at random in continuous time. The Poisson process is the canonical model — a process that, at every instant, “probabilistically restarts itself.” Count its events in any window and you get a Poisson distribution; measure the gaps between events and you get the exponential — the unique memoryless waiting time. One process ties those two distributions together.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#counting-processes",
+    "href": "appendices/advanced-probability/poisson-process.html#counting-processes",
+    "title": "The Poisson Process",
+    "section": "Counting processes",
+    "text": "Counting processes\nA counting process \\{N(t),\\,t\\ge 0\\} records the total number of events that have occurred up to time t. (Ross 2014) The Poisson process of rate \\lambda&gt;0 is the most important one, pinned down by two intuitive properties: (Ross 2014)\n\nIndependent increments — counts in disjoint intervals are independent. What happens between 2:00 and 3:00 tells you nothing about 5:00–6:00.\nStationary increments — the distribution of the count in an interval depends only on its length, not when it sits. A one-hour window is statistically the same at noon or midnight.\n\nFrom these, the number of events in an interval of length t is Poisson with mean \\lambda t: (Ross 2014) \n\\Pr\\{N(t)=n\\} = e^{-\\lambda t}\\,\\frac{(\\lambda t)^n}{n!}, \\qquad n=0,1,2,\\dots\n The rate \\lambda is events per unit time; over a window of length t you expect \\lambda t of them.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#interarrival-times-are-exponential-and-thats-no-accident",
+    "href": "appendices/advanced-probability/poisson-process.html#interarrival-times-are-exponential-and-thats-no-accident",
+    "title": "The Poisson Process",
+    "section": "Interarrival times are exponential — and that’s no accident",
+    "text": "Interarrival times are exponential — and that’s no accident\nLook at the gaps between successive events — the interarrival times T_1, T_2, \\dots. Ross’s result: they are independent and identically distributed Exponential(\\lambda), each with mean 1/\\lambda. (Ross 2014) This is the process’s deepest fact, and it follows from a single idea: stationary + independent increments mean that “at any point in time, the process probabilistically restarts itself.” (Ross 2014) Since the exponential is the unique memoryless continuous distribution, it is the only law a restart-anywhere process can have — the time to the next event cannot depend on how long you’ve already waited. (Ross 2014) (This is exactly the constant-hazard, exponential-survival baseline, seen from the other side.)\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom math import factorial\n\nrng = np.random.default_rng(2)\nlam = 3.0\nT = 20.0\n# Generate arrivals by summing Exponential interarrival times\ngaps = rng.exponential(1/lam, size=int(lam*T*1.5))\ntimes = np.cumsum(gaps)\ntimes = times[times &lt; T]\n\nfig, (axT, axB) = plt.subplots(2, 1, figsize=(7.6, 5.0))\n\naxT.step(np.concatenate([[0], times]), np.arange(len(times)+1), where=\"post\", color=\"#161613\", lw=1.6)\naxT.plot(times, np.zeros_like(times), \"|\", color=\"#e8531d\", markersize=12, markeredgewidth=1.5)\naxT.set_xlim(0, T); axT.set_xlabel(\"time  t\"); axT.set_ylabel(\"N(t)\")\naxT.set_title(f\"Counting process N(t), rate λ={lam}  (red ticks = events)\")\n\n# Counts in fixed windows of width w\nw = 1.0\nedges = np.arange(0, T+w, w)\ncounts = np.histogram(times, bins=edges)[0]\nks = np.arange(0, counts.max()+2)\npmf = np.exp(-lam*w) * (lam*w)**ks / np.array([factorial(k) for k in ks])\naxB.hist(counts, bins=np.arange(-0.5, counts.max()+1.5), density=True, color=\"#b7b6a8\",\n         alpha=0.85, label=\"observed per-window counts\")\naxB.plot(ks, pmf, \"o-\", color=\"#e8531d\", lw=1.8, label=f\"Poisson(λw={lam*w:g}) pmf\")\naxB.set_xlabel(\"events per window\"); axB.set_ylabel(\"proportion\")\naxB.set_title(\"Counts per fixed window are Poisson\")\naxB.legend(fontsize=8, frameon=False)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A Poisson process of rate λ. Top: event times (ticks) scatter at random; the step function N(t) counts them. The gaps between ticks are i.i.d. Exponential(λ). Bottom: counting events in fixed windows produces a Poisson(λ·width) distribution — here a histogram of per-window counts against the Poisson pmf (red). Same process, two faces: exponential gaps, Poisson counts.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#superposition-and-thinning",
+    "href": "appendices/advanced-probability/poisson-process.html#superposition-and-thinning",
+    "title": "The Poisson Process",
+    "section": "Superposition and thinning",
+    "text": "Superposition and thinning\nTwo operations make the Poisson process beautifully closed: (Ross 2014)\n\nSuperposition. Merge two independent Poisson processes with rates \\lambda_1 and \\lambda_2 and the combined stream is Poisson with rate \\lambda_1+\\lambda_2. (All the arrivals from two doors into one shop.)\nThinning. Independently tag each event “Type I” with probability p or “Type II” with 1-p; the two sub-streams are independent Poisson processes with rates \\lambda p and \\lambda(1-p). (Ross 2014) (Split arrivals into “web” vs “phone” and each is still Poisson.)\n\nThese closure rules are why the Poisson process is the default model whenever independent streams combine or split.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#where-it-shows-up",
+    "href": "appendices/advanced-probability/poisson-process.html#where-it-shows-up",
+    "title": "The Poisson Process",
+    "section": "Where it shows up",
+    "text": "Where it shows up\nRoss names the Poisson process the standard model for “rare events” and arrivals: radioactive \\alpha-particle emissions, earthquakes, the outbreak of wars, and customers entering a bank or post office. (Ross 2014) In this book it is the continuous-time engine beneath count-data models (a Poisson regression models the rate \\lambda) and survival analysis (the exponential interarrival time is the constant-hazard duration).",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#common-pitfalls",
+    "href": "appendices/advanced-probability/poisson-process.html#common-pitfalls",
+    "title": "The Poisson Process",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nAssuming Poisson when events clump. Independent increments fail if one event makes the next more likely (“contagion”) — that’s overdispersion; use a different process / negative binomial. (Ross 2014)\nForgetting the memoryless catch. “It’s been quiet, so an arrival is overdue” is the gambler’s fallacy in continuous time — the exponential has no memory. (Ross 2014)\nMismatching rate and window. The count is Poisson(\\lambda t), not Poisson(\\lambda); keep the time units straight (the offset issue). (Ross 2014)",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#from-the-sources",
+    "href": "appendices/advanced-probability/poisson-process.html#from-the-sources",
+    "title": "The Poisson Process",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nRoss, Introduction to Probability Models — the counting process N(t) and the Poisson process of rate \\lambda (independent & stationary increments; N(t)\\sim\\text{Poisson}(\\lambda t)); interarrival times i.i.d. Exponential(\\lambda) and the “probabilistically restarts itself” / memoryless link; superposition (\\lambda_1+\\lambda_2) and thinning (\\lambda p); and the rare-event examples (radioactive decay, earthquakes, wars, arrivals).",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/poisson-process.html#connections",
+    "href": "appendices/advanced-probability/poisson-process.html#connections",
+    "title": "The Poisson Process",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: the Poisson & exponential distributions and memorylessness.\nPowers: count-data / Poisson regression (modelling the rate) and the constant-hazard core of survival analysis.\nGeneralises to: non-homogeneous and compound Poisson processes, and the continuous-time Markov chains of the next entry.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "The Poisson Process"
+    ]
+  },
+  {
     "objectID": "appendices/computing/index.html",
     "href": "appendices/computing/index.html",
     "title": "Appendix · Computing",
     "section": "",
-    "text": "◆ QSS · APPENDIX / COMPUTING · 1 LIVE · 4 PLANNED\nThe source library is R-first (Dayal’s two volumes, Explanatory Statistical Modeling in R, ISLR’s labs), so this encyclopedia treats R as the default working language for social science. Python appears where it is the natural choice — simulations, machine learning, data wrangling at scale — and Quarto runs both engines in the same project without friction.",
+    "text": "◆ QSS · APPENDIX / COMPUTING · 4 LIVE · 1 PLANNED\nThe source library is R-first (Dayal’s two volumes, Explanatory Statistical Modeling in R, ISLR’s labs), so this encyclopedia treats R as the default working language for social science. Python appears where it is the natural choice — simulations, machine learning, data wrangling at scale — and Quarto runs both engines in the same project without friction.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -11306,7 +11540,7 @@
     "href": "appendices/computing/index.html#entries",
     "title": "Appendix · Computing",
     "section": "Entries",
-    "text": "Entries\n\n\n Reading & Running Regressions in R lm() → summary() → broom::tidy(): fitting a model, and — the real skill — reading the coefficient table honestly.",
+    "text": "Entries\n\n\n Getting Started in R The working subset of the language: vectors, data frames, the pipe, and functions — enough to be productive fast. \n\n\n Reading & Running Regressions in R lm() → summary() → broom::tidy(): fitting a model, and — the real skill — reading the coefficient table honestly. \n\n\n Reproducible Analysis with Quarto Prose, code, and output in one document that re-runs to the same result — the literate workflow this site is built on. \n\n\n Python for Simulation & ML numpy for arrays and randomness, matplotlib for figures, scikit-learn for applied ML — the stack behind every simulation here.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -11319,12 +11553,116 @@
     "href": "appendices/computing/index.html#planned",
     "title": "Appendix · Computing",
     "section": "Planned",
-    "text": "Planned\n\nGetting started in R for social science PLANNED — the working subset of R: vectors, data frames, and the pipe, enough to be productive fast.\nData wrangling: tidyverse essentials PLANNED — a reference companion to the Thinking in Dataframes track.\nReproducible analysis with Quarto PLANNED — literate documents, freeze, and the render/publish loop this very site runs on.\nPython for simulation & ML PLANNED — numpy and matplotlib by hand (the pattern behind every figure here), and where scikit-learn earns its place.\n\n\n\n\n\n\n\nNoteLive code, everywhere\n\n\n\nBeyond this appendix, every entry carries one executable Python figure — short, seeded, one idea — built by hand with numpy and matplotlib. The flagship Sampling distributions & the CLT simulation is the template.",
+    "text": "Planned\n\nData wrangling: tidyverse essentials PLANNED — a reference companion to the Thinking in Dataframes track.\n\n\n\n\n\n\n\nNoteLive code, everywhere\n\n\n\nBeyond this appendix, every entry carries one executable Python figure — short, seeded, one idea — built by hand with numpy and matplotlib. The flagship Sampling distributions & the CLT simulation is the template.",
     "crumbs": [
       "Home",
       "Appendices",
       "Computing",
       "Appendix · Computing"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/regressions-in-r.html",
+    "href": "appendices/computing/regressions-in-r.html",
+    "title": "Reading & Running Regressions in R",
+    "section": "",
+    "text": "Fitting a regression in R is one line; the skill is reading the output. lm(y ~ x1 + x2, data) estimates the model, summary() prints the coefficient table, and broom::tidy() turns that table into a tidy data frame you can plot or filter. This entry is a reference for the output, not a theory of regression — the theory lives in Part III and the matrix algebra in OLS in matrix form. Here: what each column means, and how to show it honestly.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Reading & Running Regressions in R"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/regressions-in-r.html#the-model-formula",
+    "href": "appendices/computing/regressions-in-r.html#the-model-formula",
+    "title": "Reading & Running Regressions in R",
+    "section": "The model formula",
+    "text": "The model formula\nR’s modelling verbs share one interface: the formula. y ~ x1 + x2 reads “y explained by x1 and x2”; the intercept is included automatically. A few idioms cover most needs: (McNulty 2021)\nlibrary(broom)\n\n# fit: outcome ~ predictors, from a data frame\nm &lt;- lm(wage ~ educ + exper + female, data = survey)\n\n# formula idioms\nlm(y ~ x1 + x2,      data = d)   # additive\nlm(y ~ x1 * x2,      data = d)   # x1, x2, and their interaction (x1:x2)\nlm(y ~ poly(x, 2),   data = d)   # quadratic in x\nlm(y ~ factor(grp),  data = d)   # categorical -&gt; dummies, first level = baseline\nlm(y ~ . - id,       data = d)   # every column except id\nA categorical predictor becomes a set of indicator columns automatically; R holds one level out as the reference, and every other level’s coefficient is a contrast against that baseline — the single most common source of “why is my category missing?” confusion. (James et al. 2021)",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Reading & Running Regressions in R"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/regressions-in-r.html#reading-summary",
+    "href": "appendices/computing/regressions-in-r.html#reading-summary",
+    "title": "Reading & Running Regressions in R",
+    "section": "Reading summary()",
+    "text": "Reading summary()\nsummary(m) prints the table everyone stares at. The columns, decoded: (McNulty 2021; Wooldridge 2019)\nsummary(m)\n#&gt; Coefficients:\n#&gt;              Estimate Std. Error t value Pr(&gt;|t|)\n#&gt; (Intercept)   1.9421     0.2033    9.55  &lt; 2e-16 ***\n#&gt; educ          0.4127     0.0158   26.12  &lt; 2e-16 ***\n#&gt; exper         0.0051     0.0049    1.04  0.29863\n#&gt; female       -0.3311     0.0921   -3.60  0.00033 ***\n#&gt; Residual standard error: 1.41 on 996 degrees of freedom\n#&gt; Multiple R-squared: 0.318,  Adjusted R-squared: 0.316\n#&gt; F-statistic: 154.7 on 3 and 996 DF,  p-value: &lt; 2.2e-16\n\nEstimate — the fitted coefficient \\hat\\beta_j: the change in the outcome for a one-unit change in that predictor, holding the others fixed. The intercept is the fitted outcome when every predictor is zero.\nStd. Error — the estimated standard deviation of that coefficient across hypothetical repeated samples; the ruler for how precisely it is pinned down. It is \\sqrt{\\hat\\sigma^2\\,[(X^\\top X)^{-1}]_{jj}} from the matrix formula. (Wooldridge 2019)\nt value = Estimate / Std. Error — how many standard errors the estimate sits from zero.\nPr(&gt;|t|) — the two-sided p-value for H_0:\\beta_j=0. The stars are a significance shorthand, not an importance ranking. (McNulty 2021)\nResidual standard error — \\hat\\sigma, the typical size of a residual, in the outcome’s units.\nR-squared / Adjusted — the share of outcome variance the model explains; adjusted penalises extra regressors so it can fall when you add a useless one. (James et al. 2021)\nF-statistic — the joint test that all slopes are zero at once (the model-vs-intercept comparison).",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Reading & Running Regressions in R"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/regressions-in-r.html#tidy-output-you-can-compute-with",
+    "href": "appendices/computing/regressions-in-r.html#tidy-output-you-can-compute-with",
+    "title": "Reading & Running Regressions in R",
+    "section": "Tidy output you can compute with",
+    "text": "Tidy output you can compute with\nsummary() prints; it does not return something you can plot. broom turns model objects into tidy data frames — the bridge from a fitted model back into the tidyverse workflow: (McNulty 2021)\ntidy(m, conf.int = TRUE)   # one row per coefficient: estimate, std.error, statistic, p.value, conf.low/high\nglance(m)                  # one row for the whole model: r.squared, adj.r.squared, sigma, statistic, AIC, BIC, nobs\naugment(m)                 # original data + .fitted, .resid, .hat (leverage), .cooksd\ntidy(..., conf.int = TRUE) is the one to remember: a coefficient plus its 95% interval, ready to plot. A coefficient plot — each estimate as a dot with its confidence interval as a whisker — communicates a model far better than a wall of stars, because it shows effect size and uncertainty together and lets a reader see at a glance which intervals clear zero. (Kaplan 2024)\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(5)\nn = 600\neduc   = rng.normal(13, 2.5, n)\nexper  = rng.normal(0, 1.0, n)              # a near-null control: no real effect\nfemale = rng.integers(0, 2, n).astype(float)\nX = np.column_stack([np.ones(n), educ, exper, female])\nbeta_true = np.array([2.0, 0.40, 0.00, -0.33])  # exper's true coefficient is zero\ny = X @ beta_true + rng.normal(0, 1.4, n)\n\n# OLS by the normal equations = exactly what lm() computes\nbeta = np.linalg.solve(X.T @ X, X.T @ y)\nresid = y - X @ beta\nsigma2 = resid @ resid / (n - X.shape[1])\ncov = sigma2 * np.linalg.inv(X.T @ X)\nse = np.sqrt(np.diag(cov))\nlo, hi = beta - 1.96 * se, beta + 1.96 * se\n\nterms = [\"(Intercept)\", \"educ\", \"exper\", \"female\"]\nypos = np.arange(len(terms))[::-1]                 # intercept on top\n# highlight the coefficients whose 95% interval clears zero\nclears0 = (lo &gt; 0) | (hi &lt; 0)\ncolors = [\"#e8531d\" if c else \"#8a8a7e\" for c in clears0]\n\nfig, ax = plt.subplots(figsize=(7.4, 3.8))\nax.axvline(0, color=\"#5e5e54\", lw=1.2, ls=(0, (4, 3)))\nfor yi, b, l, h, c in zip(ypos, beta, lo, hi, colors):\n    ax.plot([l, h], [yi, yi], color=c, lw=2.4, solid_capstyle=\"round\")\n    ax.plot(b, yi, \"o\", color=c, ms=7, markeredgecolor=\"#161613\", markeredgewidth=1.0)\nax.set_yticks(ypos); ax.set_yticklabels(terms)\nax.set_xlabel(\"coefficient estimate  (95% CI)\")\nax.set_title(\"Show the interval, not the stars\")\nax.set_ylim(-0.6, len(terms) - 0.4)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A coefficient plot — the honest way to show a regression. Each dot is an estimate; each whisker its 95% confidence interval; the dashed line is zero (no effect). An interval that crosses zero is ‘not significant’ — but the plot shows the whole story a p-value hides: the effect’s size, its sign, and how precisely it is pinned down. Here the estimates and standard errors are computed by hand from the normal equations (the same numbers lm()/broom::tidy() would return); only the drawing is Python. This is the shape broom::tidy(m, conf.int = TRUE) |&gt; ggplot(aes(estimate, term)) + geom_pointrange() produces in R.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Reading & Running Regressions in R"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/regressions-in-r.html#predictions-and-a-first-diagnostic-look",
+    "href": "appendices/computing/regressions-in-r.html#predictions-and-a-first-diagnostic-look",
+    "title": "Reading & Running Regressions in R",
+    "section": "Predictions and a first diagnostic look",
+    "text": "Predictions and a first diagnostic look\npredict(m, newdata = data.frame(educ = 16, exper = 10, female = 0),\n        interval = \"confidence\")     # fitted value + CI for the mean\npredict(m, newdata = nd, interval = \"prediction\")   # wider: CI for a new individual\nplot(m)                              # 4 base diagnostic plots: residuals-vs-fitted, QQ, scale-location, leverage\nThe plot(m) panel is the quickest read on the assumptions: a curved residuals-vs-fitted plot flags functional-form problems; a fanning shape flags heteroskedasticity; the QQ plot checks residual normality; the leverage panel flags influential points (the .hat and .cooksd from augment()). (McNulty 2021)",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Reading & Running Regressions in R"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/regressions-in-r.html#common-pitfalls",
+    "href": "appendices/computing/regressions-in-r.html#common-pitfalls",
+    "title": "Reading & Running Regressions in R",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere R regression output gets misread\n\n\n\n\nReading stars as importance. *** means “precisely estimated as non-zero,” not “big” or “matters most.” A tiny, useless coefficient can be *** in a huge sample; a large, decision-relevant one can be n.s. in a small one. Report the estimate and its interval, not the star count. (McNulty 2021)\nForgetting the reference category. With factor(grp), the omitted level is folded into the intercept and every shown coefficient is a contrast against it. “Region B = 2.1” means relative to region A, not in absolute terms. Change the baseline with relevel() when a different comparison reads better. (James et al. 2021)\nDefault standard errors under heteroskedasticity. lm()/summary() report classical SEs that assume constant error variance. When that fails, the estimates are still fine but the SEs (and p-values) are wrong — use lmtest::coeftest(m, vcov = sandwich::vcovHC(m)) for robust errors. R will not warn you. (Wooldridge 2019)\nPredicting outside the data’s range. predict() will happily extrapolate a fitted line far beyond where any data supported it; the interval widens but the model’s form was never tested out there.\nUsing a literal ```{r} chunk here. This is a Quarto note, not an R gotcha: in this encyclopedia the R is shown for reading, not executed (there is no R engine wired in), so R appears in plain ```r blocks. The one executable figure per entry is Python.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Reading & Running Regressions in R"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/regressions-in-r.html#from-the-sources",
+    "href": "appendices/computing/regressions-in-r.html#from-the-sources",
+    "title": "Reading & Running Regressions in R",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nMcNulty, Explanatory Statistical Modeling in R — the lm() → summary() → broom (tidy/glance/ augment) workflow; decoding the coefficient table (estimate, SE, t, p, residual SE, R^2, F); the base plot(m) diagnostics; and the “explanatory, not predictive” framing of reading a fitted model.\nJames, Witten, Hastie & Tibshirani, ISLR (the R labs) — the formula interface, factor/dummy handling and the reference level, interactions and poly(), and adjusted R^2.\nWooldridge, Introductory Econometrics — the interpretation of each coefficient as a ceteris-paribus effect, the standard error as \\sqrt{\\hat\\sigma^2[(X^\\top X)^{-1}]_{jj}}, and the heteroskedasticity caveat on default SEs.\nKaplan, Lessons in Statistical Thinking — the case for showing effects with confidence intervals (the coefficient plot) rather than significance stars.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Reading & Running Regressions in R"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/regressions-in-r.html#connections",
+    "href": "appendices/computing/regressions-in-r.html#connections",
+    "title": "Reading & Running Regressions in R",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: the tidyverse data-science workflow (get the data into a tidy data frame first) and multiple regression (what the numbers mean).\nThe math underneath: OLS in matrix form — lm() solves the normal equations, and the reported SEs are the diagonal of \\hat\\sigma^2(X^\\top X)^{-1}.\nReads with: inference for regression (t- and F-tests), regression diagnostics (plot(m), leverage, Cook’s distance), and heteroskedasticity & robust errors.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Reading & Running Regressions in R"
     ]
   },
   {
