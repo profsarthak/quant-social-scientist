@@ -1756,6 +1756,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../appendices/advanced-probability/branching-processes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Branching Processes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../appendices/advanced-probability/order-statistics.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Order Statistics</span></a>
   </div>
@@ -1795,6 +1801,7 @@ window.Quarto = {
   <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
   <li><a href="#generating-random-variables" id="toc-generating-random-variables" class="nav-link" data-scroll-target="#generating-random-variables">Generating random variables</a></li>
   <li><a href="#monte-carlo-integration" id="toc-monte-carlo-integration" class="nav-link" data-scroll-target="#monte-carlo-integration">Monte Carlo integration</a></li>
+  <li><a href="#beating-the-n-barrier-variance-reduction" id="toc-beating-the-n-barrier-variance-reduction" class="nav-link" data-scroll-target="#beating-the-n-barrier-variance-reduction">Beating the √n barrier: variance reduction</a></li>
   <li><a href="#classic-experiments" id="toc-classic-experiments" class="nav-link" data-scroll-target="#classic-experiments">Classic experiments</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
@@ -1879,7 +1886,7 @@ window.Quarto = {
 <div id="fig-monte-carlo-pi" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-monte-carlo-pi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="simulation-and-monte-carlo_files/figure-html/fig-monte-carlo-pi-output-1.png" width="840" height="392" class="figure-img">
+<img src="simulation-and-monte-carlo_files/figure-html/fig-monte-carlo-pi-output-1.png" width="838" height="391" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-monte-carlo-pi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Estimating π by Monte Carlo. Drop random points in the unit square; the fraction landing inside the quarter-circle is π/4, so 4× that fraction estimates π. Left: 2,000 points (blue inside, grey outside). Right: the running estimate converges toward π (dashed) as n grows — wobbling less and less, at the characteristic 1/√n rate.
@@ -1888,6 +1895,16 @@ Figure&nbsp;1: Estimating π by Monte Carlo. Drop random points in the unit squa
 </div>
 </div>
 </div>
+</section>
+<section id="beating-the-n-barrier-variance-reduction" class="level2">
+<h2 class="anchored" data-anchor-id="beating-the-n-barrier-variance-reduction">Beating the √n barrier: variance reduction</h2>
+<p>That <span class="math inline">1/\sqrt n</span> rate is a floor on <em>brute-force</em> sampling, not on cleverness. <strong>Variance-reduction techniques</strong> buy accuracy not by drawing more, but by drawing <em>smarter</em> — engineering the samples so the same <span class="math inline">n</span> estimates the answer with a smaller standard error. <span class="citation" data-cites="ross_first_course">(<a href="#ref-ross_first_course" role="doc-biblioref">Ross 2018</a>)</span> Three classics:</p>
+<ul>
+<li><strong>Antithetic variables.</strong> Instead of independent draws, use <em>pairs</em> that are negatively correlated: to estimate <span class="math inline">\mathbb E[g(U)]</span>, evaluate <span class="math inline">g</span> at both <span class="math inline">U</span> and <span class="math inline">1-U</span>. When <span class="math inline">g</span> is monotone the two are negatively correlated, so their average has <em>lower</em> variance than two independent draws — an overshoot in one half of the pair is offset by an undershoot in the other. Almost free, and often a real win. <span class="citation" data-cites="ross_first_course">(<a href="#ref-ross_first_course" role="doc-biblioref">Ross 2018</a>)</span></li>
+<li><strong>Conditioning (Rao–Blackwellisation).</strong> Replace the raw estimator by its <strong>conditional expectation</strong> given some variable you can integrate out by hand. Because <span class="math inline">\operatorname{Var}\!\big(\mathbb E[X\mid Y]\big) \le \operatorname{Var}(X)</span> <em>always</em> (the law of total variance), conditioning can only shrink the variance — you do part of the averaging with a formula instead of by sampling. <span class="citation" data-cites="ross_first_course">(<a href="#ref-ross_first_course" role="doc-biblioref">Ross 2018</a>)</span></li>
+<li><strong>Control variates.</strong> Subtract off a correlated quantity whose mean you already know. If <span class="math inline">C</span> is correlated with the target and <span class="math inline">\mathbb E[C]</span> is known, estimate <span class="math inline">\mathbb E[g(X)]</span> with <span class="math inline">g(X) - \beta\,(C - \mathbb E[C])</span>: the known part cancels the fluctuation it explains, leaving a tighter estimate. <span class="citation" data-cites="ross_first_course">(<a href="#ref-ross_first_course" role="doc-biblioref">Ross 2018</a>)</span></li>
+</ul>
+<p>All three exploit one idea — <strong>use structure you already know to remove noise you don’t need to simulate</strong> — and they pay off most when each draw is expensive (a slow model, a costly step), so squeezing more from every sample is worth the effort. <span class="citation" data-cites="ross_first_course">(<a href="#ref-ross_first_course" role="doc-biblioref">Ross 2018</a>)</span></p>
 </section>
 <section id="classic-experiments" class="level2">
 <h2 class="anchored" data-anchor-id="classic-experiments">Classic experiments</h2>
@@ -1936,7 +1953,7 @@ Figure&nbsp;1: Estimating π by Monte Carlo. Drop random points in the unit squa
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Ross, <em>A First Course in Probability</em></strong> — Monte Carlo as random-number approximation; the <strong>inverse-transform</strong> method (<span class="math inline">X=F^{-1}(U)</span>; the exponential <span class="math inline">-\ln U/\lambda</span>); <strong>Monte Carlo integration</strong> as <span class="math inline">\frac1n\sum g(X_i)</span> with the LLN guaranteeing convergence and <strong><span class="math inline">1/\sqrt n</span></strong> error; estimating <span class="math inline">\pi</span>.</li>
+<li><strong>Ross, <em>A First Course in Probability</em></strong> — Monte Carlo as random-number approximation; the <strong>inverse-transform</strong> method (<span class="math inline">X=F^{-1}(U)</span>; the exponential <span class="math inline">-\ln U/\lambda</span>); <strong>Monte Carlo integration</strong> as <span class="math inline">\frac1n\sum g(X_i)</span> with the LLN guaranteeing convergence and <strong><span class="math inline">1/\sqrt n</span></strong> error; estimating <span class="math inline">\pi</span>; and <strong>variance-reduction</strong> techniques (<strong>antithetic variables</strong>, <strong>conditioning</strong>, <strong>control variates</strong>) that beat the brute-force <span class="math inline">1/\sqrt n</span> rate.</li>
 <li><strong>Lambert, <em>A Student’s Guide to Bayesian Statistics</em></strong> — simulation as <em>“abandoning brute force”</em>; the <strong>“mapping mountains in fog”</strong> analogy; <strong>rejection sampling</strong> (proposal <span class="math inline">g</span>, accept <span class="math inline">\propto f/g</span>) and its <em>“wasteful”</em> nature; simulation for grasping sampling distributions.</li>
 <li><strong>Grinstead &amp; Snell, <em>Introduction to Probability</em></strong> — <strong>Buffon’s needle</strong>, the <strong>bootstrap</strong> as Monte Carlo, and seeing the <strong>LLN</strong> converge in simulation.</li>
 </ul>
@@ -2523,65 +2540,91 @@ Ross, Sheldon M. 2018. <em>A First Course in Probability</em>. 10th ed. Pearson.
 <span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
 <span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="fu">## Classic experiments</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="fu">## Beating the √n barrier: variance reduction</span></span>
 <span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>The method's pedigree is full of vivid examples: <span class="co">[</span><span class="ot">@ross_first_course; @grinstead_snell</span><span class="co">]</span></span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Estimating $\pi$** — random points in a square, count the fraction inside the circle (above).</span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Buffon's needle** — drop needles on a ruled grid; the fraction crossing a line yields $\pi$. A *physical*</span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>  Monte Carlo, two centuries before computers. <span class="co">[</span><span class="ot">@grinstead_snell</span><span class="co">]</span></span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The bootstrap** — *"a simple Monte Carlo technique"* that approximates a [sampling</span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>  distribution](../02-inference/sampling-distributions-clt.qmd) by **resampling with replacement** from the</span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>  data you have. <span class="co">[</span><span class="ot">@grinstead_snell</span><span class="co">]</span></span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Seeing the LLN** — simulate trials and watch the running mean home in on the expectation, the law made</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>  visible. <span class="co">[</span><span class="ot">@grinstead_snell</span><span class="co">]</span></span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>This is also the engine of every executable figure in this book: each one is a small Monte Carlo, generating</span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>data to make an idea concrete.</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>That $1/\sqrt n$ rate is a floor on *brute-force* sampling, not on cleverness. **Variance-reduction</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>techniques** buy accuracy not by drawing more, but by drawing *smarter* — engineering the samples so the same</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>$n$ estimates the answer with a smaller standard error. <span class="co">[</span><span class="ot">@ross_first_course</span><span class="co">]</span> Three classics:</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Antithetic variables.** Instead of independent draws, use *pairs* that are negatively correlated: to</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>  estimate $\mathbb E<span class="co">[</span><span class="ot">g(U)</span><span class="co">]</span>$, evaluate $g$ at both $U$ and $1-U$. When $g$ is monotone the two are negatively</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>  correlated, so their average has *lower* variance than two independent draws — an overshoot in one half of</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>  the pair is offset by an undershoot in the other. Almost free, and often a real win. <span class="co">[</span><span class="ot">@ross_first_course</span><span class="co">]</span></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Conditioning (Rao–Blackwellisation).** Replace the raw estimator by its **conditional expectation** given</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>  some variable you can integrate out by hand. Because</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>  $\operatorname{Var}<span class="sc">\!</span>\big(\mathbb E<span class="co">[</span><span class="ot">X\mid Y</span><span class="co">]</span>\big) \le \operatorname{Var}(X)$ *always* (the law of total</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>  variance), conditioning can only shrink the variance — you do part of the averaging with a formula instead of</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>  by sampling. <span class="co">[</span><span class="ot">@ross_first_course</span><span class="co">]</span></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Control variates.** Subtract off a correlated quantity whose mean you already know. If $C$ is correlated</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>  with the target and $\mathbb E<span class="co">[</span><span class="ot">C</span><span class="co">]</span>$ is known, estimate $\mathbb E<span class="co">[</span><span class="ot">g(X)</span><span class="co">]</span>$ with</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>  $g(X) - \beta\,(C - \mathbb E<span class="co">[</span><span class="ot">C</span><span class="co">]</span>)$: the known part cancels the fluctuation it explains, leaving a tighter</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>  estimate. <span class="co">[</span><span class="ot">@ross_first_course</span><span class="co">]</span></span>
 <span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Expecting fast convergence.** The error is only $O(1/\sqrt n)$: 100× the samples buys 10× the accuracy.</span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>  Plan the sample size for the precision you need. <span class="co">[</span><span class="ot">@ross_first_course</span><span class="co">]</span></span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting Monte Carlo error is itself random.** A simulation estimate has a [standard</span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>  error](../02-inference/sampling-distributions-clt.qmd); report it (or use enough draws that it's</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>  negligible). <span class="co">[</span><span class="ot">@ross_first_course</span><span class="co">]</span></span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wasteful rejection sampling.** A poorly-matched proposal rejects almost everything; in high dimensions</span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>  this fails badly — reach for <span class="co">[</span><span class="ot">MCMC</span><span class="co">](../02-inference/credible-intervals-and-computation.qmd)</span>. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A bad random-number generator.** Garbage pseudo-randomness (correlations, short period) poisons every</span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>  estimate; use a vetted generator and seed it for reproducibility.</span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>All three exploit one idea — **use structure you already know to remove noise you don't need to simulate** —</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>and they pay off most when each draw is expensive (a slow model, a costly step), so squeezing more from every</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>sample is worth the effort. <span class="co">[</span><span class="ot">@ross_first_course</span><span class="co">]</span></span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a><span class="fu">## Classic experiments</span></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>The method's pedigree is full of vivid examples: <span class="co">[</span><span class="ot">@ross_first_course; @grinstead_snell</span><span class="co">]</span></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Estimating $\pi$** — random points in a square, count the fraction inside the circle (above).</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Buffon's needle** — drop needles on a ruled grid; the fraction crossing a line yields $\pi$. A *physical*</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>  Monte Carlo, two centuries before computers. <span class="co">[</span><span class="ot">@grinstead_snell</span><span class="co">]</span></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The bootstrap** — *"a simple Monte Carlo technique"* that approximates a [sampling</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>  distribution](../02-inference/sampling-distributions-clt.qmd) by **resampling with replacement** from the</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>  data you have. <span class="co">[</span><span class="ot">@grinstead_snell</span><span class="co">]</span></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Seeing the LLN** — simulate trials and watch the running mean home in on the expectation, the law made</span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>  visible. <span class="co">[</span><span class="ot">@grinstead_snell</span><span class="co">]</span></span>
 <span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ross, *A First Course in Probability*** — Monte Carlo as random-number approximation; the</span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>  **inverse-transform** method ($X=F^{-1}(U)$; the exponential $-\ln U/\lambda$); **Monte Carlo integration**</span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>  as $\frac1n\sum g(X_i)$ with the LLN guaranteeing convergence and **$1/\sqrt n$** error; estimating $\pi$.</span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Lambert, *A Student's Guide to Bayesian Statistics*** — simulation as *"abandoning brute force"*; the</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>  **"mapping mountains in fog"** analogy; **rejection sampling** (proposal $g$, accept $\propto f/g$) and its</span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>  *"wasteful"* nature; simulation for grasping sampling distributions.</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Grinstead &amp; Snell, *Introduction to Probability*** — **Buffon's needle**, the **bootstrap** as Monte</span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>  Carlo, and seeing the **LLN** converge in simulation.</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">transformations &amp; sums</span><span class="co">](transformations-and-sums.qmd)</span> (inverse-transform = the probability</span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>  integral transform), <span class="co">[</span><span class="ot">the Law of Large Numbers</span><span class="co">](law-of-large-numbers.qmd)</span> (why averaging works), and</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">the CLT</span><span class="co">](../02-inference/sampling-distributions-clt.qmd)</span> (the $1/\sqrt n$ error).</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** the <span class="co">[</span><span class="ot">bootstrap</span><span class="co">](../02-inference/resampling-and-nonparametric-tests.qmd)</span> and</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">MCMC for Bayesian computation</span><span class="co">](../02-inference/credible-intervals-and-computation.qmd)</span> — both Monte Carlo</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>  at scale.</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Underlies:** every executable simulation figure in this encyclopedia — including</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">agent-based modelling</span><span class="co">](../complexity/agent-based-modelling.qmd)</span>, the same simulation mindset pointed at</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>  *emergence* rather than estimation.</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>This is also the engine of every executable figure in this book: each one is a small Monte Carlo, generating</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>data to make an idea concrete.</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Expecting fast convergence.** The error is only $O(1/\sqrt n)$: 100× the samples buys 10× the accuracy.</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>  Plan the sample size for the precision you need. <span class="co">[</span><span class="ot">@ross_first_course</span><span class="co">]</span></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting Monte Carlo error is itself random.** A simulation estimate has a [standard</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>  error](../02-inference/sampling-distributions-clt.qmd); report it (or use enough draws that it's</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>  negligible). <span class="co">[</span><span class="ot">@ross_first_course</span><span class="co">]</span></span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wasteful rejection sampling.** A poorly-matched proposal rejects almost everything; in high dimensions</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>  this fails badly — reach for <span class="co">[</span><span class="ot">MCMC</span><span class="co">](../02-inference/credible-intervals-and-computation.qmd)</span>. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A bad random-number generator.** Garbage pseudo-randomness (correlations, short period) poisons every</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>  estimate; use a vetted generator and seed it for reproducibility.</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ross, *A First Course in Probability*** — Monte Carlo as random-number approximation; the</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>  **inverse-transform** method ($X=F^{-1}(U)$; the exponential $-\ln U/\lambda$); **Monte Carlo integration**</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>  as $\frac1n\sum g(X_i)$ with the LLN guaranteeing convergence and **$1/\sqrt n$** error; estimating $\pi$;</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>  and **variance-reduction** techniques (**antithetic variables**, **conditioning**, **control variates**) that</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>  beat the brute-force $1/\sqrt n$ rate.</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Lambert, *A Student's Guide to Bayesian Statistics*** — simulation as *"abandoning brute force"*; the</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>  **"mapping mountains in fog"** analogy; **rejection sampling** (proposal $g$, accept $\propto f/g$) and its</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>  *"wasteful"* nature; simulation for grasping sampling distributions.</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Grinstead &amp; Snell, *Introduction to Probability*** — **Buffon's needle**, the **bootstrap** as Monte</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>  Carlo, and seeing the **LLN** converge in simulation.</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">transformations &amp; sums</span><span class="co">](transformations-and-sums.qmd)</span> (inverse-transform = the probability</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>  integral transform), <span class="co">[</span><span class="ot">the Law of Large Numbers</span><span class="co">](law-of-large-numbers.qmd)</span> (why averaging works), and</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">the CLT</span><span class="co">](../02-inference/sampling-distributions-clt.qmd)</span> (the $1/\sqrt n$ error).</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** the <span class="co">[</span><span class="ot">bootstrap</span><span class="co">](../02-inference/resampling-and-nonparametric-tests.qmd)</span> and</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">MCMC for Bayesian computation</span><span class="co">](../02-inference/credible-intervals-and-computation.qmd)</span> — both Monte Carlo</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>  at scale.</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Underlies:** every executable simulation figure in this encyclopedia — including</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">agent-based modelling</span><span class="co">](../complexity/agent-based-modelling.qmd)</span>, the same simulation mindset pointed at</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>  *emergence* rather than estimation.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

@@ -107,6 +107,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -1694,6 +1737,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../appendices/advanced-probability/branching-processes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Branching Processes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../appendices/advanced-probability/order-statistics.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Order Statistics</span></a>
   </div>
@@ -1759,7 +1808,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="status-line">
-<p>◆ QSS · APPENDIX / ADVANCED PROBABILITY · 6 LIVE</p>
+<p>◆ QSS · APPENDIX / ADVANCED PROBABILITY · 7 LIVE</p>
 </div>
 <p>The <a href="../../content/01-foundations/index.html">Foundations</a> probability sub-chapter covers everything the inference, regression, and causal parts actually require. This appendix goes one level deeper, into the <strong>stochastic-process</strong> and <strong>order-statistic</strong> material from Sheldon Ross’s <em>Introduction to Probability Models</em> and <em>A First Course in Probability</em> — optional for the main arc, but foundational for queueing, reliability, time-series theory, and the mathematics of extremes.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Level">
@@ -1785,6 +1834,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><a class="brand-card" href="../../appendices/advanced-probability/markov-chains.html"> <span class="bc-title">Markov Chains</span> <span class="bc-desc">Memoryless state-to-state dynamics: transition matrices and stationary distributions — the theory under MCMC.</span> </a></p>
 </div>
 <div class="g-col-12 g-col-md-4">
+<p><a class="brand-card" href="../../appendices/advanced-probability/branching-processes.html"> <span class="bc-title">Branching Processes</span> <span class="bc-desc">One ancestor, random offspring each generation: whether a line, a rumour, or an epidemic dies out or explodes — the fixed point of a generating function.</span> </a></p>
+</div>
+<div class="g-col-12 g-col-md-4">
 <p><a class="brand-card" href="../../appendices/advanced-probability/order-statistics.html"> <span class="bc-title">Order Statistics</span> <span class="bc-desc">The probability of sorted data: min, max, median, range — the basis of quantiles, extremes, and rank tests.</span> </a></p>
 </div>
 <div class="g-col-12 g-col-md-4">
@@ -1804,6 +1856,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>The <strong>Poisson process</strong> is the continuous-time engine behind <a href="../../content/03-regression/count-data-models.html">count data</a> and <a href="../../content/03-regression/survival-analysis.html">survival/hazard</a> models — its interarrival times <em>are</em> the exponential durations of survival analysis.</li>
 <li><strong>Markov chains</strong> are the theory under <a href="../../content/02-inference/credible-intervals-and-computation.html">MCMC</a> (the “MC” is Markov chain) and many <a href="../../content/04-predictive/time-series-fundamentals.html">time-series</a> models.</li>
 <li><strong>Order statistics</strong> underpin the median, quantiles, extremes, and the rank-based <a href="../../content/02-inference/resampling-and-nonparametric-tests.html">nonparametric tests</a>.</li>
+<li><strong>Branching processes</strong> are the probability behind epidemic thresholds (<span class="math inline">R_0</span>), the <a href="../../content/complexity/random-graphs-erdos-renyi.html">giant-component transition</a> in random graphs, and network <a href="../../content/complexity/information-cascades.html">cascades</a> — extinction-or-explosion decided by one mean offspring number.</li>
 </ul>
 
 
@@ -2286,7 +2339,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>::: {.status-line}</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>◆ QSS · APPENDIX / ADVANCED PROBABILITY · 6 LIVE</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>◆ QSS · APPENDIX / ADVANCED PROBABILITY · 7 LIVE</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>The <span class="co">[</span><span class="ot">Foundations</span><span class="co">](../../content/01-foundations/index.qmd)</span> probability sub-chapter covers everything the</span>
@@ -2320,45 +2373,56 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>::: {.g-col-12 .g-col-md-4}</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> class</span><span class="op">=</span><span class="st">"brand-card"</span><span class="ot"> href</span><span class="op">=</span><span class="st">"order-statistics.qmd"</span><span class="dt">&gt;</span></span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-title"</span><span class="dt">&gt;</span>Order Statistics<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-desc"</span><span class="dt">&gt;</span>The probability of sorted data: min, max, median, range — the basis of quantiles, extremes, and rank tests.<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> class</span><span class="op">=</span><span class="st">"brand-card"</span><span class="ot"> href</span><span class="op">=</span><span class="st">"branching-processes.qmd"</span><span class="dt">&gt;</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-title"</span><span class="dt">&gt;</span>Branching Processes<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-desc"</span><span class="dt">&gt;</span>One ancestor, random offspring each generation: whether a line, a rumour, or an epidemic dies out or explodes — the fixed point of a generating function.<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
 <span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
 <span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>::: {.g-col-12 .g-col-md-4}</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> class</span><span class="op">=</span><span class="st">"brand-card"</span><span class="ot"> href</span><span class="op">=</span><span class="st">"renewal-theory.qmd"</span><span class="dt">&gt;</span></span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-title"</span><span class="dt">&gt;</span>Renewal Theory<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-desc"</span><span class="dt">&gt;</span>The Poisson process with any gap distribution: the long-run rate 1/μ and the renewal-reward theorem.<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> class</span><span class="op">=</span><span class="st">"brand-card"</span><span class="ot"> href</span><span class="op">=</span><span class="st">"order-statistics.qmd"</span><span class="dt">&gt;</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-title"</span><span class="dt">&gt;</span>Order Statistics<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-desc"</span><span class="dt">&gt;</span>The probability of sorted data: min, max, median, range — the basis of quantiles, extremes, and rank tests.<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
 <span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
 <span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>::: {.g-col-12 .g-col-md-4}</span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> class</span><span class="op">=</span><span class="st">"brand-card"</span><span class="ot"> href</span><span class="op">=</span><span class="st">"queueing.qmd"</span><span class="dt">&gt;</span></span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-title"</span><span class="dt">&gt;</span>Queueing (M/M/1)<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-desc"</span><span class="dt">&gt;</span>Arrivals meet a server: utilisation, why waiting explodes near full load, and Little's law.<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> class</span><span class="op">=</span><span class="st">"brand-card"</span><span class="ot"> href</span><span class="op">=</span><span class="st">"renewal-theory.qmd"</span><span class="dt">&gt;</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-title"</span><span class="dt">&gt;</span>Renewal Theory<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-desc"</span><span class="dt">&gt;</span>The Poisson process with any gap distribution: the long-run rate 1/μ and the renewal-reward theorem.<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
 <span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
 <span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>::: {.g-col-12 .g-col-md-4}</span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> class</span><span class="op">=</span><span class="st">"brand-card"</span><span class="ot"> href</span><span class="op">=</span><span class="st">"brownian-motion.qmd"</span><span class="dt">&gt;</span></span>
-<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-title"</span><span class="dt">&gt;</span>Brownian Motion<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-desc"</span><span class="dt">&gt;</span>The continuous-time limit of a random walk: √t spreading, and the scaffolding of diffusion and finance.<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> class</span><span class="op">=</span><span class="st">"brand-card"</span><span class="ot"> href</span><span class="op">=</span><span class="st">"queueing.qmd"</span><span class="dt">&gt;</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-title"</span><span class="dt">&gt;</span>Queueing (M/M/1)<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-desc"</span><span class="dt">&gt;</span>Arrivals meet a server: utilisation, why waiting explodes near full load, and Little's law.<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
 <span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
 <span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="fu">## Where this connects</span></span>
-<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The **Poisson process** is the continuous-time engine behind <span class="co">[</span><span class="ot">count data</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span></span>
-<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>  and <span class="co">[</span><span class="ot">survival/hazard</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span> models — its interarrival times</span>
-<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>  *are* the exponential durations of survival analysis.</span>
-<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Markov chains** are the theory under <span class="co">[</span><span class="ot">MCMC</span><span class="co">](../../content/02-inference/credible-intervals-and-computation.qmd)</span></span>
-<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>  (the "MC" is Markov chain) and many <span class="co">[</span><span class="ot">time-series</span><span class="co">](../../content/04-predictive/time-series-fundamentals.qmd)</span></span>
-<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>  models.</span>
-<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Order statistics** underpin the median, quantiles, extremes, and the rank-based</span>
-<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">nonparametric tests</span><span class="co">](../../content/02-inference/resampling-and-nonparametric-tests.qmd)</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>::: {.g-col-12 .g-col-md-4}</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> class</span><span class="op">=</span><span class="st">"brand-card"</span><span class="ot"> href</span><span class="op">=</span><span class="st">"brownian-motion.qmd"</span><span class="dt">&gt;</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-title"</span><span class="dt">&gt;</span>Brownian Motion<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> class</span><span class="op">=</span><span class="st">"bc-desc"</span><span class="dt">&gt;</span>The continuous-time limit of a random walk: √t spreading, and the scaffolding of diffusion and finance.<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a><span class="fu">## Where this connects</span></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The **Poisson process** is the continuous-time engine behind <span class="co">[</span><span class="ot">count data</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span></span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>  and <span class="co">[</span><span class="ot">survival/hazard</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span> models — its interarrival times</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>  *are* the exponential durations of survival analysis.</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Markov chains** are the theory under <span class="co">[</span><span class="ot">MCMC</span><span class="co">](../../content/02-inference/credible-intervals-and-computation.qmd)</span></span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>  (the "MC" is Markov chain) and many <span class="co">[</span><span class="ot">time-series</span><span class="co">](../../content/04-predictive/time-series-fundamentals.qmd)</span></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>  models.</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Order statistics** underpin the median, quantiles, extremes, and the rank-based</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">nonparametric tests</span><span class="co">](../../content/02-inference/resampling-and-nonparametric-tests.qmd)</span>.</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Branching processes** are the probability behind epidemic thresholds ($R_0$), the</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">giant-component transition</span><span class="co">](../../content/complexity/random-graphs-erdos-renyi.qmd)</span> in random graphs, and</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>  network <span class="co">[</span><span class="ot">cascades</span><span class="co">](../../content/complexity/information-cascades.qmd)</span> — extinction-or-explosion decided by one</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>  mean offspring number.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
