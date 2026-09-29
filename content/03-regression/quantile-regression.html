@@ -1810,6 +1810,7 @@ window.Quarto = {
   <li><a href="#the-general-tau-th-quantile-and-the-check-function" id="toc-the-general-tau-th-quantile-and-the-check-function" class="nav-link" data-scroll-target="#the-general-tau-th-quantile-and-the-check-function">The general <span class="math inline">\tau</span>-th quantile and the check function</a></li>
   <li><a href="#effects-that-change-across-the-distribution" id="toc-effects-that-change-across-the-distribution" class="nav-link" data-scroll-target="#effects-that-change-across-the-distribution">Effects that change across the distribution</a></li>
   <li><a href="#inference-and-cautions" id="toc-inference-and-cautions" class="nav-link" data-scroll-target="#inference-and-cautions">Inference and cautions</a></li>
+  <li><a href="#from-description-to-cause-quantile-treatment-effects-with-an-instrument" id="toc-from-description-to-cause-quantile-treatment-effects-with-an-instrument" class="nav-link" data-scroll-target="#from-description-to-cause-quantile-treatment-effects-with-an-instrument">From description to cause: quantile treatment effects with an instrument</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
   <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
@@ -1937,6 +1938,60 @@ Figure&nbsp;1: Quantile regression fit by hand (IRLS) on heteroskedastic data �
 <li><strong>Censoring — a superpower.</strong> Because the median is <strong>unaffected by changes above it</strong>, quantile regression can recover the true relationship even when the <strong>upper tail is top-coded/hidden</strong> <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span>.</li>
 </ul>
 </section>
+<section id="from-description-to-cause-quantile-treatment-effects-with-an-instrument" class="level2">
+<h2 class="anchored" data-anchor-id="from-description-to-cause-quantile-treatment-effects-with-an-instrument">From description to cause: quantile treatment effects with an instrument</h2>
+<p>Everything above is <strong>descriptive</strong>. A quantile regression of earnings on a training dummy compares the earnings <em>distributions</em> of people who took training and people who didn’t, and it is exposed to the same <a href="../../content/03-regression/multiple-regression.html">omitted-variables bias</a> as OLS. The fix for OLS is <a href="../../content/05-causal-inference/instrumental-variables.html">instrumental variables</a>. The quantile version of that fix is the <strong>quantile treatment effect (QTE) estimator</strong> of Abadie, Angrist &amp; Imbens. It works with a binary treatment and a binary instrument, and it relies on essentially the same assumptions as <a href="../../content/05-causal-inference/instrumental-variables.html">LATE</a> <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span>.</p>
+<p><strong>The idea: run the quantile regression on the compliers.</strong> Among <strong>compliers</strong> (people who take the treatment if and only if the instrument tells them to), treatment is as good as randomly assigned. A quantile regression run on compliers alone would therefore be causal: its treatment coefficient <span class="math inline">\alpha_\tau</span> is the gap between the <span class="math inline">\tau</span>-quantiles of treated and untreated outcomes <em>for compliers</em>. The catch is that nobody wears a complier badge. <strong>Abadie’s kappa</strong> gets around this with a weight,</p>
+<p><span class="math display">
+\kappa_i \;=\; 1 \;-\; \frac{d_i(1-z_i)}{1-P(z_i=1\mid X_i)} \;-\; \frac{(1-d_i)\,z_i}{P(z_i=1\mid X_i)},
+</span></p>
+<p>that “finds compliers” on average. Under monotonicity, anyone treated <em>despite</em> <span class="math inline">z=0</span> must be an <strong>always-taker</strong> and anyone untreated <em>despite</em> <span class="math inline">z=1</span> must be a <strong>never-taker</strong>. Kappa subtracts both groups out, so the kappa-weighted average of anything equals its average among compliers, the group left over <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span>. Weight the check-function minimisation by <span class="math inline">\kappa_i</span> and you have the QTE estimator. It collapses to ordinary quantile regression when there is no instrument, in the same way 2SLS collapses to OLS <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span>.</p>
+<p><strong>JTPA: quantile regression and QTE disagree.</strong> In the U.S. Job Training Partnership Act experiment, the <em>offer</em> of training was randomised but only about 60% of those offered actually enrolled. Enrolment was self-selected, and the random offer is the instrument (5,102 adult men, 30-month earnings) <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Effect of training on earnings</th>
+<th>Mean</th>
+<th>.15</th>
+<th>.25</th>
+<th>.50</th>
+<th>.75</th>
+<th>.85</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Descriptive (OLS / quantile regression)</td>
+<td>$3,754</td>
+<td>$1,187</td>
+<td>$2,510</td>
+<td>$4,420</td>
+<td>$4,678</td>
+<td>$4,806</td>
+</tr>
+<tr class="even">
+<td>Causal (2SLS / QTE)</td>
+<td>$1,593</td>
+<td><strong>$121</strong></td>
+<td>$702</td>
+<td>$1,544</td>
+<td>$3,131</td>
+<td>$3,378</td>
+</tr>
+</tbody>
+</table>
+<p>Quantile regression says training helps the <strong>bottom</strong> of the distribution most: the .15 quantile of trainee earnings is 136% higher than for non-trainees. QTE finds that training did <strong>essentially nothing for the lower quantiles</strong> ($121 at the .15 quantile) and had its real effects <strong>above the median</strong>. The lower-tail gains in the descriptive row were <strong>positive selection</strong>: the low-end people who chose to enrol were ones who would have earned more anyway <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span>. That is the opposite policy story from the one the naive quantile regressions tell.</p>
+<p>Two practical points. <span class="math inline">\kappa_i</span> is <strong>negative</strong> whenever <span class="math inline">d_i\ne z_i</span>, which makes the weighted minimand non-convex. The standard remedy is to replace <span class="math inline">\kappa_i</span> with its conditional expectation <span class="math inline">E[\kappa_i\mid y_i,d_i,X_i]</span>, a probability, and trim estimates to <span class="math inline">[0,1]</span>. And because the kappas are themselves estimated, you should <strong>bootstrap the whole two-step procedure</strong> to get standard errors <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span>.</p>
+</section>
 <section id="common-pitfalls" class="level2">
 <h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
 <div class="callout callout-style-default callout-warning callout-titled" title="Where this goes wrong">
@@ -1950,6 +2005,8 @@ Figure&nbsp;1: Quantile regression fit by hand (IRLS) on heteroskedastic data �
 </div>
 <div class="callout-body-container callout-body">
 <ul>
+<li><strong>Reading a descriptive quantile gap as a causal effect.</strong> A quantile regression on a self-selected treatment is as vulnerable to selection bias as OLS. In JTPA, the naive .15-quantile “effect” was $1,187 and the instrumented QTE was $121. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></li>
+<li><strong>Reading <span class="math inline">\alpha_\tau</span> as the quantile of individual gains.</strong> A QTE compares the <em>quantiles</em> of <span class="math inline">y_1</span> and <span class="math inline">y_0</span>. It is <strong>not</strong> the <span class="math inline">\tau</span>-quantile of <span class="math inline">y_1-y_0</span>; even a perfect randomised trial can’t reveal that without strong assumptions such as rank invariance. Welfare comparisons usually need only the two distributions anyway. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></li>
 <li><strong>Reading a quantile effect as an individual effect.</strong> It describes the <em>distribution</em> (the poor are less poor), not a fixed person moving up. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></li>
 <li><strong>Using OLS SEs.</strong> Quantile inference needs the bootstrap (or kernel density of residuals); plug-in OLS errors are wrong. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></li>
 <li><strong>Ignoring quantile crossing.</strong> If lines cross in your <span class="math inline">X</span> range, the linear specification is straining; consider non-crossing methods or rethink the model. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></li>
@@ -1974,7 +2031,7 @@ Figure&nbsp;1: Quantile regression fit by hand (IRLS) on heteroskedastic data �
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Angrist &amp; Pischke, <em>Mostly Harmless Econometrics</em> / <em>Mastering ’Metrics</em></strong> — quantile regression beyond the mean; the <strong>check/pinball function</strong> <span class="math inline">\rho_\tau(u)=(\tau-\mathbf 1\{u\le0\})u</span> and asymmetric weighting; the <strong>conditional quantile function</strong>; slopes that <strong>fan out</strong> under heteroskedasticity (the schooling upper-tail example); the distributional (“the poor are less poor”) interpretation; <strong>bootstrap</strong> inference; the conditional-vs-unconditional difficulty; <strong>quantile crossing</strong>; and the <strong>censoring</strong> advantage.</li>
+<li><strong>Angrist &amp; Pischke, <em>Mostly Harmless Econometrics</em> / <em>Mastering ’Metrics</em></strong> — quantile regression beyond the mean; the <strong>check/pinball function</strong> <span class="math inline">\rho_\tau(u)=(\tau-\mathbf 1\{u\le0\})u</span> and asymmetric weighting; the <strong>conditional quantile function</strong>; slopes that <strong>fan out</strong> under heteroskedasticity (the schooling upper-tail example); the distributional (“the poor are less poor”) interpretation; <strong>bootstrap</strong> inference; the conditional-vs-unconditional difficulty; <strong>quantile crossing</strong>; and the <strong>censoring</strong> advantage. <em>MHE</em> §7.2 adds the <strong>causal</strong> version: the Abadie–Angrist–Imbens <strong>QTE estimator</strong> (kappa-weighted quantile regression for compliers; Abadie’s kappa theorem from §4.5.2), its practical fixes (the <span class="math inline">E[\kappa\mid y,d,X]</span> weights; bootstrap the whole procedure), and the <strong>JTPA</strong> table in which naive lower-quantile gains disappear once training is instrumented by the random offer.</li>
 <li><strong>Wooldridge, <em>Introductory Econometrics</em></strong> — <strong>LAD / median regression</strong> at <span class="math inline">\tau=0.5</span> and its <strong>robustness to outliers</strong> versus OLS’s residual-squaring.</li>
 </ul>
 </div>
@@ -1987,6 +2044,9 @@ Figure&nbsp;1: Quantile regression fit by hand (IRLS) on heteroskedastic data �
 <p><strong>Why the check function targets the <span class="math inline">\tau</span>-quantile.</strong> Minimising <span class="math inline">\mathbb{E}[\rho_\tau(Y-q)]</span> over a scalar <span class="math inline">q</span> has first-order condition <span class="math inline">\tau - \Pr(Y\le q) = 0</span>, i.e.&nbsp;<span class="math inline">\Pr(Y\le q)=\tau</span> — exactly the definition of the <span class="math inline">\tau</span>-quantile. The regression version replaces the constant <span class="math inline">q</span> with <span class="math inline">x'\beta_\tau</span>, so <span class="math inline">x'\hat\beta_\tau</span> estimates the conditional <span class="math inline">\tau</span>-quantile.</p>
 <p><strong>IRLS (the code).</strong> The check loss <span class="math inline">\sum_i \rho_\tau(r_i)</span> equals <span class="math inline">\sum_i w_i r_i^2</span> with <span class="math inline">w_i = \rho_\tau(r_i)/r_i^2 = \big[\tau\mathbf 1\{r_i&gt;0\}+(1-\tau)\mathbf 1\{r_i\le0\}\big]/|r_i|</span>. Iterating weighted least squares with these weights (clipping <span class="math inline">|r_i|</span> away from 0) converges to <span class="math inline">\hat\beta_\tau</span> — a by-hand solver standing in for the linear-programming routines production code uses.</p>
 <p><strong>Robustness of LAD.</strong> The influence of a point on an OLS fit grows <strong>linearly with its residual</strong> (from the squared loss derivative <span class="math inline">2r</span>); for LAD the derivative is <span class="math inline">\operatorname{sign}(r)</span>, <strong>bounded</strong> — so an outlier far from the line exerts no more pull than one just past it. That bounded influence is the formal meaning of “resilient to outliers.”</p>
+<p><strong>Why kappa finds compliers (Abadie’s theorem).</strong> Under the LATE assumptions, conditional on <span class="math inline">X_i</span>, any expectation is a mixture over always-takers, never-takers and compliers. By monotonicity, <span class="math inline">d_i(1-z_i)=1</span> only for always-takers and <span class="math inline">(1-d_i)z_i=1</span> only for never-takers. Dividing each indicator by the probability of the instrument value that exposes it makes its expectation equal to that group’s share, so both groups are netted out of <span class="math inline">\kappa_i</span> in expectation. That gives, for any function <span class="math inline">g</span>, <span class="math display">
+E\big[g(y_i,d_i,X_i)\mid d_{1i}&gt;d_{0i}\big] \;=\; \frac{E[\kappa_i\, g(y_i,d_i,X_i)]}{E[\kappa_i]} .
+</span> With <span class="math inline">g=\rho_\tau(y_i-a d_i-X_i'b)</span>, the complier quantile regression becomes <span class="math inline">(\alpha_\tau,\beta_\tau)=\arg\min_{a,b} E\{\kappa_i\,\rho_\tau(y_i-a d_i-X_i'b)\}</span>. Iterating expectations replaces <span class="math inline">\kappa_i</span> with <span class="math inline">E[\kappa_i\mid y_i,d_i,X_i]=P(d_{1i}&gt;d_{0i}\mid y_i,d_i,X_i)\in[0,1]</span>, which restores a convex, linear-programming problem <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span>.</p>
 </div>
 </section>
 <section id="connections" class="level2 unnumbered">
@@ -1994,6 +2054,7 @@ Figure&nbsp;1: Quantile regression fit by hand (IRLS) on heteroskedastic data �
 <ul>
 <li><strong>Builds on:</strong> <a href="../../content/03-regression/simple-linear-regression.html">simple</a> and <a href="../../content/03-regression/multiple-regression.html">multiple regression</a> (the mean model it generalises) and <a href="../../content/02-inference/the-bootstrap.html">the bootstrap</a> (its inference).</li>
 <li><strong>Relates to:</strong> <a href="../../content/03-regression/regression-diagnostics.html">regression diagnostics</a> and <a href="../../content/03-regression/heteroskedasticity-and-gls.html">heteroskedasticity &amp; GLS</a> — heteroskedasticity is precisely when quantile slopes fan out and become interesting.</li>
+<li><strong>Leads to:</strong> <a href="../../content/05-causal-inference/instrumental-variables.html">instrumental variables</a>: the QTE estimator is LATE for quantiles, with compliers found by Abadie’s kappa.</li>
 <li><strong>Echoes:</strong> <a href="../../content/05-causal-inference/causal-machine-learning.html">causal machine learning</a> — both look past the average effect to <em>where</em> in the distribution (or <em>for whom</em>) the effect lands.</li>
 </ul>
 
@@ -2604,63 +2665,139 @@ Wooldridge, Jeffrey M. 2019. <em>Introductory Econometrics: A Modern Approach</e
 <span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>  can recover the true relationship even when the **upper tail is top-coded/hidden**</span>
 <span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span>.</span>
 <span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a><span class="fu">## From description to cause: quantile treatment effects with an instrument</span></span>
 <span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a quantile effect as an individual effect.** It describes the *distribution* (the poor are less</span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>  poor), not a fixed person moving up. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using OLS SEs.** Quantile inference needs the bootstrap (or kernel density of residuals); plug-in OLS</span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>  errors are wrong. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring quantile crossing.** If lines cross in your $X$ range, the linear specification is straining;</span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>  consider non-crossing methods or rethink the model. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Expecting insight under homoskedasticity.** If errors are a pure location shift, every quantile slope is</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>  the same as OLS — quantile regression adds nothing. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing conditional and unconditional quantiles.** A policy's effect on the conditional 10th percentile</span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>  is not its effect on the population 10th percentile. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mostly Harmless Econometrics* / *Mastering 'Metrics*** — quantile regression beyond</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>  the mean; the **check/pinball function** $\rho_\tau(u)=(\tau-\mathbf 1<span class="sc">\{</span>u\le0<span class="sc">\}</span>)u$ and asymmetric weighting;</span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>  the **conditional quantile function**; slopes that **fan out** under heteroskedasticity (the schooling</span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>  upper-tail example); the distributional ("the poor are less poor") interpretation; **bootstrap** inference;</span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>  the conditional-vs-unconditional difficulty; **quantile crossing**; and the **censoring** advantage.</span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — **LAD / median regression** at $\tau=0.5$ and its</span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>  **robustness to outliers** versus OLS's residual-squaring.</span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>Everything above is **descriptive**. A quantile regression of earnings on a training dummy compares the</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>earnings *distributions* of people who took training and people who didn't, and it is exposed to the same</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">omitted-variables bias</span><span class="co">](multiple-regression.qmd)</span> as OLS. The fix for OLS is</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">instrumental variables</span><span class="co">](../05-causal-inference/instrumental-variables.qmd)</span>. The quantile version of that</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>fix is the **quantile treatment effect (QTE) estimator** of Abadie, Angrist &amp; Imbens. It works with a binary</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>treatment and a binary instrument, and it relies on essentially the same assumptions as</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">LATE</span><span class="co">](../05-causal-inference/instrumental-variables.qmd)</span> <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span>.</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>**The idea: run the quantile regression on the compliers.** Among **compliers** (people who take the</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>treatment if and only if the instrument tells them to), treatment is as good as randomly assigned. A</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>quantile regression run on compliers alone would therefore be causal: its treatment coefficient $\alpha_\tau$</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>is the gap between the $\tau$-quantiles of treated and untreated outcomes *for compliers*. The catch is that</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>nobody wears a complier badge. **Abadie's kappa** gets around this with a weight,</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>\kappa_i \;=\; 1 \;-\; \frac{d_i(1-z_i)}{1-P(z_i=1\mid X_i)} \;-\; \frac{(1-d_i)\,z_i}{P(z_i=1\mid X_i)},</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>that "finds compliers" on average. Under monotonicity, anyone treated *despite* $z=0$ must be an</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>**always-taker** and anyone untreated *despite* $z=1$ must be a **never-taker**. Kappa subtracts both groups</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>out, so the kappa-weighted average of anything equals its average among compliers, the group left over</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span>. Weight the check-function minimisation by $\kappa_i$ and you have the QTE</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>estimator. It collapses to ordinary quantile regression when there is no instrument, in the same way</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>2SLS collapses to OLS <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span>.</span>
 <span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>**Why the check function targets the $\tau$-quantile.** Minimising $\mathbb{E}<span class="co">[</span><span class="ot">\rho_\tau(Y-q)</span><span class="co">]</span>$ over a scalar</span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>$q$ has first-order condition $\tau - \Pr(Y\le q) = 0$, i.e. $\Pr(Y\le q)=\tau$ — exactly the definition of</span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>the $\tau$-quantile. The regression version replaces the constant $q$ with $x'\beta_\tau$, so $x'\hat\beta_\tau$</span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>estimates the conditional $\tau$-quantile.</span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>**IRLS (the code).** The check loss $\sum_i \rho_\tau(r_i)$ equals $\sum_i w_i r_i^2$ with</span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>$w_i = \rho_\tau(r_i)/r_i^2 = \big<span class="co">[</span><span class="ot">\tau\mathbf 1\{r_i&gt;0\}+(1-\tau)\mathbf 1\{r_i\le0\}\big</span><span class="co">]</span>/|r_i|$. Iterating</span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>weighted least squares with these weights (clipping $|r_i|$ away from 0) converges to $\hat\beta_\tau$ — a</span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>by-hand solver standing in for the linear-programming routines production code uses.</span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>**Robustness of LAD.** The influence of a point on an OLS fit grows **linearly with its residual** (from the</span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>squared loss derivative $2r$); for LAD the derivative is $\operatorname{sign}(r)$, **bounded** — so an outlier</span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>far from the line exerts no more pull than one just past it. That bounded influence is the formal meaning of</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>"resilient to outliers."</span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>**JTPA: quantile regression and QTE disagree.** In the U.S. Job Training Partnership Act experiment, the</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>*offer* of training was randomised but only about 60% of those offered actually enrolled. Enrolment was</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>self-selected, and the random offer is the instrument (5,102 adult men, 30-month earnings)</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span>:</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Effect of training on earnings <span class="pp">|</span> Mean <span class="pp">|</span> .15 <span class="pp">|</span> .25 <span class="pp">|</span> .50 <span class="pp">|</span> .75 <span class="pp">|</span> .85 <span class="pp">|</span></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|---|---|---|</span></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Descriptive (OLS / quantile regression) <span class="pp">|</span> \$3,754 <span class="pp">|</span> \$1,187 <span class="pp">|</span> \$2,510 <span class="pp">|</span> \$4,420 <span class="pp">|</span> \$4,678 <span class="pp">|</span> \$4,806 <span class="pp">|</span></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Causal (2SLS / QTE) <span class="pp">|</span> \$1,593 <span class="pp">|</span> **\$121** <span class="pp">|</span> \$702 <span class="pp">|</span> \$1,544 <span class="pp">|</span> \$3,131 <span class="pp">|</span> \$3,378 <span class="pp">|</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>Quantile regression says training helps the **bottom** of the distribution most: the .15 quantile of</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>trainee earnings is 136% higher than for non-trainees. QTE finds that training did **essentially nothing</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>for the lower quantiles** (\$121 at the .15 quantile) and had its real effects **above the median**. The</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>lower-tail gains in the descriptive row were **positive selection**: the low-end people who chose to enrol</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>were ones who would have earned more anyway <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span>. That is the opposite policy story</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>from the one the naive quantile regressions tell.</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>Two practical points. $\kappa_i$ is **negative** whenever $d_i\ne z_i$, which makes the weighted minimand</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>non-convex. The standard remedy is to replace $\kappa_i$ with its conditional expectation</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>$E<span class="co">[</span><span class="ot">\kappa_i\mid y_i,d_i,X_i</span><span class="co">]</span>$, a probability, and trim estimates to $<span class="co">[</span><span class="ot">0,1</span><span class="co">]</span>$. And because the kappas are</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>themselves estimated, you should **bootstrap the whole two-step procedure** to get standard errors</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span>.</span>
 <span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">simple</span><span class="co">](simple-linear-regression.qmd)</span> and <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](multiple-regression.qmd)</span></span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>  (the mean model it generalises) and <span class="co">[</span><span class="ot">the bootstrap</span><span class="co">](../02-inference/the-bootstrap.qmd)</span> (its inference).</span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Relates to:** <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](regression-diagnostics.qmd)</span> and</span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">heteroskedasticity &amp; GLS</span><span class="co">](heteroskedasticity-and-gls.qmd)</span> — heteroskedasticity is precisely when quantile</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  slopes fan out and become interesting.</span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Echoes:** <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](../05-causal-inference/causal-machine-learning.qmd)</span> — both look past</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  the average effect to *where* in the distribution (or *for whom*) the effect lands.</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a descriptive quantile gap as a causal effect.** A quantile regression on a self-selected</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  treatment is as vulnerable to selection bias as OLS. In JTPA, the naive .15-quantile "effect" was</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>  \$1,187 and the instrumented QTE was \$121. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading $\alpha_\tau$ as the quantile of individual gains.** A QTE compares the *quantiles* of $y_1$</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>  and $y_0$. It is **not** the $\tau$-quantile of $y_1-y_0$; even a perfect randomised trial can't reveal</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>  that without strong assumptions such as rank invariance. Welfare comparisons usually need only the two</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>  distributions anyway. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a quantile effect as an individual effect.** It describes the *distribution* (the poor are less</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>  poor), not a fixed person moving up. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using OLS SEs.** Quantile inference needs the bootstrap (or kernel density of residuals); plug-in OLS</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>  errors are wrong. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring quantile crossing.** If lines cross in your $X$ range, the linear specification is straining;</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>  consider non-crossing methods or rethink the model. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Expecting insight under homoskedasticity.** If errors are a pure location shift, every quantile slope is</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>  the same as OLS — quantile regression adds nothing. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing conditional and unconditional quantiles.** A policy's effect on the conditional 10th percentile</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>  is not its effect on the population 10th percentile. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mostly Harmless Econometrics* / *Mastering 'Metrics*** — quantile regression beyond</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  the mean; the **check/pinball function** $\rho_\tau(u)=(\tau-\mathbf 1<span class="sc">\{</span>u\le0<span class="sc">\}</span>)u$ and asymmetric weighting;</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>  the **conditional quantile function**; slopes that **fan out** under heteroskedasticity (the schooling</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>  upper-tail example); the distributional ("the poor are less poor") interpretation; **bootstrap** inference;</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>  the conditional-vs-unconditional difficulty; **quantile crossing**; and the **censoring** advantage.</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>  *MHE* §7.2 adds the **causal** version: the Abadie–Angrist–Imbens **QTE estimator** (kappa-weighted</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>  quantile regression for compliers; Abadie's kappa theorem from §4.5.2), its practical fixes (the</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>  $E<span class="co">[</span><span class="ot">\kappa\mid y,d,X</span><span class="co">]</span>$ weights; bootstrap the whole procedure), and the **JTPA** table in which naive</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>  lower-quantile gains disappear once training is instrumented by the random offer.</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — **LAD / median regression** at $\tau=0.5$ and its</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>  **robustness to outliers** versus OLS's residual-squaring.</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>**Why the check function targets the $\tau$-quantile.** Minimising $\mathbb{E}<span class="co">[</span><span class="ot">\rho_\tau(Y-q)</span><span class="co">]</span>$ over a scalar</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>$q$ has first-order condition $\tau - \Pr(Y\le q) = 0$, i.e. $\Pr(Y\le q)=\tau$ — exactly the definition of</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>the $\tau$-quantile. The regression version replaces the constant $q$ with $x'\beta_\tau$, so $x'\hat\beta_\tau$</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>estimates the conditional $\tau$-quantile.</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>**IRLS (the code).** The check loss $\sum_i \rho_\tau(r_i)$ equals $\sum_i w_i r_i^2$ with</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>$w_i = \rho_\tau(r_i)/r_i^2 = \big<span class="co">[</span><span class="ot">\tau\mathbf 1\{r_i&gt;0\}+(1-\tau)\mathbf 1\{r_i\le0\}\big</span><span class="co">]</span>/|r_i|$. Iterating</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>weighted least squares with these weights (clipping $|r_i|$ away from 0) converges to $\hat\beta_\tau$ — a</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>by-hand solver standing in for the linear-programming routines production code uses.</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>**Robustness of LAD.** The influence of a point on an OLS fit grows **linearly with its residual** (from the</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>squared loss derivative $2r$); for LAD the derivative is $\operatorname{sign}(r)$, **bounded** — so an outlier</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>far from the line exerts no more pull than one just past it. That bounded influence is the formal meaning of</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>"resilient to outliers."</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>**Why kappa finds compliers (Abadie's theorem).** Under the LATE assumptions, conditional on $X_i$, any</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>expectation is a mixture over always-takers, never-takers and compliers. By monotonicity,</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>$d_i(1-z_i)=1$ only for always-takers and $(1-d_i)z_i=1$ only for never-takers. Dividing each indicator by</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>the probability of the instrument value that exposes it makes its expectation equal to that group's share,</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>so both groups are netted out of $\kappa_i$ in expectation. That gives, for any function $g$,</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>E\big<span class="co">[</span><span class="ot">g(y_i,d_i,X_i)\mid d_{1i}&gt;d_{0i}\big</span><span class="co">]</span> \;=\; \frac{E<span class="co">[</span><span class="ot">\kappa_i\, g(y_i,d_i,X_i)</span><span class="co">]</span>}{E<span class="co">[</span><span class="ot">\kappa_i</span><span class="co">]</span>} .</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>With $g=\rho_\tau(y_i-a d_i-X_i'b)$, the complier quantile regression becomes</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>$(\alpha_\tau,\beta_\tau)=\arg\min_{a,b} E<span class="sc">\{</span>\kappa_i\,\rho_\tau(y_i-a d_i-X_i'b)<span class="sc">\}</span>$. Iterating expectations</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>replaces $\kappa_i$ with $E<span class="co">[</span><span class="ot">\kappa_i\mid y_i,d_i,X_i</span><span class="co">]</span>=P(d_{1i}&gt;d_{0i}\mid y_i,d_i,X_i)\in<span class="co">[</span><span class="ot">0,1</span><span class="co">]</span>$, which</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>restores a convex, linear-programming problem <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span>.</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">simple</span><span class="co">](simple-linear-regression.qmd)</span> and <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](multiple-regression.qmd)</span></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>  (the mean model it generalises) and <span class="co">[</span><span class="ot">the bootstrap</span><span class="co">](../02-inference/the-bootstrap.qmd)</span> (its inference).</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Relates to:** <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](regression-diagnostics.qmd)</span> and</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">heteroskedasticity &amp; GLS</span><span class="co">](heteroskedasticity-and-gls.qmd)</span> — heteroskedasticity is precisely when quantile</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>  slopes fan out and become interesting.</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">instrumental variables</span><span class="co">](../05-causal-inference/instrumental-variables.qmd)</span>: the QTE</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>  estimator is LATE for quantiles, with compliers found by Abadie's kappa.</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Echoes:** <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](../05-causal-inference/causal-machine-learning.qmd)</span> — both look past</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>  the average effect to *where* in the distribution (or *for whom*) the effect lands.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
