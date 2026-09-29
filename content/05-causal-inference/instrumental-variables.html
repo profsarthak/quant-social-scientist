@@ -1806,6 +1806,7 @@ window.Quarto = {
   <li><a href="#weak-instruments" id="toc-weak-instruments" class="nav-link" data-scroll-target="#weak-instruments">Weak instruments</a></li>
   <li><a href="#overidentification-weak-instrument-robust-inference" id="toc-overidentification-weak-instrument-robust-inference" class="nav-link" data-scroll-target="#overidentification-weak-instrument-robust-inference">Overidentification &amp; weak-instrument-robust inference</a></li>
   <li><a href="#the-exclusion-restriction-is-an-argument-not-a-test-the-ajr-debate" id="toc-the-exclusion-restriction-is-an-argument-not-a-test-the-ajr-debate" class="nav-link" data-scroll-target="#the-exclusion-restriction-is-an-argument-not-a-test-the-ajr-debate">The exclusion restriction is an argument, not a test — the AJR debate</a></li>
+  <li><a href="#doing-2sls-by-hand-four-classic-mistakes" id="toc-doing-2sls-by-hand-four-classic-mistakes" class="nav-link" data-scroll-target="#doing-2sls-by-hand-four-classic-mistakes">Doing 2SLS by hand: four classic mistakes</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
   <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
@@ -1979,6 +1980,17 @@ Figure&nbsp;1: IV recovers what OLS can’t. The treatment D is confounded by an
 </ul>
 <p>The honest responses are the ones the rest of this Part supplies: <strong>defend the mechanism on substance</strong>, <strong>triangulate</strong> across studies whose weaknesses differ (AJR themselves lean on nature-matched pairs — North vs South Korea; the two halves of Nogales — where institutions diverge but geography does not), and when the restriction is only <em>partly</em> credible, report a <a href="../../content/05-causal-inference/partial-identification.html">bounded range</a> rather than a single point. Ambiguity you cannot eliminate you can still <strong>reduce</strong>. <span class="citation" data-cites="dayal_r_datascience">(<a href="#ref-dayal_r_datascience" role="doc-biblioref">Dayal 2020</a>)</span></p>
 </section>
+<section id="doing-2sls-by-hand-four-classic-mistakes" class="level2">
+<h2 class="anchored" data-anchor-id="doing-2sls-by-hand-four-classic-mistakes">Doing 2SLS by hand: four classic mistakes</h2>
+<p>“Regress <span class="math inline">D</span> on <span class="math inline">Z</span>, then regress <span class="math inline">Y</span> on the fitted <span class="math inline">\hat D</span>” is a good way to <em>understand</em> 2SLS, and you should always look at the first stage. But Angrist and Pischke warn that running the two stages yourself opens the door to four mistakes. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></p>
+<ol type="1">
+<li><strong>Wrong standard errors.</strong> The manual second stage’s OLS residual includes <span class="math inline">\rho(D-\hat D)</span>, the first-stage error, so its standard errors are wrong. Proper 2SLS software computes them from the structural error alone. Use it for inference. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></li>
+<li><strong>Covariate ambivalence.</strong> Every exogenous covariate in the second stage must also be in the first. Griliches and Mason (1972) put age in their wage equation but left it out of the first stage for AFQT scores. A covariate left out of the first stage is likely correlated with the first-stage residual, and that inconsistency <em>spreads to every coefficient</em> in the second stage. The authors’ rule: <em>if a covariate is good enough for the second stage, it’s good enough for the first.</em> <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></li>
+<li><strong>The “forbidden regression.”</strong> With a binary treatment, it is tempting to fit the first stage by probit and plug its fitted values into the second stage. Only a <em>linear</em> first stage guarantees residuals uncorrelated with the fitted values and covariates. Ordinary 2SLS stays consistent even if the true first-stage relationship isn’t linear, but the plug-in version is consistent only if the probit is <em>exactly right</em>. The safe alternative is to use the probit fitted values as an <strong>instrument</strong> in ordinary 2SLS. That is valid and can be more efficient, but it lets the probit’s <em>nonlinearity</em> supply identification. Angrist and Pischke prefer to avoid that kind of back-door identification, because it is unclear what the underlying experiment is. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></li>
+<li><strong>Squaring the fitted value.</strong> If the model has both <span class="math inline">s</span> and <span class="math inline">s^2</span> (a quadratic return to schooling), you need <strong>two first stages</strong>, one for <span class="math inline">s</span> and one for <span class="math inline">s^2</span>, using e.g.&nbsp;the instrument and its square. Squaring a single <span class="math inline">\hat s</span> and plugging it in is inconsistent. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></li>
+</ol>
+<p>The common thread: 2SLS works because OLS first-stage residuals are <em>orthogonal by construction</em> to everything in the first stage. Every shortcut above breaks that orthogonality somewhere.</p>
+</section>
 <section id="common-pitfalls" class="level2">
 <h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
 <div class="callout callout-style-default callout-warning callout-titled" title="Where this goes wrong">
@@ -1997,6 +2009,7 @@ Figure&nbsp;1: IV recovers what OLS can’t. The treatment D is confounded by an
 <li><p><strong>Reading IV as the ATE.</strong> Under heterogeneity it’s the <strong>LATE for compliers</strong> — a local effect on whoever the instrument moved, not the population. State the complier group. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
 <li><p><strong>Forgetting monotonicity.</strong> Defiers break the complier interpretation; argue the instrument pushes one way for everyone. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></p></li>
 <li><p><strong>Instrument-shopping.</strong> Trying many instruments until one “works” mines for a strong-but-invalid first stage; the exclusion restriction must be defended on substance, not chosen by fit. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
+<li><p><strong>Hand-rolled 2SLS.</strong> Manual second stages give wrong standard errors, and mismatched covariates, probit plug-ins, or a squared <span class="math inline">\hat s</span> make the estimates inconsistent. Use a proper 2SLS routine, with the same exogenous covariates in both stages. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></p></li>
 </ul>
 </div>
 </div>
@@ -2016,7 +2029,7 @@ Figure&nbsp;1: IV recovers what OLS can’t. The treatment D is confounded by an
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Angrist &amp; Pischke, <em>Mastering ’Metrics / Mostly Harmless</em></strong> — endogeneity and OLS inconsistency; <strong>relevance</strong> (first stage) and the <strong>exclusion restriction</strong> + independence; the <strong>Wald estimator</strong> (reduced form ÷ first stage) and <strong>2SLS</strong> (fitted <span class="math inline">\hat D</span>); <strong>LATE</strong> and the complier/always-taker/never-taker/defier taxonomy with <strong>monotonicity</strong>; <strong>weak instruments</strong> and the first-stage <strong><span class="math inline">F&gt;10</span></strong> rule; the <strong>draft-lottery</strong> (first stage <span class="math inline">.159</span>, <span class="math inline">\approx-\$2{,}400</span>) and <strong>quarter-of-birth</strong> (<span class="math inline">.089</span> vs OLS <span class="math inline">.071</span>) studies.</li>
+<li><strong>Angrist &amp; Pischke, <em>Mastering ’Metrics / Mostly Harmless</em></strong> — endogeneity and OLS inconsistency; <strong>relevance</strong> (first stage) and the <strong>exclusion restriction</strong> + independence; the <strong>Wald estimator</strong> (reduced form ÷ first stage) and <strong>2SLS</strong> (fitted <span class="math inline">\hat D</span>); <strong>LATE</strong> and the complier/always-taker/never-taker/defier taxonomy with <strong>monotonicity</strong>; <strong>weak instruments</strong> and the first-stage <strong><span class="math inline">F&gt;10</span></strong> rule; the <strong>draft-lottery</strong> (first stage <span class="math inline">.159</span>, <span class="math inline">\approx-\$2{,}400</span>) and <strong>quarter-of-birth</strong> (<span class="math inline">.089</span> vs OLS <span class="math inline">.071</span>) studies. <em>Mostly Harmless</em> §4.6.1 supplies the <strong>2SLS mistakes</strong>: wrong manual-second-stage SEs, <strong>covariate ambivalence</strong> (Griliches–Mason’s age), Hausman’s <strong>forbidden regression</strong> (probit plug-in; use nonlinear fits as instruments instead, per Newey 1990, but beware identification from nonlinearity alone), and the squared-fitted-value error in Card’s quadratic model.</li>
 <li><strong>Cunningham, <em>The Mixtape</em></strong> — the IV <strong>DAG</strong> <span class="math inline">Z\to D\to Y</span> with <span class="math inline">D\leftarrow u\to Y</span> and no <span class="math inline">Z\to
 Y</span>; the exclusion restriction as the missing arrow; <strong>Card’s distance-to-college</strong> (<span class="math inline">+0.327</span> yrs, <span class="math inline">F=15.8</span>, IV return <span class="math inline">13.2\%</span> vs OLS <span class="math inline">7.5\%</span>).</li>
 <li><strong>Dayal, <em>Quantitative Economics with R</em></strong> — the <strong>Acemoglu–Johnson–Robinson settler-mortality</strong> instrument for institutions (2SLS <span class="math inline">\approx 0.94</span> vs OLS <span class="math inline">0.52</span>; the Nigeria–Chile seven-fold punchline) and the <strong>exclusion-restriction debate</strong> around it (Rodrik et al.; Assenova &amp; Regele on the geography channel); <strong>Deaton’s</strong> point that exogeneity is assumed, not tested, and that a passing overidentification test cannot certify validity; and the <strong>Morgan–Winship</strong> simulation showing a valid instrument still earns a significant coefficient when you (wrongly) regress <span class="math inline">Y</span> on <span class="math inline">D</span> and <span class="math inline">Z</span>.</li>
@@ -2766,87 +2779,126 @@ Wooldridge, Jeffrey M. 2019. <em>Introductory Econometrics: A Modern Approach</e
 <span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>when the restriction is only *partly* credible, report a <span class="co">[</span><span class="ot">bounded range</span><span class="co">](partial-identification.qmd)</span></span>
 <span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>rather than a single point. Ambiguity you cannot eliminate you can still **reduce**. <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span></span>
 <span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a><span class="fu">## Doing 2SLS by hand: four classic mistakes</span></span>
 <span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A shaky exclusion restriction.** If $Z$ affects $Y$ through *any* channel besides $D$, IV is</span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>  biased — and you can't test it. Most IV critiques are exclusion critiques. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Weak instruments.** Low first-stage $F$ inflates variance and biases 2SLS toward OLS. Report the</span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>  first stage and its $F$; treat $F&lt;10$ as a red flag. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading IV as the ATE.** Under heterogeneity it's the **LATE for compliers** — a local effect on</span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  whoever the instrument moved, not the population. State the complier group. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting monotonicity.** Defiers break the complier interpretation; argue the instrument pushes</span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>  one way for everyone. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
-<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Instrument-shopping.** Trying many instruments until one "works" mines for a strong-but-invalid</span>
-<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>  first stage; the exclusion restriction must be defended on substance, not chosen by fit.</span>
-<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mastering 'Metrics / Mostly Harmless*** — endogeneity and OLS inconsistency;</span>
-<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>  **relevance** (first stage) and the **exclusion restriction** + independence; the **Wald estimator**</span>
-<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>  (reduced form ÷ first stage) and **2SLS** (fitted $\hat D$); **LATE** and the</span>
-<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>  complier/always-taker/never-taker/defier taxonomy with **monotonicity**; **weak instruments** and the</span>
-<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>  first-stage **$F&gt;10$** rule; the **draft-lottery** (first stage $.159$, $\approx-\$2{,}400$) and</span>
-<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>  **quarter-of-birth** ($.089$ vs OLS $.071$) studies.</span>
-<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *The Mixtape*** — the IV **DAG** $Z\to D\to Y$ with $D\leftarrow u\to Y$ and no $Z\to</span>
-<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>  Y$; the exclusion restriction as the missing arrow; **Card's distance-to-college** ($+0.327$ yrs,</span>
-<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>  $F=15.8$, IV return $13.2\%$ vs OLS $7.5\%$).</span>
-<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dayal, *Quantitative Economics with R*** — the **Acemoglu–Johnson–Robinson settler-mortality**</span>
-<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>  instrument for institutions (2SLS $\approx 0.94$ vs OLS $0.52$; the Nigeria–Chile seven-fold punchline)</span>
-<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>  and the **exclusion-restriction debate** around it (Rodrik et al.; Assenova &amp; Regele on the geography</span>
-<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>  channel); **Deaton's** point that exogeneity is assumed, not tested, and that a passing overidentification</span>
-<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>  test cannot certify validity; and the **Morgan–Winship** simulation showing a valid instrument still</span>
-<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>  earns a significant coefficient when you (wrongly) regress $Y$ on $D$ and $Z$.</span>
-<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>"Regress $D$ on $Z$, then regress $Y$ on the fitted $\hat D$" is a good way to *understand* 2SLS, and</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>you should always look at the first stage. But Angrist and Pischke warn that running the two stages</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>yourself opens the door to four mistakes. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Wrong standard errors.** The manual second stage's OLS residual includes $\rho(D-\hat D)$, the</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>   first-stage error, so its standard errors are wrong. Proper 2SLS software computes them from the</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>   structural error alone. Use it for inference. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Covariate ambivalence.** Every exogenous covariate in the second stage must also be in the first.</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>   Griliches and Mason (1972) put age in their wage equation but left it out of the first stage for</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>   AFQT scores. A covariate left out of the first stage is likely correlated with the first-stage</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>   residual, and that inconsistency *spreads to every coefficient* in the second stage. The authors'</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>   rule: *if a covariate is good enough for the second stage, it's good enough for the first.*</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>   <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**The "forbidden regression."** With a binary treatment, it is tempting to fit the first stage by</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>   probit and plug its fitted values into the second stage. Only a *linear* first stage guarantees</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>   residuals uncorrelated with the fitted values and covariates. Ordinary 2SLS stays consistent even if</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>   the true first-stage relationship isn't linear, but the plug-in version is consistent only if the</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>   probit is *exactly right*. The safe alternative is to use the probit fitted values as an</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>   **instrument** in ordinary 2SLS. That is valid and can be more efficient, but it lets the probit's</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>   *nonlinearity* supply identification. Angrist and Pischke prefer to avoid that kind of back-door</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>   identification, because it is unclear what the underlying experiment is. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Squaring the fitted value.** If the model has both $s$ and $s^2$ (a quadratic return to</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>   schooling), you need **two first stages**, one for $s$ and one for $s^2$, using e.g. the instrument</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>   and its square. Squaring a single $\hat s$ and plugging it in is inconsistent.</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>   <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>The common thread: 2SLS works because OLS first-stage residuals are *orthogonal by construction* to</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>everything in the first stage. Every shortcut above breaks that orthogonality somewhere.</span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A shaky exclusion restriction.** If $Z$ affects $Y$ through *any* channel besides $D$, IV is</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>  biased — and you can't test it. Most IV critiques are exclusion critiques. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Weak instruments.** Low first-stage $F$ inflates variance and biases 2SLS toward OLS. Report the</span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>  first stage and its $F$; treat $F&lt;10$ as a red flag. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading IV as the ATE.** Under heterogeneity it's the **LATE for compliers** — a local effect on</span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>  whoever the instrument moved, not the population. State the complier group. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
 <span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>**Why the IV estimand is unbiased under exclusion.** With structural equation $Y=\beta D+u$, take the</span>
-<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>covariance with $Z$: $\operatorname{Cov}(Z,Y)=\beta\operatorname{Cov}(Z,D)+\operatorname{Cov}(Z,u)$.</span>
-<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>Exclusion sets the last term to zero, so</span>
-<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>\beta=\frac{\operatorname{Cov}(Z,Y)}{\operatorname{Cov}(Z,D)},</span>
-<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>the population Wald/2SLS estimand. The denominator is relevance — if $\operatorname{Cov}(Z,D)\to0$</span>
-<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>(weak instrument) the ratio explodes, which is why weak instruments wreck precision.</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting monotonicity.** Defiers break the complier interpretation; argue the instrument pushes</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>  one way for everyone. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Instrument-shopping.** Trying many instruments until one "works" mines for a strong-but-invalid</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>  first stage; the exclusion restriction must be defended on substance, not chosen by fit.</span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Hand-rolled 2SLS.** Manual second stages give wrong standard errors, and mismatched covariates,</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>  probit plug-ins, or a squared $\hat s$ make the estimates inconsistent. Use a proper 2SLS routine,</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>  with the same exogenous covariates in both stages. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
 <span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>**2SLS as a projection.** $\hat D=P_Z D$ where $P_Z=Z(Z'Z)^{-1}Z'$ projects $D$ onto the instrument</span>
-<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a>space; the second stage gives $\hat\beta_{2SLS}=(\hat D'\hat D)^{-1}\hat D'Y$. 2SLS keeps only the</span>
-<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>component of $D$ in the column space of $Z$ — the exogenous slice — and discards the rest.</span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
 <span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>**LATE theorem (Imbens–Angrist).** Under independence, exclusion, relevance, and **monotonicity**,</span>
-<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>\frac{\mathbb E<span class="co">[</span><span class="ot">Y\mid Z=1</span><span class="co">]</span>-\mathbb E<span class="co">[</span><span class="ot">Y\mid Z=0</span><span class="co">]</span>}{\mathbb E<span class="co">[</span><span class="ot">D\mid Z=1</span><span class="co">]</span>-\mathbb E<span class="co">[</span><span class="ot">D\mid Z=0</span><span class="co">]</span>}</span>
-<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>=\mathbb E<span class="co">[</span><span class="ot">\,Y(1)-Y(0)\mid \text{complier}\,</span><span class="co">]</span>.</span>
-<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>The denominator equals the **share of compliers**, so the ratio reweights the reduced form onto exactly</span>
-<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>the subpopulation the instrument moves — the formal reason IV is *local*.</span>
-<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">randomized experiments</span><span class="co">](randomized-experiments.qmd)</span> (LATE/compliers from</span>
-<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>  noncompliance; assignment as the ideal instrument), <span class="co">[</span><span class="ot">DAGs</span><span class="co">](directed-acyclic-graphs.qmd)</span> (the</span>
-<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>  exclusion restriction is a missing arrow), and</span>
-<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">endogeneity</span><span class="co">](../03-regression/regression-and-causality.qmd)</span> (the problem IV solves).</span>
-<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">fuzzy regression discontinuity</span><span class="co">](regression-discontinuity.qmd)</span> (the cutoff as an</span>
-<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>  instrument) and the credibility-revolution natural experiments; and — when the exclusion restriction is</span>
-<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>  only partly defensible — <span class="co">[</span><span class="ot">partial identification</span><span class="co">](partial-identification.qmd)</span> (report a bounded range)</span>
-<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>  and <span class="co">[</span><span class="ot">sensitivity analysis</span><span class="co">](sensitivity-and-external-validity.qmd)</span>.</span>
-<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](causal-machine-learning.qmd)</span>, where</span>
-<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a>  **double/debiased ML** orthogonalises treatment and instrument with flexible first stages.</span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mastering 'Metrics / Mostly Harmless*** — endogeneity and OLS inconsistency;</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>  **relevance** (first stage) and the **exclusion restriction** + independence; the **Wald estimator**</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>  (reduced form ÷ first stage) and **2SLS** (fitted $\hat D$); **LATE** and the</span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>  complier/always-taker/never-taker/defier taxonomy with **monotonicity**; **weak instruments** and the</span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>  first-stage **$F&gt;10$** rule; the **draft-lottery** (first stage $.159$, $\approx-\$2{,}400$) and</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>  **quarter-of-birth** ($.089$ vs OLS $.071$) studies. *Mostly Harmless* §4.6.1 supplies the **2SLS</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>  mistakes**: wrong manual-second-stage SEs, **covariate ambivalence** (Griliches–Mason's age), Hausman's</span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>  **forbidden regression** (probit plug-in; use nonlinear fits as instruments instead, per Newey 1990,</span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>  but beware identification from nonlinearity alone), and the squared-fitted-value error in Card's</span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>  quadratic model.</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *The Mixtape*** — the IV **DAG** $Z\to D\to Y$ with $D\leftarrow u\to Y$ and no $Z\to</span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a>  Y$; the exclusion restriction as the missing arrow; **Card's distance-to-college** ($+0.327$ yrs,</span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>  $F=15.8$, IV return $13.2\%$ vs OLS $7.5\%$).</span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dayal, *Quantitative Economics with R*** — the **Acemoglu–Johnson–Robinson settler-mortality**</span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>  instrument for institutions (2SLS $\approx 0.94$ vs OLS $0.52$; the Nigeria–Chile seven-fold punchline)</span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>  and the **exclusion-restriction debate** around it (Rodrik et al.; Assenova &amp; Regele on the geography</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>  channel); **Deaton's** point that exogeneity is assumed, not tested, and that a passing overidentification</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>  test cannot certify validity; and the **Morgan–Winship** simulation showing a valid instrument still</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>  earns a significant coefficient when you (wrongly) regress $Y$ on $D$ and $Z$.</span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>**Why the IV estimand is unbiased under exclusion.** With structural equation $Y=\beta D+u$, take the</span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a>covariance with $Z$: $\operatorname{Cov}(Z,Y)=\beta\operatorname{Cov}(Z,D)+\operatorname{Cov}(Z,u)$.</span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>Exclusion sets the last term to zero, so</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a>\beta=\frac{\operatorname{Cov}(Z,Y)}{\operatorname{Cov}(Z,D)},</span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>the population Wald/2SLS estimand. The denominator is relevance — if $\operatorname{Cov}(Z,D)\to0$</span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>(weak instrument) the ratio explodes, which is why weak instruments wreck precision.</span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>**2SLS as a projection.** $\hat D=P_Z D$ where $P_Z=Z(Z'Z)^{-1}Z'$ projects $D$ onto the instrument</span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a>space; the second stage gives $\hat\beta_{2SLS}=(\hat D'\hat D)^{-1}\hat D'Y$. 2SLS keeps only the</span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a>component of $D$ in the column space of $Z$ — the exogenous slice — and discards the rest.</span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a>**LATE theorem (Imbens–Angrist).** Under independence, exclusion, relevance, and **monotonicity**,</span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a>\frac{\mathbb E<span class="co">[</span><span class="ot">Y\mid Z=1</span><span class="co">]</span>-\mathbb E<span class="co">[</span><span class="ot">Y\mid Z=0</span><span class="co">]</span>}{\mathbb E<span class="co">[</span><span class="ot">D\mid Z=1</span><span class="co">]</span>-\mathbb E<span class="co">[</span><span class="ot">D\mid Z=0</span><span class="co">]</span>}</span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a>=\mathbb E<span class="co">[</span><span class="ot">\,Y(1)-Y(0)\mid \text{complier}\,</span><span class="co">]</span>.</span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a>The denominator equals the **share of compliers**, so the ratio reweights the reduced form onto exactly</span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a>the subpopulation the instrument moves — the formal reason IV is *local*.</span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">randomized experiments</span><span class="co">](randomized-experiments.qmd)</span> (LATE/compliers from</span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a>  noncompliance; assignment as the ideal instrument), <span class="co">[</span><span class="ot">DAGs</span><span class="co">](directed-acyclic-graphs.qmd)</span> (the</span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a>  exclusion restriction is a missing arrow), and</span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">endogeneity</span><span class="co">](../03-regression/regression-and-causality.qmd)</span> (the problem IV solves).</span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">fuzzy regression discontinuity</span><span class="co">](regression-discontinuity.qmd)</span> (the cutoff as an</span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a>  instrument) and the credibility-revolution natural experiments; and — when the exclusion restriction is</span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a>  only partly defensible — <span class="co">[</span><span class="ot">partial identification</span><span class="co">](partial-identification.qmd)</span> (report a bounded range)</span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a>  and <span class="co">[</span><span class="ot">sensitivity analysis</span><span class="co">](sensitivity-and-external-validity.qmd)</span>.</span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](causal-machine-learning.qmd)</span>, where</span>
+<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a>  **double/debiased ML** orthogonalises treatment and instrument with flexible first stages.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

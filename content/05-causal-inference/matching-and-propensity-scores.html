@@ -1802,6 +1802,7 @@ window.Quarto = {
   <li><a href="#the-two-conditions" id="toc-the-two-conditions" class="nav-link" data-scroll-target="#the-two-conditions">The two conditions</a></li>
   <li><a href="#subclassification-the-idea-in-its-purest-form" id="toc-subclassification-the-idea-in-its-purest-form" class="nav-link" data-scroll-target="#subclassification-the-idea-in-its-purest-form">Subclassification: the idea in its purest form</a></li>
   <li><a href="#matching-and-why-many-covariates-break-it" id="toc-matching-and-why-many-covariates-break-it" class="nav-link" data-scroll-target="#matching-and-why-many-covariates-break-it">Matching, and why many covariates break it</a></li>
+  <li><a href="#making-approximate-matching-honest" id="toc-making-approximate-matching-honest" class="nav-link" data-scroll-target="#making-approximate-matching-honest">Making approximate matching honest</a></li>
   <li><a href="#the-propensity-score-one-number-to-balance-them-all" id="toc-the-propensity-score-one-number-to-balance-them-all" class="nav-link" data-scroll-target="#the-propensity-score-one-number-to-balance-them-all">The propensity score: one number to balance them all</a></li>
   <li><a href="#inverse-probability-weighting" id="toc-inverse-probability-weighting" class="nav-link" data-scroll-target="#inverse-probability-weighting">Inverse probability weighting</a></li>
   <li><a href="#regression-is-matching-in-disguise" id="toc-regression-is-matching-in-disguise" class="nav-link" data-scroll-target="#regression-is-matching-in-disguise">Regression is matching in disguise</a></li>
@@ -1878,7 +1879,17 @@ window.Quarto = {
 <li><strong>Exact matching</strong> pairs a treated unit with controls having identical <span class="math inline">X</span> — perfect, when feasible.</li>
 <li><strong>Nearest-neighbour matching</strong> pairs with the <em>closest</em> available <span class="math inline">X</span> when exact matches run out.</li>
 </ul>
-<p>The wall it hits is the <strong>curse of dimensionality</strong>. With many covariates, the space is vast and the data sparse: cells empty out, exact matches vanish, and <strong>common support fails</strong> — you simply can’t find a treated <em>and</em> a control unit in most cells. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> Matching on more than a few covariates at once is infeasible in finite samples. This is the problem the propensity score was invented to dissolve.</p>
+<p>The wall it hits is the <strong>curse of dimensionality</strong>. With many covariates, the space is vast and the data sparse: cells empty out, exact matches vanish, and <strong>common support fails</strong> — you simply can’t find a treated <em>and</em> a control unit in most cells. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> Matching on more than a few covariates at once is infeasible in finite samples. This is the problem the propensity score was invented to dissolve. Before reaching for it, though, it is worth seeing how far direct matching can be pushed, because the repairs below are what practitioners actually use.</p>
+</section>
+<section id="making-approximate-matching-honest" class="level2">
+<h2 class="anchored" data-anchor-id="making-approximate-matching-honest">Making approximate matching honest</h2>
+<p><strong>What “closest” means.</strong> With one covariate, “nearest” is obvious. With several, you need a <strong>distance</strong>. Plain Euclidean distance changes with units: measure income in cents and it swamps age. The <strong>normalized Euclidean</strong> distance divides each covariate’s gap by its variance, and the <strong>Mahalanobis distance</strong> uses the whole covariance matrix <span class="math inline">\hat\Sigma_X</span>, <span class="math display">
+\lVert X_i-X_j\rVert=\sqrt{(X_i-X_j)'\,\hat\Sigma_X^{-1}(X_i-X_j)}.
+</span> Both are <strong>scale-invariant</strong>, so rescaling a covariate does not change who matches whom. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<p><strong>Imperfect matches leave bias, and it shrinks slowly.</strong> Whatever the metric, a 25-year-old gets matched to a 26-year-old; those <strong>matching discrepancies</strong> feed straight into the estimate. They shrink as the sample grows, which is why approximate matching is so hungry for data, but they shrink <strong>more slowly the more covariates you match on</strong>. With many covariates the bias need not vanish at the rate the standard error does. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> The good news is that discrepancies are <em>visible</em>: you can see how badly each pair is mismatched on <span class="math inline">X</span>.</p>
+<p><strong>Bias correction (Abadie–Imbens).</strong> Because the discrepancies are observed, they can be partly corrected. Fit a regression of the outcome on <span class="math inline">X</span> among the controls, <span class="math inline">\hat\mu_0(X)</span>, and subtract from each matched difference the part the regression attributes to the covariate gap: <span class="math inline">(Y_i-Y_{j(i)})-\big(\hat\mu_0(X_i)-\hat\mu_0(X_{j(i)})\big)</span>. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> In Cunningham’s eight-unit toy example the naive nearest-neighbour ATT is <span class="math inline">3.25</span>. With the fitted control regression <span class="math inline">\hat\mu_0(X)=4.42-0.49X</span>, the corrected ATT is <span class="math inline">3.28</span>. The correction is small because the discrepancies are small, and it grows as they do. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> His practical rules for keeping the discrepancies small: use <strong>one match</strong> per treated unit, match <strong>with replacement</strong> (so a good control can be reused), and match most carefully on the covariates that most affect the outcome. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<p><strong>Coarsened exact matching (CEM).</strong> A different escape from the curse of dimensionality is to make <em>exact</em> matching feasible by <strong>coarsening</strong> first (Iacus et al.&nbsp;2012): bin each covariate into meaningful categories (schooling into below high school, high school, some college, college, post- college; age into bands), form one stratum per combination of bins, <strong>drop every stratum that lacks either a treated or a control unit</strong>, and run a regression weighted by stratum size. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> You control the trade-off directly: coarser bins give more matches but more imbalance <em>within</em> each stratum. Because the coarsening is chosen in advance, CEM belongs to the <strong>monotonic imbalance bounding</strong> family, meaning the user’s choice caps the worst imbalance. Balance is reported with the <span class="math inline">\mathcal L_1</span> statistic, from <span class="math inline">0</span> (identical distributions) to <span class="math inline">1</span> (no overlap). <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<p>Applied to the NSW job-training data, CEM achieved tight balance, with <span class="math inline">\mathcal L_1</span> close to zero on most covariates and at most <span class="math inline">0.12</span> (for age squared). Yet it produced an estimate of <strong>$2,771</strong>, well above the experimental benchmark discussed below. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> That is a useful lesson in itself: <strong>good balance on <span class="math inline">X</span> does not guarantee the right answer.</strong> And because CEM prunes treated units as well as controls, the estimand quietly changes. You are no longer estimating the ATE or the ATT, just as when you trim propensity scores, so say so. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
 </section>
 <section id="the-propensity-score-one-number-to-balance-them-all" class="level2">
 <h2 class="anchored" data-anchor-id="the-propensity-score-one-number-to-balance-them-all">The propensity score: one number to balance them all</h2>
@@ -1920,10 +1931,10 @@ e(X) = \Pr(D=1\mid X).
 <div id="fig-common-support" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-common-support-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="matching-and-propensity-scores_files/figure-html/fig-common-support-output-1.png" width="681" height="375" class="figure-img">
+<img src="matching-and-propensity-scores_files/figure-html/fig-common-support-output-1.png" width="682" height="373" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-common-support-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Common support in propensity scores. The estimated probability of treatment, e(X), for treated (green) and control (grey) units. Where the histograms overlap, every treated unit has comparable controls and matching works. In the tails — control units near 0, treated units near 1 — there is no counterpart in the other group (the shaded ‘no-overlap’ zones); those units must be trimmed, and the effect is identified only on the region of common support.
+Figure&nbsp;1: Common support in propensity scores. The estimated probability of treatment, e(X), for treated (dark grey) and control (light grey) units. Where the histograms overlap, every treated unit has comparable controls and matching works. In the tails — control units near 0, treated units near 1 — there is no counterpart in the other group (the shaded ‘no-overlap’ zones); those units must be trimmed, and the effect is identified only on the region of common support.
 </figcaption>
 </figure>
 </div>
@@ -1973,6 +1984,8 @@ Figure&nbsp;1: Common support in propensity scores. The estimated probability of
 <li><p><strong>Treating CIA as established.</strong> It’s untestable. “We controlled for a lot” is an argument about unobservables, not a proof; a hidden confounder leaves the estimate biased. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
 <li><p><strong>Ignoring common support.</strong> Comparing units with no counterpart in the other arm extrapolates off a cliff; check overlap and trim non-overlapping units. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
 <li><p><strong>Matching on many covariates directly.</strong> The curse of dimensionality empties the cells — use the propensity score to collapse <span class="math inline">X</span> to one number. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
+<li><p><strong>Ignoring matching discrepancies.</strong> Nearest-neighbour pairs are not exact, and with many covariates the leftover bias can dominate. Inspect the discrepancies, use one match with replacement, and apply the Abadie–Imbens bias correction. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
+<li><p><strong>Forgetting that pruning changes the question.</strong> CEM and propensity trimming drop units, so the estimate describes the matched subpopulation, not the ATE or ATT. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
 <li><p><strong>Extreme IPW weights.</strong> Propensities near 0 or 1 blow up the weights and the variance; it’s the overlap problem in disguise. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
 <li><p><strong>Reading balance on <span class="math inline">X</span> as balance overall.</strong> A perfect balance table says nothing about the unobservables — the very things that make this weaker than an experiment. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
 </ul>
@@ -1994,7 +2007,7 @@ Figure&nbsp;1: Common support in propensity scores. The estimated probability of
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Cunningham, <em>Causal Inference: The Mixtape</em></strong> — the <strong>CIA/unconfoundedness</strong> <span class="math inline">(Y(1),Y(0))\perp D\mid X</span> and <strong>common support</strong> <span class="math inline">0&lt;\Pr(D=1\mid X)&lt;1</span>; <strong>subclassification</strong> and the <strong>Titanic</strong> example (SDO <span class="math inline">35.4\%\to</span> weighted ATE <span class="math inline">16.1\%</span> stratifying on age/gender); exact and nearest-neighbour <strong>matching</strong> and the <strong>curse of dimensionality</strong>; the <strong>propensity score</strong> <span class="math inline">e(X)=\Pr(D=1\mid X)</span> and the <strong>Rosenbaum–Rubin balancing theorem</strong>; <strong>IPW</strong> formulas for ATE and ATT; the untestability of CIA; and the <strong>NSW / LaLonde / Dehejia–Wahba</strong> evaluation (experimental <span class="math inline">\$1{,}794</span>; naive <span class="math inline">-\$8{,}498</span>; PSM <span class="math inline">\$1{,}362</span>).</li>
+<li><strong>Cunningham, <em>Causal Inference: The Mixtape</em></strong> — the <strong>CIA/unconfoundedness</strong> <span class="math inline">(Y(1),Y(0))\perp D\mid X</span> and <strong>common support</strong> <span class="math inline">0&lt;\Pr(D=1\mid X)&lt;1</span>; <strong>subclassification</strong> and the <strong>Titanic</strong> example (SDO <span class="math inline">35.4\%\to</span> weighted ATE <span class="math inline">16.1\%</span> stratifying on age/gender); exact and nearest-neighbour <strong>matching</strong> and the <strong>curse of dimensionality</strong>; the <strong>propensity score</strong> <span class="math inline">e(X)=\Pr(D=1\mid X)</span> and the <strong>Rosenbaum–Rubin balancing theorem</strong>; <strong>IPW</strong> formulas for ATE and ATT; the untestability of CIA; and the <strong>NSW / LaLonde / Dehejia–Wahba</strong> evaluation (experimental <span class="math inline">\$1{,}794</span>; naive <span class="math inline">-\$8{,}498</span>; PSM <span class="math inline">\$1{,}362</span>). Also <strong>distance metrics</strong> (normalized Euclidean, Mahalanobis), <strong>matching discrepancies</strong> and their slow convergence in high dimension, the <strong>Abadie–Imbens (2011) bias correction</strong> with its eight-unit worked example (<span class="math inline">3.25\to3.28</span>, <span class="math inline">\hat\mu_0=4.42-0.49X</span>) and practical advice (one match, with replacement), and <strong>coarsened exact matching</strong> (Iacus et al.&nbsp;2012; monotonic imbalance bounding; <span class="math inline">\mathcal L_1</span>; NSW estimate <span class="math inline">\$2{,}771</span> with max <span class="math inline">\mathcal L_1=0.12</span>).</li>
 <li><strong>Angrist &amp; Pischke, <em>Mostly Harmless / Mastering ’Metrics</em></strong> — regression as an <strong>automated matchmaker</strong> and a weighted matching estimator; regression’s variance weighting <span class="math inline">\Pr(X)(1-\Pr(X))</span> vs matching’s treated-distribution weighting; CIA as the shared foundation.</li>
 </ul>
 </div>
@@ -2008,13 +2021,19 @@ Figure&nbsp;1: Common support in propensity scores. The estimated probability of
 \mathbb E[Y\mid D=1,X]-\mathbb E[Y\mid D=0,X]=\mathbb E[Y(1)-Y(0)\mid X],
 </span> and averaging over the distribution of <span class="math inline">X</span> gives the ATE — the <a href="../../content/05-causal-inference/directed-acyclic-graphs.html">backdoor adjustment</a>. Subclassification estimates the inner contrast cell by cell and averages with weights <span class="math inline">\Pr(X=x)</span>.</p>
 <p><strong>The balancing-score theorem (sketch).</strong> Rosenbaum &amp; Rubin show <span class="math inline">D\perp X\mid e(X)</span>: by construction <span class="math inline">\Pr(D=1\mid X,e(X))=e(X)</span> depends on <span class="math inline">X</span> only through <span class="math inline">e(X)</span>, so within a level of <span class="math inline">e(X)</span> the covariate distribution is identical across arms. Combined with CIA-given-<span class="math inline">X</span>, this yields CIA-given-<span class="math inline">e(X)</span> — so conditioning on the scalar <span class="math inline">e(X)</span> suffices. The high-dimensional <span class="math inline">X</span> is compressed to one number with no loss for identification.</p>
+<p><strong>Where matching bias comes from.</strong> Write <span class="math inline">\mu_d(x)=\mathbb E[Y\mid X=x,D=d]</span> and let <span class="math inline">j(i)</span> be treated unit <span class="math inline">i</span>’s match. The nearest-neighbour ATT error decomposes as <span class="math display">
+\hat\delta_{ATT}-\delta_{ATT}=\underbrace{\tfrac1{N_T}\sum_{D_i=1}\big(\mu_1(X_i)-\mu_0(X_i)-\delta_{ATT}\big)}_{\text{heterogeneity}}
++\underbrace{\tfrac1{N_T}\sum_{D_i=1}(\varepsilon_i-\varepsilon_{j(i)})}_{\text{noise}}
++\underbrace{\tfrac1{N_T}\sum_{D_i=1}\big(\mu_0(X_i)-\mu_0(X_{j(i)})\big)}_{\text{matching discrepancy}}.
+</span> The first two terms are mean-zero and CLT-friendly. The third is the bias, and when <span class="math inline">X</span> is high-dimensional, <span class="math inline">\sqrt{N_T}</span> times it need not converge to zero. The Abadie–Imbens estimator subtracts an estimate of each unit’s contribution, <span class="math inline">\hat\delta^{BC}_{ATT}=\frac1{N_T}\sum_{D_i=1}\big[(Y_i-Y_{j(i)})-(\hat\mu_0(X_i)-\hat\mu_0(X_{j(i)}))\big]</span>. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<p><strong>CEM’s imbalance measure.</strong> With <span class="math inline">f</span> and <span class="math inline">g</span> the relative frequencies of treated and control units across the multivariate bins <span class="math inline">\ell_1\ldots\ell_k</span>, <span class="math inline">\mathcal L_1(f,g)=\tfrac12\sum_{\ell_1\ldots\ell_k}\lvert f_{\ell_1\ldots\ell_k}-g_{\ell_1\ldots\ell_k}\rvert\in[0,1]</span>: zero for identical distributions, one for completely separated ones. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
 <p><strong>Why regression weights by treatment variance.</strong> With saturated controls, OLS recovers <span class="math inline">\sum_x w(x)\,\big(\mathbb E[Y\mid D=1,x]-\mathbb E[Y\mid D=0,x]\big)</span> with <span class="math inline">w(x)\propto \Pr(X=x)\,\operatorname{Var}(D\mid X=x)=\Pr(X=x)\,e(x)(1-e(x))</span>. The factor <span class="math inline">e(x)(1-e(x))</span> peaks at <span class="math inline">e=1/2</span>, so cells with the most treatment variation — the most informative comparisons — dominate the OLS estimand. This is why the regression number can differ from a matching ATT even under the <em>same</em> CIA.</p>
 </div>
 </section>
 <section id="connections" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
 <ul>
-<li><strong>Builds on:</strong> <a href="../../content/05-causal-inference/directed-acyclic-graphs.html">DAGs</a> (the backdoor criterion this estimates), <a href="../../content/05-causal-inference/potential-outcomes.html">potential outcomes</a> (CIA is conditional independence of <span class="math inline">D</span> and the <span class="math inline">Y(d)</span>), and <a href="../../content/03-regression/limited-dependent-variables.html">logistic regression</a> (how <span class="math inline">e(X)</span> is fit).</li>
+<li><strong>Builds on:</strong> <a href="../../content/05-causal-inference/directed-acyclic-graphs.html">DAGs</a> (the backdoor criterion this estimates), <a href="../../content/05-causal-inference/potential-outcomes.html">potential outcomes</a> (CIA is conditional independence of <span class="math inline">D</span> and the <span class="math inline">Y(d)</span>), <a href="../../content/03-regression/limited-dependent-variables.html">logistic regression</a> (how <span class="math inline">e(X)</span> is fit), and <a href="../../appendices/math/linear-algebra.html">linear algebra</a> (the quadratic form behind the Mahalanobis distance).</li>
 <li><strong>Leads to:</strong> the designs for when CIA <strong>fails</strong> — <a href="../../content/05-causal-inference/instrumental-variables.html">instrumental variables</a>, <a href="../../content/05-causal-inference/regression-discontinuity.html">regression discontinuity</a>, and <a href="../../content/05-causal-inference/difference-in-differences.html">difference-in-differences</a> find leverage beyond the observables.</li>
 <li><strong>Reappears in:</strong> <a href="../../content/05-causal-inference/causal-machine-learning.html">causal machine learning</a>, where flexible ML estimates <span class="math inline">e(X)</span> and the outcome model and <strong>double/debiased ML</strong> combines them to be robust to errors in each.</li>
 </ul>
@@ -2572,182 +2591,262 @@ Cunningham, Scott. 2021. <em>Causal Inference: The Mixtape</em>. Yale University
 <span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>data sparse: cells empty out, exact matches vanish, and **common support fails** — you simply can't</span>
 <span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>find a treated *and* a control unit in most cells. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> Matching on more than a few</span>
 <span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>covariates at once is infeasible in finite samples. This is the problem the propensity score was</span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>invented to dissolve.</span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="fu">## The propensity score: one number to balance them all</span></span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>The **propensity score** is the probability of treatment given covariates,</span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>e(X) = \Pr(D=1\mid X).</span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>The **Rosenbaum–Rubin (1983) theorem** is the magic: if CIA holds given the full vector $X$, then it</span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>*also* holds given the **single scalar** $e(X)$: <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>\big(Y(1),Y(0)\big)\perp D \ \big|\ e(X).</span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>The score is a **balancing score** — among units with the *same* propensity, the *entire distribution*</span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>of $X$ is identical across treated and control. So you can condition on one number instead of a</span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>high-dimensional vector, sidestepping the curse of dimensionality entirely. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> You</span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>estimate $e(X)$ (usually a <span class="co">[</span><span class="ot">logit</span><span class="co">](../03-regression/limited-dependent-variables.qmd)</span>), then match,</span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>stratify, or weight on it.</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>The figure shows what overlap looks like — and where it fails.</span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-common-support</span></span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Common support in propensity scores. The estimated probability of treatment, e(X), for treated (green) and control (grey) units. Where the histograms overlap, every treated unit has comparable controls and matching works. In the tails — control units near 0, treated units near 1 — there is no counterpart in the other group (the shaded 'no-overlap' zones); those units must be trimmed, and the effect is identified only on the region of common support."</span></span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">5</span>)</span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">4000</span></span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n)</span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a><span class="co"># True propensity rises with X; treatment assigned accordingly (confounding by X).</span></span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>e <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span><span class="fl">1.3</span> <span class="op">*</span> X))</span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>D <span class="op">=</span> rng.uniform(size<span class="op">=</span>n) <span class="op">&lt;</span> e</span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.0</span>))</span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>bins <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">41</span>)</span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>ax.hist(e[D],  bins<span class="op">=</span>bins, color<span class="op">=</span><span class="st">"#5e5e54"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"treated"</span>, density<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>ax.hist(e[<span class="op">~</span>D], bins<span class="op">=</span>bins, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"control"</span>, density<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>ax.axvspan(<span class="fl">0.0</span>, <span class="fl">0.12</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, alpha<span class="op">=</span><span class="fl">0.08</span>)</span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>ax.axvspan(<span class="fl">0.88</span>, <span class="fl">1.0</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, alpha<span class="op">=</span><span class="fl">0.08</span>)</span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.02</span>, ax.get_ylim()[<span class="dv">1</span>]<span class="op">*</span><span class="fl">0.85</span>, <span class="st">"few treated</span><span class="ch">\n</span><span class="st">(no controls' match here?)"</span>, fontsize<span class="op">=</span><span class="fl">7.5</span>, color<span class="op">=</span><span class="st">"#3a3a33"</span>)</span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.62</span>, ax.get_ylim()[<span class="dv">1</span>]<span class="op">*</span><span class="fl">0.92</span>, <span class="st">"common support</span><span class="ch">\n</span><span class="st">(matching works)"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"#161613"</span>)</span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"estimated propensity score  e(X) = P(D=1 | X)"</span>)</span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"density"</span>)</span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Overlap is what makes matching possible"</span>)</span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper center"</span>)</span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a><span class="fu">## Inverse probability weighting</span></span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>Instead of matching, you can **reweight**. **Inverse probability weighting (IPW)** builds a synthetic</span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>sample in which treatment is independent of $X$ by up-weighting the *rare* cases — a treated unit with</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>a low propensity stands in for the many similar units who went untreated. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> The ATE</span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>estimator weights each outcome by treatment status over (one minus) the propensity:</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>invented to dissolve. Before reaching for it, though, it is worth seeing how far direct matching can be</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>pushed, because the repairs below are what practitioners actually use.</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a><span class="fu">## Making approximate matching honest</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>**What "closest" means.** With one covariate, "nearest" is obvious. With several, you need a</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>**distance**. Plain Euclidean distance changes with units: measure income in cents and it swamps age.</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>The **normalized Euclidean** distance divides each covariate's gap by its variance, and the</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>**Mahalanobis distance** uses the whole covariance matrix $\hat\Sigma_X$,</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>\lVert X_i-X_j\rVert=\sqrt{(X_i-X_j)'\,\hat\Sigma_X^{-1}(X_i-X_j)}.</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>Both are **scale-invariant**, so rescaling a covariate does not change who matches whom.</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>**Imperfect matches leave bias, and it shrinks slowly.** Whatever the metric, a 25-year-old gets matched</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>to a 26-year-old; those **matching discrepancies** feed straight into the estimate. They shrink as the</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>sample grows, which is why approximate matching is so hungry for data, but they shrink **more slowly the</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>more covariates you match on**. With many covariates the bias need not vanish at the rate the standard</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>error does. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> The good news is that discrepancies are *visible*: you can see how</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>badly each pair is mismatched on $X$.</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>**Bias correction (Abadie–Imbens).** Because the discrepancies are observed, they can be partly</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>corrected. Fit a regression of the outcome on $X$ among the controls, $\hat\mu_0(X)$, and subtract from</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>each matched difference the part the regression attributes to the covariate gap:</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>$(Y_i-Y_{j(i)})-\big(\hat\mu_0(X_i)-\hat\mu_0(X_{j(i)})\big)$. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> In Cunningham's</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>eight-unit toy example the naive nearest-neighbour ATT is $3.25$. With the fitted control regression</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>$\hat\mu_0(X)=4.42-0.49X$, the corrected ATT is $3.28$. The correction is small because the discrepancies</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>are small, and it grows as they do. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> His practical rules for keeping the</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>discrepancies small: use **one match** per treated unit, match **with replacement** (so a good control</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>can be reused), and match most carefully on the covariates that most affect the outcome.</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>**Coarsened exact matching (CEM).** A different escape from the curse of dimensionality is to make</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>*exact* matching feasible by **coarsening** first (Iacus et al. 2012): bin each covariate into</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>meaningful categories (schooling into below high school, high school, some college, college, post-</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>college; age into bands), form one stratum per combination of bins, **drop every stratum that lacks</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>either a treated or a control unit**, and run a regression weighted by stratum size.</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> You control the trade-off directly: coarser bins give more matches but more</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>imbalance *within* each stratum. Because the coarsening is chosen in advance, CEM belongs to the</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>**monotonic imbalance bounding** family, meaning the user's choice caps the worst imbalance. Balance is</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>reported with the $\mathcal L_1$ statistic, from $0$ (identical distributions) to $1$ (no overlap).</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>Applied to the NSW job-training data, CEM achieved tight balance, with $\mathcal L_1$ close to zero on</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>most covariates and at most $0.12$ (for age squared). Yet it produced an estimate of **\$2,771**, well</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>above the experimental benchmark discussed below. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> That is a useful lesson in</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>itself: **good balance on $X$ does not guarantee the right answer.** And because CEM prunes treated</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>units as well as controls, the estimand quietly changes. You are no longer estimating the ATE or the ATT,</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>just as when you trim propensity scores, so say so. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a><span class="fu">## The propensity score: one number to balance them all</span></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>The **propensity score** is the probability of treatment given covariates,</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>e(X) = \Pr(D=1\mid X).</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>The **Rosenbaum–Rubin (1983) theorem** is the magic: if CIA holds given the full vector $X$, then it</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>*also* holds given the **single scalar** $e(X)$: <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>\big(Y(1),Y(0)\big)\perp D \ \big|\ e(X).</span>
 <span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>\widehat{\text{ATE}} = \frac1N\sum_i Y_i\cdot\frac{D_i-\hat e(X_i)}{\hat e(X_i)\,(1-\hat e(X_i))}.</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>Weighting and matching are two ways to spend the same propensity score; both lean entirely on getting</span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>$e(X)$ — and CIA — right. (Note the danger lurking in the denominator: propensities near 0 or 1 produce</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>explosive weights, which is the overlap problem returning in a new guise.)</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>The score is a **balancing score** — among units with the *same* propensity, the *entire distribution*</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>of $X$ is identical across treated and control. So you can condition on one number instead of a</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>high-dimensional vector, sidestepping the curse of dimensionality entirely. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> You</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>estimate $e(X)$ (usually a <span class="co">[</span><span class="ot">logit</span><span class="co">](../03-regression/limited-dependent-variables.qmd)</span>), then match,</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>stratify, or weight on it.</span>
 <span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="fu">## Regression is matching in disguise</span></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>The figure shows what overlap looks like — and where it fails.</span>
 <span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>Where does ordinary <span class="co">[</span><span class="ot">regression</span><span class="co">](../03-regression/multiple-regression.qmd)</span> fit? Angrist &amp; Pischke call</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>it an **"automated matchmaker."** <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span> Regression with controls is also a</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>selection-on-observables estimator built on CIA, and it can be written as a **weighted average of</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>within-cell treatment–control contrasts** — i.e. a matching estimator. The difference is the</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>*weights*: matching for the ATT weights cells by the covariate distribution **among the treated**,</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>while regression weights them by the **variance of treatment** within each cell, $\,\Pr(X)(1-\Pr(X))$</span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>— giving most weight to cells where treatment is a coin flip (near $0.5$), because those are the most</span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>*precise*. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span> Same identifying assumption, different weighting — which is why</span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>matching and regression usually agree, and why, when they *disagree*, the culprit is the weighting or</span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>the functional form.</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-common-support</span></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Common support in propensity scores. The estimated probability of treatment, e(X), for treated (dark grey) and control (light grey) units. Where the histograms overlap, every treated unit has comparable controls and matching works. In the tails — control units near 0, treated units near 1 — there is no counterpart in the other group (the shaded 'no-overlap' zones); those units must be trimmed, and the effect is identified only on the region of common support."</span></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a><span class="fu">## The limitation you can never escape</span></span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>Here is the line that separates this whole family from <span class="co">[</span><span class="ot">randomization</span><span class="co">](randomized-experiments.qmd)</span>:</span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>matching and propensity scores **balance only the observables.** <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> An experiment</span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>balances everything, seen and unseen; selection-on-observables balances $X$ and *prays* the rest goes</span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>with it. CIA is **fundamentally untestable** — it concerns the missing counterfactuals — so if</span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>unobserved **ability** or **motivation** drives both treatment and outcome, every method here stays</span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>biased, no matter how clean the balance table. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> Matching is not a machine for</span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>removing bias; it is a machine for removing bias *due to observed confounders*, conditional on an</span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>assumption you must defend on substance.</span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="LaLonde, and when it works (NSW / Dehejia–Wahba)"}</span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>The famous test: the **National Supported Work** job-training program had a true **experimental**</span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>benchmark of about **+\$1,794** in earnings. LaLonde (1986) discarded the experimental controls and</span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>substituted observational comparison groups (from the CPS and PSID) — the naive gap swung to **−\$8,498**,</span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>catastrophic negative selection (trainees were far more disadvantaged to begin with).</span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> Dehejia &amp; Wahba (1999) then applied **propensity-score matching with trimming**</span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>to enforce common support, conditioning on demographics and *two years of pre-treatment earnings*; their</span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>screened estimate, **+\$1,362**, landed close to the experimental truth. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> The moral</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>cuts both ways: matching *can* recover the experiment — **if** the selection really is on observables</span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>you have (here, rich earnings histories) — and fails badly when it isn't.</span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">5</span>)</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">4000</span></span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n)</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="co"># True propensity rises with X; treatment assigned accordingly (confounding by X).</span></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>e <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span><span class="fl">1.3</span> <span class="op">*</span> X))</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>D <span class="op">=</span> rng.uniform(size<span class="op">=</span>n) <span class="op">&lt;</span> e</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.0</span>))</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>bins <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">41</span>)</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>ax.hist(e[D],  bins<span class="op">=</span>bins, color<span class="op">=</span><span class="st">"#5e5e54"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"treated"</span>, density<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>ax.hist(e[<span class="op">~</span>D], bins<span class="op">=</span>bins, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"control"</span>, density<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>ax.axvspan(<span class="fl">0.0</span>, <span class="fl">0.12</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, alpha<span class="op">=</span><span class="fl">0.08</span>)</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>ax.axvspan(<span class="fl">0.88</span>, <span class="fl">1.0</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, alpha<span class="op">=</span><span class="fl">0.08</span>)</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.02</span>, ax.get_ylim()[<span class="dv">1</span>]<span class="op">*</span><span class="fl">0.85</span>, <span class="st">"few treated</span><span class="ch">\n</span><span class="st">(no controls' match here?)"</span>, fontsize<span class="op">=</span><span class="fl">7.5</span>, color<span class="op">=</span><span class="st">"#3a3a33"</span>)</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.62</span>, ax.get_ylim()[<span class="dv">1</span>]<span class="op">*</span><span class="fl">0.92</span>, <span class="st">"common support</span><span class="ch">\n</span><span class="st">(matching works)"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"#161613"</span>)</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"estimated propensity score  e(X) = P(D=1 | X)"</span>)</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"density"</span>)</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Overlap is what makes matching possible"</span>)</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper center"</span>)</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="fu">## Inverse probability weighting</span></span>
 <span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating CIA as established.** It's untestable. "We controlled for a lot" is an argument about</span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>  unobservables, not a proof; a hidden confounder leaves the estimate biased. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring common support.** Comparing units with no counterpart in the other arm extrapolates off a</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  cliff; check overlap and trim non-overlapping units. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Matching on many covariates directly.** The curse of dimensionality empties the cells — use the</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>  propensity score to collapse $X$ to one number. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>Instead of matching, you can **reweight**. **Inverse probability weighting (IPW)** builds a synthetic</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>sample in which treatment is independent of $X$ by up-weighting the *rare* cases — a treated unit with</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>a low propensity stands in for the many similar units who went untreated. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> The ATE</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>estimator weights each outcome by treatment status over (one minus) the propensity:</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>\widehat{\text{ATE}} = \frac1N\sum_i Y_i\cdot\frac{D_i-\hat e(X_i)}{\hat e(X_i)\,(1-\hat e(X_i))}.</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>Weighting and matching are two ways to spend the same propensity score; both lean entirely on getting</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>$e(X)$ — and CIA — right. (Note the danger lurking in the denominator: propensities near 0 or 1 produce</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>explosive weights, which is the overlap problem returning in a new guise.)</span>
 <span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Extreme IPW weights.** Propensities near 0 or 1 blow up the weights and the variance; it's the</span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>  overlap problem in disguise. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading balance on $X$ as balance overall.** A perfect balance table says nothing about the</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>  unobservables — the very things that make this weaker than an experiment. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *Causal Inference: The Mixtape*** — the **CIA/unconfoundedness**</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>  $(Y(1),Y(0))\perp D\mid X$ and **common support** $0&lt;\Pr(D=1\mid X)&lt;1$; **subclassification** and the</span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>  **Titanic** example (SDO $35.4\%\to$ weighted ATE $16.1\%$ stratifying on age/gender); exact and</span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>  nearest-neighbour **matching** and the **curse of dimensionality**; the **propensity score**</span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  $e(X)=\Pr(D=1\mid X)$ and the **Rosenbaum–Rubin balancing theorem**; **IPW** formulas for ATE and</span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>  ATT; the untestability of CIA; and the **NSW / LaLonde / Dehejia–Wahba** evaluation</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>  (experimental $\$1{,}794$; naive $-\$8{,}498$; PSM $\$1{,}362$).</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mostly Harmless / Mastering 'Metrics*** — regression as an **automated</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>  matchmaker** and a weighted matching estimator; regression's variance weighting</span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>  $\Pr(X)(1-\Pr(X))$ vs matching's treated-distribution weighting; CIA as the shared foundation.</span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>**Identification under CIA.** Under $(Y(1),Y(0))\perp D\mid X$ and overlap,</span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>\mathbb E<span class="co">[</span><span class="ot">Y\mid D=1,X</span><span class="co">]</span>-\mathbb E<span class="co">[</span><span class="ot">Y\mid D=0,X</span><span class="co">]</span>=\mathbb E<span class="co">[</span><span class="ot">Y(1)-Y(0)\mid X</span><span class="co">]</span>,</span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>and averaging over the distribution of $X$ gives the ATE — the</span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">backdoor adjustment</span><span class="co">](directed-acyclic-graphs.qmd)</span>. Subclassification estimates the inner contrast</span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>cell by cell and averages with weights $\Pr(X=x)$.</span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>**The balancing-score theorem (sketch).** Rosenbaum &amp; Rubin show $D\perp X\mid e(X)$: by construction</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>$\Pr(D=1\mid X,e(X))=e(X)$ depends on $X$ only through $e(X)$, so within a level of $e(X)$ the covariate</span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>distribution is identical across arms. Combined with CIA-given-$X$, this yields CIA-given-$e(X)$ — so</span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>conditioning on the scalar $e(X)$ suffices. The high-dimensional $X$ is compressed to one number with</span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>no loss for identification.</span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>**Why regression weights by treatment variance.** With saturated controls, OLS recovers</span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>$\sum_x w(x)\,\big(\mathbb E<span class="co">[</span><span class="ot">Y\mid D=1,x</span><span class="co">]</span>-\mathbb E<span class="co">[</span><span class="ot">Y\mid D=0,x</span><span class="co">]</span>\big)$ with</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>$w(x)\propto \Pr(X=x)\,\operatorname{Var}(D\mid X=x)=\Pr(X=x)\,e(x)(1-e(x))$. The factor $e(x)(1-e(x))$</span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>peaks at $e=1/2$, so cells with the most treatment variation — the most informative comparisons —</span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>dominate the OLS estimand. This is why the regression number can differ from a matching ATT even under</span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>the *same* CIA.</span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">DAGs</span><span class="co">](directed-acyclic-graphs.qmd)</span> (the backdoor criterion this estimates),</span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">potential outcomes</span><span class="co">](potential-outcomes.qmd)</span> (CIA is conditional independence of $D$ and the</span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>  $Y(d)$), and <span class="co">[</span><span class="ot">logistic regression</span><span class="co">](../03-regression/limited-dependent-variables.qmd)</span> (how $e(X)$ is</span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>  fit).</span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** the designs for when CIA **fails** — <span class="co">[</span><span class="ot">instrumental variables</span><span class="co">](instrumental-variables.qmd)</span>,</span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">regression discontinuity</span><span class="co">](regression-discontinuity.qmd)</span>, and</span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">difference-in-differences</span><span class="co">](difference-in-differences.qmd)</span> find leverage beyond the observables.</span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](causal-machine-learning.qmd)</span>, where flexible ML estimates</span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>  $e(X)$ and the outcome model and **double/debiased ML** combines them to be robust to errors in each.</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="fu">## Regression is matching in disguise</span></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>Where does ordinary <span class="co">[</span><span class="ot">regression</span><span class="co">](../03-regression/multiple-regression.qmd)</span> fit? Angrist &amp; Pischke call</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>it an **"automated matchmaker."** <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span> Regression with controls is also a</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>selection-on-observables estimator built on CIA, and it can be written as a **weighted average of</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>within-cell treatment–control contrasts** — i.e. a matching estimator. The difference is the</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>*weights*: matching for the ATT weights cells by the covariate distribution **among the treated**,</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>while regression weights them by the **variance of treatment** within each cell, $\,\Pr(X)(1-\Pr(X))$</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>— giving most weight to cells where treatment is a coin flip (near $0.5$), because those are the most</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>*precise*. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span> Same identifying assumption, different weighting — which is why</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>matching and regression usually agree, and why, when they *disagree*, the culprit is the weighting or</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>the functional form.</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a><span class="fu">## The limitation you can never escape</span></span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>Here is the line that separates this whole family from <span class="co">[</span><span class="ot">randomization</span><span class="co">](randomized-experiments.qmd)</span>:</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>matching and propensity scores **balance only the observables.** <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> An experiment</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>balances everything, seen and unseen; selection-on-observables balances $X$ and *prays* the rest goes</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>with it. CIA is **fundamentally untestable** — it concerns the missing counterfactuals — so if</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>unobserved **ability** or **motivation** drives both treatment and outcome, every method here stays</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>biased, no matter how clean the balance table. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> Matching is not a machine for</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>removing bias; it is a machine for removing bias *due to observed confounders*, conditional on an</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>assumption you must defend on substance.</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="LaLonde, and when it works (NSW / Dehejia–Wahba)"}</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>The famous test: the **National Supported Work** job-training program had a true **experimental**</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>benchmark of about **+\$1,794** in earnings. LaLonde (1986) discarded the experimental controls and</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>substituted observational comparison groups (from the CPS and PSID) — the naive gap swung to **−\$8,498**,</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>catastrophic negative selection (trainees were far more disadvantaged to begin with).</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> Dehejia &amp; Wahba (1999) then applied **propensity-score matching with trimming**</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>to enforce common support, conditioning on demographics and *two years of pre-treatment earnings*; their</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>screened estimate, **+\$1,362**, landed close to the experimental truth. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> The moral</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>cuts both ways: matching *can* recover the experiment — **if** the selection really is on observables</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>you have (here, rich earnings histories) — and fails badly when it isn't.</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating CIA as established.** It's untestable. "We controlled for a lot" is an argument about</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>  unobservables, not a proof; a hidden confounder leaves the estimate biased. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring common support.** Comparing units with no counterpart in the other arm extrapolates off a</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>  cliff; check overlap and trim non-overlapping units. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Matching on many covariates directly.** The curse of dimensionality empties the cells — use the</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>  propensity score to collapse $X$ to one number. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring matching discrepancies.** Nearest-neighbour pairs are not exact, and with many covariates</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>  the leftover bias can dominate. Inspect the discrepancies, use one match with replacement, and apply</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>  the Abadie–Imbens bias correction. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting that pruning changes the question.** CEM and propensity trimming drop units, so the</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>  estimate describes the matched subpopulation, not the ATE or ATT. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Extreme IPW weights.** Propensities near 0 or 1 blow up the weights and the variance; it's the</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  overlap problem in disguise. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading balance on $X$ as balance overall.** A perfect balance table says nothing about the</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>  unobservables — the very things that make this weaker than an experiment. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *Causal Inference: The Mixtape*** — the **CIA/unconfoundedness**</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>  $(Y(1),Y(0))\perp D\mid X$ and **common support** $0&lt;\Pr(D=1\mid X)&lt;1$; **subclassification** and the</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>  **Titanic** example (SDO $35.4\%\to$ weighted ATE $16.1\%$ stratifying on age/gender); exact and</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>  nearest-neighbour **matching** and the **curse of dimensionality**; the **propensity score**</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>  $e(X)=\Pr(D=1\mid X)$ and the **Rosenbaum–Rubin balancing theorem**; **IPW** formulas for ATE and</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>  ATT; the untestability of CIA; and the **NSW / LaLonde / Dehejia–Wahba** evaluation</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>  (experimental $\$1{,}794$; naive $-\$8{,}498$; PSM $\$1{,}362$). Also **distance metrics**</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>  (normalized Euclidean, Mahalanobis), **matching discrepancies** and their slow convergence in high</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>  dimension, the **Abadie–Imbens (2011) bias correction** with its eight-unit worked example</span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>  ($3.25\to3.28$, $\hat\mu_0=4.42-0.49X$) and practical advice (one match, with replacement), and</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>  **coarsened exact matching** (Iacus et al. 2012; monotonic imbalance bounding; $\mathcal L_1$; NSW</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>  estimate $\$2{,}771$ with max $\mathcal L_1=0.12$).</span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mostly Harmless / Mastering 'Metrics*** — regression as an **automated</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>  matchmaker** and a weighted matching estimator; regression's variance weighting</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>  $\Pr(X)(1-\Pr(X))$ vs matching's treated-distribution weighting; CIA as the shared foundation.</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>**Identification under CIA.** Under $(Y(1),Y(0))\perp D\mid X$ and overlap,</span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>\mathbb E<span class="co">[</span><span class="ot">Y\mid D=1,X</span><span class="co">]</span>-\mathbb E<span class="co">[</span><span class="ot">Y\mid D=0,X</span><span class="co">]</span>=\mathbb E<span class="co">[</span><span class="ot">Y(1)-Y(0)\mid X</span><span class="co">]</span>,</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>and averaging over the distribution of $X$ gives the ATE — the</span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">backdoor adjustment</span><span class="co">](directed-acyclic-graphs.qmd)</span>. Subclassification estimates the inner contrast</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>cell by cell and averages with weights $\Pr(X=x)$.</span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>**The balancing-score theorem (sketch).** Rosenbaum &amp; Rubin show $D\perp X\mid e(X)$: by construction</span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>$\Pr(D=1\mid X,e(X))=e(X)$ depends on $X$ only through $e(X)$, so within a level of $e(X)$ the covariate</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>distribution is identical across arms. Combined with CIA-given-$X$, this yields CIA-given-$e(X)$ — so</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>conditioning on the scalar $e(X)$ suffices. The high-dimensional $X$ is compressed to one number with</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>no loss for identification.</span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a>**Where matching bias comes from.** Write $\mu_d(x)=\mathbb E<span class="co">[</span><span class="ot">Y\mid X=x,D=d</span><span class="co">]</span>$ and let $j(i)$ be treated</span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>unit $i$'s match. The nearest-neighbour ATT error decomposes as</span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>\hat\delta_{ATT}-\delta_{ATT}=\underbrace{\tfrac1{N_T}\sum_{D_i=1}\big(\mu_1(X_i)-\mu_0(X_i)-\delta_{ATT}\big)}_{\text{heterogeneity}}</span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a>+\underbrace{\tfrac1{N_T}\sum_{D_i=1}(\varepsilon_i-\varepsilon_{j(i)})}_{\text{noise}}</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>+\underbrace{\tfrac1{N_T}\sum_{D_i=1}\big(\mu_0(X_i)-\mu_0(X_{j(i)})\big)}_{\text{matching discrepancy}}.</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>The first two terms are mean-zero and CLT-friendly. The third is the bias, and when $X$ is</span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>high-dimensional, $\sqrt{N_T}$ times it need not converge to zero. The Abadie–Imbens estimator subtracts</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>an estimate of each unit's contribution,</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>$\hat\delta^{BC}_{ATT}=\frac1{N_T}\sum_{D_i=1}\big[(Y_i-Y_{j(i)})-(\hat\mu_0(X_i)-\hat\mu_0(X_{j(i)}))\big]$.</span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>**CEM's imbalance measure.** With $f$ and $g$ the relative frequencies of treated and control units</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a>across the multivariate bins $\ell_1\ldots\ell_k$,</span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a>$\mathcal L_1(f,g)=\tfrac12\sum_{\ell_1\ldots\ell_k}\lvert f_{\ell_1\ldots\ell_k}-g_{\ell_1\ldots\ell_k}\rvert\in<span class="co">[</span><span class="ot">0,1</span><span class="co">]</span>$:</span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>zero for identical distributions, one for completely separated ones. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>**Why regression weights by treatment variance.** With saturated controls, OLS recovers</span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>$\sum_x w(x)\,\big(\mathbb E<span class="co">[</span><span class="ot">Y\mid D=1,x</span><span class="co">]</span>-\mathbb E<span class="co">[</span><span class="ot">Y\mid D=0,x</span><span class="co">]</span>\big)$ with</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>$w(x)\propto \Pr(X=x)\,\operatorname{Var}(D\mid X=x)=\Pr(X=x)\,e(x)(1-e(x))$. The factor $e(x)(1-e(x))$</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>peaks at $e=1/2$, so cells with the most treatment variation — the most informative comparisons —</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>dominate the OLS estimand. This is why the regression number can differ from a matching ATT even under</span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>the *same* CIA.</span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">DAGs</span><span class="co">](directed-acyclic-graphs.qmd)</span> (the backdoor criterion this estimates),</span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">potential outcomes</span><span class="co">](potential-outcomes.qmd)</span> (CIA is conditional independence of $D$ and the</span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>  $Y(d)$), <span class="co">[</span><span class="ot">logistic regression</span><span class="co">](../03-regression/limited-dependent-variables.qmd)</span> (how $e(X)$ is</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>  fit), and <span class="co">[</span><span class="ot">linear algebra</span><span class="co">](../../appendices/math/linear-algebra.qmd)</span> (the quadratic form behind the</span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a>  Mahalanobis distance).</span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** the designs for when CIA **fails** — <span class="co">[</span><span class="ot">instrumental variables</span><span class="co">](instrumental-variables.qmd)</span>,</span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">regression discontinuity</span><span class="co">](regression-discontinuity.qmd)</span>, and</span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">difference-in-differences</span><span class="co">](difference-in-differences.qmd)</span> find leverage beyond the observables.</span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](causal-machine-learning.qmd)</span>, where flexible ML estimates</span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>  $e(X)$ and the outcome model and **double/debiased ML** combines them to be robust to errors in each.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
