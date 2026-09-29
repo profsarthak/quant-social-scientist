@@ -760,6 +760,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/censoring-truncation-and-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Censoring, Truncation &amp; Sample Selection: Tobit and Heckman</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../content/03-regression/generalized-linear-models.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Generalized Linear Models: One Family</span></a>
   </div>
@@ -1800,6 +1806,7 @@ window.Quarto = {
   <ul>
   <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
   <li><a href="#metropolishastings-asymmetric-proposals" id="toc-metropolishastings-asymmetric-proposals" class="nav-link" data-scroll-target="#metropolishastings-asymmetric-proposals">Metropolis–Hastings: asymmetric proposals</a></li>
+  <li><a href="#step-size-finding-and-exploring-the-typical-set" id="toc-step-size-finding-and-exploring-the-typical-set" class="nav-link" data-scroll-target="#step-size-finding-and-exploring-the-typical-set">Step size: finding and exploring the typical set</a></li>
   <li><a href="#gibbs-sampling-the-conditional-workhorse" id="toc-gibbs-sampling-the-conditional-workhorse" class="nav-link" data-scroll-target="#gibbs-sampling-the-conditional-workhorse">Gibbs sampling: the conditional workhorse</a></li>
   <li><a href="#hamiltonian-monte-carlo-a-directed-walk" id="toc-hamiltonian-monte-carlo-a-directed-walk" class="nav-link" data-scroll-target="#hamiltonian-monte-carlo-a-directed-walk">Hamiltonian Monte Carlo: a directed walk</a></li>
   <li><a href="#diagnostics-that-matter-autocorrelation-ess-thinning" id="toc-diagnostics-that-matter-autocorrelation-ess-thinning" class="nav-link" data-scroll-target="#diagnostics-that-matter-autocorrelation-ess-thinning">Diagnostics that matter: autocorrelation, ESS, thinning</a></li>
@@ -1850,6 +1857,18 @@ r = \underbrace{\frac{p(\theta_{t+1}\mid\text{data})}{p(\theta_t\mid\text{data})
 \underbrace{\frac{J(\theta_t\mid\theta_{t+1})}{J(\theta_{t+1}\mid\theta_t)}}_{\text{Hastings (q-) ratio}} .
 </span></p>
 <p>The second factor <strong>compensates for a proposal that itself favours some states over others</strong> — without it, the chain would converge to the <em>wrong</em> distribution <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span>. (When <span class="math inline">J</span> is symmetric the q-ratio is 1 and MH collapses to Metropolis.)</p>
+</section>
+<section id="step-size-finding-and-exploring-the-typical-set" class="level2">
+<h2 class="anchored" data-anchor-id="step-size-finding-and-exploring-the-typical-set">Step size: finding and exploring the typical set</h2>
+<p>Any symmetric proposal centred on the current value eventually converges to the posterior. But “eventually” can mean far longer than you will wait, and the one dial you control, the <strong>proposal’s standard deviation (step size)</strong>, sets how long. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> Lambert runs the same random-walk Metropolis sampler three ways, each started away from the posterior’s bulk: <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
+<ul>
+<li><strong>Too small.</strong> Nearly every step is accepted, but each is tiny. The chain takes a long time just to <em>reach</em> the high-density region, so its early history is dominated by the arbitrary starting point.</li>
+<li><strong>Too large.</strong> Most proposals land in the low, flat outskirts and are <strong>rejected</strong>. The chain sits still for long stretches and is highly autocorrelated.</li>
+<li><strong>Just right.</strong> The trace “looks roughly like white noise”, which is what good mixing looks like.</li>
+</ul>
+<p>The <strong>effective sample size</strong> (below) makes the difference concrete. From 1,000 draws, the just-right sampler gives an ESS of <strong>about 160</strong>. The too-small one gives about 4 and the too-large one about 25. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> Even the best random walk falls far short of the 1,000 an independent sampler would give, which is the gap <a href="#hamiltonian-monte-carlo-a-directed-walk">HMC</a> was built to close.</p>
+<p>Lambert borrows a framing from Betancourt. In most models the posterior mass sits in a small region, the <strong>typical set</strong>, and the rest of parameter space is low and flat. MCMC has <strong>two jobs: find the typical set, then explore it</strong>. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> Small steps are slow at the first job. Big steps manage the first job but fail the second, because they keep proposing jumps out of the region they have found. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
+<p><strong>Tuning by acceptance rate.</strong> A good step size has an observable fingerprint: the fraction of proposals accepted. For random-walk Metropolis the optimum is about <strong>0.44 in one dimension and 0.23 in higher dimensions</strong>. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> Lambert’s practical recipe has two stages. First, a <strong>training run</strong> nudges the step size down when acceptance is below target and up when it is above, with shrinking adjustments (<span class="math inline">\varepsilon_t = 0.99\,\varepsilon_{t-1}</span>). Then the tuned step size is frozen and <strong>fresh chains</strong> are run with it. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> Adapting on the fly for ever needs care if the chain is still to converge to the posterior, which is why the two stages are kept separate. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> The same logic explains why modern samplers discard an initial <strong>warm-up</strong> stretch before keeping draws, and why Stan exposes step-size controls such as <code>adapt_delta</code> for the cases where its defaults struggle. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
 </section>
 <section id="gibbs-sampling-the-conditional-workhorse" class="level2">
 <h2 class="anchored" data-anchor-id="gibbs-sampling-the-conditional-workhorse">Gibbs sampling: the conditional workhorse</h2>
@@ -1993,6 +2012,7 @@ Figure&nbsp;1: Gibbs sampling a correlated bivariate Normal, by hand, via its fu
 <div class="callout-body-container callout-body">
 <ul>
 <li><strong>Forgetting the Hastings correction with an asymmetric proposal.</strong> The chain converges to the wrong distribution — a silent, serious bug. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+<li><strong>Leaving a Metropolis step size untuned.</strong> Too small and the chain never leaves its start. Too large and it rejects almost everything. Aim for an acceptance rate near 0.44 in one dimension and 0.23 in several, tune in a separate training run, and judge the result by ESS. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
 <li><strong>Using Gibbs on highly correlated parameters.</strong> It mixes painfully slowly; reparameterise or switch to HMC. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
 <li><strong>Ignoring divergences in Stan.</strong> They flag regions the sampler can’t reach — the posterior estimates may be biased, not just noisy. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
 <li><strong>Trusting the raw draw count.</strong> Report <strong>ESS</strong>; 10,000 autocorrelated draws can carry the information of a few hundred. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
@@ -2016,7 +2036,7 @@ Figure&nbsp;1: Gibbs sampling a correlated bivariate Normal, by hand, via its fu
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Lambert, <em>A Student’s Guide to Bayesian Statistics</em></strong> — Metropolis–Hastings and the <strong>Hastings correction</strong> (q-ratio) for asymmetric/constrained proposals; <strong>Gibbs sampling</strong> from full conditionals, the <strong>always-accept</strong> property, its conjugacy requirement and <strong>correlation weakness</strong> (axis-aligned steps on a diagonal ridge); <strong>HMC</strong> via the frictionless-sledge / gradient / momentum analogy, its high-dimensional efficiency, <strong>NUTS</strong> as Stan’s default and the <strong>U-turn</strong> problem, and <strong>divergences</strong> as curvature-failure warnings; <strong>autocorrelation</strong>, <strong>effective sample size</strong>, <strong>thinning</strong> (saves memory, not information), and <strong><span class="math inline">\hat R\approx 1</span></strong>.</li>
+<li><strong>Lambert, <em>A Student’s Guide to Bayesian Statistics</em></strong> — Metropolis–Hastings and the <strong>Hastings correction</strong> (q-ratio) for asymmetric/constrained proposals; <strong>step size</strong> for random-walk Metropolis (§13.7: too small / too large / just right, ESS ≈ 4 / 25 / 160 out of 1,000), MCMC as <strong>finding and exploring the typical set</strong> (after Betancourt), optimal acceptance rates <strong>0.44 (1-D) / 0.23 (multi-D)</strong>, and two-stage adaptive tuning (<span class="math inline">\varepsilon_t = 0.99\,\varepsilon_{t-1}</span>); <strong>Gibbs sampling</strong> from full conditionals, the <strong>always-accept</strong> property, its conjugacy requirement and <strong>correlation weakness</strong> (axis-aligned steps on a diagonal ridge); <strong>HMC</strong> via the frictionless-sledge / gradient / momentum analogy, its high-dimensional efficiency, <strong>NUTS</strong> as Stan’s default and the <strong>U-turn</strong> problem, and <strong>divergences</strong> as curvature-failure warnings; <strong>autocorrelation</strong>, <strong>effective sample size</strong>, <strong>thinning</strong> (saves memory, not information), and <strong><span class="math inline">\hat R\approx 1</span></strong>.</li>
 <li><strong>Murphy, <em>Machine Learning: A Probabilistic Perspective</em></strong> — corroborating treatment of HMC and the ESS / thinning diagnostics.</li>
 </ul>
 </div>
@@ -2558,177 +2578,220 @@ Lambert, Ben. 2018. <em>A Student’s Guide to Bayesian Statistics</em>. SAGE Pu
 <span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>the chain would converge to the *wrong* distribution <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. (When $J$ is symmetric the q-ratio is</span>
 <span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>1 and MH collapses to Metropolis.)</span>
 <span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="fu">## Gibbs sampling: the conditional workhorse</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="fu">## Step size: finding and exploring the typical set</span></span>
 <span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>**Gibbs sampling** exploits a model's structure: instead of proposing a joint move, it samples **each</span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>parameter in turn from its full conditional distribution** given the current value of all the others,</span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>$p(\theta_i \mid \theta_{-i}, \text{data})$ <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. Its signature property: **no rejection step —</span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>the acceptance probability is always 1**, because each draw comes straight from the true conditional</span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. Every iteration *moves*.</span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>The cost: Gibbs is **only possible when you can derive and sample those full conditionals** — which usually</span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>requires <span class="co">[</span><span class="ot">conjugacy</span><span class="co">](bayesian-machinery.qmd)</span> <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. And it has a sharp **geometric weakness**:</span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>when parameters are **highly correlated** (a sharp "diagonal ridge"), Gibbs — restricted to **axis-aligned,</span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>horizontal-and-vertical moves** — is forced into **tiny steps** and explores agonisingly slowly</span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-gibbs</span></span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Gibbs sampling a correlated bivariate Normal, by hand, via its full conditionals x|y ~ N(ρy, 1−ρ²) and y|x ~ N(ρx, 1−ρ²). Each move is purely horizontal then purely vertical (the axis-aligned stair-step). Left (ρ=0.4): the conditionals are wide, the sampler strides across the distribution and mixes fast. Right (ρ=0.95): the posterior is a thin diagonal ridge, the conditionals are narrow, and the sampler is trapped taking minuscule steps along it — Gibbs' notorious slow mixing under high correlation."</span></span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gibbs_bivariate(rho, n, rng):</span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>    sd <span class="op">=</span> np.sqrt(<span class="dv">1</span> <span class="op">-</span> rho<span class="op">**</span><span class="dv">2</span>)</span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>    pts <span class="op">=</span> np.empty((<span class="dv">2</span><span class="op">*</span>n <span class="op">+</span> <span class="dv">1</span>, <span class="dv">2</span>))<span class="op">;</span> x, y <span class="op">=</span> <span class="op">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span></span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    pts[<span class="dv">0</span>] <span class="op">=</span> (x, y)</span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n):</span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> rho <span class="op">*</span> y <span class="op">+</span> sd <span class="op">*</span> rng.normal()<span class="op">;</span>  pts[<span class="dv">2</span><span class="op">*</span>i<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> (x, y)   <span class="co"># update x | y</span></span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> rho <span class="op">*</span> x <span class="op">+</span> sd <span class="op">*</span> rng.normal()<span class="op">;</span>  pts[<span class="dv">2</span><span class="op">*</span>i<span class="op">+</span><span class="dv">2</span>] <span class="op">=</span> (x, y)   <span class="co"># update y | x</span></span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pts</span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> density_grid(rho):</span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> np.linspace(<span class="op">-</span><span class="fl">3.5</span>, <span class="fl">3.5</span>, <span class="dv">120</span>)</span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    X, Y <span class="op">=</span> np.meshgrid(g, g)</span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>    Z <span class="op">=</span> np.exp(<span class="op">-</span><span class="fl">0.5</span><span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>rho<span class="op">**</span><span class="dv">2</span>) <span class="op">*</span> (X<span class="op">**</span><span class="dv">2</span> <span class="op">-</span> <span class="dv">2</span><span class="op">*</span>rho<span class="op">*</span>X<span class="op">*</span>Y <span class="op">+</span> Y<span class="op">**</span><span class="dv">2</span>))</span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X, Y, Z</span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">8.8</span>, <span class="fl">4.2</span>))</span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, rho <span class="kw">in</span> <span class="bu">zip</span>(axes, [<span class="fl">0.4</span>, <span class="fl">0.95</span>]):</span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>    X, Y, Z <span class="op">=</span> density_grid(rho)</span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>    ax.contour(X, Y, Z, levels<span class="op">=</span><span class="dv">5</span>, colors<span class="op">=</span><span class="st">"#b7b6a8"</span>, linewidths<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>    pts <span class="op">=</span> gibbs_bivariate(rho, <span class="dv">40</span>, rng)</span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>    ax.plot(pts[:, <span class="dv">0</span>], pts[:, <span class="dv">1</span>], color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, alpha<span class="op">=</span><span class="fl">0.9</span>)</span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>    ax.plot(pts[:, <span class="dv">0</span>], pts[:, <span class="dv">1</span>], <span class="st">"o"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, ms<span class="op">=</span><span class="fl">2.5</span>)</span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"ρ = </span><span class="sc">{</span>rho<span class="sc">}</span><span class="ss">  →  </span><span class="sc">{</span><span class="st">'fast mixing'</span> <span class="cf">if</span> rho <span class="op">&lt;</span> <span class="fl">0.5</span> <span class="cf">else</span> <span class="st">'trapped on the ridge'</span><span class="sc">}</span><span class="ss">"</span>,</span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>                 fontsize<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"θ₁"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"θ₂"</span>)<span class="op">;</span> ax.set_xlim(<span class="op">-</span><span class="fl">3.5</span>, <span class="fl">3.5</span>)<span class="op">;</span> ax.set_ylim(<span class="op">-</span><span class="fl">3.5</span>, <span class="fl">3.5</span>)</span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Gibbs sampling: axis-aligned steps stall on a correlated posterior"</span>, fontsize<span class="op">=</span><span class="fl">11.5</span>)</span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="fu">## Hamiltonian Monte Carlo: a directed walk</span></span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>HMC abandons the random walk for a **directed** one driven by the **gradient** of the log-posterior</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. Lambert's **sledge analogy**: picture a sledge sliding on a *frictionless* surface in</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>**negative-log-posterior** space <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Gradient (gravity).** The slope pulls the sledge **toward troughs in NLP space — the peaks of the</span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>  posterior** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Momentum (the shove).** A random kick (momentum drawn from a multivariate Normal) gives the sledge</span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>  energy to **climb out of a basin and traverse the whole landscape**, rather than settling at the mode</span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>Because it uses **local geometry to propose distant moves with high acceptance**, HMC explores</span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>high-dimensional posteriors **"orders of magnitude faster"** than random-walk Metropolis or Gibbs</span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. Two practicalities:</span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**NUTS &amp; Stan.** HMC needs a trajectory length $T$; too long and the sledge does a **U-turn**, retracing</span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>  its path. The **No-U-Turn Sampler (NUTS)** picks $T$ adaptively at each step, and is the **default engine</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>  in Stan** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Divergences.** When the discrete **leapfrog** approximation of the trajectory fails to track the</span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>  posterior's true curvature — typically in high-curvature **"neck" regions** — the path *diverges*. A</span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>  reported divergence flags a region the sampler **cannot explore properly**, signalling potential **bias**</span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. Divergences are not cosmetic; they are a correctness warning.</span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="fu">## Diagnostics that matter: autocorrelation, ESS, thinning</span></span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>MCMC draws are **dependent**, and that dependence is the quantity to police <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>:</span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Autocorrelation.** How correlated a draw is with its own past; high autocorrelation means the chain</span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>  **lingers** and each draw carries little new information <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Effective sample size (ESS).** The number of *independent* samples that would carry the **same</span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>  information** as your autocorrelated draws — almost always **far below** the nominal count</span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. 4,000 draws with high autocorrelation might be worth an ESS of 200. ESS, not the raw</span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>  draw count, governs your Monte Carlo precision.</span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Thinning.** Keeping every $n$-th draw to cut autocorrelation. It **saves memory** but Lambert (and</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>  Murphy) stress it does **not add information** — a thinned chain is not a better chain, just a smaller one</span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**$\hat R$ (Gelman–Rubin).** Compares within-chain to between-chain variance across multiple chains;</span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>  trust convergence **only when $\hat R \approx 1$ for every parameter** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a><span class="fu">## Choosing a sampler</span></span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Sampler <span class="pp">|</span> Move <span class="pp">|</span> Acceptance <span class="pp">|</span> Best when <span class="pp">|</span> Struggles when <span class="pp">|</span></span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|---|</span></span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Metropolis** <span class="pp">|</span> symmetric random step <span class="pp">|</span> $\le 1$ <span class="pp">|</span> simple, low-dim <span class="pp">|</span> high-dim, correlated <span class="pp">|</span></span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Metropolis–Hastings** <span class="pp">|</span> asymmetric step <span class="pp">|</span> $\le 1$ (q-corrected) <span class="pp">|</span> constrained params <span class="pp">|</span> tuning the proposal <span class="pp">|</span></span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Gibbs** | draw from full conditionals | **always 1** <span class="pp">|</span> conjugate structure <span class="pp">|</span> correlated parameters <span class="pp">|</span></span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **HMC / NUTS** <span class="pp">|</span> gradient + momentum <span class="pp">|</span> high <span class="pp">|</span> high-dim, continuous <span class="pp">|</span> discrete params; sharp funnels <span class="pp">|</span></span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>Any symmetric proposal centred on the current value eventually converges to the posterior. But</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>"eventually" can mean far longer than you will wait, and the one dial you control, the **proposal's</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>standard deviation (step size)**, sets how long. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Lambert runs the same</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>random-walk Metropolis sampler three ways, each started away from the posterior's bulk: <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Too small.** Nearly every step is accepted, but each is tiny. The chain takes a long time just to</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>  *reach* the high-density region, so its early history is dominated by the arbitrary starting point.</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Too large.** Most proposals land in the low, flat outskirts and are **rejected**. The chain sits</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>  still for long stretches and is highly autocorrelated.</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Just right.** The trace "looks roughly like white noise", which is what good mixing looks like.</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>The **effective sample size** (below) makes the difference concrete. From 1,000 draws, the just-right</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>sampler gives an ESS of **about 160**. The too-small one gives about 4 and the too-large one about</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="ss">25. </span><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Even the best random walk falls far short of the 1,000 an independent sampler</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>would give, which is the gap <span class="co">[</span><span class="ot">HMC</span><span class="co">](#hamiltonian-monte-carlo-a-directed-walk)</span> was built to close.</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>Lambert borrows a framing from Betancourt. In most models the posterior mass sits in a small region,</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>the **typical set**, and the rest of parameter space is low and flat. MCMC has **two jobs: find the</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>typical set, then explore it**. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Small steps are slow at the first job. Big steps</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>manage the first job but fail the second, because they keep proposing jumps out of the region they</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>have found. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>**Tuning by acceptance rate.** A good step size has an observable fingerprint: the fraction of</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>proposals accepted. For random-walk Metropolis the optimum is about **0.44 in one dimension and 0.23</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>in higher dimensions**. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Lambert's practical recipe has two stages. First, a</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>**training run** nudges the step size down when acceptance is below target and up when it is above,</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>with shrinking adjustments ($\varepsilon_t = 0.99\,\varepsilon_{t-1}$). Then the tuned step size is</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>frozen and **fresh chains** are run with it. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Adapting on the fly for ever needs</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>care if the chain is still to converge to the posterior, which is why the two stages are kept</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>separate. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> The same logic explains why modern samplers discard an initial</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>**warm-up** stretch before keeping draws, and why Stan exposes step-size controls such as</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="in">`adapt_delta`</span> for the cases where its defaults struggle. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a><span class="fu">## Gibbs sampling: the conditional workhorse</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>**Gibbs sampling** exploits a model's structure: instead of proposing a joint move, it samples **each</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>parameter in turn from its full conditional distribution** given the current value of all the others,</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>$p(\theta_i \mid \theta_{-i}, \text{data})$ <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. Its signature property: **no rejection step —</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>the acceptance probability is always 1**, because each draw comes straight from the true conditional</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. Every iteration *moves*.</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>The cost: Gibbs is **only possible when you can derive and sample those full conditionals** — which usually</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>requires <span class="co">[</span><span class="ot">conjugacy</span><span class="co">](bayesian-machinery.qmd)</span> <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. And it has a sharp **geometric weakness**:</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>when parameters are **highly correlated** (a sharp "diagonal ridge"), Gibbs — restricted to **axis-aligned,</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>horizontal-and-vertical moves** — is forced into **tiny steps** and explores agonisingly slowly</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-gibbs</span></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Gibbs sampling a correlated bivariate Normal, by hand, via its full conditionals x|y ~ N(ρy, 1−ρ²) and y|x ~ N(ρx, 1−ρ²). Each move is purely horizontal then purely vertical (the axis-aligned stair-step). Left (ρ=0.4): the conditionals are wide, the sampler strides across the distribution and mixes fast. Right (ρ=0.95): the posterior is a thin diagonal ridge, the conditionals are narrow, and the sampler is trapped taking minuscule steps along it — Gibbs' notorious slow mixing under high correlation."</span></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gibbs_bivariate(rho, n, rng):</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>    sd <span class="op">=</span> np.sqrt(<span class="dv">1</span> <span class="op">-</span> rho<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>    pts <span class="op">=</span> np.empty((<span class="dv">2</span><span class="op">*</span>n <span class="op">+</span> <span class="dv">1</span>, <span class="dv">2</span>))<span class="op">;</span> x, y <span class="op">=</span> <span class="op">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>    pts[<span class="dv">0</span>] <span class="op">=</span> (x, y)</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> rho <span class="op">*</span> y <span class="op">+</span> sd <span class="op">*</span> rng.normal()<span class="op">;</span>  pts[<span class="dv">2</span><span class="op">*</span>i<span class="op">+</span><span class="dv">1</span>] <span class="op">=</span> (x, y)   <span class="co"># update x | y</span></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> rho <span class="op">*</span> x <span class="op">+</span> sd <span class="op">*</span> rng.normal()<span class="op">;</span>  pts[<span class="dv">2</span><span class="op">*</span>i<span class="op">+</span><span class="dv">2</span>] <span class="op">=</span> (x, y)   <span class="co"># update y | x</span></span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pts</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> density_grid(rho):</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> np.linspace(<span class="op">-</span><span class="fl">3.5</span>, <span class="fl">3.5</span>, <span class="dv">120</span>)</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>    X, Y <span class="op">=</span> np.meshgrid(g, g)</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>    Z <span class="op">=</span> np.exp(<span class="op">-</span><span class="fl">0.5</span><span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>rho<span class="op">**</span><span class="dv">2</span>) <span class="op">*</span> (X<span class="op">**</span><span class="dv">2</span> <span class="op">-</span> <span class="dv">2</span><span class="op">*</span>rho<span class="op">*</span>X<span class="op">*</span>Y <span class="op">+</span> Y<span class="op">**</span><span class="dv">2</span>))</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X, Y, Z</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">8.8</span>, <span class="fl">4.2</span>))</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, rho <span class="kw">in</span> <span class="bu">zip</span>(axes, [<span class="fl">0.4</span>, <span class="fl">0.95</span>]):</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>    X, Y, Z <span class="op">=</span> density_grid(rho)</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>    ax.contour(X, Y, Z, levels<span class="op">=</span><span class="dv">5</span>, colors<span class="op">=</span><span class="st">"#b7b6a8"</span>, linewidths<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>    pts <span class="op">=</span> gibbs_bivariate(rho, <span class="dv">40</span>, rng)</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>    ax.plot(pts[:, <span class="dv">0</span>], pts[:, <span class="dv">1</span>], color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, alpha<span class="op">=</span><span class="fl">0.9</span>)</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>    ax.plot(pts[:, <span class="dv">0</span>], pts[:, <span class="dv">1</span>], <span class="st">"o"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, ms<span class="op">=</span><span class="fl">2.5</span>)</span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"ρ = </span><span class="sc">{</span>rho<span class="sc">}</span><span class="ss">  →  </span><span class="sc">{</span><span class="st">'fast mixing'</span> <span class="cf">if</span> rho <span class="op">&lt;</span> <span class="fl">0.5</span> <span class="cf">else</span> <span class="st">'trapped on the ridge'</span><span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>                 fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"θ₁"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"θ₂"</span>)<span class="op">;</span> ax.set_xlim(<span class="op">-</span><span class="fl">3.5</span>, <span class="fl">3.5</span>)<span class="op">;</span> ax.set_ylim(<span class="op">-</span><span class="fl">3.5</span>, <span class="fl">3.5</span>)</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Gibbs sampling: axis-aligned steps stall on a correlated posterior"</span>, fontsize<span class="op">=</span><span class="fl">11.5</span>)</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a><span class="fu">## Hamiltonian Monte Carlo: a directed walk</span></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>HMC abandons the random walk for a **directed** one driven by the **gradient** of the log-posterior</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. Lambert's **sledge analogy**: picture a sledge sliding on a *frictionless* surface in</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>**negative-log-posterior** space <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Gradient (gravity).** The slope pulls the sledge **toward troughs in NLP space — the peaks of the</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>  posterior** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Momentum (the shove).** A random kick (momentum drawn from a multivariate Normal) gives the sledge</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>  energy to **climb out of a basin and traverse the whole landscape**, rather than settling at the mode</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>Because it uses **local geometry to propose distant moves with high acceptance**, HMC explores</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>high-dimensional posteriors **"orders of magnitude faster"** than random-walk Metropolis or Gibbs</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. Two practicalities:</span>
 <span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting the Hastings correction with an asymmetric proposal.** The chain converges to the wrong</span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>  distribution — a silent, serious bug. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using Gibbs on highly correlated parameters.** It mixes painfully slowly; reparameterise or switch to</span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>  HMC. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring divergences in Stan.** They flag regions the sampler can't reach — the posterior estimates may</span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>  be biased, not just noisy. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Trusting the raw draw count.** Report **ESS**; 10,000 autocorrelated draws can carry the information of</span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>  a few hundred. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Thinning to 'improve' a chain.** It discards information; only thin to save storage, never to fix</span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>  mixing. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Lambert, *A Student's Guide to Bayesian Statistics*** — Metropolis–Hastings and the **Hastings</span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>  correction** (q-ratio) for asymmetric/constrained proposals; **Gibbs sampling** from full conditionals,</span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>  the **always-accept** property, its conjugacy requirement and **correlation weakness** (axis-aligned</span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>  steps on a diagonal ridge); **HMC** via the frictionless-sledge / gradient / momentum analogy, its</span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>  high-dimensional efficiency, **NUTS** as Stan's default and the **U-turn** problem, and **divergences**</span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>  as curvature-failure warnings; **autocorrelation**, **effective sample size**, **thinning** (saves memory,</span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>  not information), and **$\hat R\approx 1$**.</span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Murphy, *Machine Learning: A Probabilistic Perspective*** — corroborating treatment of HMC and the ESS</span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>  / thinning diagnostics.</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>**Why the Hastings correction restores the target.** For the chain to have posterior $\pi$ as its</span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>stationary distribution it suffices that **detailed balance** holds:</span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>$\pi(\theta)\,T(\theta\to\theta') = \pi(\theta')\,T(\theta'\to\theta)$, where the transition is</span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>$T(\theta\to\theta') = J(\theta'\mid\theta)\,\alpha(\theta\to\theta')$. Substituting the MH acceptance</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>$\alpha = \min<span class="sc">\!</span>\big(1,\ \tfrac{\pi(\theta')J(\theta\mid\theta')}{\pi(\theta)J(\theta'\mid\theta)}\big)$ makes</span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>both sides equal — the q-ratio is exactly what cancels the proposal's asymmetry. Drop it and detailed</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>balance fails, so the chain targets a *different* distribution.</span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>**Gibbs is MH with acceptance 1.** Take the proposal for component $i$ to *be* its full conditional,</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>$J(\theta_i'\mid\theta) = p(\theta_i'\mid\theta_{-i})$. The MH ratio then algebraically reduces to 1 — every</span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>proposal is accepted. Gibbs is the special case where the proposal is perfect.</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>**HMC in one breath.** Augment $\theta$ with momentum $\mathbf{p}\sim\mathcal N(0,M)$ and define the</span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>Hamiltonian $H(\theta,\mathbf{p}) = -\log\pi(\theta) + \tfrac12\mathbf{p}^\top M^{-1}\mathbf{p}$ (potential +</span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>kinetic energy). Simulating Hamilton's equations with the **leapfrog** integrator conserves $H$</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>approximately, so the proposal at the trajectory's end has near-1 acceptance; the small leapfrog error is</span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>corrected by a Metropolis step. **Divergences** are leapfrog blow-ups where curvature is too sharp for the</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>step size — the diagnostic that the discretisation broke.</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>**Monte Carlo error with ESS.** A posterior-mean estimate has standard error</span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>$\approx \sigma_{\text{post}}/\sqrt{\text{ESS}}$, *not* $/\sqrt{M}$. With autocorrelation $\rho_k$,</span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>$\text{ESS} = M / (1 + 2\sum_{k\ge1}\rho_k)$ — which is why a sticky chain's effective size collapses.</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**NUTS &amp; Stan.** HMC needs a trajectory length $T$; too long and the sledge does a **U-turn**, retracing</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>  its path. The **No-U-Turn Sampler (NUTS)** picks $T$ adaptively at each step, and is the **default engine</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>  in Stan** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Divergences.** When the discrete **leapfrog** approximation of the trajectory fails to track the</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>  posterior's true curvature — typically in high-curvature **"neck" regions** — the path *diverges*. A</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>  reported divergence flags a region the sampler **cannot explore properly**, signalling potential **bias**</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. Divergences are not cosmetic; they are a correctness warning.</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a><span class="fu">## Diagnostics that matter: autocorrelation, ESS, thinning</span></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>MCMC draws are **dependent**, and that dependence is the quantity to police <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>:</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Autocorrelation.** How correlated a draw is with its own past; high autocorrelation means the chain</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>  **lingers** and each draw carries little new information <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Effective sample size (ESS).** The number of *independent* samples that would carry the **same</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>  information** as your autocorrelated draws — almost always **far below** the nominal count</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. 4,000 draws with high autocorrelation might be worth an ESS of 200. ESS, not the raw</span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>  draw count, governs your Monte Carlo precision.</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Thinning.** Keeping every $n$-th draw to cut autocorrelation. It **saves memory** but Lambert (and</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>  Murphy) stress it does **not add information** — a thinned chain is not a better chain, just a smaller one</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**$\hat R$ (Gelman–Rubin).** Compares within-chain to between-chain variance across multiple chains;</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>  trust convergence **only when $\hat R \approx 1$ for every parameter** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a><span class="fu">## Choosing a sampler</span></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Sampler <span class="pp">|</span> Move <span class="pp">|</span> Acceptance <span class="pp">|</span> Best when <span class="pp">|</span> Struggles when <span class="pp">|</span></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|---|</span></span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Metropolis** <span class="pp">|</span> symmetric random step <span class="pp">|</span> $\le 1$ <span class="pp">|</span> simple, low-dim <span class="pp">|</span> high-dim, correlated <span class="pp">|</span></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Metropolis–Hastings** <span class="pp">|</span> asymmetric step <span class="pp">|</span> $\le 1$ (q-corrected) <span class="pp">|</span> constrained params <span class="pp">|</span> tuning the proposal <span class="pp">|</span></span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Gibbs** | draw from full conditionals | **always 1** <span class="pp">|</span> conjugate structure <span class="pp">|</span> correlated parameters <span class="pp">|</span></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **HMC / NUTS** <span class="pp">|</span> gradient + momentum <span class="pp">|</span> high <span class="pp">|</span> high-dim, continuous <span class="pp">|</span> discrete params; sharp funnels <span class="pp">|</span></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting the Hastings correction with an asymmetric proposal.** The chain converges to the wrong</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  distribution — a silent, serious bug. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leaving a Metropolis step size untuned.** Too small and the chain never leaves its start. Too</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>  large and it rejects almost everything. Aim for an acceptance rate near 0.44 in one dimension and</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>  0.23 in several, tune in a separate training run, and judge the result by ESS.</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using Gibbs on highly correlated parameters.** It mixes painfully slowly; reparameterise or switch to</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>  HMC. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring divergences in Stan.** They flag regions the sampler can't reach — the posterior estimates may</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>  be biased, not just noisy. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Trusting the raw draw count.** Report **ESS**; 10,000 autocorrelated draws can carry the information of</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>  a few hundred. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Thinning to 'improve' a chain.** It discards information; only thin to save storage, never to fix</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>  mixing. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
 <span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">credible intervals &amp; computation</span><span class="co">](credible-intervals-and-computation.qmd)</span> (basic</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>  Metropolis and R-hat), <span class="co">[</span><span class="ot">the Bayesian machinery</span><span class="co">](bayesian-machinery.qmd)</span> (conjugacy that makes Gibbs</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>  possible), and <span class="co">[</span><span class="ot">the LLN</span><span class="co">](../01-foundations/law-of-large-numbers.qmd)</span> (why samples approximate the</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>  posterior).</span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Powers:** <span class="co">[</span><span class="ot">hierarchical Bayesian models</span><span class="co">](hierarchical-bayesian-models.qmd)</span> — whose funnels are exactly</span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>  the high-curvature regions HMC was built for — and <span class="co">[</span><span class="ot">Bayesian model comparison</span><span class="co">](bayesian-model-comparison.qmd)</span>.</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Relates to:** <span class="co">[</span><span class="ot">maximum likelihood</span><span class="co">](maximum-likelihood.qmd)</span> (HMC needs the same log-density gradients)</span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>  and the <span class="co">[</span><span class="ot">Monte Carlo</span><span class="co">](../01-foundations/simulation-and-monte-carlo.qmd)</span> foundations.</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Lambert, *A Student's Guide to Bayesian Statistics*** — Metropolis–Hastings and the **Hastings</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>  correction** (q-ratio) for asymmetric/constrained proposals; **step size** for random-walk</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  Metropolis (§13.7: too small / too large / just right, ESS ≈ 4 / 25 / 160 out of 1,000), MCMC as</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>  **finding and exploring the typical set** (after Betancourt), optimal acceptance rates **0.44</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>  (1-D) / 0.23 (multi-D)**, and two-stage adaptive tuning ($\varepsilon_t = 0.99\,\varepsilon_{t-1}$);</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>  **Gibbs sampling** from full conditionals,</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>  the **always-accept** property, its conjugacy requirement and **correlation weakness** (axis-aligned</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>  steps on a diagonal ridge); **HMC** via the frictionless-sledge / gradient / momentum analogy, its</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>  high-dimensional efficiency, **NUTS** as Stan's default and the **U-turn** problem, and **divergences**</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>  as curvature-failure warnings; **autocorrelation**, **effective sample size**, **thinning** (saves memory,</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>  not information), and **$\hat R\approx 1$**.</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Murphy, *Machine Learning: A Probabilistic Perspective*** — corroborating treatment of HMC and the ESS</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>  / thinning diagnostics.</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>**Why the Hastings correction restores the target.** For the chain to have posterior $\pi$ as its</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>stationary distribution it suffices that **detailed balance** holds:</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>$\pi(\theta)\,T(\theta\to\theta') = \pi(\theta')\,T(\theta'\to\theta)$, where the transition is</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>$T(\theta\to\theta') = J(\theta'\mid\theta)\,\alpha(\theta\to\theta')$. Substituting the MH acceptance</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>$\alpha = \min<span class="sc">\!</span>\big(1,\ \tfrac{\pi(\theta')J(\theta\mid\theta')}{\pi(\theta)J(\theta'\mid\theta)}\big)$ makes</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>both sides equal — the q-ratio is exactly what cancels the proposal's asymmetry. Drop it and detailed</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>balance fails, so the chain targets a *different* distribution.</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>**Gibbs is MH with acceptance 1.** Take the proposal for component $i$ to *be* its full conditional,</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>$J(\theta_i'\mid\theta) = p(\theta_i'\mid\theta_{-i})$. The MH ratio then algebraically reduces to 1 — every</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>proposal is accepted. Gibbs is the special case where the proposal is perfect.</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>**HMC in one breath.** Augment $\theta$ with momentum $\mathbf{p}\sim\mathcal N(0,M)$ and define the</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>Hamiltonian $H(\theta,\mathbf{p}) = -\log\pi(\theta) + \tfrac12\mathbf{p}^\top M^{-1}\mathbf{p}$ (potential +</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>kinetic energy). Simulating Hamilton's equations with the **leapfrog** integrator conserves $H$</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>approximately, so the proposal at the trajectory's end has near-1 acceptance; the small leapfrog error is</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>corrected by a Metropolis step. **Divergences** are leapfrog blow-ups where curvature is too sharp for the</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>step size — the diagnostic that the discretisation broke.</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>**Monte Carlo error with ESS.** A posterior-mean estimate has standard error</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>$\approx \sigma_{\text{post}}/\sqrt{\text{ESS}}$, *not* $/\sqrt{M}$. With autocorrelation $\rho_k$,</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>$\text{ESS} = M / (1 + 2\sum_{k\ge1}\rho_k)$ — which is why a sticky chain's effective size collapses.</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">credible intervals &amp; computation</span><span class="co">](credible-intervals-and-computation.qmd)</span> (basic</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>  Metropolis and R-hat), <span class="co">[</span><span class="ot">the Bayesian machinery</span><span class="co">](bayesian-machinery.qmd)</span> (conjugacy that makes Gibbs</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>  possible), and <span class="co">[</span><span class="ot">the LLN</span><span class="co">](../01-foundations/law-of-large-numbers.qmd)</span> (why samples approximate the</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>  posterior).</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Powers:** <span class="co">[</span><span class="ot">hierarchical Bayesian models</span><span class="co">](hierarchical-bayesian-models.qmd)</span> — whose funnels are exactly</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>  the high-curvature regions HMC was built for — and <span class="co">[</span><span class="ot">Bayesian model comparison</span><span class="co">](bayesian-model-comparison.qmd)</span>.</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Relates to:** <span class="co">[</span><span class="ot">maximum likelihood</span><span class="co">](maximum-likelihood.qmd)</span> (HMC needs the same log-density gradients)</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>  and the <span class="co">[</span><span class="ot">Monte Carlo</span><span class="co">](../01-foundations/simulation-and-monte-carlo.qmd)</span> foundations.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

@@ -760,6 +760,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/censoring-truncation-and-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Censoring, Truncation &amp; Sample Selection: Tobit and Heckman</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../content/03-regression/generalized-linear-models.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Generalized Linear Models: One Family</span></a>
   </div>
@@ -1800,7 +1806,10 @@ window.Quarto = {
   <ul>
   <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
   <li><a href="#the-likelihood-function-up-close" id="toc-the-likelihood-function-up-close" class="nav-link" data-scroll-target="#the-likelihood-function-up-close">The likelihood function, up close</a></li>
-  <li><a href="#choosing-a-prior-the-part-everyone-argues-about" id="toc-choosing-a-prior-the-part-everyone-argues-about" class="nav-link" data-scroll-target="#choosing-a-prior-the-part-everyone-argues-about">Choosing a prior — the part everyone argues about</a></li>
+  <li><a href="#choosing-a-prior-the-part-everyone-argues-about" id="toc-choosing-a-prior-the-part-everyone-argues-about" class="nav-link" data-scroll-target="#choosing-a-prior-the-part-everyone-argues-about">Choosing a prior — the part everyone argues about</a>
+  <ul class="collapse">
+  <li><a href="#can-a-prior-be-made-objective" id="toc-can-a-prior-be-made-objective" class="nav-link" data-scroll-target="#can-a-prior-be-made-objective">Can a prior be made objective?</a></li>
+  </ul></li>
   <li><a href="#conjugacy-when-the-math-closes-by-hand" id="toc-conjugacy-when-the-math-closes-by-hand" class="nav-link" data-scroll-target="#conjugacy-when-the-math-closes-by-hand">Conjugacy: when the math closes by hand</a>
   <ul class="collapse">
   <li><a href="#watch-different-priors-converge" id="toc-watch-different-priors-converge" class="nav-link" data-scroll-target="#watch-different-priors-converge">Watch different priors converge</a></li>
@@ -1862,6 +1871,22 @@ window.Quarto = {
 <p><strong>Flat / uninformative / vague priors</strong> try to “let the data speak” by giving every value equal weight — a uniform <span class="math inline">\text{U}(0,1)</span> for a proportion. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> But Lambert flags a deep catch, the <strong>illusion of objectivity</strong>: a prior that is flat for <span class="math inline">\theta</span> is generally <em>not</em> flat for a transformation like <span class="math inline">\theta^2</span>. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> “Uninformative” is rarely as innocent as it sounds — flatness is not a coordinate-free notion.</p>
 <p><strong>Informative priors</strong> deliberately encode previous data or expert knowledge. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> A clean construction is <strong>moment matching</strong>: borrow the mean and SD of past data — say a Normal with <span class="math inline">\mu = 998</span>, <span class="math inline">\sigma = 145</span> to represent historical SAT scores — and use that as your prior. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
 <p><strong>Weakly-informative priors</strong> are the pragmatic middle ground Lambert (with Gelman) recommends: rule out the genuinely <em>impossible</em> (a human lifespan of 500 years; a probability above 1) without over-committing to a precise belief. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> They regularise — gently keeping the model sane — without pretending to know more than you do.</p>
+<section id="can-a-prior-be-made-objective" class="level3">
+<h3 class="anchored" data-anchor-id="can-a-prior-be-made-objective">Can a prior be made objective?</h3>
+<p>The flat-prior illusion deserves a concrete face, because it is what launched a whole search for “objective” priors. Lambert’s example: model obesity prevalence <span class="math inline">\theta</span> with a uniform prior, then ask about a <em>different</em> event — that <strong>both</strong> people in a sample of two are obese, <span class="math inline">\phi = \theta^2</span>. The prior that was flat for <span class="math inline">\theta</span> turns out to be <strong>steeply downward-sloping</strong> for <span class="math inline">\phi</span>, piling more than 70% of its weight on low values. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> You said “I know nothing”; your model heard “I’m fairly sure this joint event is rare.” A prior that is uninformative about one quantity is usually informative about another. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
+<p>Three historical escape routes follow. Lambert covers each and ends up unconvinced by all of them.</p>
+<ul>
+<li><strong>Jeffreys priors — redefine “uninformative.”</strong> Harold Jeffreys asked for something weaker than “flat everywhere.” He wanted a rule that gives the <em>same answer</em> whichever parameterisation you start from. His solution sets the prior proportional to the square root of the <strong>Fisher information</strong>, the likelihood’s curvature. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> For a Bernoulli proportion that is a <span class="math inline">\text{Beta}(\tfrac12,\tfrac12)</span>: a U-shape that leans toward 0 and 1. There the Bernoulli’s standard deviation is small and each observation is most informative, so the Jeffreys prior “simply tries to align with the likelihood.” <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> Lambert adds a correction that textbooks often skip. The “invariance” is not a prior that <em>looks</em> the same in every frame (§11.3 showed that is impossible). It means two analysts using different parameterisations get posteriors that map onto each other by the ordinary change-of-variables rule. The invariance is really a property of the <em>posterior</em>. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> Two drawbacks limit its use: Jeffreys priors are hard to extend to many parameters, and they are often <strong>improper</strong>, meaning they do not integrate to 1. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+<li><strong>Reference priors — let the data shout loudest.</strong> Bernardo (1979) chose the prior that <strong>maximises the expected information gain from prior to posterior</strong>. That is the expected KL divergence, which equals the mutual information between the parameter and a sufficient statistic. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> It is elegant, but deriving one needs the calculus of variations, “sufficient to thwart even the most ardent objectivists.” In Lambert’s exponential-data example, with <span class="math inline">n = 100</span> the reference-prior posterior is virtually indistinguishable from a weakly-informative <span class="math inline">\Gamma(4,2)</span> one. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></li>
+<li><strong>Empirical Bayes — estimate the prior from the data.</strong> Casella’s drug-trial example: each patient has their own effect <span class="math inline">\theta_i</span>, drawn from a population <span class="math inline">\mathcal N(\mu, \sigma_1^2)</span>. Empirical Bayes estimates <span class="math inline">\mu</span> and <span class="math inline">\sigma_1</span> by frequentist <em>method of moments</em> from the pooled data. It then plugs them in as if known, shrinking each patient’s estimate toward <span class="math inline">\mu</span>. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> Lambert calls it “half-Bayesian/half-Frequentist”: it uses the data twice and ignores the uncertainty in <span class="math inline">\mu, \sigma_1</span>. He treats it as an approximation to the full <a href="../../content/02-inference/hierarchical-bayesian-models.html">hierarchical model</a>, which puts priors on those parameters instead. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> It is still worth recognising, because “a number of popular methods” rest on it.</li>
+</ul>
+<p>Lambert’s verdict: <strong>don’t obsess over objectivity</strong>. Every analysis involves choosing among reasonable models. With moderate data, “uninformative” and sensible weakly-informative priors give nearly the same posterior. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> Truly vague priors also cause trouble of their own. They put mass on absurd regions of parameter space and they slow <a href="../../content/02-inference/mcmc-in-depth.html">MCMC</a> convergence. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span> His three working rules for weakly-informative priors: <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p>
+<ol type="1">
+<li><strong>Wide but not absurd.</strong> With standardised regressors, use <span class="math inline">\beta \sim \mathcal N(0, 10)</span>, not <span class="math inline">\mathcal N(0, 1000)</span>.</li>
+<li><strong>Smooth, not boxed.</strong> Use a long-tailed Cauchy rather than a uniform over some arbitrary finite range.</li>
+<li><strong>Don’t favour the unrealistic.</strong> For a variance, use a half-Cauchy rather than an inverse-gamma.</li>
+</ol>
+</section>
 </section>
 <section id="conjugacy-when-the-math-closes-by-hand" class="level2">
 <h2 class="anchored" data-anchor-id="conjugacy-when-the-math-closes-by-hand">Conjugacy: when the math closes by hand</h2>
@@ -1898,12 +1923,12 @@ window.Quarto = {
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>                                          (<span class="dv">140</span>, <span class="dv">200</span>, <span class="st">"After 200 flips (140 heads)"</span>)]):</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> label, a, b, color <span class="kw">in</span> priors:</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        ax.plot(theta, beta_pdf(theta, a <span class="op">+</span> k, b <span class="op">+</span> n <span class="op">-</span> k), color<span class="op">=</span>color, lw<span class="op">=</span><span class="fl">2.0</span>, label<span class="op">=</span>label)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    ax.axvline(<span class="fl">0.7</span>, color<span class="op">=</span><span class="st">"#cf4718"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.4</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    ax.axvline(<span class="fl">0.7</span>, color<span class="op">=</span><span class="st">"#161613"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.4</span>)</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    ax.set_title(title, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    ax.set_yticks([])</span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"θ — coin bias"</span>)</span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>axS.legend(fontsize<span class="op">=</span><span class="fl">7.5</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="fl">0.71</span>, axL.get_ylim()[<span class="dv">1</span>] <span class="op">*</span> <span class="fl">0.5</span>, <span class="st">"truth 0.7"</span>, color<span class="op">=</span><span class="st">"#cf4718"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, rotation<span class="op">=</span><span class="dv">90</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="fl">0.71</span>, axL.get_ylim()[<span class="dv">1</span>] <span class="op">*</span> <span class="fl">0.5</span>, <span class="st">"truth 0.7"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, rotation<span class="op">=</span><span class="dv">90</span>)</span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"With enough data, the prior stops mattering"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1964,6 +1989,8 @@ p(\text{data}) = \int p(\text{data}\mid\theta)\,p(\theta)\,d\theta .
 <div class="callout-body-container callout-body">
 <ul>
 <li><p><strong>Believing “flat” means “objective.”</strong> A prior flat in <span class="math inline">\theta</span> is informative about <span class="math inline">\theta^2</span>; there is no assumption-free prior. Choose deliberately and disclose. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p></li>
+<li><p><strong>Reaching for <span class="math inline">\mathcal N(0, 1000)</span> “to be safe.”</strong> An ultra-vague prior is not neutral. It puts weight on absurd parameter values and can slow MCMC badly. A weakly-informative prior on standardised variables (e.g.&nbsp;<span class="math inline">\mathcal N(0, 10)</span>) is usually both safer and faster. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p></li>
+<li><p><strong>Calling empirical Bayes “fully Bayesian.”</strong> Plugging data-estimated hyperparameters into the prior uses the data twice and understates uncertainty. A hierarchical model propagates that uncertainty instead. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p></li>
 <li><p><strong>Treating conjugacy as the general case.</strong> Conjugate models are a convenient minority. Real problems are non-conjugate, which is <em>why</em> MCMC exists — don’t mistake the textbook Beta–Binomial for how most analyses actually run. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p></li>
 <li><p><strong>Reporting only the MAP.</strong> The mode ignores the shape of the distribution; a skewed posterior’s mode can sit far from where the mass lives. Prefer the mean/median, and always show the spread. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p></li>
 <li><p><strong>Assigning zero prior probability.</strong> A dogmatic prior is unfalsifiable by data. Use weakly-informative priors that merely down-weight the implausible. <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span></p></li>
@@ -1987,7 +2014,7 @@ p(\text{data}) = \int p(\text{data}\mid\theta)\,p(\theta)\,d\theta .
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Lambert, <em>A Student’s Guide to Bayesian Statistics</em></strong> — the whole entry: the likelihood as a function of <span class="math inline">\theta</span> with data fixed, and the coin-table demonstration that it doesn’t sum to 1; flat / informative / weakly-informative priors, moment-matching (SAT <span class="math inline">\mu=998,\sigma=145</span>), and the illusion of objectivity (<span class="math inline">\theta</span> vs <span class="math inline">\theta^2</span>); conjugacy, the Beta–Binomial updating rule <span class="math inline">\text{Beta}(a+k, b+n-k)</span> with <span class="math inline">a,b</span> as virtual successes/failures, and the Normal–Normal weighted mean; the evidence integral, marginalisation, and the 200-dimensional intractability; posterior mean / MAP / SD and the preference for the mean; sensitivity analysis and the zero-prior (flat-earth) trap.</li>
+<li><strong>Lambert, <em>A Student’s Guide to Bayesian Statistics</em></strong> — the whole entry: the likelihood as a function of <span class="math inline">\theta</span> with data fixed, and the coin-table demonstration that it doesn’t sum to 1; flat / informative / weakly-informative priors, moment-matching (SAT <span class="math inline">\mu=998,\sigma=145</span>), and the illusion of objectivity (<span class="math inline">\theta</span> vs <span class="math inline">\theta^2</span>, the obesity example, Ch 11.3); the search for objective priors (Ch 11.4–11.7): <strong>Jeffreys priors</strong> (<span class="math inline">\propto\sqrt{I(\theta)}</span>, Beta(½,½) for the Bernoulli, “invariance” as a property of the posterior, impropriety and multi-parameter limits), <strong>reference priors</strong> (Bernardo’s expected-KL/mutual-information criterion; exponential example), <strong>empirical Bayes</strong> (Casella’s drug trial; method-of-moments hyperparameters as a “half-Bayesian/half-Frequentist” shortcut to hierarchical models), and the <strong>three weakly-informative rules</strong> (<span class="math inline">\mathcal N(0,10)</span> not <span class="math inline">\mathcal N(0,1000)</span>; Cauchy not bounded uniform; half-Cauchy not inverse-gamma); conjugacy, the Beta–Binomial updating rule <span class="math inline">\text{Beta}(a+k, b+n-k)</span> with <span class="math inline">a,b</span> as virtual successes/failures, and the Normal–Normal weighted mean; the evidence integral, marginalisation, and the 200-dimensional intractability; posterior mean / MAP / SD and the preference for the mean; sensitivity analysis and the zero-prior (flat-earth) trap.</li>
 </ul>
 </div>
 </div>
@@ -2014,6 +2041,17 @@ p(\theta\mid k) \propto \theta^{a-1}(1-\theta)^{b-1}\cdot\theta^{k}(1-\theta)^{n
 \frac{1}{\tau_{\text{post}}^2} = \frac{1}{\tau_0^2} + \frac{n}{\sigma^2}.
 </span></p>
 <p>Precisions (inverse variances) simply <strong>add</strong>, and the posterior mean is a precision-weighted average — the prior contributes <span class="math inline">1/\tau_0^2</span> “pseudo-observations,” the data contributes <span class="math inline">n/\sigma^2</span>, and the data dominates as <span class="math inline">n</span> grows.</p>
+<p><strong>The flat prior under a change of variables.</strong> For <span class="math inline">\phi = g(\theta)</span> the density transforms as <span class="math inline">p_\phi(\phi) = p_\theta\big(g^{-1}(\phi)\big)\,\big|\tfrac{d}{d\phi}g^{-1}(\phi)\big|</span>. With <span class="math inline">\theta\sim\text{U}(0,1)</span> and <span class="math inline">\phi = \theta^2</span>, <span class="math inline">\theta = \sqrt\phi</span>, so <span class="math inline">p_\phi(\phi) = \tfrac{1}{2\sqrt\phi}</span> on <span class="math inline">(0,1)</span>. The density is decreasing, and <span class="math inline">P(\phi &lt; 0.5) = \sqrt{0.5} \approx 0.71</span>: the “more than 70%” of the obesity example.</p>
+<p><strong>Jeffreys prior for the Bernoulli.</strong> <span class="math inline">p(\theta)\propto\sqrt{I(\theta)}</span>, with Fisher information <span class="math inline">I(\theta) = -\mathbb E\big[\partial^2_\theta \log p(y\mid\theta)\big]</span>. For <span class="math inline">\log p(y\mid\theta) = y\log\theta + (1-y)\log(1-\theta)</span>,</p>
+<p><span class="math display">
+I(\theta) = \frac{\mathbb E[y]}{\theta^2} + \frac{1-\mathbb E[y]}{(1-\theta)^2}
+= \frac{1}{\theta(1-\theta)}
+\;\;\Rightarrow\;\;
+p(\theta)\propto\theta^{-1/2}(1-\theta)^{-1/2} = \text{Beta}(\tfrac12,\tfrac12).
+</span></p>
+<p>Under a reparameterisation <span class="math inline">\phi = g(\theta)</span> the chain rule gives <span class="math inline">I(\phi) = I(\theta)\,(d\theta/d\phi)^2</span>. So <span class="math inline">\sqrt{I(\phi)} = \sqrt{I(\theta)}\,|d\theta/d\phi|</span>, which is exactly the change-of-variables rule. Computing the Jeffreys prior directly in <span class="math inline">\phi</span>, or transforming the one found in <span class="math inline">\theta</span>, gives the same answer.</p>
+<p><strong>Empirical Bayes shrinkage.</strong> With <span class="math inline">X_i\mid\theta_i\sim\mathcal N(\theta_i,\sigma_0^2)</span> and <span class="math inline">\theta_i\sim\mathcal N(\mu,\sigma_1^2)</span>, the posterior mean is <span class="math inline">\mathbb E[\theta_i\mid X_i] = \frac{\sigma_1^2}{\sigma_0^2+\sigma_1^2}X_i +
+\frac{\sigma_0^2}{\sigma_0^2+\sigma_1^2}\mu</span>. Empirical Bayes replaces <span class="math inline">\mu</span> with <span class="math inline">\bar X</span> and <span class="math inline">\sigma_1^2</span> with the moment estimate <span class="math inline">\max(0,\,s^2_X - \sigma_0^2)</span> from the marginal <span class="math inline">X_i\sim\mathcal N(\mu,\sigma_0^2+\sigma_1^2)</span>. That gives a plug-in shrinkage estimator. A hierarchical model would put priors on <span class="math inline">(\mu,\sigma_1)</span> instead of fixing them.</p>
 <p><strong>The evidence as an average.</strong> <span class="math inline">p(\text{data}) = \int p(\text{data}\mid\theta)p(\theta)\,d\theta =
 \mathbb{E}_{\text{prior}}[p(\text{data}\mid\theta)]</span> — the likelihood <em>averaged over the prior</em>. It is both the normaliser of the posterior and the quantity used to compare models (the Bayes factor), which is why its intractability is so consequential.</p>
 </div>
@@ -2023,7 +2061,7 @@ p(\theta\mid k) \propto \theta^{a-1}(1-\theta)^{b-1}\cdot\theta^{k}(1-\theta)^{n
 <ul>
 <li><strong>Builds on:</strong> <a href="../../content/02-inference/bayesian-worldview.html">the Bayesian worldview</a> (the central dogma this entry operationalises), <a href="../../content/01-foundations/common-distributions.html">the Beta and Normal distributions</a> (the priors and likelihoods in play), and <a href="../../content/02-inference/estimation.html">maximum likelihood</a> (the MAP under a flat prior).</li>
 <li><strong>Leads to:</strong> <a href="../../content/02-inference/credible-intervals-and-computation.html">credible intervals &amp; computation</a> — because the intractable denominator forces us to <em>sample</em> the posterior rather than solve it (MCMC), and to read intervals off those samples.</li>
-<li><strong>Reappears in:</strong> Bayesian <a href="../../content/03-regression/index.html">regression</a> and hierarchical models, where weakly-informative priors and MCMC are the standard toolkit.</li>
+<li><strong>Reappears in:</strong> Bayesian <a href="../../content/03-regression/index.html">regression</a> and <a href="../../content/02-inference/hierarchical-bayesian-models.html">hierarchical models</a>, where weakly-informative priors and MCMC are the standard toolkit, and which properly replace the empirical-Bayes shortcut. The Fisher information behind Jeffreys priors is the same curvature that gives <a href="../../content/02-inference/maximum-likelihood.html">maximum likelihood</a> its standard errors.</li>
 </ul>
 
 
@@ -2572,215 +2610,318 @@ Lambert, Ben. 2018. <em>A Student’s Guide to Bayesian Statistics</em>. SAGE Pu
 <span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>over-committing to a precise belief. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> They regularise — gently keeping the model</span>
 <span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>sane — without pretending to know more than you do.</span>
 <span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conjugacy: when the math closes by hand</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="fu">### Can a prior be made objective?</span></span>
 <span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>Most prior–likelihood pairs give a posterior with no tidy formula. A blessed few are **conjugate**:</span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>the prior and likelihood are matched so that the **posterior lands in the same family as the</span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>prior.** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> When that happens, updating is just **arithmetic on the parameters** — no</span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>integral, no simulation, "pen-and-paper" Bayesian inference. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>The headline case, which powered every figure in this sub-chapter, is the **Beta–Binomial**:</span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>\text{Prior } \text{Beta}(a,b) \;+\; k \text{ successes in } n \text{ trials}</span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>\;\longrightarrow\;</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>\text{Posterior } \text{Beta}(a+k,\; b+n-k).</span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>The intuition is gorgeous: $a$ and $b$ behave like **virtual prior successes and failures** — pretend</span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>data from past experience — and Bayesian updating simply *adds your real counts to them.*</span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> A $\text{Beta}(2,2)$ prior is "I've effectively seen 1 head and 1 tail before";</span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>observe 7 heads and 3 tails and you carry forward $\text{Beta}(9,5)$.</span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>The other workhorse is the **Normal–Normal** model (estimating a mean $\mu$ with known variance):</span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>the posterior mean is a **weighted average of the prior mean and the sample mean**, and — exactly as</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>the worldview promised — **the data's weight grows with $n$**, so the prior fades as evidence</span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>accumulates. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="fu">### Watch different priors converge</span></span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>Conjugacy lets us *see* prior sensitivity directly. Below, three researchers analyse the same coin</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>(true bias 0.7) from very different starting beliefs — a skeptic, an open mind, and an enthusiast.</span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>With little data their posteriors disagree. With a lot, the data swamps all three and they land</span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>essentially on top of one another.</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-prior-convergence</span></span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Three priors meet the same data. Left: after just 10 flips (7 heads), the skeptic (Beta(2,8)), the flat prior (Beta(1,1)), and the enthusiast (Beta(8,2)) still hold visibly different posteriors. Right: after 200 flips (140 heads, same 70% rate), the data has swamped the prior — all three posteriors collapse onto the truth. Disagreement is a small-sample luxury."</span></span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> lgamma</span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> beta_pdf(theta, a, b):</span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>    logB <span class="op">=</span> lgamma(a) <span class="op">+</span> lgamma(b) <span class="op">-</span> lgamma(a <span class="op">+</span> b)</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.exp((a <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(theta) <span class="op">+</span> (b <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(<span class="dv">1</span> <span class="op">-</span> theta) <span class="op">-</span> logB)</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>The flat-prior illusion deserves a concrete face, because it is what launched a whole search for</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>"objective" priors. Lambert's example: model obesity prevalence $\theta$ with a uniform prior, then</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>ask about a *different* event — that **both** people in a sample of two are obese, $\phi = \theta^2$.</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>The prior that was flat for $\theta$ turns out to be **steeply downward-sloping** for $\phi$, piling</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>more than 70% of its weight on low values. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> You said "I know nothing"; your model</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>heard "I'm fairly sure this joint event is rare." A prior that is uninformative about one quantity is</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>usually informative about another. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>Three historical escape routes follow. Lambert covers each and ends up unconvinced by all of them.</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Jeffreys priors — redefine "uninformative."** Harold Jeffreys asked for something weaker than</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>  "flat everywhere." He wanted a rule that gives the *same answer* whichever parameterisation you</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>  start from. His solution sets the prior proportional to the square root of the **Fisher</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>  information**, the likelihood's curvature. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> For a Bernoulli proportion that is a</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>  $\text{Beta}(\tfrac12,\tfrac12)$: a U-shape that leans toward 0 and 1. There the Bernoulli's</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>  standard deviation is small and each observation is most informative, so the Jeffreys prior</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>  "simply tries to align with the likelihood." <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Lambert adds a correction that</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>  textbooks often skip. The "invariance" is not a prior that *looks* the same in every frame (§11.3</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>  showed that is impossible). It means two analysts using different parameterisations get</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>  posteriors that map onto each other by the ordinary change-of-variables rule. The invariance is</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>  really a property of the *posterior*. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Two drawbacks limit its use: Jeffreys</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>  priors are hard to extend to many parameters, and they are often **improper**, meaning they do not</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>  integrate to 1. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reference priors — let the data shout loudest.** Bernardo (1979) chose the prior that</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>  **maximises the expected information gain from prior to posterior**. That is the expected KL</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>  divergence, which equals the mutual information between the parameter and a sufficient</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>  statistic. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> It is elegant, but deriving one needs the calculus of variations,</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>  "sufficient to thwart even the most ardent objectivists." In Lambert's exponential-data example,</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>  with $n = 100$ the reference-prior posterior is virtually indistinguishable from a</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>  weakly-informative $\Gamma(4,2)$ one. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Empirical Bayes — estimate the prior from the data.** Casella's drug-trial example: each patient</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>  has their own effect $\theta_i$, drawn from a population $\mathcal N(\mu, \sigma_1^2)$.</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>  Empirical Bayes estimates $\mu$ and $\sigma_1$ by frequentist *method of moments* from the pooled</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>  data. It then plugs them in as if known, shrinking each patient's estimate toward $\mu$.</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Lambert calls it "half-Bayesian/half-Frequentist": it uses the data twice and</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>  ignores the uncertainty in $\mu, \sigma_1$. He treats it as an approximation to the full</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">hierarchical model</span><span class="co">](hierarchical-bayesian-models.qmd)</span>, which puts priors on those parameters</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>  instead. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> It is still worth recognising, because "a number of popular methods" rest</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>  on it.</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>Lambert's verdict: **don't obsess over objectivity**. Every analysis involves choosing among</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>reasonable models. With moderate data, "uninformative" and sensible weakly-informative priors give</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>nearly the same posterior. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Truly vague priors also cause trouble of their own. They</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>put mass on absurd regions of parameter space and they slow <span class="co">[</span><span class="ot">MCMC</span><span class="co">](mcmc-in-depth.qmd)</span> convergence.</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> His three working rules for weakly-informative priors: <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
 <span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> np.linspace(<span class="fl">1e-3</span>, <span class="dv">1</span> <span class="op">-</span> <span class="fl">1e-3</span>, <span class="dv">600</span>)</span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>priors <span class="op">=</span> [(<span class="st">"Skeptic  Beta(2,8)"</span>, <span class="dv">2</span>, <span class="dv">8</span>, <span class="st">"#e8531d"</span>),</span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>          (<span class="st">"Flat  Beta(1,1)"</span>,    <span class="dv">1</span>, <span class="dv">1</span>, <span class="st">"#b7b6a8"</span>),</span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>          (<span class="st">"Enthusiast  Beta(8,2)"</span>, <span class="dv">8</span>, <span class="dv">2</span>, <span class="st">"#5e5e54"</span>)]</span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>fig, (axS, axL) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">3.6</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (k, n, title) <span class="kw">in</span> <span class="bu">zip</span>((axS, axL), [(<span class="dv">7</span>, <span class="dv">10</span>, <span class="st">"After 10 flips (7 heads)"</span>),</span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>                                          (<span class="dv">140</span>, <span class="dv">200</span>, <span class="st">"After 200 flips (140 heads)"</span>)]):</span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> label, a, b, color <span class="kw">in</span> priors:</span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>        ax.plot(theta, beta_pdf(theta, a <span class="op">+</span> k, b <span class="op">+</span> n <span class="op">-</span> k), color<span class="op">=</span>color, lw<span class="op">=</span><span class="fl">2.0</span>, label<span class="op">=</span>label)</span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>    ax.axvline(<span class="fl">0.7</span>, color<span class="op">=</span><span class="st">"#cf4718"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.4</span>)</span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>    ax.set_title(title, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>    ax.set_yticks([])</span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"θ — coin bias"</span>)</span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>axS.legend(fontsize<span class="op">=</span><span class="fl">7.5</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="fl">0.71</span>, axL.get_ylim()[<span class="dv">1</span>] <span class="op">*</span> <span class="fl">0.5</span>, <span class="st">"truth 0.7"</span>, color<span class="op">=</span><span class="st">"#cf4718"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, rotation<span class="op">=</span><span class="dv">90</span>)</span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"With enough data, the prior stops mattering"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Wide but not absurd.** With standardised regressors, use $\beta \sim \mathcal N(0, 10)$, not</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>   $\mathcal N(0, 1000)$.</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Smooth, not boxed.** Use a long-tailed Cauchy rather than a uniform over some arbitrary finite</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>   range.</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Don't favour the unrealistic.** For a variance, use a half-Cauchy rather than an inverse-gamma.</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conjugacy: when the math closes by hand</span></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>Most prior–likelihood pairs give a posterior with no tidy formula. A blessed few are **conjugate**:</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>the prior and likelihood are matched so that the **posterior lands in the same family as the</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>prior.** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> When that happens, updating is just **arithmetic on the parameters** — no</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>integral, no simulation, "pen-and-paper" Bayesian inference. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>The headline case, which powered every figure in this sub-chapter, is the **Beta–Binomial**:</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>\text{Prior } \text{Beta}(a,b) \;+\; k \text{ successes in } n \text{ trials}</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>\;\longrightarrow\;</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>\text{Posterior } \text{Beta}(a+k,\; b+n-k).</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>The left panel is why priors are *fought over*; the right panel is why the fight usually *doesn't</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>matter*. Convergence is a theorem, not a hope — but it is a **large-sample** theorem, which is</span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>exactly why small-$n$ studies must take their priors seriously and report sensitivity.</span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="fu">## The denominator: the evidence, and why it's hard</span></span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>We have been writing "$\propto$" and dodging the constant. That constant is the **denominator** of</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>Bayes' theorem — the **evidence** or **marginal likelihood** $p(\text{data})$ — the single number</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>that rescales the posterior so it integrates to 1. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> To get it you must</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>**marginalise out** the parameter, integrating the joint density over *every possible value of</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>$\theta$*:</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>The intuition is gorgeous: $a$ and $b$ behave like **virtual prior successes and failures** — pretend</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>data from past experience — and Bayesian updating simply *adds your real counts to them.*</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> A $\text{Beta}(2,2)$ prior is "I've effectively seen 1 head and 1 tail before";</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>observe 7 heads and 3 tails and you carry forward $\text{Beta}(9,5)$.</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>The other workhorse is the **Normal–Normal** model (estimating a mean $\mu$ with known variance):</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>the posterior mean is a **weighted average of the prior mean and the sample mean**, and — exactly as</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>the worldview promised — **the data's weight grows with $n$**, so the prior fades as evidence</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>accumulates. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="fu">### Watch different priors converge</span></span>
 <span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>p(\text{data}) = \int p(\text{data}\mid\theta)\,p(\theta)\,d\theta .</span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>For a handful of discrete values this is a quick sum. For a realistic continuous model it is a</span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>**high-dimensional integral**, and that is the wall Bayesian inference hits. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>Lambert's example: a model of test scores across 100 schools can carry a **200-dimensional</span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>integral** — practically impossible to compute or even approximate by brute force. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>This single difficulty is the reason modern Bayesian analysis leans on **MCMC sampling**, which</span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>cleverly draws from the posterior *without ever computing the denominator* — the subject of</span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">B3</span><span class="co">](credible-intervals-and-computation.qmd)</span>.</span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reading the posterior</span></span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>Once you have the posterior (in formula or in samples), you summarise it. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Posterior mean** — the distribution's centre of gravity, the density-weighted average.</span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Posterior mode (MAP)** — the *maximum a posteriori* value, the single highest peak. (Note: when</span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>  the prior is flat, the MAP coincides with the <span class="co">[</span><span class="ot">maximum-likelihood estimate</span><span class="co">](estimation.qmd)</span> — the</span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>  bridge back to the Classical Toolkit.)</span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Posterior standard deviation** — the spread, i.e. the uncertainty that survives the data.</span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>Lambert's guidance: prefer the **mean or median** to the mode, because they reflect the *bulk* of</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>the probability mass rather than a lone peak that a long tail can make unrepresentative.</span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> But the honest Bayesian answer is never a single number — it is the **whole</span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>posterior**.</span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="fu">## Prior sensitivity, robustness, and one trap</span></span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>Good Bayesian practice *interrogates* the prior. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Sensitivity analysis.** Re-run with different reasonable priors. If the conclusions hold, the</span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>  findings are **robust** and far more credible; if they swing, you must say so — that is a</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  scientific obligation, not an optional extra. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The zero-prior trap.** Never assign a prior probability of *exactly zero* to a possible value:</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  if your prior says "impossible," the posterior stays zero **no matter how much data points there.**</span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>  Lambert's image: if you are 100% certain the Earth is flat, no photograph from space can ever</span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>  move you. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Leave a crack open for every possibility you can't truly rule out.</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong in practice"}</span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Believing "flat" means "objective."** A prior flat in $\theta$ is informative about $\theta^2$;</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>  there is no assumption-free prior. Choose deliberately and disclose. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>Conjugacy lets us *see* prior sensitivity directly. Below, three researchers analyse the same coin</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>(true bias 0.7) from very different starting beliefs — a skeptic, an open mind, and an enthusiast.</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>With little data their posteriors disagree. With a lot, the data swamps all three and they land</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>essentially on top of one another.</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-prior-convergence</span></span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Three priors meet the same data. Left: after just 10 flips (7 heads), the skeptic (Beta(2,8)), the flat prior (Beta(1,1)), and the enthusiast (Beta(8,2)) still hold visibly different posteriors. Right: after 200 flips (140 heads, same 70% rate), the data has swamped the prior — all three posteriors collapse onto the truth. Disagreement is a small-sample luxury."</span></span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> lgamma</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> beta_pdf(theta, a, b):</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>    logB <span class="op">=</span> lgamma(a) <span class="op">+</span> lgamma(b) <span class="op">-</span> lgamma(a <span class="op">+</span> b)</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.exp((a <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(theta) <span class="op">+</span> (b <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.log(<span class="dv">1</span> <span class="op">-</span> theta) <span class="op">-</span> logB)</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> np.linspace(<span class="fl">1e-3</span>, <span class="dv">1</span> <span class="op">-</span> <span class="fl">1e-3</span>, <span class="dv">600</span>)</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>priors <span class="op">=</span> [(<span class="st">"Skeptic  Beta(2,8)"</span>, <span class="dv">2</span>, <span class="dv">8</span>, <span class="st">"#e8531d"</span>),</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>          (<span class="st">"Flat  Beta(1,1)"</span>,    <span class="dv">1</span>, <span class="dv">1</span>, <span class="st">"#b7b6a8"</span>),</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>          (<span class="st">"Enthusiast  Beta(8,2)"</span>, <span class="dv">8</span>, <span class="dv">2</span>, <span class="st">"#5e5e54"</span>)]</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>fig, (axS, axL) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">3.6</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (k, n, title) <span class="kw">in</span> <span class="bu">zip</span>((axS, axL), [(<span class="dv">7</span>, <span class="dv">10</span>, <span class="st">"After 10 flips (7 heads)"</span>),</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>                                          (<span class="dv">140</span>, <span class="dv">200</span>, <span class="st">"After 200 flips (140 heads)"</span>)]):</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> label, a, b, color <span class="kw">in</span> priors:</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>        ax.plot(theta, beta_pdf(theta, a <span class="op">+</span> k, b <span class="op">+</span> n <span class="op">-</span> k), color<span class="op">=</span>color, lw<span class="op">=</span><span class="fl">2.0</span>, label<span class="op">=</span>label)</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>    ax.axvline(<span class="fl">0.7</span>, color<span class="op">=</span><span class="st">"#161613"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.4</span>)</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>    ax.set_title(title, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>    ax.set_yticks([])</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"θ — coin bias"</span>)</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>axS.legend(fontsize<span class="op">=</span><span class="fl">7.5</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="fl">0.71</span>, axL.get_ylim()[<span class="dv">1</span>] <span class="op">*</span> <span class="fl">0.5</span>, <span class="st">"truth 0.7"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, rotation<span class="op">=</span><span class="dv">90</span>)</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"With enough data, the prior stops mattering"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>The left panel is why priors are *fought over*; the right panel is why the fight usually *doesn't</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>matter*. Convergence is a theorem, not a hope — but it is a **large-sample** theorem, which is</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>exactly why small-$n$ studies must take their priors seriously and report sensitivity.</span>
 <span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating conjugacy as the general case.** Conjugate models are a convenient minority. Real</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>  problems are non-conjugate, which is *why* MCMC exists — don't mistake the textbook Beta–Binomial</span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>  for how most analyses actually run. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reporting only the MAP.** The mode ignores the shape of the distribution; a skewed posterior's</span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>  mode can sit far from where the mass lives. Prefer the mean/median, and always show the spread.</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="fu">## The denominator: the evidence, and why it's hard</span></span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>We have been writing "$\propto$" and dodging the constant. That constant is the **denominator** of</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>Bayes' theorem — the **evidence** or **marginal likelihood** $p(\text{data})$ — the single number</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>that rescales the posterior so it integrates to 1. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> To get it you must</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>**marginalise out** the parameter, integrating the joint density over *every possible value of</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>$\theta$*:</span>
 <span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Assigning zero prior probability.** A dogmatic prior is unfalsifiable by data. Use</span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  weakly-informative priors that merely down-weight the implausible. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping sensitivity analysis on small samples.** When $n$ is small the prior drives the</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>  answer; failing to test alternative priors hides exactly the assumption doing the work.</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Lambert, *A Student's Guide to Bayesian Statistics*** — the whole entry: the likelihood as a</span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>  function of $\theta$ with data fixed, and the coin-table demonstration that it doesn't sum to 1;</span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>  flat / informative / weakly-informative priors, moment-matching (SAT $\mu=998,\sigma=145$), and the</span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  illusion of objectivity ($\theta$ vs $\theta^2$); conjugacy, the Beta–Binomial updating rule</span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>  $\text{Beta}(a+k, b+n-k)$ with $a,b$ as virtual successes/failures, and the Normal–Normal weighted</span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>  mean; the evidence integral, marginalisation, and the 200-dimensional intractability; posterior</span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>  mean / MAP / SD and the preference for the mean; sensitivity analysis and the zero-prior</span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>  (flat-earth) trap.</span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>p(\text{data}) = \int p(\text{data}\mid\theta)\,p(\theta)\,d\theta .</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>For a handful of discrete values this is a quick sum. For a realistic continuous model it is a</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>**high-dimensional integral**, and that is the wall Bayesian inference hits. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>Lambert's example: a model of test scores across 100 schools can carry a **200-dimensional</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>integral** — practically impossible to compute or even approximate by brute force. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>This single difficulty is the reason modern Bayesian analysis leans on **MCMC sampling**, which</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>cleverly draws from the posterior *without ever computing the denominator* — the subject of</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">B3</span><span class="co">](credible-intervals-and-computation.qmd)</span>.</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reading the posterior</span></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>Once you have the posterior (in formula or in samples), you summarise it. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Posterior mean** — the distribution's centre of gravity, the density-weighted average.</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Posterior mode (MAP)** — the *maximum a posteriori* value, the single highest peak. (Note: when</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>  the prior is flat, the MAP coincides with the <span class="co">[</span><span class="ot">maximum-likelihood estimate</span><span class="co">](estimation.qmd)</span> — the</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>  bridge back to the Classical Toolkit.)</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Posterior standard deviation** — the spread, i.e. the uncertainty that survives the data.</span>
 <span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the full mathematics {.unnumbered}</span></span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>**Beta–Binomial conjugacy, derived.** With likelihood $p(k\mid\theta) \propto \theta^k(1-\theta)^{n-k}$</span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>and prior $p(\theta) \propto \theta^{a-1}(1-\theta)^{b-1}$, multiply:</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>Lambert's guidance: prefer the **mean or median** to the mode, because they reflect the *bulk* of</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>the probability mass rather than a lone peak that a long tail can make unrepresentative.</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> But the honest Bayesian answer is never a single number — it is the **whole</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>posterior**.</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a><span class="fu">## Prior sensitivity, robustness, and one trap</span></span>
 <span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>p(\theta\mid k) \propto \theta^{a-1}(1-\theta)^{b-1}\cdot\theta^{k}(1-\theta)^{n-k}</span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>= \theta^{(a+k)-1}(1-\theta)^{(b+n-k)-1},</span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>which is the kernel of $\text{Beta}(a+k,\,b+n-k)$. The normaliser is then forced (it must be the</span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>Beta function), so no integral is needed — the essence of conjugacy. The posterior mean is</span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>\mathbb{E}<span class="co">[</span><span class="ot">\theta\mid k</span><span class="co">]</span> = \frac{a+k}{a+b+n},</span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>Good Bayesian practice *interrogates* the prior. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Sensitivity analysis.** Re-run with different reasonable priors. If the conclusions hold, the</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>  findings are **robust** and far more credible; if they swing, you must say so — that is a</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>  scientific obligation, not an optional extra. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The zero-prior trap.** Never assign a prior probability of *exactly zero* to a possible value:</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>  if your prior says "impossible," the posterior stays zero **no matter how much data points there.**</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>  Lambert's image: if you are 100% certain the Earth is flat, no photograph from space can ever</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>  move you. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> Leave a crack open for every possibility you can't truly rule out.</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
 <span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>manifestly a weighted blend of the prior mean $a/(a+b)$ and the data rate $k/n$, with the data's</span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>weight $\to 1$ as $n\to\infty$.</span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>**Normal–Normal updating.** Prior $\mu \sim \mathcal N(\mu_0, \tau_0^2)$, data</span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>$\bar x$ from $n$ observations with known variance $\sigma^2$. The posterior is Normal with</span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>\mu_{\text{post}} = \frac{\tfrac{1}{\tau_0^2}\,\mu_0 + \tfrac{n}{\sigma^2}\,\bar x}</span>
-<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>{\tfrac{1}{\tau_0^2} + \tfrac{n}{\sigma^2}},</span>
-<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>\qquad</span>
-<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>\frac{1}{\tau_{\text{post}}^2} = \frac{1}{\tau_0^2} + \frac{n}{\sigma^2}.</span>
-<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>Precisions (inverse variances) simply **add**, and the posterior mean is a precision-weighted</span>
-<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>average — the prior contributes $1/\tau_0^2$ "pseudo-observations," the data contributes $n/\sigma^2$,</span>
-<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>and the data dominates as $n$ grows.</span>
-<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>**The evidence as an average.** $p(\text{data}) = \int p(\text{data}\mid\theta)p(\theta)\,d\theta =</span>
-<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>\mathbb{E}_{\text{prior}}<span class="co">[</span><span class="ot">p(\text{data}\mid\theta)</span><span class="co">]</span>$ — the likelihood *averaged over the prior*. It</span>
-<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>is both the normaliser of the posterior and the quantity used to compare models (the Bayes factor),</span>
-<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>which is why its intractability is so consequential.</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong in practice"}</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Believing "flat" means "objective."** A prior flat in $\theta$ is informative about $\theta^2$;</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  there is no assumption-free prior. Choose deliberately and disclose. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reaching for $\mathcal N(0, 1000)$ "to be safe."** An ultra-vague prior is not neutral. It puts</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>  weight on absurd parameter values and can slow MCMC badly. A weakly-informative prior on</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>  standardised variables (e.g. $\mathcal N(0, 10)$) is usually both safer and faster.</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Calling empirical Bayes "fully Bayesian."** Plugging data-estimated hyperparameters into the</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>  prior uses the data twice and understates uncertainty. A hierarchical model propagates that</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>  uncertainty instead. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating conjugacy as the general case.** Conjugate models are a convenient minority. Real</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>  problems are non-conjugate, which is *why* MCMC exists — don't mistake the textbook Beta–Binomial</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>  for how most analyses actually run. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reporting only the MAP.** The mode ignores the shape of the distribution; a skewed posterior's</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>  mode can sit far from where the mass lives. Prefer the mean/median, and always show the spread.</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
 <span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Bayesian worldview</span><span class="co">](bayesian-worldview.qmd)</span> (the central dogma this entry</span>
-<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>  operationalises), <span class="co">[</span><span class="ot">the Beta and Normal distributions</span><span class="co">](../01-foundations/common-distributions.qmd)</span></span>
-<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>  (the priors and likelihoods in play), and <span class="co">[</span><span class="ot">maximum likelihood</span><span class="co">](estimation.qmd)</span> (the MAP under a</span>
-<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>  flat prior).</span>
-<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">credible intervals &amp; computation</span><span class="co">](credible-intervals-and-computation.qmd)</span> — because</span>
-<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>  the intractable denominator forces us to *sample* the posterior rather than solve it (MCMC), and to</span>
-<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>  read intervals off those samples.</span>
-<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** Bayesian <span class="co">[</span><span class="ot">regression</span><span class="co">](../03-regression/index.qmd)</span> and hierarchical models, where</span>
-<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>  weakly-informative priors and MCMC are the standard toolkit.</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Assigning zero prior probability.** A dogmatic prior is unfalsifiable by data. Use</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>  weakly-informative priors that merely down-weight the implausible. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping sensitivity analysis on small samples.** When $n$ is small the prior drives the</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>  answer; failing to test alternative priors hides exactly the assumption doing the work.</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Lambert, *A Student's Guide to Bayesian Statistics*** — the whole entry: the likelihood as a</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>  function of $\theta$ with data fixed, and the coin-table demonstration that it doesn't sum to 1;</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>  flat / informative / weakly-informative priors, moment-matching (SAT $\mu=998,\sigma=145$), and the</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>  illusion of objectivity ($\theta$ vs $\theta^2$, the obesity example, Ch 11.3); the search for</span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>  objective priors (Ch 11.4–11.7): **Jeffreys priors** ($\propto\sqrt{I(\theta)}$, Beta(½,½) for the</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>  Bernoulli, "invariance" as a property of the posterior, impropriety and multi-parameter limits),</span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>  **reference priors** (Bernardo's expected-KL/mutual-information criterion; exponential example),</span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>  **empirical Bayes** (Casella's drug trial; method-of-moments hyperparameters as a</span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>  "half-Bayesian/half-Frequentist" shortcut to hierarchical models), and the **three</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>  weakly-informative rules** ($\mathcal N(0,10)$ not $\mathcal N(0,1000)$; Cauchy not bounded</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>  uniform; half-Cauchy not inverse-gamma); conjugacy, the Beta–Binomial updating rule</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>  $\text{Beta}(a+k, b+n-k)$ with $a,b$ as virtual successes/failures, and the Normal–Normal weighted</span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>  mean; the evidence integral, marginalisation, and the 200-dimensional intractability; posterior</span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a>  mean / MAP / SD and the preference for the mean; sensitivity analysis and the zero-prior</span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>  (flat-earth) trap.</span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the full mathematics {.unnumbered}</span></span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>**Beta–Binomial conjugacy, derived.** With likelihood $p(k\mid\theta) \propto \theta^k(1-\theta)^{n-k}$</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>and prior $p(\theta) \propto \theta^{a-1}(1-\theta)^{b-1}$, multiply:</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>p(\theta\mid k) \propto \theta^{a-1}(1-\theta)^{b-1}\cdot\theta^{k}(1-\theta)^{n-k}</span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>= \theta^{(a+k)-1}(1-\theta)^{(b+n-k)-1},</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>which is the kernel of $\text{Beta}(a+k,\,b+n-k)$. The normaliser is then forced (it must be the</span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>Beta function), so no integral is needed — the essence of conjugacy. The posterior mean is</span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>\mathbb{E}<span class="co">[</span><span class="ot">\theta\mid k</span><span class="co">]</span> = \frac{a+k}{a+b+n},</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>manifestly a weighted blend of the prior mean $a/(a+b)$ and the data rate $k/n$, with the data's</span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a>weight $\to 1$ as $n\to\infty$.</span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a>**Normal–Normal updating.** Prior $\mu \sim \mathcal N(\mu_0, \tau_0^2)$, data</span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a>$\bar x$ from $n$ observations with known variance $\sigma^2$. The posterior is Normal with</span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a>\mu_{\text{post}} = \frac{\tfrac{1}{\tau_0^2}\,\mu_0 + \tfrac{n}{\sigma^2}\,\bar x}</span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>{\tfrac{1}{\tau_0^2} + \tfrac{n}{\sigma^2}},</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>\qquad</span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a>\frac{1}{\tau_{\text{post}}^2} = \frac{1}{\tau_0^2} + \frac{n}{\sigma^2}.</span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>Precisions (inverse variances) simply **add**, and the posterior mean is a precision-weighted</span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a>average — the prior contributes $1/\tau_0^2$ "pseudo-observations," the data contributes $n/\sigma^2$,</span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>and the data dominates as $n$ grows.</span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a>**The flat prior under a change of variables.** For $\phi = g(\theta)$ the density transforms as</span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a>$p_\phi(\phi) = p_\theta\big(g^{-1}(\phi)\big)\,\big|\tfrac{d}{d\phi}g^{-1}(\phi)\big|$. With</span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a>$\theta\sim\text{U}(0,1)$ and $\phi = \theta^2$, $\theta = \sqrt\phi$, so</span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a>$p_\phi(\phi) = \tfrac{1}{2\sqrt\phi}$ on $(0,1)$. The density is decreasing, and</span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a>$P(\phi &lt; 0.5) = \sqrt{0.5} \approx 0.71$: the "more than 70%" of the obesity example.</span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a>**Jeffreys prior for the Bernoulli.** $p(\theta)\propto\sqrt{I(\theta)}$, with Fisher information</span>
+<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a>$I(\theta) = -\mathbb E\big<span class="co">[</span><span class="ot">\partial^2_\theta \log p(y\mid\theta)\big</span><span class="co">]</span>$. For</span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a>$\log p(y\mid\theta) = y\log\theta + (1-y)\log(1-\theta)$,</span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a>I(\theta) = \frac{\mathbb E<span class="co">[</span><span class="ot">y</span><span class="co">]</span>}{\theta^2} + \frac{1-\mathbb E<span class="co">[</span><span class="ot">y</span><span class="co">]</span>}{(1-\theta)^2}</span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>= \frac{1}{\theta(1-\theta)}</span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a>\;\;\Rightarrow\;\;</span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a>p(\theta)\propto\theta^{-1/2}(1-\theta)^{-1/2} = \text{Beta}(\tfrac12,\tfrac12).</span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a>Under a reparameterisation $\phi = g(\theta)$ the chain rule gives</span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a>$I(\phi) = I(\theta)\,(d\theta/d\phi)^2$. So $\sqrt{I(\phi)} = \sqrt{I(\theta)}\,|d\theta/d\phi|$,</span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a>which is exactly the change-of-variables rule. Computing the Jeffreys prior directly in $\phi$, or</span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a>transforming the one found in $\theta$, gives the same answer.</span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a>**Empirical Bayes shrinkage.** With $X_i\mid\theta_i\sim\mathcal N(\theta_i,\sigma_0^2)$ and</span>
+<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a>$\theta_i\sim\mathcal N(\mu,\sigma_1^2)$, the posterior mean is</span>
+<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a>$\mathbb E<span class="co">[</span><span class="ot">\theta_i\mid X_i</span><span class="co">]</span> = \frac{\sigma_1^2}{\sigma_0^2+\sigma_1^2}X_i +</span>
+<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a>\frac{\sigma_0^2}{\sigma_0^2+\sigma_1^2}\mu$. Empirical Bayes replaces $\mu$ with $\bar X$ and</span>
+<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a>$\sigma_1^2$ with the moment estimate $\max(0,\,s^2_X - \sigma_0^2)$ from the marginal</span>
+<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a>$X_i\sim\mathcal N(\mu,\sigma_0^2+\sigma_1^2)$. That gives a plug-in shrinkage estimator. A</span>
+<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a>hierarchical model would put priors on $(\mu,\sigma_1)$ instead of fixing them.</span>
+<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a>**The evidence as an average.** $p(\text{data}) = \int p(\text{data}\mid\theta)p(\theta)\,d\theta =</span>
+<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a>\mathbb{E}_{\text{prior}}<span class="co">[</span><span class="ot">p(\text{data}\mid\theta)</span><span class="co">]</span>$ — the likelihood *averaged over the prior*. It</span>
+<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a>is both the normaliser of the posterior and the quantity used to compare models (the Bayes factor),</span>
+<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a>which is why its intractability is so consequential.</span>
+<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Bayesian worldview</span><span class="co">](bayesian-worldview.qmd)</span> (the central dogma this entry</span>
+<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a>  operationalises), <span class="co">[</span><span class="ot">the Beta and Normal distributions</span><span class="co">](../01-foundations/common-distributions.qmd)</span></span>
+<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a>  (the priors and likelihoods in play), and <span class="co">[</span><span class="ot">maximum likelihood</span><span class="co">](estimation.qmd)</span> (the MAP under a</span>
+<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a>  flat prior).</span>
+<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">credible intervals &amp; computation</span><span class="co">](credible-intervals-and-computation.qmd)</span> — because</span>
+<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a>  the intractable denominator forces us to *sample* the posterior rather than solve it (MCMC), and to</span>
+<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>  read intervals off those samples.</span>
+<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** Bayesian <span class="co">[</span><span class="ot">regression</span><span class="co">](../03-regression/index.qmd)</span> and</span>
+<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">hierarchical models</span><span class="co">](hierarchical-bayesian-models.qmd)</span>, where weakly-informative priors and MCMC</span>
+<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a>  are the standard toolkit, and which properly replace the empirical-Bayes shortcut. The Fisher</span>
+<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a>  information behind Jeffreys priors is the same curvature that gives</span>
+<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">maximum likelihood</span><span class="co">](maximum-likelihood.qmd)</span> its standard errors.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
