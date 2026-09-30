@@ -905,6 +905,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/distributed-lags-and-interventions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Distributed Lags, Interventions &amp; Transfer Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../content/04-predictive/var-and-impulse-responses.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Vector Autoregression: VAR, Granger &amp; Impulse Responses</span></a>
   </div>
@@ -1812,6 +1818,7 @@ window.Quarto = {
   </ul></li>
   <li><a href="#the-chi-square-test-are-categories-related" id="toc-the-chi-square-test-are-categories-related" class="nav-link" data-scroll-target="#the-chi-square-test-are-categories-related">The chi-square test: are categories related?</a></li>
   <li><a href="#tests-for-proportions" id="toc-tests-for-proportions" class="nav-link" data-scroll-target="#tests-for-proportions">Tests for proportions</a></li>
+  <li><a href="#compare-the-groups-not-their-p-values" id="toc-compare-the-groups-not-their-p-values" class="nav-link" data-scroll-target="#compare-the-groups-not-their-p-values">Compare the groups, not their p-values</a></li>
   <li><a href="#which-test-when" id="toc-which-test-when" class="nav-link" data-scroll-target="#which-test-when">Which test when?</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
@@ -1979,6 +1986,39 @@ Figure&nbsp;1: ANOVA is signal ÷ noise. Both panels have the same three group m
 </div>
 </div>
 </section>
+<section id="compare-the-groups-not-their-p-values" class="level2">
+<h2 class="anchored" data-anchor-id="compare-the-groups-not-their-p-values">Compare the groups, not their p-values</h2>
+<p>A different mistake happens <em>after</em> the tests are done. “Drug A beat placebo significantly, drug B did not, so A is better than B.” Reinhart’s rule is that <strong>a difference in significance is not a significant difference</strong> <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>. He gives two reasons. First, <span class="math inline">p=0.04</span> and <span class="math inline">p=0.06</span> are almost the same result, even though they fall on opposite sides of the cutoff. Second, a p-value is not an effect size, so two results with similar p-values can still describe quite different effects <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>.</p>
+<p><strong>The probability of a false contradiction is easy to work out.</strong> Suppose two drugs have <em>identical</em> real effects, and each trial has power <span class="math inline">B</span>. The chance that one comes out significant and the other does not is</p>
+<p><span class="math display">
+P(\text{contradiction}) = 2B(1-B),
+</span></p>
+<p>which reaches <strong>50% when power is 50%</strong> <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>. At the modest power typical of real studies (see the <a href="../../content/02-inference/statistical-power.html">power entry</a>), a “significant vs not significant” split is close to a coin toss even when the drugs do exactly the same thing. The fix is to <strong>test the difference itself</strong>. Compare A with B directly, or report a confidence interval for <span class="math inline">A - B</span>. This adds no power, but it stops you inventing a difference that isn’t there <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Reinhart's cases">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Reinhart’s cases
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>A best-selling wrinkle serum (2007).</strong> A trial reported that the active serum improved 43% of users (significant) while the control cream improved 22% (not significant). The advertising treated this as proof. The paper itself admitted that <strong>the difference between the two groups was not significant</strong>.</li>
+<li><strong>Five statin meta-analyses.</strong> Three concluded that statins reduce mortality and two found “not enough evidence”. Yet all five estimated a relative risk <strong>near 0.9</strong>. The studies agreed on the size of the effect and disagreed only on which side of a threshold their intervals fell.</li>
+<li><strong>The same logic applies to replications.</strong> “The original was significant and the replication was not” may not be a contradiction. Truth inflation means the original probably overstated the effect, so the replication had less real power than it was designed for <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>.</li>
+</ul>
+</div>
+</div>
+<p><strong>Overlapping error bars don’t answer the question either.</strong> A common shortcut is to plot two means with bars and check whether the bars overlap. Reinhart shows why this fails <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>:</p>
+<ul>
+<li><strong>95% confidence intervals</strong> can overlap even when a <span class="math inline">t</span>-test gives <span class="math inline">p&lt;0.05</span>. The overlap check is <em>always stricter</em> than the test, so real differences get missed.</li>
+<li><strong>Standard-error bars</strong> fail the other way. They can <em>fail</em> to overlap while the difference is still not significant.</li>
+<li><strong>Standard-deviation bars</strong> describe how spread out individual observations are, not how precise the means are, so they cannot answer the question at all. Papers also often don’t say which kind of bar they are showing.</li>
+</ul>
+<p>Checking an interval against a <strong>fixed value</strong>, such as whether it covers zero, is the one visual check that works. For two groups, run the test. In Reinhart’s words, your eyeball “is not a well-defined statistical procedure” <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>.</p>
+</section>
 <section id="which-test-when" class="level2">
 <h2 class="anchored" data-anchor-id="which-test-when">Which test when?</h2>
 <table class="caption-top table">
@@ -2026,6 +2066,7 @@ Figure&nbsp;1: ANOVA is signal ÷ noise. Both panels have the same three group m
 <li><p><strong>Mining post-hoc pairs after a non-significant F.</strong> If the omnibus test is null, hunting for a “significant pair” is p-hacking. The gate exists for a reason. <span class="citation" data-cites="martin_bridgmon">(<a href="#ref-martin_bridgmon" role="doc-biblioref">Martin and Bridgmon 2012</a>)</span></p></li>
 <li><p><strong>Using chi-square with tiny expected counts.</strong> Below ~5 per cell the approximation misleads — switch to Fisher’s exact. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span></p></li>
 <li><p><strong>Confusing exposures with conversions.</strong> A huge sample with a rare outcome can still be underpowered; precision tracks the count of <em>events</em>, not of <em>trials</em>. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span></p></li>
+<li><p><strong>Comparing significance instead of comparing groups.</strong> “A was significant, B wasn’t” is not evidence that A beats B. With identical effects and power <span class="math inline">B</span>, that split happens with probability <span class="math inline">2B(1-B)</span>. Test <span class="math inline">A-B</span> directly, and don’t judge it by whether error bars overlap. <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></p></li>
 <li><p><strong>Reporting a significant F as the whole story.</strong> ANOVA says <em>some</em> group differs, not <em>which</em> or <em>by how much</em>. Follow up with post-hoc tests and effect sizes. <span class="citation" data-cites="martin_bridgmon">(<a href="#ref-martin_bridgmon" role="doc-biblioref">Martin and Bridgmon 2012</a>)</span></p></li>
 </ul>
 </div>
@@ -2034,7 +2075,7 @@ Figure&nbsp;1: ANOVA is signal ÷ noise. Both panels have the same three group m
 <section id="from-the-sources" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
 <div class="callout callout-style-default callout-note callout-titled" title="Who says what">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2043,10 +2084,11 @@ Figure&nbsp;1: ANOVA is signal ÷ noise. Both panels have the same three group m
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
 <li><strong>Bruce &amp; Bruce, <em>Practical Statistics for Data Scientists</em></strong> — the multiplicity problem motivating ANOVA; the F-test as between- over within-group variance; the web-page-stickiness example (means 172/185/176/162; <span class="math inline">F=2.74</span>, <span class="math inline">p=0.0776</span>, not significant); the chi-square observed-vs-expected logic and statistic; the headline-click example (14/8/12; expected 11.33; <span class="math inline">\chi^2=1.666</span>, df 2, not significant); goodness-of-fit and Fisher’s exact for small counts; the two-proportion test and the e-commerce price example (<span class="math inline">p=0.3498</span> despite 45,000+ trials).</li>
+<li><strong>Reinhart, <em>Statistics Done Wrong</em> (Ch. 5)</strong> — “a difference in significance does not always make a significant difference”; the <span class="math inline">2B(1-B)</span> probability of a false contradiction; test the difference or give its CI; the wrinkle-serum trial (43% vs 22%, difference not significant); the five statin meta-analyses all near RR 0.9; replications read through truth inflation; why CI, SE and SD bars each mislead as a test by overlap; checking against a fixed value is the only valid eyeball test.</li>
 <li><strong>Martin &amp; Bridgmon, <em>Quantitative &amp; Statistical Research Methods</em></strong> — the ANOVA sum-of-squares decomposition and degrees of freedom (<span class="math inline">K-1</span>, <span class="math inline">N-K</span>); post-hoc Tukey HSD and the rule to run it only after a significant omnibus F.</li>
 </ul>
 </div>
@@ -2095,6 +2137,9 @@ Bruce, Peter, Andrew Bruce, and Peter Gedeck. 2020. <em>Practical Statistics for
 </div>
 <div id="ref-martin_bridgmon" class="csl-entry" role="listitem">
 Martin, William E., and Krista D. Bridgmon. 2012. <em>Quantitative and Statistical Research Methods: From Hypothesis to Results</em>. Jossey-Bass.
+</div>
+<div id="ref-reinhart_swrong" class="csl-entry" role="listitem">
+Reinhart, Alex. 2015. <em>Statistics Done Wrong: The Woefully Complete Guide</em>. No Starch Press.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -2733,104 +2778,162 @@ Martin, William E., and Krista D. Bridgmon. 2012. <em>Quantitative and Statistic
 <span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>of the <span class="co">[</span><span class="ot">power entry</span><span class="co">](statistical-power.qmd)</span>.)</span>
 <span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a><span class="fu">## Which test when?</span></span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a><span class="fu">## Compare the groups, not their p-values</span></span>
 <span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Outcome type <span class="pp">|</span> Two groups <span class="pp">|</span> Three or more groups <span class="pp">|</span></span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Numeric (means)** | [two-sample t-test](hypothesis-testing.qmd) | **ANOVA / F-test** (then Tukey HSD) <span class="pp">|</span></span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Categorical (counts)** | $2\times2$ **chi-square** (or **Fisher's exact** if small) | **chi-square** on the full table <span class="pp">|</span></span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Binary (proportion)** | **two-proportion z-test** <span class="pp">|</span> chi-square across groups <span class="pp">|</span></span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>A different mistake happens *after* the tests are done. "Drug A beat placebo significantly, drug B did</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>not, so A is better than B." Reinhart's rule is that **a difference in significance is not a significant</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>difference** <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>. He gives two reasons. First, $p=0.04$ and $p=0.06$ are almost the same</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>result, even though they fall on opposite sides of the cutoff. Second, a p-value is not an effect size, so</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>two results with similar p-values can still describe quite different effects <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>.</span>
 <span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>Pick by the shape of your outcome and the number of groups; the question — "real difference or</span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>noise?" — is always the same. This table is the group-comparison slice of the full</span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">**map from question to test**</span><span class="co">](choosing-a-statistical-test.qmd)</span>, which adds paired/clustered designs,</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>association and time-to-event outcomes, and the bridge to regression.</span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Running pairwise t-tests instead of ANOVA.** Many comparisons inflate the false-positive rate;</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>  use the omnibus F first, post-hoc tests only after. <span class="co">[</span><span class="ot">@bruce_practical; @martin_bridgmon</span><span class="co">]</span></span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Mining post-hoc pairs after a non-significant F.** If the omnibus test is null, hunting for a</span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>  "significant pair" is p-hacking. The gate exists for a reason. <span class="co">[</span><span class="ot">@martin_bridgmon</span><span class="co">]</span></span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using chi-square with tiny expected counts.** Below ~5 per cell the approximation misleads —</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>  switch to Fisher's exact. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing exposures with conversions.** A huge sample with a rare outcome can still be</span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>  underpowered; precision tracks the count of *events*, not of *trials*. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reporting a significant F as the whole story.** ANOVA says *some* group differs, not *which* or</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>  *by how much*. Follow up with post-hoc tests and effect sizes. <span class="co">[</span><span class="ot">@martin_bridgmon</span><span class="co">]</span></span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>**The probability of a false contradiction is easy to work out.** Suppose two drugs have *identical*</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>real effects, and each trial has power $B$. The chance that one comes out significant and the other</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>does not is</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>P(\text{contradiction}) = 2B(1-B),</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>which reaches **50% when power is 50%** <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>. At the modest power typical of real studies</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>(see the <span class="co">[</span><span class="ot">power entry</span><span class="co">](statistical-power.qmd)</span>), a "significant vs not significant" split is close to a coin</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>toss even when the drugs do exactly the same thing. The fix is to **test the difference itself**. Compare A</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>with B directly, or report a confidence interval for $A - B$. This adds no power, but it stops you inventing</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>a difference that isn't there <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>.</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Reinhart's cases"}</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A best-selling wrinkle serum (2007).** A trial reported that the active serum improved 43% of users</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>  (significant) while the control cream improved 22% (not significant). The advertising treated this as</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>  proof. The paper itself admitted that **the difference between the two groups was not significant**.</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Five statin meta-analyses.** Three concluded that statins reduce mortality and two found "not enough</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>  evidence". Yet all five estimated a relative risk **near 0.9**. The studies agreed on the size of the</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>  effect and disagreed only on which side of a threshold their intervals fell.</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The same logic applies to replications.** "The original was significant and the replication was not"</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>  may not be a contradiction. Truth inflation means the original probably overstated the effect, so the</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>  replication had less real power than it was designed for <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>.</span>
 <span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bruce &amp; Bruce, *Practical Statistics for Data Scientists*** — the multiplicity problem motivating</span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>  ANOVA; the F-test as between- over within-group variance; the web-page-stickiness example</span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>  (means 172/185/176/162; $F=2.74$, $p=0.0776$, not significant); the chi-square observed-vs-expected</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>  logic and statistic; the headline-click example (14/8/12; expected 11.33; $\chi^2=1.666$, df 2, not</span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>  significant); goodness-of-fit and Fisher's exact for small counts; the two-proportion test and the</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>  e-commerce price example ($p=0.3498$ despite 45,000+ trials).</span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Martin &amp; Bridgmon, *Quantitative &amp; Statistical Research Methods*** — the ANOVA sum-of-squares</span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>  decomposition and degrees of freedom ($K-1$, $N-K$); post-hoc Tukey HSD and the rule to run it only</span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>  after a significant omnibus F.</span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>**The one-way ANOVA F-statistic.** For $K$ groups of sizes $n_j$ with group means $\bar y_j$, grand</span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>mean $\bar y$, and total size $N$:</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>\text{SS}_{\text{between}} = \sum_{j=1}^K n_j(\bar y_j - \bar y)^2, \qquad</span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>\text{SS}_{\text{within}} = \sum_{j=1}^K \sum_{i=1}^{n_j} (y_{ij} - \bar y_j)^2,</span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>F = \frac{\text{SS}_{\text{between}}/(K-1)}{\text{SS}_{\text{within}}/(N-K)}</span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>= \frac{\text{MS}_{\text{between}}}{\text{MS}_{\text{within}}} \;\sim\; F_{K-1,\,N-K}\ \text{under } H_0.</span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>Under the null (all group means equal) both mean squares estimate the same $\sigma^2$, so $F\approx1$;</span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>real differences inflate only the numerator. This is the [total-variance</span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>decomposition](../01-foundations/conditional-expectation.qmd) $\operatorname{Var}(Y) =</span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>\operatorname{Var}(E<span class="co">[</span><span class="ot">Y\mid g</span><span class="co">]</span>) + E<span class="co">[</span><span class="ot">\operatorname{Var}(Y\mid g)</span><span class="co">]</span>$ turned into a test of the</span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>between-group term.</span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>**Chi-square expected counts.** For a contingency table, the expected count under independence is</span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>$E_{ij} = (\text{row}_i\,\text{total})(\text{col}_j\,\text{total})/N$. The headline test: expected</span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>$= 1000 \times 34/3000 = 11.33$ clicks each, and</span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>$\chi^2 = \frac{(14-11.33)^2}{11.33} + \frac{(8-11.33)^2}{11.33} + \frac{(12-11.33)^2}{11.33}$ on the</span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>*clicks*, plus the matching non-click cells, $\approx 1.67$ — small for df $=2$.</span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>**Two-proportion z-test.** With pooled proportion $\hat p = (x_1+x_2)/(n_1+n_2)$,</span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>z = \frac{\hat p_1 - \hat p_2}{\sqrt{\hat p(1-\hat p)\left(\tfrac{1}{n_1}+\tfrac{1}{n_2}\right)}}.</span>
-<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>Squaring this $z$ gives exactly the $2\times2$ chi-square statistic — the two tests are one.</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>**Overlapping error bars don't answer the question either.** A common shortcut is to plot two means with</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>bars and check whether the bars overlap. Reinhart shows why this fails <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>:</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**95% confidence intervals** can overlap even when a $t$-test gives $p&lt;0.05$. The overlap check is</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>  *always stricter* than the test, so real differences get missed.</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Standard-error bars** fail the other way. They can *fail* to overlap while the difference is still not</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>  significant.</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Standard-deviation bars** describe how spread out individual observations are, not how precise the</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>  means are, so they cannot answer the question at all. Papers also often don't say which kind of bar they</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>  are showing.</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>Checking an interval against a **fixed value**, such as whether it covers zero, is the one visual check</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>that works. For two groups, run the test. In Reinhart's words, your eyeball "is not a well-defined</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>statistical procedure" <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>.</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="fu">## Which test when?</span></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Outcome type <span class="pp">|</span> Two groups <span class="pp">|</span> Three or more groups <span class="pp">|</span></span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Numeric (means)** | [two-sample t-test](hypothesis-testing.qmd) | **ANOVA / F-test** (then Tukey HSD) <span class="pp">|</span></span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Categorical (counts)** | $2\times2$ **chi-square** (or **Fisher's exact** if small) | **chi-square** on the full table <span class="pp">|</span></span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Binary (proportion)** | **two-proportion z-test** <span class="pp">|</span> chi-square across groups <span class="pp">|</span></span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>Pick by the shape of your outcome and the number of groups; the question — "real difference or</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>noise?" — is always the same. This table is the group-comparison slice of the full</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">**map from question to test**</span><span class="co">](choosing-a-statistical-test.qmd)</span>, which adds paired/clustered designs,</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>association and time-to-event outcomes, and the bridge to regression.</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Running pairwise t-tests instead of ANOVA.** Many comparisons inflate the false-positive rate;</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>  use the omnibus F first, post-hoc tests only after. <span class="co">[</span><span class="ot">@bruce_practical; @martin_bridgmon</span><span class="co">]</span></span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Mining post-hoc pairs after a non-significant F.** If the omnibus test is null, hunting for a</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>  "significant pair" is p-hacking. The gate exists for a reason. <span class="co">[</span><span class="ot">@martin_bridgmon</span><span class="co">]</span></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using chi-square with tiny expected counts.** Below ~5 per cell the approximation misleads —</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>  switch to Fisher's exact. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing exposures with conversions.** A huge sample with a rare outcome can still be</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  underpowered; precision tracks the count of *events*, not of *trials*. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Comparing significance instead of comparing groups.** "A was significant, B wasn't" is not evidence</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>  that A beats B. With identical effects and power $B$, that split happens with probability $2B(1-B)$.</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>  Test $A-B$ directly, and don't judge it by whether error bars overlap. <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reporting a significant F as the whole story.** ANOVA says *some* group differs, not *which* or</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>  *by how much*. Follow up with post-hoc tests and effect sizes. <span class="co">[</span><span class="ot">@martin_bridgmon</span><span class="co">]</span></span>
 <span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
 <span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">hypothesis testing &amp; p-values</span><span class="co">](hypothesis-testing.qmd)</span> (the null/alternative logic</span>
-<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>  and the t-test it generalises), <span class="co">[</span><span class="ot">the law of total variance</span><span class="co">](../01-foundations/conditional-expectation.qmd)</span></span>
-<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>  (ANOVA's between/within split), and <span class="co">[</span><span class="ot">the common distributions</span><span class="co">](../01-foundations/common-distributions.qmd)</span></span>
-<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>  (the F, chi-square, and Normal-approximation-to-binomial).</span>
-<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Sits beside:** <span class="co">[</span><span class="ot">resampling &amp; distribution-free tests</span><span class="co">](resampling-and-nonparametric-tests.qmd)</span> — the</span>
-<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>  assumption-light alternatives when ANOVA's normality fails.</span>
-<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">regression</span><span class="co">](../03-regression/index.qmd)</span>, which *contains* ANOVA as a special case</span>
-<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>  (regression on group dummies reproduces the F-test) and extends it to continuous predictors and</span>
-<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>  controls.</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bruce &amp; Bruce, *Practical Statistics for Data Scientists*** — the multiplicity problem motivating</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>  ANOVA; the F-test as between- over within-group variance; the web-page-stickiness example</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>  (means 172/185/176/162; $F=2.74$, $p=0.0776$, not significant); the chi-square observed-vs-expected</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>  logic and statistic; the headline-click example (14/8/12; expected 11.33; $\chi^2=1.666$, df 2, not</span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>  significant); goodness-of-fit and Fisher's exact for small counts; the two-proportion test and the</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>  e-commerce price example ($p=0.3498$ despite 45,000+ trials).</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reinhart, *Statistics Done Wrong* (Ch. 5)** — "a difference in significance does not always make a</span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>  significant difference"; the $2B(1-B)$ probability of a false contradiction; test the difference or give</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>  its CI; the wrinkle-serum trial (43% vs 22%, difference not significant); the five statin meta-analyses</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>  all near RR 0.9; replications read through truth inflation; why CI, SE and SD bars each mislead as a test</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>  by overlap; checking against a fixed value is the only valid eyeball test.</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Martin &amp; Bridgmon, *Quantitative &amp; Statistical Research Methods*** — the ANOVA sum-of-squares</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>  decomposition and degrees of freedom ($K-1$, $N-K$); post-hoc Tukey HSD and the rule to run it only</span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>  after a significant omnibus F.</span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>**The one-way ANOVA F-statistic.** For $K$ groups of sizes $n_j$ with group means $\bar y_j$, grand</span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>mean $\bar y$, and total size $N$:</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>\text{SS}_{\text{between}} = \sum_{j=1}^K n_j(\bar y_j - \bar y)^2, \qquad</span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>\text{SS}_{\text{within}} = \sum_{j=1}^K \sum_{i=1}^{n_j} (y_{ij} - \bar y_j)^2,</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>F = \frac{\text{SS}_{\text{between}}/(K-1)}{\text{SS}_{\text{within}}/(N-K)}</span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a>= \frac{\text{MS}_{\text{between}}}{\text{MS}_{\text{within}}} \;\sim\; F_{K-1,\,N-K}\ \text{under } H_0.</span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>Under the null (all group means equal) both mean squares estimate the same $\sigma^2$, so $F\approx1$;</span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a>real differences inflate only the numerator. This is the [total-variance</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>decomposition](../01-foundations/conditional-expectation.qmd) $\operatorname{Var}(Y) =</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>\operatorname{Var}(E<span class="co">[</span><span class="ot">Y\mid g</span><span class="co">]</span>) + E<span class="co">[</span><span class="ot">\operatorname{Var}(Y\mid g)</span><span class="co">]</span>$ turned into a test of the</span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>between-group term.</span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>**Chi-square expected counts.** For a contingency table, the expected count under independence is</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>$E_{ij} = (\text{row}_i\,\text{total})(\text{col}_j\,\text{total})/N$. The headline test: expected</span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>$= 1000 \times 34/3000 = 11.33$ clicks each, and</span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>$\chi^2 = \frac{(14-11.33)^2}{11.33} + \frac{(8-11.33)^2}{11.33} + \frac{(12-11.33)^2}{11.33}$ on the</span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>*clicks*, plus the matching non-click cells, $\approx 1.67$ — small for df $=2$.</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a>**Two-proportion z-test.** With pooled proportion $\hat p = (x_1+x_2)/(n_1+n_2)$,</span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>z = \frac{\hat p_1 - \hat p_2}{\sqrt{\hat p(1-\hat p)\left(\tfrac{1}{n_1}+\tfrac{1}{n_2}\right)}}.</span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>Squaring this $z$ gives exactly the $2\times2$ chi-square statistic — the two tests are one.</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">hypothesis testing &amp; p-values</span><span class="co">](hypothesis-testing.qmd)</span> (the null/alternative logic</span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a>  and the t-test it generalises), <span class="co">[</span><span class="ot">the law of total variance</span><span class="co">](../01-foundations/conditional-expectation.qmd)</span></span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>  (ANOVA's between/within split), and <span class="co">[</span><span class="ot">the common distributions</span><span class="co">](../01-foundations/common-distributions.qmd)</span></span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a>  (the F, chi-square, and Normal-approximation-to-binomial).</span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Sits beside:** <span class="co">[</span><span class="ot">resampling &amp; distribution-free tests</span><span class="co">](resampling-and-nonparametric-tests.qmd)</span> — the</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>  assumption-light alternatives when ANOVA's normality fails.</span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">regression</span><span class="co">](../03-regression/index.qmd)</span>, which *contains* ANOVA as a special case</span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>  (regression on group dummies reproduces the F-test) and extends it to continuous predictors and</span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>  controls.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

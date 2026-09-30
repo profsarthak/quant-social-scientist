@@ -905,6 +905,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/distributed-lags-and-interventions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Distributed Lags, Interventions &amp; Transfer Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../content/04-predictive/var-and-impulse-responses.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Vector Autoregression: VAR, Granger &amp; Impulse Responses</span></a>
   </div>
@@ -1810,6 +1816,7 @@ window.Quarto = {
   <li><a href="#the-prosecutors-fallacy-base-rate-neglect" id="toc-the-prosecutors-fallacy-base-rate-neglect" class="nav-link" data-scroll-target="#the-prosecutors-fallacy-base-rate-neglect">The prosecutor’s fallacy: base-rate neglect</a></li>
   <li><a href="#berksons-paradox-collider-bias-by-selection" id="toc-berksons-paradox-collider-bias-by-selection" class="nav-link" data-scroll-target="#berksons-paradox-collider-bias-by-selection">Berkson’s paradox: collider bias by selection</a></li>
   <li><a href="#the-thread-conditioning-is-a-causal-act" id="toc-the-thread-conditioning-is-a-causal-act" class="nav-link" data-scroll-target="#the-thread-conditioning-is-a-causal-act">The thread: conditioning is a causal act</a></li>
+  <li><a href="#regression-to-the-mean-selecting-on-luck" id="toc-regression-to-the-mean-selecting-on-luck" class="nav-link" data-scroll-target="#regression-to-the-mean-selecting-on-luck">Regression to the mean: selecting on luck</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
   <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
@@ -1823,7 +1830,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../content/01-foundations/index.html">I · Foundations: Probability &amp; Data</a></li><li class="breadcrumb-item"><a href="../../content/01-foundations/what-probability-is.html">Probability</a></li><li class="breadcrumb-item"><a href="../../content/01-foundations/famous-paradoxes.html">Famous Paradoxes: Simpson, Monty Hall &amp; the Prosecutor</a></li></ol></nav>
 <div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">Famous Paradoxes: Simpson, Monty Hall &amp; the Prosecutor</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
-<p class="subtitle lead">The same data can say opposite things depending on how you slice it — and only a causal story tells you which slice is right. Four puzzles where intuition fails, and why they matter.</p>
+<p class="subtitle lead">The same data can say opposite things depending on how you slice it — and only a causal story tells you which slice is right. Five puzzles where intuition fails, and why they matter.</p>
 </div>
 
 
@@ -1906,15 +1913,15 @@ window.Quarto = {
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>x_all <span class="op">=</span> np.concatenate([xA, xB])<span class="op">;</span> y_all <span class="op">=</span> np.concatenate([yA, yB])</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.3</span>))</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> x, y, c, lab <span class="kw">in</span> [(xA, yA, <span class="st">"#161613"</span>, <span class="st">"group A"</span>), (xB, yB, <span class="st">"#8a8a7e"</span>, <span class="st">"group B"</span>)]:</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> x, y, c, lab <span class="kw">in</span> [(xA, yA, <span class="st">"#161613"</span>, <span class="st">"group A"</span>), (xB, yB, <span class="st">"#b7b6a8"</span>, <span class="st">"group B"</span>)]:</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y, s<span class="op">=</span><span class="dv">14</span>, color<span class="op">=</span>c, alpha<span class="op">=</span><span class="fl">0.55</span>, label<span class="op">=</span>lab)</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    b1, b0 <span class="op">=</span> np.polyfit(x, y, <span class="dv">1</span>)</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    xs <span class="op">=</span> np.linspace(x.<span class="bu">min</span>(), x.<span class="bu">max</span>(), <span class="dv">20</span>)</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    ax.plot(xs, b0<span class="op">+</span>b1<span class="op">*</span>xs, <span class="st">"--"</span>, color<span class="op">=</span>c, lw<span class="op">=</span><span class="dv">2</span>)</span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>b1, b0 <span class="op">=</span> np.polyfit(x_all, y_all, <span class="dv">1</span>)</span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="dv">1</span>, <span class="dv">9</span>, <span class="dv">30</span>)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, b0<span class="op">+</span>b1<span class="op">*</span>xs, <span class="st">"-"</span>, color<span class="op">=</span><span class="st">"black"</span>, lw<span class="op">=</span><span class="fl">2.6</span>, label<span class="op">=</span><span class="ss">f"overall fit (slope +</span><span class="sc">{</span>b1<span class="sc">:.2f}</span><span class="ss">)"</span>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="dv">2</span>, <span class="fl">4.2</span>, <span class="st">"within groups: slope −1.0"</span>, fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"#444"</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, b0<span class="op">+</span>b1<span class="op">*</span>xs, <span class="st">"-"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">2.6</span>, label<span class="op">=</span><span class="ss">f"overall fit (slope +</span><span class="sc">{</span>b1<span class="sc">:.2f}</span><span class="ss">)"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="dv">2</span>, <span class="fl">4.2</span>, <span class="st">"within groups: slope −1.0"</span>, fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>)</span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"x"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"y"</span>)</span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Simpson's paradox: within-group ↓ but aggregate ↑"</span>)</span>
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
@@ -1928,7 +1935,7 @@ window.Quarto = {
 <img src="famous-paradoxes_files/figure-html/fig-simpson-output-1.png" width="681" height="404" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-simpson-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Simpson’s paradox in continuous form. Within each group (blue, orange) the relationship between x and y is clearly negative (dashed within-group fits). But the groups are offset — the orange group sits up and to the right — so the overall regression through all the points (solid black) slopes positively. Aggregate and subgroup trends point in opposite directions. Which is ‘the’ relationship? The data can’t say; only knowing whether the grouping variable is a confounder (stratify) or a mediator (don’t) resolves it.
+Figure&nbsp;1: Simpson’s paradox in continuous form. Within each group (dark ink, light grey) the relationship between x and y is clearly negative (dashed within-group fits). But the groups are offset — the grey group sits up and to the right — so the overall regression through all the points (solid orange) slopes positively. Aggregate and subgroup trends point in opposite directions. Which is ‘the’ relationship? The data can’t say; only knowing whether the grouping variable is a confounder (stratify) or a mediator (don’t) resolves it.
 </figcaption>
 </figure>
 </div>
@@ -1960,6 +1967,18 @@ Figure&nbsp;1: Simpson’s paradox in continuous form. Within each group (blue, 
 </ul>
 <p>No amount of data tells you which is which — that knowledge comes from a <a href="../../content/05-causal-inference/directed-acyclic-graphs.html">causal model</a>. This is the Book of Why’s thesis in miniature.</p>
 </section>
+<section id="regression-to-the-mean-selecting-on-luck" class="level2">
+<h2 class="anchored" data-anchor-id="regression-to-the-mean-selecting-on-luck">Regression to the mean: selecting on luck</h2>
+<p>Here is one more paradox, with a different moral. Rank businesses by this quarter’s revenue, or patients by today’s blood pressure, and pick the most extreme. You have picked out the ones who are truly exceptional, <em>and</em> the ones who were <strong>lucky (or unlucky) this time</strong>. Measure them again and the luck has gone, so on average the group moves back towards the middle. Reinhart puts it simply: luck doesn’t last, and “on average, everyone’s luck is average” <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>.</p>
+<ul>
+<li><strong>Galton (1869)</strong> noticed that the descendants of eminent people were usually less eminent than their parents. Heights behaved the same way: very tall parents tended to have children closer to average, and very short parents tended to have taller children <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>.</li>
+<li><strong>Selecting patients on a high reading.</strong> Some patients selected for high blood pressure have it chronically, but some were having a bad day or were measured with a badly calibrated cuff. Their readings will fall <em>whether or not you treat them</em>. A before/after study on such a sample is <strong>biased towards finding an effect</strong> simply because of how the patients were selected. The cure is a randomised <strong>control group</strong> that regresses by the same amount <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>.</li>
+<li><strong>Schools and interventions.</strong> Last year’s worst schools will tend to do better next year and the best will tend to do worse. That can convince administrators that their interventions worked, when the change was regression to the mean <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>.</li>
+<li><strong>Secrist and Hotelling.</strong> In <em>The Triumph of Mediocrity in Business</em> (1933), Horace Secrist argued from large amounts of data that competition pushes successful and unsuccessful firms towards the middle. Reviewing the book, Harold Hotelling pointed out that the same data could “prove” the opposite. Follow the top firms <em>forward</em> and they decline; trace them <em>backward</em> from their peak and they improve. Secrist had shown only that the ratios “have a tendency to wander about” <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>.</li>
+</ul>
+<p><strong>A related trap: small units at both extremes.</strong> Small groups are noisier, so they fill <em>both</em> ends of any league table. Reinhart gives two examples. The best-scoring schools are mostly small, but so are the worst-scoring ones. The U.S. counties with the <em>lowest</em> kidney-cancer rates are mostly rural, and so are the counties with the <em>highest</em> rates, because one case in a county of ten people produces an extreme rate <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>. The standard fix is <strong>shrinkage</strong>: pull small units’ estimates towards the overall average. This is the logic of <a href="../../content/02-inference/hierarchical-bayesian-models.html">hierarchical models</a>. It comes at a cost, because a small unit that really is unusual gets pulled towards average as well <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>.</p>
+<p>The link to the rest of this page is that regression to the mean is also a <strong>selection</strong> effect. As with Berkson’s paradox, the pattern comes from <em>which cases you chose to look at</em>, not from anything that happened to them.</p>
+</section>
 <section id="common-pitfalls" class="level2">
 <h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
 <div class="callout callout-style-default callout-warning callout-titled" title="Where this goes wrong">
@@ -1976,6 +1995,7 @@ Figure&nbsp;1: Simpson’s paradox in continuous form. Within each group (blue, 
 <li><strong>Always trusting the aggregate (or always the subgroups).</strong> Simpson’s shows either can be right — decide by the causal role of the grouping variable. <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span></li>
 <li><strong>Treating the host’s door (or any collider) as uninformative.</strong> Conditioning on a common effect changes the probabilities; ignore that and you misjudge Monty Hall and selection-biased samples. <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span></li>
 <li><strong>Transposing the conditional.</strong> <span class="math inline">P(\text{match}\mid\text{innocent})\ne P(\text{innocent}\mid\text{match})</span>; always bring in the base rate. <span class="citation" data-cites="wheelan_naked">(<a href="#ref-wheelan_naked" role="doc-biblioref">Wheelan 2013</a>)</span></li>
+<li><strong>Crediting an intervention with regression to the mean.</strong> If units were chosen <em>because</em> they were extreme (worst schools, highest readings), they will move back towards average anyway. Without a control group, a “before vs after” improvement tells you nothing. <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></li>
 <li><strong>Reading correlations in a selected sample as real.</strong> Berkson’s bias is everywhere data is filtered on an outcome (hospitalised, admitted, hired, dated). <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span></li>
 </ul>
 </div>
@@ -1997,6 +2017,7 @@ Figure&nbsp;1: Simpson’s paradox in continuous form. Within each group (blue, 
 <div class="callout-body-container callout-body">
 <ul>
 <li><strong>Pearl &amp; Mackenzie, <em>The Book of Why</em></strong> — <strong>Simpson’s paradox</strong> (the heart-drug 5%/7.5%, 30%/40%, 22%/18% reversal; confounder + unequal sizes; resolution only via a causal model — adjust for a confounder, not a mediator); <strong>Monty Hall</strong> (1/3 vs 2/3, the host’s informed action, the <strong>collider</strong> framing); <strong>Berkson’s paradox / collider bias</strong> (the attractive-jerks dating pool and the hospital example).</li>
+<li><strong>Reinhart, <em>Statistics Done Wrong</em> (Chs. 2 &amp; 6)</strong> — <strong>regression to the mean</strong> (“everyone’s luck is average”): Galton’s eminence and heights; blood-pressure selection biasing a trial towards an effect; schools crediting interventions; Secrist’s <em>Triumph of Mediocrity</em> and Hotelling’s rebuttal (“ratios … wander about”). <strong>Little extremes</strong>: small schools at both ends of the league table, rural counties with both the lowest and highest kidney-cancer rates, and <strong>shrinkage</strong> with its opposite bias.</li>
 <li><strong>Wheelan, <em>Naked Statistics</em></strong> — the <strong>prosecutor’s fallacy</strong> / transposed conditional and <strong>base-rate neglect</strong> (the 1%-blood-type, 8,000-suspects example).</li>
 </ul>
 </div>
@@ -2011,6 +2032,7 @@ Figure&nbsp;1: Simpson’s paradox in continuous form. Within each group (blue, 
 \dfrac{1\cdot\frac13}{\frac12\cdot\frac13 + 1\cdot\frac13} = \dfrac{1/3}{1/6 + 1/3} = \dfrac{1/3}{1/2} = \tfrac{2}{3}</span>, versus <span class="math inline">P(\text{car in 1}\mid\text{opens 3})=1/3</span>. Switch.</p>
 <p><strong>Prosecutor by Bayes.</strong> With prior guilt <span class="math inline">P(G)=1/800{,}000</span> (one true culprit) and a match that is certain if guilty, <span class="math inline">P(M\mid G)=1</span>, and <span class="math inline">P(M\mid \bar G)=0.01</span>: <span class="math inline">P(G\mid M)=\frac{1\cdot\frac1{800{,}000}}{1\cdot\frac1{800{,}000} + 0.01\cdot\frac{799{,}999}{800{,}000}}
 \approx \frac{1}{8001}</span> — about <span class="math inline">1/8000</span>, not <span class="math inline">0.99</span>. The likelihood is not the posterior.</p>
+<p><strong>Regression to the mean, formally.</strong> Let an observed score be <span class="math inline">X_t = \mu_i + e_t</span>, a stable true level plus independent noise, with <span class="math inline">\operatorname{Var}(\mu_i)=\sigma_\mu^2</span> and <span class="math inline">\operatorname{Var}(e_t)=\sigma_e^2</span>. Then <span class="math inline">\operatorname{Corr}(X_1,X_2)=\rho=\sigma_\mu^2/(\sigma_\mu^2+\sigma_e^2)</span> and, for jointly Normal scores, <span class="math inline">\mathbb{E}[X_2\mid X_1=x] = \bar\mu + \rho\,(x-\bar\mu)</span>. The expected second score lies a fraction <span class="math inline">\rho&lt;1</span> of the first score’s distance from the mean. The noisier the measurement (smaller <span class="math inline">\rho</span>), the stronger the pull. It happens with no change at all in anyone’s true level. Shrinkage estimators use the same weight, <span class="math inline">\hat\mu_i = \bar\mu + \rho_i(\bar x_i - \bar\mu)</span>, with <span class="math inline">\rho_i</span> rising in the unit’s sample size.</p>
 <p><strong>Collider bias, formally.</strong> If <span class="math inline">A\to C\leftarrow B</span> with <span class="math inline">A\perp B</span> marginally, then conditioning on the collider <span class="math inline">C</span> generally makes <span class="math inline">A\not\perp B\mid C</span> — an induced dependence. Berkson’s “you’d date them” and Monty’s “opened door” are both <span class="math inline">C</span>.</p>
 </div>
 </section>
@@ -2031,6 +2053,9 @@ Figure&nbsp;1: Simpson’s paradox in continuous form. Within each group (blue, 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-pearl_why" class="csl-entry" role="listitem">
 Pearl, Judea, and Dana Mackenzie. 2018. <em>The Book of Why: The New Science of Cause and Effect</em>. Basic Books.
+</div>
+<div id="ref-reinhart_swrong" class="csl-entry" role="listitem">
+Reinhart, Alex. 2015. <em>Statistics Done Wrong: The Woefully Complete Guide</em>. No Starch Press.
 </div>
 <div id="ref-wheelan_naked" class="csl-entry" role="listitem">
 Wheelan, Charles. 2013. <em>Naked Statistics: Stripping the Dread from the Data</em>. W. W. Norton &amp; Company.
@@ -2506,7 +2531,7 @@ Wheelan, Charles. 2013. <em>Naked Statistics: Stripping the Dread from the Data<
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Famous Paradoxes: Simpson, Monty Hall &amp; the Prosecutor"</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "The same data can say opposite things depending on how you slice it — and only a causal story tells you which slice is right. Four puzzles where intuition fails, and why they matter."</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "The same data can say opposite things depending on how you slice it — and only a causal story tells you which slice is right. Five puzzles where intuition fails, and why they matter."</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
@@ -2554,7 +2579,7 @@ Wheelan, Charles. 2013. <em>Naked Statistics: Stripping the Dread from the Data<
 <span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-simpson</span></span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Simpson's paradox in continuous form. Within each group (blue, orange) the relationship between x and y is clearly negative (dashed within-group fits). But the groups are offset — the orange group sits up and to the right — so the overall regression through all the points (solid black) slopes positively. Aggregate and subgroup trends point in opposite directions. Which is 'the' relationship? The data can't say; only knowing whether the grouping variable is a confounder (stratify) or a mediator (don't) resolves it."</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Simpson's paradox in continuous form. Within each group (dark ink, light grey) the relationship between x and y is clearly negative (dashed within-group fits). But the groups are offset — the grey group sits up and to the right — so the overall regression through all the points (solid orange) slopes positively. Aggregate and subgroup trends point in opposite directions. Which is 'the' relationship? The data can't say; only knowing whether the grouping variable is a confounder (stratify) or a mediator (don't) resolves it."</span></span>
 <span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
 <span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
 <span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
@@ -2573,15 +2598,15 @@ Wheelan, Charles. 2013. <em>Naked Statistics: Stripping the Dread from the Data<
 <span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>x_all <span class="op">=</span> np.concatenate([xA, xB])<span class="op">;</span> y_all <span class="op">=</span> np.concatenate([yA, yB])</span>
 <span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.3</span>))</span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> x, y, c, lab <span class="kw">in</span> [(xA, yA, <span class="st">"#161613"</span>, <span class="st">"group A"</span>), (xB, yB, <span class="st">"#8a8a7e"</span>, <span class="st">"group B"</span>)]:</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> x, y, c, lab <span class="kw">in</span> [(xA, yA, <span class="st">"#161613"</span>, <span class="st">"group A"</span>), (xB, yB, <span class="st">"#b7b6a8"</span>, <span class="st">"group B"</span>)]:</span>
 <span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y, s<span class="op">=</span><span class="dv">14</span>, color<span class="op">=</span>c, alpha<span class="op">=</span><span class="fl">0.55</span>, label<span class="op">=</span>lab)</span>
 <span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>    b1, b0 <span class="op">=</span> np.polyfit(x, y, <span class="dv">1</span>)</span>
 <span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    xs <span class="op">=</span> np.linspace(x.<span class="bu">min</span>(), x.<span class="bu">max</span>(), <span class="dv">20</span>)</span>
 <span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    ax.plot(xs, b0<span class="op">+</span>b1<span class="op">*</span>xs, <span class="st">"--"</span>, color<span class="op">=</span>c, lw<span class="op">=</span><span class="dv">2</span>)</span>
 <span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>b1, b0 <span class="op">=</span> np.polyfit(x_all, y_all, <span class="dv">1</span>)</span>
 <span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="dv">1</span>, <span class="dv">9</span>, <span class="dv">30</span>)</span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, b0<span class="op">+</span>b1<span class="op">*</span>xs, <span class="st">"-"</span>, color<span class="op">=</span><span class="st">"black"</span>, lw<span class="op">=</span><span class="fl">2.6</span>, label<span class="op">=</span><span class="ss">f"overall fit (slope +</span><span class="sc">{</span>b1<span class="sc">:.2f}</span><span class="ss">)"</span>)</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="dv">2</span>, <span class="fl">4.2</span>, <span class="st">"within groups: slope −1.0"</span>, fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"#444"</span>)</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, b0<span class="op">+</span>b1<span class="op">*</span>xs, <span class="st">"-"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">2.6</span>, label<span class="op">=</span><span class="ss">f"overall fit (slope +</span><span class="sc">{</span>b1<span class="sc">:.2f}</span><span class="ss">)"</span>)</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="dv">2</span>, <span class="fl">4.2</span>, <span class="st">"within groups: slope −1.0"</span>, fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>)</span>
 <span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"x"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"y"</span>)</span>
 <span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Simpson's paradox: within-group ↓ but aggregate ↑"</span>)</span>
 <span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
@@ -2636,66 +2661,121 @@ Wheelan, Charles. 2013. <em>Naked Statistics: Stripping the Dread from the Data<
 <span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>No amount of data tells you which is which — that knowledge comes from a [causal</span>
 <span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>model](../05-causal-inference/directed-acyclic-graphs.qmd). This is the Book of Why's thesis in miniature.</span>
 <span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="fu">## Regression to the mean: selecting on luck</span></span>
 <span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Always trusting the aggregate (or always the subgroups).** Simpson's shows either can be right — decide</span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>  by the causal role of the grouping variable. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating the host's door (or any collider) as uninformative.** Conditioning on a common effect changes</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>  the probabilities; ignore that and you misjudge Monty Hall and selection-biased samples. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Transposing the conditional.** $P(\text{match}\mid\text{innocent})\ne P(\text{innocent}\mid\text{match})$;</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>  always bring in the base rate. <span class="co">[</span><span class="ot">@wheelan_naked</span><span class="co">]</span></span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading correlations in a selected sample as real.** Berkson's bias is everywhere data is filtered on an</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>  outcome (hospitalised, admitted, hired, dated). <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pearl &amp; Mackenzie, *The Book of Why*** — **Simpson's paradox** (the heart-drug 5%/7.5%, 30%/40%,</span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>  22%/18% reversal; confounder + unequal sizes; resolution only via a causal model — adjust for a confounder,</span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>  not a mediator); **Monty Hall** (1/3 vs 2/3, the host's informed action, the **collider** framing);</span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>  **Berkson's paradox / collider bias** (the attractive-jerks dating pool and the hospital example).</span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wheelan, *Naked Statistics*** — the **prosecutor's fallacy** / transposed conditional and **base-rate</span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>  neglect** (the 1%-blood-type, 8,000-suspects example).</span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>**Simpson's algebra.** The aggregate rate is a **size-weighted average** of subgroup rates. With drug-group</span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>women heavily outnumbering drug-group men (and women low-risk), the drug average</span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>$\approx w\cdot(\text{low women rate}) + (1-w)\cdot(\text{men rate})$ puts large weight $w$ on the low value;</span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>the control average reverses the weights, putting more weight on high-risk men. Different weights on the same</span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>two risk levels flip the comparison — even though, level-for-level, the drug is worse. The reversal is a</span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>weighting artefact; the fix is to compare **like with like** (the causal adjustment).</span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>**Monty Hall by Bayes.** Let the car be behind Door 1, 2, or 3 with prior $1/3$ each; you pick Door 1. The</span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>host opens Door 3. $P(\text{host opens 3}\mid \text{car in 1})=1/2$, $P(\cdot\mid\text{car in 2})=1$,</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>$P(\cdot\mid\text{car in 3})=0$. By Bayes, $P(\text{car in 2}\mid\text{opens 3}) =</span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>\dfrac{1\cdot\frac13}{\frac12\cdot\frac13 + 1\cdot\frac13} = \dfrac{1/3}{1/6 + 1/3} = \dfrac{1/3}{1/2} = \tfrac{2}{3}$,</span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>versus $P(\text{car in 1}\mid\text{opens 3})=1/3$. Switch.</span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>**Prosecutor by Bayes.** With prior guilt $P(G)=1/800{,}000$ (one true culprit) and a match that is certain</span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>if guilty, $P(M\mid G)=1$, and $P(M\mid \bar G)=0.01$:</span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>$P(G\mid M)=\frac{1\cdot\frac1{800{,}000}}{1\cdot\frac1{800{,}000} + 0.01\cdot\frac{799{,}999}{800{,}000}}</span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>\approx \frac{1}{8001}$ — about $1/8000$, not $0.99$. The likelihood is not the posterior.</span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>**Collider bias, formally.** If $A\to C\leftarrow B$ with $A\perp B$ marginally, then conditioning on the</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>collider $C$ generally makes $A\not\perp B\mid C$ — an induced dependence. Berkson's "you'd date them" and</span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>Monty's "opened door" are both $C$.</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>Here is one more paradox, with a different moral. Rank businesses by this quarter's revenue, or patients</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>by today's blood pressure, and pick the most extreme. You have picked out the ones who are truly</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>exceptional, *and* the ones who were **lucky (or unlucky) this time**. Measure them again and the luck has</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>gone, so on average the group moves back towards the middle. Reinhart puts it simply: luck doesn't last,</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>and "on average, everyone's luck is average" <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>.</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Galton (1869)** noticed that the descendants of eminent people were usually less eminent than their</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>  parents. Heights behaved the same way: very tall parents tended to have children closer to average, and</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>  very short parents tended to have taller children <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>.</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Selecting patients on a high reading.** Some patients selected for high blood pressure have it</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>  chronically, but some were having a bad day or were measured with a badly calibrated cuff. Their readings</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>  will fall *whether or not you treat them*. A before/after study on such a sample is **biased towards</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>  finding an effect** simply because of how the patients were selected. The cure is a randomised</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>  **control group** that regresses by the same amount <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>.</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Schools and interventions.** Last year's worst schools will tend to do better next year and the best</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>  will tend to do worse. That can convince administrators that their interventions worked, when the change</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>  was regression to the mean <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>.</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Secrist and Hotelling.** In *The Triumph of Mediocrity in Business* (1933), Horace Secrist argued from</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>  large amounts of data that competition pushes successful and unsuccessful firms towards the middle.</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>  Reviewing the book, Harold Hotelling pointed out that the same data could "prove" the opposite. Follow the</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>  top firms *forward* and they decline; trace them *backward* from their peak and they improve. Secrist had</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>  shown only that the ratios "have a tendency to wander about" <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>.</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>**A related trap: small units at both extremes.** Small groups are noisier, so they fill *both* ends of any</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>league table. Reinhart gives two examples. The best-scoring schools are mostly small, but so are the</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>worst-scoring ones. The U.S. counties with the *lowest* kidney-cancer rates are mostly rural, and so are</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>the counties with the *highest* rates, because one case in a county of ten people produces an extreme</span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>rate <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>. The standard fix is **shrinkage**: pull small units' estimates towards the overall</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>average. This is the logic of <span class="co">[</span><span class="ot">hierarchical models</span><span class="co">](../02-inference/hierarchical-bayesian-models.qmd)</span>. It</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>comes at a cost, because a small unit that really is unusual gets pulled towards average as well</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>.</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>The link to the rest of this page is that regression to the mean is also a **selection** effect. As with</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>Berkson's paradox, the pattern comes from *which cases you chose to look at*, not from anything that</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>happened to them.</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Always trusting the aggregate (or always the subgroups).** Simpson's shows either can be right — decide</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>  by the causal role of the grouping variable. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating the host's door (or any collider) as uninformative.** Conditioning on a common effect changes</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>  the probabilities; ignore that and you misjudge Monty Hall and selection-biased samples. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Transposing the conditional.** $P(\text{match}\mid\text{innocent})\ne P(\text{innocent}\mid\text{match})$;</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>  always bring in the base rate. <span class="co">[</span><span class="ot">@wheelan_naked</span><span class="co">]</span></span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Crediting an intervention with regression to the mean.** If units were chosen *because* they were</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>  extreme (worst schools, highest readings), they will move back towards average anyway. Without a control</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  group, a "before vs after" improvement tells you nothing. <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading correlations in a selected sample as real.** Berkson's bias is everywhere data is filtered on an</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>  outcome (hospitalised, admitted, hired, dated). <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">conditional probability</span><span class="co">](conditional-probability.qmd)</span> and <span class="co">[</span><span class="ot">Bayes' theorem</span><span class="co">](bayes-theorem.qmd)</span></span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>  (Monty Hall, the prosecutor) — the machinery these puzzles exercise.</span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">DAGs, confounders &amp; colliders</span><span class="co">](../05-causal-inference/directed-acyclic-graphs.qmd)</span> (the</span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>  causal grammar that resolves all four) and <span class="co">[</span><span class="ot">what regression can't tell you</span><span class="co">](../03-regression/regression-and-causality.qmd)</span>.</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Echoes:** <span class="co">[</span><span class="ot">the Bayesian worldview</span><span class="co">](../02-inference/bayesian-worldview.qmd)</span> (base rates as priors) and the</span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>  selection-bias cautions throughout <span class="co">[</span><span class="ot">Part V</span><span class="co">](../05-causal-inference/index.qmd)</span>.</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pearl &amp; Mackenzie, *The Book of Why*** — **Simpson's paradox** (the heart-drug 5%/7.5%, 30%/40%,</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>  22%/18% reversal; confounder + unequal sizes; resolution only via a causal model — adjust for a confounder,</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>  not a mediator); **Monty Hall** (1/3 vs 2/3, the host's informed action, the **collider** framing);</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>  **Berkson's paradox / collider bias** (the attractive-jerks dating pool and the hospital example).</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reinhart, *Statistics Done Wrong* (Chs. 2 &amp; 6)** — **regression to the mean** ("everyone's luck is</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>  average"): Galton's eminence and heights; blood-pressure selection biasing a trial towards an effect;</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>  schools crediting interventions; Secrist's *Triumph of Mediocrity* and Hotelling's rebuttal ("ratios …</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>  wander about"). **Little extremes**: small schools at both ends of the league table, rural counties with</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>  both the lowest and highest kidney-cancer rates, and **shrinkage** with its opposite bias.</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wheelan, *Naked Statistics*** — the **prosecutor's fallacy** / transposed conditional and **base-rate</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>  neglect** (the 1%-blood-type, 8,000-suspects example).</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>**Simpson's algebra.** The aggregate rate is a **size-weighted average** of subgroup rates. With drug-group</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>women heavily outnumbering drug-group men (and women low-risk), the drug average</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>$\approx w\cdot(\text{low women rate}) + (1-w)\cdot(\text{men rate})$ puts large weight $w$ on the low value;</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>the control average reverses the weights, putting more weight on high-risk men. Different weights on the same</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>two risk levels flip the comparison — even though, level-for-level, the drug is worse. The reversal is a</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>weighting artefact; the fix is to compare **like with like** (the causal adjustment).</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>**Monty Hall by Bayes.** Let the car be behind Door 1, 2, or 3 with prior $1/3$ each; you pick Door 1. The</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>host opens Door 3. $P(\text{host opens 3}\mid \text{car in 1})=1/2$, $P(\cdot\mid\text{car in 2})=1$,</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>$P(\cdot\mid\text{car in 3})=0$. By Bayes, $P(\text{car in 2}\mid\text{opens 3}) =</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>\dfrac{1\cdot\frac13}{\frac12\cdot\frac13 + 1\cdot\frac13} = \dfrac{1/3}{1/6 + 1/3} = \dfrac{1/3}{1/2} = \tfrac{2}{3}$,</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>versus $P(\text{car in 1}\mid\text{opens 3})=1/3$. Switch.</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>**Prosecutor by Bayes.** With prior guilt $P(G)=1/800{,}000$ (one true culprit) and a match that is certain</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>if guilty, $P(M\mid G)=1$, and $P(M\mid \bar G)=0.01$:</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>$P(G\mid M)=\frac{1\cdot\frac1{800{,}000}}{1\cdot\frac1{800{,}000} + 0.01\cdot\frac{799{,}999}{800{,}000}}</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>\approx \frac{1}{8001}$ — about $1/8000$, not $0.99$. The likelihood is not the posterior.</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>**Regression to the mean, formally.** Let an observed score be $X_t = \mu_i + e_t$, a stable true</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>level plus independent noise, with $\operatorname{Var}(\mu_i)=\sigma_\mu^2$ and</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>$\operatorname{Var}(e_t)=\sigma_e^2$. Then $\operatorname{Corr}(X_1,X_2)=\rho=\sigma_\mu^2/(\sigma_\mu^2+\sigma_e^2)$</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>and, for jointly Normal scores, $\mathbb{E}<span class="co">[</span><span class="ot">X_2\mid X_1=x</span><span class="co">]</span> = \bar\mu + \rho\,(x-\bar\mu)$. The expected</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>second score lies a fraction $\rho&lt;1$ of the first score's distance from the mean. The noisier the</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>measurement (smaller $\rho$), the stronger the pull. It happens with no change at all in anyone's true</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>level. Shrinkage estimators use the same weight, $\hat\mu_i = \bar\mu + \rho_i(\bar x_i - \bar\mu)$,</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>with $\rho_i$ rising in the unit's sample size.</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>**Collider bias, formally.** If $A\to C\leftarrow B$ with $A\perp B$ marginally, then conditioning on the</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>collider $C$ generally makes $A\not\perp B\mid C$ — an induced dependence. Berkson's "you'd date them" and</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>Monty's "opened door" are both $C$.</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">conditional probability</span><span class="co">](conditional-probability.qmd)</span> and <span class="co">[</span><span class="ot">Bayes' theorem</span><span class="co">](bayes-theorem.qmd)</span></span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>  (Monty Hall, the prosecutor) — the machinery these puzzles exercise.</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">DAGs, confounders &amp; colliders</span><span class="co">](../05-causal-inference/directed-acyclic-graphs.qmd)</span> (the</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  causal grammar that resolves all four) and <span class="co">[</span><span class="ot">what regression can't tell you</span><span class="co">](../03-regression/regression-and-causality.qmd)</span>.</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Echoes:** <span class="co">[</span><span class="ot">the Bayesian worldview</span><span class="co">](../02-inference/bayesian-worldview.qmd)</span> (base rates as priors) and the</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>  selection-bias cautions throughout <span class="co">[</span><span class="ot">Part V</span><span class="co">](../05-causal-inference/index.qmd)</span>.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
