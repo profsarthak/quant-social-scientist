@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "The Quantitative Social Scientist",
     "section": "",
-    "text": "◆ PROFSARTHAK · QSS · n=191 ENTRIES · CORPUS-GROUNDED · REV 2026-09\nThis is a reference you grow into, not a course you finish. It walks the road from basic probability to the academic rigour of causal inference and the messy realities of field and client work — always intuition first, examples second, and mathematics used in a common-sense way to explain principles and deviations, with the full derivations kept in an appendix you can reach for but never have to wade through.\nIt is self-contained — every idea, with a runnable figure, lives on the page — and built on a curated library of canonical sources (Wooldridge, Angrist & Pischke, Cunningham, Gerber & Green, Ross, ISLR, Meadows, Barabási, Mitchell, and more), with explicit per-source attribution throughout. See How to use this.",
+    "text": "◆ PROFSARTHAK · QSS · n=193 ENTRIES · CORPUS-GROUNDED · REV 2026-09\nThis is a reference you grow into, not a course you finish. It walks the road from basic probability to the academic rigour of causal inference and the messy realities of field and client work — always intuition first, examples second, and mathematics used in a common-sense way to explain principles and deviations, with the full derivations kept in an appendix you can reach for but never have to wade through.\nIt is self-contained — every idea, with a runnable figure, lives on the page — and built on a curated library of canonical sources (Wooldridge, Angrist & Pischke, Cunningham, Gerber & Green, Ross, ISLR, Meadows, Barabási, Mitchell, and more), with explicit per-source attribution throughout. See How to use this.",
     "crumbs": [
       "Home",
       "Start here",
@@ -1148,6 +1148,136 @@
     ]
   },
   {
+    "objectID": "content/04-predictive/measurement-and-ml.html",
+    "href": "content/04-predictive/measurement-and-ml.html",
+    "title": "Measurement Error & Machine Learning",
+    "section": "",
+    "text": "Most social-science predictors are scale scores, noisy readings of a construct nobody observes directly. In a linear regression, that noise pulls coefficients towards zero. In machine learning it does more damage. It makes trees unstable, and it hides nonlinearity, so random forests and boosting lose their edge over a straight line. When an ML model “fails to beat regression”, check how well the inputs were measured before blaming the algorithm.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Measurement Error & Machine Learning"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/measurement-and-ml.html#why-it-matters",
+    "href": "content/04-predictive/measurement-and-ml.html#why-it-matters",
+    "title": "Measurement Error & Machine Learning",
+    "section": "Why it matters",
+    "text": "Why it matters\nJacobucci, Grimm and Zhang start from what they call the machine-learning thesis. Psychological and social phenomena are extremely complex, driven by many variables with small effects, so flexible algorithms “must improve our modeling of these data”. Yet a surprising number of studies find that linear models predict just as well as algorithms that search for nonlinearities and interactions (Jacobucci et al. 2023).\nTheir reading is that these results do not refute the thesis. They expose limits of study design: predictors or outcomes with too much measurement error, items built to reflect one latent variable rather than distinct things, too few or the wrong predictors, samples that are too small, too little time between predictor and outcome (Jacobucci et al. 2023). Measurement comes first on that list, and it is the subject of this entry. If you build prediction models from survey scales (depression inventories, personality items, attitude batteries), this is the question you need to ask before comparing algorithms.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Measurement Error & Machine Learning"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/measurement-and-ml.html#reliability-how-much-of-the-score-is-the-thing-you-meant",
+    "href": "content/04-predictive/measurement-and-ml.html#reliability-how-much-of-the-score-is-the-thing-you-meant",
+    "title": "Measurement Error & Machine Learning",
+    "section": "Reliability: how much of the score is the thing you meant",
+    "text": "Reliability: how much of the score is the thing you meant\nClassical test theory splits an observed score into a true score and error: X = T + E. Reliability is the share of the observed variance that is true-score variance:\n\n\\text{reliability} = \\frac{\\sigma^2_T}{\\sigma^2_X} = \\frac{\\sigma^2_T}{\\sigma^2_T + \\sigma^2_E}.\n\nDepression and intelligence cannot be observed, so they are measured through several items and treated as latent variables (Jacobucci et al. 2023). The authors note that reliability in social science plays the role that precision plays in the physical sciences (Jacobucci et al. 2023). A reliability of 0.5 means half of what varies in your predictor is noise.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Measurement Error & Machine Learning"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/measurement-and-ml.html#three-ways-noise-hurts-a-model",
+    "href": "content/04-predictive/measurement-and-ml.html#three-ways-noise-hurts-a-model",
+    "title": "Measurement Error & Machine Learning",
+    "section": "Three ways noise hurts a model",
+    "text": "Three ways noise hurts a model\n1. Attenuation. In a regression, a noisy predictor’s coefficient shrinks towards zero in proportion to its unreliability. This has been known since the early twentieth century and is covered in regression & causality (Jacobucci et al. 2023).\n2. Instability. Decision trees are already criticized for giving quite different structures on slightly different samples. Measurement error makes this worse. The authors simulate the simplest possible case: a true predictor X_{\\text{lat}} and an outcome that is exactly +1 above 0.5 and -1 below, so the ideal tree has one split. They then give the algorithm only a noisy indicator of X_{\\text{lat}}. Stability is scored as one minus the share of distinct tree structures (same splits, variables and cut-offs) across bootstrap samples, so 1 means every resample grew the identical tree (Jacobucci et al. 2023):\n\n\n\nPredictor given to the tree\nN = 300\nN = 2{,}000\n\n\n\n\ntrue latent score\n1.00\n1.00\n\n\nobserved, reliability index 0.8\n0.58\n0.75\n\n\nobserved, reliability index 0.5\n0.33\n0.62\n\n\n\nWith the true score the tree is perfectly stable. With a noisy score it is not, and the damage is worst in small samples, which are the norm in behavioural research. This is with only the right variable available. Add other candidate splitting variables and stability falls further (Jacobucci et al. 2023).\n3. Hidden nonlinearity. This is the least obvious effect and the most important for ML. Following Jacobucci and Grimm (2020), the book simulates an outcome with a strongly nonlinear dependence on two latent predictors (y = \\cos x_1 + \\sin x_2 + \\tan(0.1\\,x_1x_2) plus a little noise). Each predictor is measured by four indicators whose reliability is set to 0.3, 0.6 or 0.9, and linear regression is compared with random forests and boosting (Jacobucci et al. 2023). The result:\n\nAt high reliability the ensembles capture the nonlinear effects and linear regression fits poorly.\nAt low reliability the noise-to-signal ratio is so high that linear regression reaches “comparable, if not superior” R^2, even though its functional form is wrong (Jacobucci et al. 2023).\nWhen the true relation is linear, regression beats the ensembles at every reliability, and its advantage grows as reliability falls (Jacobucci et al. 2023).\n\nThe authors’ interpretation connects this to the bias–variance trade-off. Compared with an ensemble, a linear model acts “as a type of shrinkage or regularization”. Just as small samples reduce the information in a dataset, poor measurement reduces it too, and that favours simpler models (Jacobucci et al. 2023). The figure rebuilds the effect by hand.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(3)\n\ndef simulate(n, reliability):\n    x = rng.normal(size=(n, 2))                                  # latent predictors\n    y = np.cos(x[:, 0]) + np.sin(x[:, 1]) + np.tan(0.1 * x[:, 0] * x[:, 1]) \\\n        + rng.normal(0, 0.1, n)\n    noise = rng.normal(size=(n, 2))\n    x_obs = np.sqrt(reliability) * x + np.sqrt(1 - reliability) * noise\n    return x_obs, y                                              # the model only sees x_obs\n\ndef r2(y, yhat):\n    return 1 - np.mean((y - yhat) ** 2) / np.var(y)\n\ndef linear(Xtr, ytr, Xte):\n    Z = np.column_stack([np.ones(len(Xtr)), Xtr])\n    b = np.linalg.lstsq(Z, ytr, rcond=None)[0]\n    return np.column_stack([np.ones(len(Xte)), Xte]) @ b\n\ndef knn(Xtr, ytr, Xte, k=30):\n    d = ((Xte[:, None, :] - Xtr[None, :, :]) ** 2).sum(-1)\n    nearest = np.argpartition(d, k, axis=1)[:, :k]\n    return ytr[nearest].mean(1)\n\nrels = np.round(np.arange(0.2, 1.01, 0.1), 2)\nlin_r2, knn_r2 = [], []\nfor rel in rels:\n    a, b = [], []\n    for rep in range(30):\n        Xtr, ytr = simulate(500, rel)\n        Xte, yte = simulate(1000, rel)\n        a.append(r2(yte, linear(Xtr, ytr, Xte)))\n        b.append(r2(yte, knn(Xtr, ytr, Xte)))\n    lin_r2.append(np.mean(a))\n    knn_r2.append(np.mean(b))\nlin_r2, knn_r2 = np.array(lin_r2), np.array(knn_r2)\n\nfig, ax = plt.subplots(figsize=(8.8, 4.6))\nax.fill_between(rels, lin_r2, knn_r2, where=knn_r2 &gt; lin_r2,\n                color=\"#e8531d\", alpha=0.12, lw=0)\nax.plot(rels, knn_r2, \"o-\", color=\"#e8531d\", lw=2, label=\"flexible model (k-NN)\")\nax.plot(rels, lin_r2, \"s-\", color=\"#161613\", lw=1.6, label=\"linear regression\")\nax.annotate(\"the flexible model's edge\", xy=(0.85, (lin_r2[-2] + knn_r2[-2]) / 2),\n            xytext=(0.52, 0.72), fontsize=9, color=\"#5e5e54\",\n            arrowprops=dict(arrowstyle=\"-&gt;\", color=\"#5e5e54\", lw=0.8))\nax.set_xlabel(\"reliability of the predictors\")\nax.set_ylabel(\"held-out $R^2$\")\nax.set_ylim(0, 1)\nax.legend(frameon=False, fontsize=9, loc=\"upper left\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Noise hides the curve. The outcome depends nonlinearly on two latent predictors (y = cos x₁ + sin x₂ + tan(0.1·x₁x₂) + small noise, following the book’s design), but the models see only noisy versions of the predictors at a given reliability. The flexible model (k-nearest neighbours, orange) far outperforms linear regression (ink) when the predictors are measured well. As reliability falls, its advantage (shaded) shrinks: at reliability 0.3 the two are level, and below that the straight line wins. Held-out R² averaged over 30 simulated datasets (500 training and 1,000 test cases each). This is a simplified rebuild: a single noisy score per predictor rather than the book’s four indicators.\n\n\n\n\n\nThe authors draw two conclusions. Using machine learning “does not negate the necessity of quality measurement”. And any model comparison is conditional not only on which variables went in but on how well they were measured. “Just because we use more powerful methods does not negate the term ‘garbage in, garbage out’” (Jacobucci et al. 2023).",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Measurement Error & Machine Learning"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/measurement-and-ml.html#measuring-the-measurement-α-ω-and-factor-scores",
+    "href": "content/04-predictive/measurement-and-ml.html#measuring-the-measurement-α-ω-and-factor-scores",
+    "title": "Measurement Error & Machine Learning",
+    "section": "Measuring the measurement: α, ω and factor scores",
+    "text": "Measuring the measurement: α, ω and factor scores\nThe book’s running example is the 12-item Grit scale (1,000 training and 1,000 test cases). Its workflow is a practical checklist (Jacobucci et al. 2023):\n\nCronbach’s α is by far the most common reliability index. For the 12 Grit items it is 0.84 (95% CI 0.82–0.85). But α assumes tau-equivalence (every item is equally representative of the construct) and unidimensionality (one construct underneath), which rarely hold. The authors call 0.84 a good estimate, but refuse any finer label because they regard reliability cut-offs as arbitrary.\nCheck the dimensionality first. Parallel analysis (comparing eigenvalues with those from random data) points to two factors, which the authors read as “persistence” and “hard work”. A confirmatory model fits acceptably (RMSEA 0.059, CFI 0.94, TLI 0.93). See factor analysis.\nω total lets each item have its own loading. Here it is also 0.84, but like α it presumes a one-factor model fits.\nFactor scores weight items by their loadings rather than summing them equally. They carry a quality problem of their own, factor indeterminacy: infinitely many sets of scores are consistent with the same model. For Grit, the scores correlate 0.98 with the first factor but only 0.70 with the second. Persistence is measured well, hard work much less so.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Measurement Error & Machine Learning"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/measurement-and-ml.html#items-or-scales",
+    "href": "content/04-predictive/measurement-and-ml.html#items-or-scales",
+    "title": "Measurement Error & Machine Learning",
+    "section": "Items or scales?",
+    "text": "Items or scales?\nThe question ML practitioners actually ask is whether to feed the model individual items or a scale score (a sum or factor score). Higher reliability argues for scales. But that argument assumes each item’s specific variance (the part not shared with the factor and not random error) has nothing to do with the outcome. Writing an item as x = \\Lambda\\xi + s + e, the specific part s may carry real signal (Jacobucci et al. 2023).\nThe authors borrow Kendler’s distinction between indexical scales, whose items are exchangeable pointers to one construct, and constitutive scales, whose items each measure a distinct component. For indexical scales, scores should predict about as well as items. For constitutive scales, items should win (Jacobucci et al. 2023). Grit’s items were chosen by item-total correlations and redundancy, with no discussion of individual item meaning, so the prediction is “about equal”. Predicting conscientiousness in the 1,000-case holdout (Jacobucci et al. 2023):\n\n\n\nPredictors\nModel\nHoldout RMSE\n\n\n\n\nsummed score\nregression / boosting\n3.94 / 3.94\n\n\nfactor scores\nregression\n3.85\n\n\n12 items\nregression / boosting\n3.83 / 3.82\n\n\nitems + factor scores\nridge / boosting\n3.83 / 3.82\n\n\n\nSummed scores do worst, and factor scores come close to the items. A useful hybrid is to include both and let ridge or boosting handle the redundancy. In the boosting model the second factor score was the most important variable. It was the less reliable factor, but the one theoretically closer to conscientiousness (Jacobucci et al. 2023). The chapter’s summary advice is that when maximizing prediction is the goal, individual items are “almost always” preferable to scale scores. The reliability of items and scales should still be assessed, because it helps explain why some inputs mattered or why prediction was weaker than hoped (Jacobucci et al. 2023).\nTwo neighbouring tools get a caution from the authors (Jacobucci et al. 2023):\n\nPCA is not factor analysis. PCA models total variance and FA models shared variance. Use PCA to compress many redundant predictors, and FA to extract interpretable latent dimensions. The common ML habit of keeping components that explain 95% or 99% of variance makes sense only when predictors number in the thousands, or vastly outnumber cases. Social-science predictors come from varied sources and rarely compress well. See unsupervised learning.\nPsychometric networks are the graphical-model alternative. A Gaussian graphical model, estimated by the graphical lasso on the precision (inverse covariance) matrix, draws an edge wherever two items remain related after conditioning on all the others. On Grit, items that load on the same factor cluster together, and a node’s centrality correlates 0.82–0.91 with its factor-model item R^2. The two frameworks overlap more than their separate literatures suggest.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Measurement Error & Machine Learning"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/measurement-and-ml.html#common-pitfalls",
+    "href": "content/04-predictive/measurement-and-ml.html#common-pitfalls",
+    "title": "Measurement Error & Machine Learning",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nDeclaring “ML doesn’t help” without checking reliability. Linear-equals-ML results may be telling you about the measures, not the world. (Jacobucci et al. 2023)\nReporting α as if it certified a scale. α assumes one factor and equal item contributions. Check the factor structure first, and prefer ω or factor-score reliability when loadings differ. (Jacobucci et al. 2023)\nInterpreting a single tree fitted on noisy scales. Its splits may not survive a bootstrap resample. Use ensembles and variable importance, and report stability. (Jacobucci et al. 2023)\nTwo-step factor scores in SEM. Computing factor scores and then entering them into a structural model can bias parameter estimates and standard errors. Where possible, keep the measurement model inside the model. (Jacobucci et al. 2023)\nForgetting the outcome. None of these remedies fix error in the outcome. When the aim is prediction, there is no way to overcome it, and it caps achievable accuracy. (Jacobucci et al. 2023)\nChoosing features on the test set. Selecting EFA/PCA structures and then scoring fit on the same data overstates performance. Separate construction from evaluation, as in cross-validation. (Jacobucci et al. 2023)",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Measurement Error & Machine Learning"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/measurement-and-ml.html#from-the-sources",
+    "href": "content/04-predictive/measurement-and-ml.html#from-the-sources",
+    "title": "Measurement Error & Machine Learning",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nJacobucci, Grimm & Zhang, Machine Learning for Social and Behavioral Research, Ch. 1 & 7. Ch. 1: the machine-learning thesis (phenomena are complex, so flexible algorithms should help) and the puzzle of linear models matching ML, read as a study-design problem (measurement error, indexical vs constitutive items, sample size, timing). Ch. 7: classical test theory and reliability; three impacts of measurement error, namely attenuation, tree stability (Table 7.1 simulation) and predictive performance (the Jacobucci & Grimm 2020 nonlinear simulation; linear regression as implicit regularization; “garbage in, garbage out”). Reliability indices (Cronbach’s α and its assumptions; ω total), parallel analysis, EFA with oblique rotation, CFA fit, factor-score estimation, indeterminacy and factor-score reliability, all on the Grit data. Weighting, item reliability as communality, specific variance s, items vs scales (Kendler; Table 7.5 RMSEs; Table 7.6 importance). PCA vs FA and the 95%-variance rule; Gaussian graphical models, the graphical lasso, EBIC and Ising models, and centrality vs loadings.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Measurement Error & Machine Learning"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/measurement-and-ml.html#appendix-the-mathematics",
+    "href": "content/04-predictive/measurement-and-ml.html#appendix-the-mathematics",
+    "title": "Measurement Error & Machine Learning",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nReliability and the reliability index. With X = T + E and T \\perp E, \\rho^2_{XT} = \\sigma^2_T/\\sigma^2_X. In the simulations an observed score is built as X_{\\text{obs}} = \\rho X_{\\text{lat}} + \\sqrt{1-\\rho^2}\\,e with standardized X_{\\text{lat}} and e, so \\rho is the reliability index and \\rho^2 the reliability.\nAttenuation. If the true correlation of X_1 with Y is r and \\operatorname{Var}(X_1)=1, the expected coefficient on the observed X_1 is r\\sqrt{\\rho^2_{X_1}}. The book’s example is a true correlation of 0.5, which shrinks by the square root of the reliability.\nCronbach’s α. For k items with variances s_i^2 and total-score variance s_X^2, \n\\alpha = \\frac{k}{k-1}\\Big(1 - \\frac{\\sum_i s_i^2}{s_X^2}\\Big).\n\nω total (factor variance fixed to 1, no residual covariances), with loadings \\lambda_i and residual variances \\theta_{ii}: \n\\omega_{\\text{total}} = \\frac{\\big(\\sum_i \\lambda_i\\big)^2}{\\big(\\sum_i \\lambda_i\\big)^2 + \\sum_i \\theta_{ii}} .\n α is the special case where all \\lambda_i are equal (tau-equivalence).\nFactor model. x = \\Lambda f + e implies \\Sigma = \\Lambda\\Phi\\Lambda' + \\Psi^2. Item reliability (communality) is R^2_{x_i} = 1 - \\Psi^2_{x_i}/s^2_{x_i}, or \\lambda_i^2 in a standardized one-factor model. The regression factor-score estimator, as the book writes it, is \\hat f = (I + \\Lambda'\\Phi^{-1}\\Lambda)^{-1}\\Lambda'\\Phi^{-1}x_i.\nSpecific variance. x = \\Lambda\\xi + s + e, so T = \\Lambda\\xi + s. Unique variance \\Psi^2 confounds s with e. That is why a scale score, which discards s, can predict worse than the items.\nGraphical lasso. With empirical covariance C and precision matrix \\Theta = \\Sigma^{-1}, maximize \n\\log\\lvert\\Theta\\rvert - \\operatorname{tr}(C\\Theta) - \\lambda\\lVert\\Theta\\rVert_1 .\n \\Theta_{ij} = 0 means items i and j are conditionally independent given the rest. \\lambda is typically chosen by EBIC.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Measurement Error & Machine Learning"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/measurement-and-ml.html#connections",
+    "href": "content/04-predictive/measurement-and-ml.html#connections",
+    "title": "Measurement Error & Machine Learning",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: concepts & measurement (reliability vs validity), regression & causality (attenuation), factor analysis, and trees & forests.\nLeads to: structural equation models (keep the measurement model inside the model), interpretability & ML (variable importance with items and scores side by side), and ML for social science.\nContrasts with: the bias–variance trade-off as usually told, where only sample size limits flexibility. Here measurement quality is a second, independent limit.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Measurement Error & Machine Learning"
+    ]
+  },
+  {
     "objectID": "content/04-predictive/trees-and-forests.html",
     "href": "content/04-predictive/trees-and-forests.html",
     "title": "Trees, Forests & Boosting",
@@ -1308,7 +1438,7 @@
     "href": "content/04-predictive/trees-and-forests.html#connections",
     "title": "Trees, Forests & Boosting",
     "section": "Connections",
-    "text": "Connections\n\nBuilds on: the bias–variance trade-off (a high-variance method tamed by averaging), the bootstrap (bagging’s engine), and the LLN (why averaging many models works).\nLeads to: interpretability & ML for social science (variable importance and partial dependence as the price of ensembles), and causal forests for heterogeneous treatment effects.\nContrasts with: regression — linear structure vs learned non-linear partitions; the right choice depends on the truth.",
+    "text": "Connections\n\nBuilds on: the bias–variance trade-off (a high-variance method tamed by averaging), the bootstrap (bagging’s engine), and the LLN (why averaging many models works).\nLeads to: interpretability & ML for social science (variable importance and partial dependence as the price of ensembles), measurement error & ML (why noisy scale scores make trees unstable and hide the nonlinearity ensembles exist to find), and causal forests for heterogeneous treatment effects.\nContrasts with: regression — linear structure vs learned non-linear partitions; the right choice depends on the truth.",
     "crumbs": [
       "Home",
       "IV · Predictive Modelling",
@@ -7985,7 +8115,7 @@
     "href": "content/05-causal-inference/causal-machine-learning.html#connections",
     "title": "Causal Machine Learning: Heterogeneous Effects",
     "section": "Connections",
-    "text": "Connections\n\nBuilds on: interpretability & ML (the DML/causal- forest preview, now full), regularization and cross-validation (the bias they cause and cure here), FWL partialling-out, and matching/overlap (the identification ML still needs).\nCloses: the summit — from the fundamental problem to estimating who benefits and whom to treat.\nComplements: heterogeneous effects in experiments — the same machinery seen from the research-design side: how to explore a randomized experiment for heterogeneity reproducibly (prediction rule ensembles, RATE validation) without p-hacking.\nLeads to: combining & triangulating designs (doubly robust estimation is the stacking of the propensity and outcome models seen here), then sensitivity analysis & external validity (how fragile and how generalisable any of these estimates are), and onward to Part VI · doing research in the world, where these estimates meet measurement, incentives, fairness, and the tyranny of metrics.",
+    "text": "Connections\n\nBuilds on: interpretability & ML (the DML/causal- forest preview, now full), regularization and cross-validation (the bias they cause and cure here), FWL partialling-out, Double Lasso (the same orthogonal score with the Lasso, and why single selection fails), and matching/overlap (the identification ML still needs).\nCloses: the summit — from the fundamental problem to estimating who benefits and whom to treat.\nComplements: heterogeneous effects in experiments — the same machinery seen from the research-design side: how to explore a randomized experiment for heterogeneity reproducibly (prediction rule ensembles, RATE validation) without p-hacking.\nLeads to: combining & triangulating designs (doubly robust estimation is the stacking of the propensity and outcome models seen here), then sensitivity analysis & external validity (how fragile and how generalisable any of these estimates are), and onward to Part VI · doing research in the world, where these estimates meet measurement, incentives, fairness, and the tyranny of metrics.",
     "crumbs": [
       "Home",
       "V · The Summit: Causal Inference",
@@ -16320,7 +16450,7 @@
     "href": "content/03-regression/factor-analysis.html#connections",
     "title": "Factor Analysis: Measuring the Unseen",
     "section": "Connections",
-    "text": "Connections\n\nBuilds on: concepts & measurement (latent constructs) and covariance & correlation (the correlations it explains).\nLeads to: structural equation modeling — CFA is SEM’s measurement model.\nContrast with: PCA & unsupervised learning (dimension reduction vs latent constructs).",
+    "text": "Connections\n\nBuilds on: concepts & measurement (latent constructs) and covariance & correlation (the correlations it explains).\nLeads to: structural equation modeling — CFA is SEM’s measurement model.\nApplied to prediction: measurement error & ML (Cronbach’s α vs ω, factor scores vs items as ML inputs).\nContrast with: PCA & unsupervised learning (dimension reduction vs latent constructs).",
     "crumbs": [
       "Home",
       "III · Statistical Modelling: Regression",
@@ -23705,6 +23835,162 @@
     ]
   },
   {
+    "objectID": "content/04-predictive/double-lasso.html",
+    "href": "content/04-predictive/double-lasso.html",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "",
+    "text": "When you have more candidate controls than you can sensibly use, the Lasso can choose them. But if you choose only the ones that predict the outcome, you throw away controls that are weak predictors of the outcome and strong predictors of the regressor you care about, and those are the confounders. Double Lasso runs two prediction problems, one for Y and one for D, partials both out, and then regresses residual on residual. That estimator is built so that small mistakes in the two prediction steps do not move the answer.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/double-lasso.html#why-it-matters",
+    "href": "content/04-predictive/double-lasso.html#why-it-matters",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "Why it matters",
+    "text": "Why it matters\nRegularization was built for prediction: it trades a little bias for a lot less variance, and it is judged on how well it forecasts new data. Much of social science needs something else, namely a single coefficient with an honest confidence interval. What happens to growth when initial income is higher, holding institutions and schooling fixed? How big is the gender wage gap once hundreds of job characteristics are held fixed?\nChernozhukov and coauthors put the problem in one line: with high-dimensional controls, “good prediction is not enough”, and you need procedures designed for inference (Chernozhukov et al. 2024). Their running example is the growth-convergence question. The Barro–Lee sample has 90 countries and about 60 controls, so p/n is far from small. Ordinary least squares with every control is legal but nearly useless there. Its estimate is noisy, and the book notes that conventional robust standard errors are not even consistent when p/n is not small (Chernozhukov et al. 2024). You need to throw most controls away, but the way you throw them away decides whether the resulting interval can be trusted.\nThis entry is the bridge between the Lasso as a forecasting tool and double/debiased machine learning, which is the same idea with any ML learner in the prediction steps.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/double-lasso.html#start-from-something-you-already-know-partialling-out",
+    "href": "content/04-predictive/double-lasso.html#start-from-something-you-already-know-partialling-out",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "Start from something you already know: partialling out",
+    "text": "Start from something you already know: partialling out\nThe Frisch–Waugh–Lovell theorem says that in Y = \\alpha D + \\beta' W + \\varepsilon, the coefficient \\alpha can be found in two steps:\n\nRemove from Y everything that W can linearly explain, leaving \\tilde Y. Do the same for D, leaving \\tilde D.\nRegress \\tilde Y on \\tilde D. The slope is \\alpha.\n\nIn words: \\alpha is how the unexplained part of the outcome moves with the unexplained part of the regressor (Chernozhukov et al. 2024). Step 1 is two prediction problems, and prediction is exactly what the Lasso is good at when W is large. So the Double Lasso recipe is (Chernozhukov et al. 2024):\n\nLasso Y on W; keep the residuals \\check Y.\nLasso D on W; keep the residuals \\check D.\nRegress \\check Y on \\check D by least squares, and use an ordinary heteroskedasticity-robust standard error, as if the residuals had been observed.\n\nThat last step looks too good to be true. You estimated two whole prediction rules and then ignore that uncertainty? The book’s theorem says yes: under approximate sparsity and sensible tuning, the estimation error in \\check Y and \\check D has no first-order effect on \\hat\\alpha, and the estimator behaves like least squares with the true residuals (Chernozhukov et al. 2024). The reason has a name.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/double-lasso.html#why-it-works-neyman-orthogonality",
+    "href": "content/04-predictive/double-lasso.html#why-it-works-neyman-orthogonality",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "Why it works: Neyman orthogonality",
+    "text": "Why it works: Neyman orthogonality\nThink of \\hat\\alpha as a function of the two prediction rules it was built from. Those rules are regularized, so they are slightly wrong: the Lasso shrinks, and it misses small coefficients. The question is how much a slightly wrong prediction rule moves \\alpha.\nFor the partialled-out equation the answer is: not at all, to first order. Nudge either prediction rule a little away from the truth and the derivative of \\alpha with respect to that nudge is zero. The book calls this local insensitivity Neyman orthogonality and describes it as the property that ensures the regularization bias in the nuisance parts “does not transmit to the estimation of the target parameter, at least to the first order” (Chernozhukov et al. 2024). An error of size \\delta in the prediction step shows up in \\hat\\alpha only as something like \\delta^2, which shrinks fast enough to ignore.\nTwo remarks from the book are worth keeping (Chernozhukov et al. 2024):\n\nIn a pure randomized experiment, D is unrelated to W, so orthogonality holds automatically. The problem this entry solves is an observational-data problem.\nThe requirement on sparsity is stronger than for prediction. The sorted coefficients must fall off faster than 1/j, because the prediction errors must be small enough that their products vanish at the \\sqrt n rate. Good prediction alone is not the target.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/double-lasso.html#why-the-obvious-shortcut-fails-single-selection",
+    "href": "content/04-predictive/double-lasso.html#why-the-obvious-shortcut-fails-single-selection",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "Why the obvious shortcut fails: single selection",
+    "text": "Why the obvious shortcut fails: single selection\nThe tempting alternative is single selection: run one Lasso of Y on (D, W), keep whichever controls survive, refit by least squares, and report the usual interval. Chernozhukov and coauthors say this is “a fine approach if the goal is solely the prediction of the outcome”, but it “can result in very misleading conclusions” about \\alpha (Chernozhukov et al. 2024).\nThe mechanism is omitted-variable bias with a machine-learning accent. The single Lasso keeps controls that help predict Y given D is already in the model. A control that affects Y weakly but drives D strongly looks useless for predicting Y, since D already carries most of its information, and it is dropped. In the book’s words, “weak predictors of the outcome could still be strong predictors of D”, and dropping them “results in a strong omitted variable bias” (Chernozhukov et al. 2024). Double Lasso instead finds controls that matter for either equation, so the residuals are approximately “de-confounded”.\nThe book demonstrates this with a simulation (its Example 4.3.1): p = n = 100, the controls’ effects on both Y and D fall off as 1/j^2, and the true \\alpha = 1. The naive estimator is “heavily biased”, while Double Lasso is “approximately unbiased and Gaussian” (Chernozhukov et al. 2024). The figure below rebuilds that experiment by hand.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom math import erf, sqrt, log\n\nrng = np.random.default_rng(42)\nn = p = 100\ncoef = 1 / np.arange(1, p + 1) ** 2          # effect of control j on Y and on D\n\ndef norm_ppf(q):                              # normal quantile by bisection\n    lo, hi = 0.0, 10.0\n    for _ in range(80):\n        m = (lo + hi) / 2\n        lo, hi = (m, hi) if 0.5 * (1 + erf(m / sqrt(2))) &lt; q else (lo, m)\n    return lo\n\ndef lasso_selected(X, y, lam):                # coordinate descent, standardised columns\n    Xs = (X - X.mean(0)) / X.std(0)\n    b, r = np.zeros(X.shape[1]), y - y.mean()\n    for _ in range(300):\n        biggest = 0\n        for j in range(X.shape[1]):\n            old = b[j]\n            rho = Xs[:, j] @ r / len(y) + old\n            b[j] = np.sign(rho) * max(abs(rho) - lam, 0)\n            if b[j] != old:\n                r -= Xs[:, j] * (b[j] - old)\n                biggest = max(biggest, abs(b[j] - old))\n        if biggest &lt; 1e-7:\n            break\n    return b != 0\n\ndef resid(v, X):                              # least-squares residuals on selected controls\n    Z = np.column_stack([np.ones(len(v)), X])\n    return v - Z @ np.linalg.lstsq(Z, v, rcond=None)[0]\n\ndef plugin_lasso(X, y):                       # plug-in penalty, noise level re-estimated\n    N, k = X.shape\n    c = 1.1 * norm_ppf(1 - 0.1 / log(N) / (2 * k)) / np.sqrt(N)\n    s = y.std()\n    for _ in range(5):\n        sel = lasso_selected(X, y, c * s)\n        s = resid(y, X[:, sel]).std()\n    return sel\n\nsingle, double = [], []\nfor rep in range(300):\n    W = rng.normal(size=(n, p))\n    D = W @ coef + rng.normal(size=n) / 4\n    Y = 1.0 * D + W @ coef + rng.normal(size=n)\n    keep = plugin_lasso(np.column_stack([D, W]), Y)[1:]      # single selection\n    rd = resid(D, W[:, keep])\n    single.append(rd @ resid(Y, W[:, keep]) / (rd @ rd))\n    ry = resid(Y, W[:, plugin_lasso(W, Y)])                   # Double Lasso\n    rd = resid(D, W[:, plugin_lasso(W, D)])\n    double.append(rd @ ry / (rd @ rd))\n\nsingle, double = np.array(single), np.array(double)\nbins = np.linspace(-0.4, 2.8, 41)\nfig, ax = plt.subplots(figsize=(8.8, 4.4))\nax.hist(single, bins=bins, color=\"#b7b6a8\", alpha=0.85, edgecolor=\"#f4f3ec\",\n        label=f\"single selection (mean {single.mean():.2f})\")\nax.hist(double, bins=bins, color=\"#e8531d\", alpha=0.65, edgecolor=\"#f4f3ec\",\n        label=f\"Double Lasso (mean {double.mean():.2f})\")\nax.axvline(1, color=\"#161613\", lw=1.6, ls=\"--\")\nax.text(1.03, ax.get_ylim()[1] * 0.93, \"true α = 1\", color=\"#161613\", fontsize=9)\nax.set_xlabel(r\"estimate $\\hat\\alpha$ across 300 simulated datasets\")\nax.set_ylabel(\"count\")\nax.legend(frameon=False, fontsize=9, loc=\"upper left\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: A by-hand rebuild of Chernozhukov et al.’s Example 4.3.1 (p = n = 100; each control’s effect on Y and on D is 1/j²; true α = 1), 300 simulated datasets, Lasso by coordinate descent with a plug-in penalty. Single selection (grey) keeps only controls that predict Y and centres near 1.57, about two of its own standard deviations off the truth. Double Lasso (orange) selects controls for Y and for D separately and centres near 1.15. It is much closer, but not exactly on 1: at n = 100 the weakest confounders (effects of 1/9, 1/16, …) sometimes fall below the penalty in both equations, and what they leave behind is a small residual bias.\n\n\n\n\n\nThe simulation is also a warning about expectations. Double Lasso is not magic. It removes the first-order damage from imperfect selection, and at small n with many weak confounders some damage is left. What it fixes is the systematic failure of single selection, which does not go away however careful you are, because that estimator is aimed at the wrong target.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/double-lasso.html#worked-example-1-do-poor-countries-grow-faster",
+    "href": "content/04-predictive/double-lasso.html#worked-example-1-do-poor-countries-grow-faster",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "Worked example 1: do poor countries grow faster?",
+    "text": "Worked example 1: do poor countries grow faster?\nThe Solow model predicts conditional convergence: holding institutions, schooling and the like fixed, poorer countries should grow faster. The coefficient \\alpha on initial GDP per capita should be negative. Chernozhukov et al. estimate it on the Barro–Lee data (90 countries, about 60 controls) (Chernozhukov et al. 2024):\n\n\n\nMethod\nEstimate\nStd. error\n95% CI\n\n\n\n\nOLS, all controls\n−0.009\n0.032\n[−0.073, 0.054]\n\n\nDouble Lasso\n−0.045\n0.018\n[−0.080, −0.010]\n\n\n\nOLS cannot tell convergence from divergence: its interval straddles zero comfortably. Double Lasso gives an annual convergence rate of about −4.5%, with a 95% interval from −8% to −1%, which is “consistent with the conditional convergence hypothesis” (Chernozhukov et al. 2024). The data did not change. What changed is that the estimator stopped spending its precision on 60 nuisance coefficients.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/double-lasso.html#worked-example-2-many-coefficients-at-once",
+    "href": "content/04-predictive/double-lasso.html#worked-example-2-many-coefficients-at-once",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "Worked example 2: many coefficients at once",
+    "text": "Worked example 2: many coefficients at once\nOften you care about a family of coefficients: a main effect plus how it varies across groups. The book returns to CPS 2015 wage data and asks whether the gender wage gap differs by education, region and experience. That gives 12 target coefficients: sex and 11 interactions. The interactions are estimated one by one with Double Lasso, each against 990 controls (pairwise interactions of the modifiers plus occupation and industry dummies) (Chernozhukov et al. 2024).\nTaken one at a time, some interactions look interesting. The gap at average characteristics is −0.07 (SE 0.01). The Midwest interaction is −0.12 (SE 0.04, pointwise p = 0.01), and the some-high-school interaction is −0.32 (SE 0.19, p = 0.08). But there are twelve of them. With 12 independent 95% intervals, the chance that at least one misses is 1 - 0.95^{12} \\approx 0.46 (Chernozhukov et al. 2024). The book therefore builds a simultaneous 95% confidence band that covers all twelve together. Once multiplicity is accounted for, every interaction interval includes zero. The main gap survives, with a band of [−0.11, −0.03], but the apparent heterogeneity does not (Chernozhukov et al. 2024).\nThis is the same lesson as multiple testing, met in a high-dimensional setting. Double Lasso makes each estimate honest, and the simultaneous band makes the collection honest.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/double-lasso.html#relatives-with-the-same-property",
+    "href": "content/04-predictive/double-lasso.html#relatives-with-the-same-property",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "Relatives with the same property",
+    "text": "Relatives with the same property\nThe book lists two other procedures that are approximately equivalent to Double Lasso and share its orthogonality (Chernozhukov et al. 2024):\n\nDouble selection. Take the controls the Lasso picks for Y, and the controls it picks for D. Regress Y on D and the union of both sets, then use standard inference. This is “more conservative compared to single selection”, because it makes sure strong confounders of D were not dropped. It is the version most applied papers report.\nDebiased (desparsified) Lasso. Fit a Lasso of Y on (D, W), then correct its coefficient on D using the residualized \\tilde D from a Lasso of D on W. Technically the residualized D “instruments” for D, and the book notes that estimators of this form are called instrumental-variable estimators in econometrics.\n\nAll of these generalize, in Chapter 9 of the same book, to double/debiased machine learning: swap the Lasso for forests, boosting or neural nets, and add cross-fitting to stop the flexible learners overfitting their own residuals (Chernozhukov et al. 2024). See causal ML.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/double-lasso.html#common-pitfalls",
+    "href": "content/04-predictive/double-lasso.html#common-pitfalls",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "Common pitfalls",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nSingle selection. Reporting post-Lasso OLS standard errors after selecting controls from the outcome equation alone. It predicts well and infers badly. (Chernozhukov et al. 2024)\nCross-validated penalties in modest samples. Cross-validation is the default for prediction, but the authors have found that in the partialling-out steps it “frequently overfits in moderately sized samples”, giving poor practical performance. Use the theory-driven plug-in penalty, or cross-fitting as in DML. (Chernozhukov et al. 2024)\nForgetting that “predictive effect” is not “causal effect”. Double Lasso delivers honest inference on a regression coefficient. Whether that coefficient is causal depends on the identification argument (conditional ignorability, a DAG, a design), which the book treats separately. (Chernozhukov et al. 2024)\nTreating sparsity as free. The method assumes a few controls (or a fast-decaying set) do most of the work. If confounding is spread thinly over hundreds of variables, no selection rule will capture it, and the simulation above shows the leftover bias.\nReading twelve marginal intervals as twelve discoveries. With many targets, report a simultaneous band, or control the false discovery rate. (Chernozhukov et al. 2024)",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/double-lasso.html#from-the-sources",
+    "href": "content/04-predictive/double-lasso.html#from-the-sources",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "From the sources",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nChernozhukov, Hansen, Kallus, Spindler & Syrgkanis, Applied Causal Inference Powered by ML and AI, Ch. 4. The predictive-effect parameter \\alpha in a high-dimensional linear model; FWL partialling-out as “the key to inference”; the Double Lasso recipe with heteroskedasticity-robust SEs and Theorem 4.2.1 (adaptive inference: first-step error has no first-order effect); approximate sparsity with decay a &gt; 1; plug-in vs cross-validated penalties. Neyman orthogonality defined and verified for the partialled-out moment by the implicit function theorem; its automatic validity in pure RCTs. The single-selection failure and Example 4.3.1 (p = n = 100, 1/j^2 coefficients). The Barro–Lee convergence application (Table 4.1). Many coefficients: Theorem 4.4.1, simultaneous bands vs marginal intervals (1 - 0.95^{12} \\approx 0.46), the CPS 2015 wage-gap heterogeneity analysis with 990 controls (Tables 4.2–4.3). Double selection and the debiased/desparsified Lasso as IV-type estimators. Preview of cross-fitting and DML (Ch. 9).",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/double-lasso.html#appendix-the-mathematics",
+    "href": "content/04-predictive/double-lasso.html#appendix-the-mathematics",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "Appendix · the mathematics",
+    "text": "Appendix · the mathematics\n\nModel and target. Y = \\alpha D + \\beta'W + \\varepsilon. Let \\gamma_{YW} and \\gamma_{DW} be the best-linear-predictor coefficients of Y and D on W, and \\tilde Y = Y - \\gamma_{YW}'W, \\tilde D = D - \\gamma_{DW}'W. Then \\alpha solves the partialled-out moment \nM(a, \\eta) = \\mathbb E\\big[(\\tilde Y(\\eta) - a\\tilde D(\\eta))\\,\\tilde D(\\eta)\\big] = 0,\n\\qquad \\alpha = \\big(\\mathbb E[\\tilde D^2]\\big)^{-1}\\mathbb E[\\tilde D\\tilde Y],\n with nuisance \\eta = (\\eta_1, \\eta_2) entering as \\tilde Y(\\eta) = Y - \\eta_1'W and \\tilde D(\\eta) = D - \\eta_2'W, true value \\eta_o = (\\gamma_{YW}, \\gamma_{DW}).\nOrthogonality. By the implicit function theorem, \\partial_\\eta\\alpha(\\eta_o) = -\\partial_a M(\\alpha,\\eta_o)^{-1}\\,\\partial_\\eta M(\\alpha,\\eta_o). Now \n\\partial_{\\eta_1} M = \\mathbb E[W\\tilde D] = 0,\\qquad\n\\partial_{\\eta_2} M = -\\mathbb E[W\\tilde Y] + 2\\alpha\\,\\mathbb E[W\\tilde D] = 0,\n both zero because least-squares residuals are orthogonal to the regressors. So \\partial_\\eta \\alpha(\\eta_o) = 0.\nWhy single selection is not orthogonal. Its moment is M(a, b) = \\mathbb E[(Y - aD - b'W)D], with \\partial_b M(\\alpha,\\beta) = -\\mathbb E[DW] \\neq 0 unless D \\perp W. The slow \\sqrt{s\\log(p\\vee n)/n} error in \\hat\\beta therefore passes straight into \\hat\\alpha.\nDistribution. Under approximate sparsity |\\gamma|_{(j)} \\le A j^{-a} with a &gt; 1 and plug-in tuning, \n\\sqrt n(\\hat\\alpha - \\alpha) \\approx \\frac{\\sqrt n\\,\\mathbb E_n[\\tilde D\\varepsilon]}{\\mathbb E_n[\\tilde D^2]}\n\\;\\overset{a}{\\sim}\\; N(0, V),\\qquad\nV = \\big(\\mathbb E[\\tilde D^2]\\big)^{-1}\\mathbb E[\\tilde D^2\\varepsilon^2]\\big(\\mathbb E[\\tilde D^2]\\big)^{-1}.\n\nPlug-in penalty (as in the figure). In the scaling \\tfrac1{2n}\\lVert y - Xb\\rVert^2 + \\lambda\\lVert b\\rVert_1 on standardized regressors, \\lambda = 1.1\\,\\hat\\sigma\\,\\Phi^{-1}\\!\\big(1 - \\tfrac{0.1/\\log n}{2p}\\big)/\\sqrt n, with \\hat\\sigma re-estimated from post-Lasso residuals a few times.\nSimultaneous bands. For targets \\alpha_1,\\dots,\\alpha_{p_1} with estimated covariance \\hat V, the band \\hat\\alpha_\\ell \\pm c\\,\\sqrt{\\hat V_{\\ell\\ell}/n} uses c = the (1-a)-quantile of \\lVert N(0, D^{-1/2}\\hat V D^{-1/2})\\rVert_\\infty, D = \\mathrm{diag}(\\hat V), found by simulation. It is never narrower than the pointwise band.\nDebiased Lasso. \\hat\\alpha = \\big(\\mathbb E_n[D\\tilde D(\\hat\\gamma)]\\big)^{-1}\\mathbb E_n\\big[(Y - \\hat\\beta'W)\\tilde D(\\hat\\gamma)\\big], an IV estimator with the residualized \\tilde D(\\hat\\gamma) as instrument.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
+    "objectID": "content/04-predictive/double-lasso.html#connections",
+    "href": "content/04-predictive/double-lasso.html#connections",
+    "title": "Double Lasso: Honest Inference After Choosing Controls",
+    "section": "Connections",
+    "text": "Connections\n\nBuilds on: regularization (the Lasso itself, now used for a new purpose), multiple regression (FWL partialling-out and omitted-variable bias), and OLS in matrix form.\nLeads to: causal ML / double machine learning (the same orthogonal score with any learner, plus cross-fitting), and multiple testing (simultaneous bands are family-wise control).\nContrasts with: cross-validation, which tunes for prediction error, the wrong criterion when the goal is a confidence interval for one coefficient.",
+    "crumbs": [
+      "Home",
+      "IV · Predictive Modelling",
+      "The Predictive Paradigm",
+      "Double Lasso: Honest Inference After Choosing Controls"
+    ]
+  },
+  {
     "objectID": "content/04-predictive/var-and-impulse-responses.html",
     "href": "content/04-predictive/var-and-impulse-responses.html",
     "title": "Vector Autoregression: VAR, Granger & Impulse Responses",
@@ -23877,7 +24163,7 @@
     "href": "content/04-predictive/index.html#the-predictive-paradigm",
     "title": "IV · The Computational Turn: Predictive Modelling",
     "section": "The Predictive Paradigm",
-    "text": "The Predictive Paradigm\nThe goal shift and the core machine-learning concepts, in reading order:\n\n\n\nEntry\nStatus\nCore sources\n\n\n\n\nFrom explaining to predicting: two cultures\n✅ Written\nISL, Jacobucci, Bruce\n\n\nThe bias–variance trade-off\n✅ Written\nISL\n\n\nClassification: when the outcome is a category\n✅ Written\nISL, Bruce, Jacobucci\n\n\nOut-of-sample honesty: the test set & cross-validation\n✅ Written\nISL, Bruce\n\n\nRegularization: Ridge & Lasso\n✅ Written\nISL\n\n\nTrees, forests & boosting\n✅ Written\nISL, Bruce\n\n\nInterpretability & ML for social science\n✅ Written\nJacobucci, ISL, Angrist & Pischke",
+    "text": "The Predictive Paradigm\nThe goal shift and the core machine-learning concepts, in reading order:\n\n\n\nEntry\nStatus\nCore sources\n\n\n\n\nFrom explaining to predicting: two cultures\n✅ Written\nISL, Jacobucci, Bruce\n\n\nThe bias–variance trade-off\n✅ Written\nISL\n\n\nClassification: when the outcome is a category\n✅ Written\nISL, Bruce, Jacobucci\n\n\nOut-of-sample honesty: the test set & cross-validation\n✅ Written\nISL, Bruce\n\n\nRegularization: Ridge & Lasso\n✅ Written\nISL\n\n\nDouble Lasso: honest inference after choosing controls\n✅ Written\nChernozhukov et al.\n\n\nTrees, forests & boosting\n✅ Written\nISL, Bruce\n\n\nMeasurement error & machine learning\n✅ Written\nJacobucci et al.\n\n\nInterpretability & ML for social science\n✅ Written\nJacobucci, ISL, Angrist & Pischke",
     "crumbs": [
       "Home",
       "IV · Predictive Modelling",
@@ -24030,7 +24316,7 @@
     "href": "content/04-predictive/regularization.html#connections",
     "title": "Regularization: Ridge & Lasso",
     "section": "Connections",
-    "text": "Connections\n\nBuilds on: the bias–variance trade-off (regularization buys variance reduction with bias), the shrinkage estimator (lower MSE via bias), cross-validation (how \\lambda is chosen), and OLS / Gauss–Markov (the unbiased baseline being traded away).\nLeads to: trees & forests (another route to low variance, via averaging) and high-dimensional causal ML (Lasso for selecting controls; double/debiased ML).\nContrasts with: logistic regression, which the Lasso also regularises for high-dimensional classification.",
+    "text": "Connections\n\nBuilds on: the bias–variance trade-off (regularization buys variance reduction with bias), the shrinkage estimator (lower MSE via bias), cross-validation (how \\lambda is chosen), and OLS / Gauss–Markov (the unbiased baseline being traded away).\nLeads to: trees & forests (another route to low variance, via averaging), Double Lasso (the Lasso used to choose controls without wrecking the confidence interval), and high-dimensional causal ML (double/debiased ML).\nContrasts with: logistic regression, which the Lasso also regularises for high-dimensional classification.",
     "crumbs": [
       "Home",
       "IV · Predictive Modelling",
