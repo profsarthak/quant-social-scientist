@@ -26,4 +26,5 @@ appendices/     Math and computing references
 .nojekyll       Tells GitHub Pages to serve files as-is (no Jekyll processing)
 ```
 
-For the philosophy, curriculum, and how the book is written, see the source project.
+For the philosophy, the curriculum, and how to read it, see the
+[About page](https://profsarthak.github.io/quant-social-scientist/about.html).
