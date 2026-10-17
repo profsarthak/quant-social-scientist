@@ -975,6 +975,12 @@ window.Quarto = {
  <span class="menu-text">Volatility: ARCH &amp; GARCH Models</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/nonlinear-time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Nonlinear Time Series: Thresholds, Smooth Transitions &amp; Regime Switching</span></a>
+  </div>
+</li>
       </ul>
   </li>
       </ul>
@@ -1911,6 +1917,11 @@ window.Quarto = {
   <li><a href="#why-naive-ml-is-biased-for-effects" id="toc-why-naive-ml-is-biased-for-effects" class="nav-link" data-scroll-target="#why-naive-ml-is-biased-for-effects">Why naive ML is biased for effects</a></li>
   <li><a href="#doubledebiased-machine-learning" id="toc-doubledebiased-machine-learning" class="nav-link" data-scroll-target="#doubledebiased-machine-learning">Double/debiased machine learning</a></li>
   <li><a href="#causal-forests-and-honesty" id="toc-causal-forests-and-honesty" class="nav-link" data-scroll-target="#causal-forests-and-honesty">Causal forests and honesty</a></li>
+  <li><a href="#why-τx-is-hard-and-how-to-lower-your-sights" id="toc-why-τx-is-hard-and-how-to-lower-your-sights" class="nav-link" data-scroll-target="#why-τx-is-hard-and-how-to-lower-your-sights">Why τ(x) is hard, and how to lower your sights</a></li>
+  <li><a href="#inference-on-a-summary-best-linear-predictor-and-group-effects" id="toc-inference-on-a-summary-best-linear-predictor-and-group-effects" class="nav-link" data-scroll-target="#inference-on-a-summary-best-linear-predictor-and-group-effects">Inference on a summary: best linear predictor and group effects</a></li>
+  <li><a href="#the-meta-learners-five-ways-to-build-τx-from-any-ml-method" id="toc-the-meta-learners-five-ways-to-build-τx-from-any-ml-method" class="nav-link" data-scroll-target="#the-meta-learners-five-ways-to-build-τx-from-any-ml-method">The meta-learners: five ways to build τ(x) from any ML method</a></li>
+  <li><a href="#choosing-and-stacking-learners" id="toc-choosing-and-stacking-learners" class="nav-link" data-scroll-target="#choosing-and-stacking-learners">Choosing and stacking learners</a></li>
+  <li><a href="#did-the-model-find-real-heterogeneity-validation-on-held-out-data" id="toc-did-the-model-find-real-heterogeneity-validation-on-held-out-data" class="nav-link" data-scroll-target="#did-the-model-find-real-heterogeneity-validation-on-held-out-data">Did the model find real heterogeneity? Validation on held-out data</a></li>
   <li><a href="#policy-learning" id="toc-policy-learning" class="nav-link" data-scroll-target="#policy-learning">Policy learning</a></li>
   <li><a href="#the-cautions-ml-is-not-a-license" id="toc-the-cautions-ml-is-not-a-license" class="nav-link" data-scroll-target="#the-cautions-ml-is-not-a-license">The cautions: ML is not a license</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
@@ -2019,7 +2030,7 @@ Y/\partial D</span>.</li>
 <img src="causal-machine-learning_files/figure-html/fig-cate-output-1.png" width="682" height="392" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Heterogeneous treatment effects. The true CATE τ(x) (green) rises with a covariate x — the treatment helps high-x units far more than low-x units, a pattern the ATE (grey dashed) completely hides. An honest, binned effect estimator (blue points, with 95% intervals) recovers τ(x) by comparing treated and control outcomes within strata of x — the intuition behind causal forests, which split to maximise effect heterogeneity and estimate honestly for valid intervals.
+Figure&nbsp;1: Heterogeneous treatment effects. The true CATE τ(x) (solid grey line) rises with a covariate x, so the treatment helps high-x units far more than low-x units. The ATE (light dashed line) hides this completely. An honest, binned estimator (ink points, with 95% intervals) recovers τ(x) by comparing treated and control outcomes within strata of x. That is the intuition behind causal forests, which split to maximise effect heterogeneity and estimate honestly for valid intervals. Binning by x is also a GATE estimator, the simplest version of the ‘inference on a summary’ route below.
 </figcaption>
 </figure>
 </div>
@@ -2033,6 +2044,111 @@ Figure&nbsp;1: Heterogeneous treatment effects. The true CATE τ(x) (green) rise
 <li><strong>Causal splitting.</strong> Instead of splitting to reduce prediction error (RSS), trees split to <strong>maximise the heterogeneity of the estimated treatment effect</strong> across the children — actively hunting for the covariates along which the effect <em>varies</em>. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></li>
 <li><strong>Honesty.</strong> A tree is <strong>honest</strong> if it uses <strong>one subsample to choose the splits</strong> and a <strong>separate subsample to estimate the effect</strong> in each leaf. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> This separation is what makes the leaf estimates statistically <em>valid</em> — it earns trustworthy <strong>confidence intervals</strong> on <span class="math inline">\tau(x)</span>, instead of the overconfident ones you’d get from estimating effects in the very leaves you carved to maximise them.</li>
 </ul>
+<p>Even honest forests come with a warning. Their confidence intervals are “more brittle and are not as assumption-lean as inference based on OLS” <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. They are valid only for low-dimensional <span class="math inline">X</span> and particular hyperparameter choices, and those choices are “typically violated in practice”, especially once the hyperparameters are tuned by cross-validation.</p>
+</section>
+<section id="why-τx-is-hard-and-how-to-lower-your-sights" class="level2">
+<h2 class="anchored" data-anchor-id="why-τx-is-hard-and-how-to-lower-your-sights">Why τ(x) is hard, and how to lower your sights</h2>
+<p>Chernozhukov and coauthors put the difficulty bluntly. This is “the first time” in the book that the causal target “is actually a function” <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. Even if you could see both counterfactuals, estimating <span class="math inline">\tau(x)</span> would be as hard as a high-dimensional regression of <span class="math inline">Y(1)-Y(0)</span> on <span class="math inline">X</span>. A deep result makes it worse: there are no <strong>adaptive confidence bands</strong> for the whole curve <span class="math inline">\tau_0(x)</span> except under very restrictive assumptions (Genovese and Wasserman 2008) <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. So we have to “re-calibrate our expectations and potentially relax our goals.” The book offers four ways to do that <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>:</p>
+<ol type="1">
+<li><strong>Infer a summary, not the curve.</strong> Project <span class="math inline">\tau(x)</span> onto a few pre-specified features to get a best linear approximation or a set of group effects. These come with ordinary confidence intervals.</li>
+<li><strong>Infer other summaries</strong>, such as the effect among the top responders or the value of a policy.</li>
+<li><strong>Pointwise intervals from causal forests.</strong> These work only for low-dimensional <span class="math inline">X</span>, with the brittleness noted above.</li>
+<li><strong>Give up on intervals.</strong> Aim for a <span class="math inline">\tau(x)</span> with small prediction error, then <em>validate</em> it on held-out data.</li>
+</ol>
+<p>The rest of this entry covers routes 1 and 4.</p>
+</section>
+<section id="inference-on-a-summary-best-linear-predictor-and-group-effects" class="level2">
+<h2 class="anchored" data-anchor-id="inference-on-a-summary-best-linear-predictor-and-group-effects">Inference on a summary: best linear predictor and group effects</h2>
+<p>The key tool is a <strong>doubly robust pseudo-outcome</strong> for each unit: <span class="math display">
+Y_i(\hat\eta)=\hat g(1,Z_i)-\hat g(0,Z_i)+\Big(\tfrac{D_i}{\hat\mu(Z_i)}-\tfrac{1-D_i}{1-\hat\mu(Z_i)}\Big)\big(Y_i-\hat g(D_i,Z_i)\big),
+</span> with the outcome model <span class="math inline">\hat g</span> and the propensity <span class="math inline">\hat\mu</span> cross-fitted <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. It is the <a href="../../content/05-causal-inference/combining-and-triangulating-designs.html">AIPW</a> score computed one unit at a time. Each <span class="math inline">Y_i(\hat\eta)</span> is a very noisy estimate of that unit’s effect, but its conditional mean is exactly <span class="math inline">\tau_0(X)</span>. It is also Neyman-orthogonal, so small errors in the two nuisances do not bias it to first order <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>.</p>
+<p>That turns CATE inference into ordinary regression. Regress <span class="math inline">Y_i(\hat\eta)</span> on a handful of chosen features <span class="math inline">p(X_i)</span> with OLS and robust standard errors. The result is the <strong>best linear predictor (BLP)</strong> of <span class="math inline">\tau(x)</span> in those features, and it has the same large-sample behaviour as if the nuisances were known <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. If the features are group dummies, such as income quintiles, the BLP coefficients <em>are</em> the <strong>group average treatment effects (GATEs)</strong> <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. You get pointwise intervals for one pre-chosen group and wider simultaneous bands that cover all of them at once.</p>
+<p>Two running examples from the book show the scope:</p>
+<ul>
+<li><strong>401(k) eligibility</strong> and net financial assets. GATEs by income quintile, and a polynomial in log income, show the effect rising with income <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. Forests trained on the same pseudo-outcomes trace a sigmoid curve between roughly $5k and $22k of income, with very wide uncertainty in the top tail <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>.</li>
+<li><strong>The “welfare” wording experiment.</strong> The General Social Survey randomly asked respondents about spending on “welfare programs” or on “assistance to the poor”. Same meaning, different words. Across 12,907 respondents from 1986–2010, with 42 covariates, the simple two-means ATE of the “welfare” wording is <strong>−0.3681</strong> (SE 0.007) <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. Both kinds of forest single out political views as the most important moderator.</li>
+</ul>
+</section>
+<section id="the-meta-learners-five-ways-to-build-τx-from-any-ml-method" class="level2">
+<h2 class="anchored" data-anchor-id="the-meta-learners-five-ways-to-build-τx-from-any-ml-method">The meta-learners: five ways to build τ(x) from any ML method</h2>
+<p>Route 4 asks for the best possible estimate of the <em>curve</em>. The book’s answer is <strong>meta-learning</strong>: treat any regression or classification method as a black-box “oracle”, and combine oracle calls into an estimate of <span class="math inline">\tau(x)</span> <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. The recipes differ in what they ask the oracle to predict:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Learner</th>
+<th>Recipe</th>
+<th>Strength</th>
+<th>Weakness</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>S</strong> (single)</td>
+<td>one model of <span class="math inline">Y</span> on <span class="math inline">(D,Z)</span>; <span class="math inline">\hat\tau=\hat g(1,Z)-\hat g(0,Z)</span></td>
+<td>low variance</td>
+<td>can “overly regularize the treatment variable”, shrinking a small effect toward zero</td>
+</tr>
+<tr class="even">
+<td><strong>T</strong> (two)</td>
+<td>separate models for treated and controls; subtract</td>
+<td>simple; good when both arms are well represented</td>
+<td>errors in two outcome models add up</td>
+</tr>
+<tr class="odd">
+<td><strong>X</strong> (cross)</td>
+<td>impute each unit’s effect from the <em>other</em> arm’s model, then blend the two by the propensity</td>
+<td>shines when one arm is rare and the effect is simpler than the baselines</td>
+<td>still essentially outcome modelling</td>
+</tr>
+<tr class="even">
+<td><strong>DR</strong> (doubly robust)</td>
+<td>regress the pseudo-outcome <span class="math inline">Y(\hat\eta)</span> on <span class="math inline">X</span></td>
+<td>the error depends only on the <em>product</em> of nuisance errors</td>
+<td>unstable with extreme propensities</td>
+</tr>
+<tr class="odd">
+<td><strong>R</strong> (residual)</td>
+<td>regress <span class="math inline">\check Y=Y-\hat h(Z)</span> on <span class="math inline">\check D=D-\hat\mu(Z)</span>, with the slope allowed to vary in <span class="math inline">X</span></td>
+<td>Neyman-orthogonal and stable</td>
+<td>needs an accurate propensity; targets an <strong>overlap-weighted</strong> projection, not <span class="math inline">\tau^*</span> itself</td>
+</tr>
+</tbody>
+</table>
+<p><span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p>
+<p>The R-learner is the DML <a href="../../content/04-predictive/double-lasso.html">partialling-out</a> idea from above, with the slope allowed to vary. It minimises <span class="math inline">\mathbb E[(\check Y-\tau(X)\check D)^2]</span>, which is a weighted regression of <span class="math inline">\check Y/\check D</span> with weights <span class="math inline">\check D^2</span> <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. Its weakness shows when <span class="math inline">\tau</span> is misspecified. It then converges to the approximation that best fits units with plenty of overlap, and for the R-learner propensity accuracy “cannot be compensated by more accurate estimation of the outcome regression” <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>.</p>
+<p>Which learner wins depends on the problem. The book’s simulations make this concrete <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. All use 500 units, and in all of them only 5% (or 95%) of units are treated:</p>
+<ul>
+<li><strong>DGP 1:</strong> a constant effect of 0.5 on top of a baseline with a step in it. The R-learner’s RMSE is 0.002, against 0.038 for the T-learner.</li>
+<li><strong>DGP 2:</strong> the effect exists only for <span class="math inline">Z\in[0.6,0.8]</span>, and treatment is rare. Here the R-learner is the <em>worst</em> (0.374).</li>
+<li><strong>DGP 3:</strong> the same as DGP 2, but treatment is common. The T-learner (0.036) and the DR-learner (0.049) do best.</li>
+</ul>
+<p>Hence the honest summary: “there is no clear winner among the X-, R- and DR-Learner methods” <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>.</p>
+</section>
+<section id="choosing-and-stacking-learners" class="level2">
+<h2 class="anchored" data-anchor-id="choosing-and-stacking-learners">Choosing and stacking learners</h2>
+<p>If no learner wins everywhere, you need a way to choose. You cannot score a CATE model against the truth, because <span class="math inline">Y(1)-Y(0)</span> is never observed. But the pseudo-outcome stands in for it. The <strong>DR loss</strong> <span class="math inline">\mathbb E_n[(Y(\hat\eta)-\tau(X))^2]</span> ranks candidate models consistently, since the differences in loss between models target the differences in their true mean squared error. A theorem in the book gives confidence intervals for those differences <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. Instead of picking one model you can <strong>stack</strong> them. Q-aggregation, a convex-weight scheme, stays “consistently close to the best performer across the board” in the simulations: 0.017, 0.165 and 0.037 RMSE on the three DGPs <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>.</p>
+<p>Two cautions come with this. First, the stacked ensemble “does not come with confidence intervals”, and it can shift with the data split and the random seed <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. Second, the evidence may simply not be there. In the 401(k) data the authors “cannot statistically conclude” that any meta-learner predicts effects better than a constant <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. A distilled tree still says something sensible: about $6k for lower-income, younger savers and about $13k for high earners. But that description is a hypothesis, not a finding.</p>
+</section>
+<section id="did-the-model-find-real-heterogeneity-validation-on-held-out-data" class="level2">
+<h2 class="anchored" data-anchor-id="did-the-model-find-real-heterogeneity-validation-on-held-out-data">Did the model find real heterogeneity? Validation on held-out data</h2>
+<p>Before anyone acts on a CATE model, the book prescribes diagnostics on a <strong>test set</strong> that played no part in fitting or choosing the model <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. All of them run on the held-out pseudo-outcomes:</p>
+<ul>
+<li><strong>The BLP slope test.</strong> Regress <span class="math inline">Y(\hat\eta)</span> on <span class="math inline">(1,\tau^*(X))</span>. The slope estimates <span class="math inline">\mathrm{Cov}(\tau_0,\tau^*)/\mathrm{Var}(\tau^*)</span>. A significant slope means the model has found real heterogeneity, and a perfectly calibrated model would have a slope of exactly 1 <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>.</li>
+<li><strong>Calibration by group.</strong> Split the test set into quartiles of predicted effect and estimate each quartile’s GATE from the pseudo-outcomes. A good model’s predicted and estimated group effects line up <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>.</li>
+<li><strong>Uplift curves.</strong> The <strong>TOC</strong> asks how much larger the effect is among the top <span class="math inline">q</span> share of predicted responders than on average. The <strong>Qini</strong> scales that by the share treated. The areas under them (AUTOC, AUQC) give one-sided tests for useful targeting <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>. This is the same RATE logic as in <a href="../../content/05-causal-inference/heterogeneous-effects-in-experiments.html">heterogeneous effects in experiments</a>, now with doubly robust scores so that it also works with observational data.</li>
+</ul>
+<p>The results show how much the data can and cannot say <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span>:</p>
+<ul>
+<li><strong>401(k)</strong> (9,716 households, split 60/20/20). The BLP slope is 2.24 (95% CI 0.83 to 3.65), so the model carries real signal. The AUTOC is 5,229 (SE 1,472). The authors warn that the specific numbers varied a lot depending on the random split.</li>
+<li><strong>“Welfare” wording.</strong> The slope is 1.47 (CI 0.94 to 1.99), which includes the ideal value of 1. A shallow tree distilled from the ensemble finds the least adverse reaction among left-leaning respondents with a four-year degree, and the most adverse among right-leaning respondents who do not identify as Black. Political views alone create less variation than the combination of views and education.</li>
+</ul>
+<p>Validation like this is what turns a pretty CATE plot into evidence.</p>
 </section>
 <section id="policy-learning" class="level2">
 <h2 class="anchored" data-anchor-id="policy-learning">Policy learning</h2>
@@ -2066,6 +2182,9 @@ Figure&nbsp;1: Heterogeneous treatment effects. The true CATE τ(x) (green) rise
 <li><p><strong>Dishonest forests.</strong> Choosing splits <em>and</em> estimating effects on the same data gives invalid, overconfident intervals on <span class="math inline">\tau(x)</span>. Use honest estimation. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
 <li><p><strong>Believing ML earns identification.</strong> Unconfoundedness and overlap are still required; ML buys flexibility, not exogeneity. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
 <li><p><strong>Acting on a biased CATE.</strong> A policy rule is only as causal as the <span class="math inline">\tau(x)</span> beneath it — garbage identification in, harmful targeting out. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
+<li><p><strong>Promising confidence bands for the whole curve.</strong> No adaptive bands exist for <span class="math inline">\tau_0(x)</span> in general. Put intervals on pre-specified summaries (BLP, GATEs), and validate everything else. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
+<li><p><strong>Crowning one meta-learner.</strong> S, T, X, DR and R each win on some data-generating processes and lose on others. Score them with the DR loss on held-out data, or stack them. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
+<li><p><strong>Skipping validation.</strong> A CATE plot is not evidence of heterogeneity. Run the BLP slope test, calibration and uplift curves on a test set the model never saw, and check that the conclusion survives a different split. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
 </ul>
 </div>
 </div>
@@ -2085,7 +2204,7 @@ Figure&nbsp;1: Heterogeneous treatment effects. The true CATE τ(x) (green) rise
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Chernozhukov et al., <em>Applied Causal Inference Powered by ML and AI</em></strong> — the <strong>CATE</strong> <span class="math inline">\tau(x)=\mathbb E[Y(1)-Y(0)\mid X=x]</span> and the “four-feet-deep river”; <strong>regularization bias</strong> from naive outcome-prediction ML; <strong>double/debiased ML</strong> — nuisances <span class="math inline">g_0(X),m_0(X)</span>, <strong>Neyman orthogonality</strong>, <strong>cross-fitting</strong>; <strong>causal forests / GRF</strong> with <strong>causal splitting</strong> and <strong>honest</strong> estimation for valid CIs; <strong>policy learning</strong> <span class="math inline">\pi^*(x)=\mathbf 1\{\tau(x)\ge0\}</span> as cost-sensitive classification; and the cautions — ML doesn’t fix <strong>identification</strong> (needs unconfoundedness + overlap), fairness, and interpretability-vs-mechanism.</li>
+<li><strong>Chernozhukov et al., <em>Applied Causal Inference Powered by ML and AI</em></strong> — the <strong>CATE</strong> <span class="math inline">\tau(x)=\mathbb E[Y(1)-Y(0)\mid X=x]</span> and the “four-feet-deep river”; <strong>regularization bias</strong> from naive outcome-prediction ML; <strong>double/debiased ML</strong> — nuisances <span class="math inline">g_0(X),m_0(X)</span>, <strong>Neyman orthogonality</strong>, <strong>cross-fitting</strong>; <strong>causal forests / GRF</strong> with <strong>causal splitting</strong> and <strong>honest</strong> estimation for valid CIs; <strong>policy learning</strong> <span class="math inline">\pi^*(x)=\mathbf 1\{\tau(x)\ge0\}</span> as cost-sensitive classification; and the cautions — ML doesn’t fix <strong>identification</strong> (needs unconfoundedness + overlap), fairness, and interpretability-vs-mechanism. <strong>Ch. 14–15 in detail:</strong> CATE as “the first” function-valued target, the Genovese–Wasserman no-adaptive-bands result and the four ways to relax the goal; the doubly robust pseudo-outcome, <strong>BLP</strong> and <strong>GATEs</strong> with simultaneous bands; the brittleness of forest intervals; the <strong>S/T/X/DR/R meta-learners</strong>, the R-learner’s overlap-weighted limit and the “no clear winner” verdict with the three-DGP RMSE comparison; DR-loss scoring, stacking and <strong>Q-aggregation</strong>; held-out <strong>validation</strong> by the BLP slope test, calibration and <strong>TOC/Qini</strong> uplift curves; and the 401(k) and GSS “welfare”-wording applications (ATE −0.3681, 12,907 respondents; slopes 2.24 and 1.47; the distilled trees).</li>
 <li><strong>Jacobucci, Grimm &amp; Zhang, <em>ML for Social &amp; Behavioral Research</em></strong> — heterogeneous effects for social science, encoded bias/fairness, and interpretability tools (SHAP, distillation) describing the model, not the mechanism.</li>
 </ul>
 </div>
@@ -2099,6 +2218,12 @@ Figure&nbsp;1: Heterogeneous treatment effects. The true CATE τ(x) (green) rise
 \hat\theta=\frac{\frac1n\sum_i \tilde D_i\,\tilde Y_i}{\frac1n\sum_i \tilde D_i^2},
 </span> each nuisance fit on a <em>separate fold</em>. Orthogonality means <span class="math inline">\partial_{\eta}\mathbb E[\psi(W;\theta,\eta)]=0</span> at the truth: small errors <span class="math inline">\hat g-g_0</span>, <span class="math inline">\hat m-m_0</span> enter the estimating equation only at <strong>second order</strong>, so <span class="math inline">\hat\theta</span> stays <span class="math inline">\sqrt n</span>-consistent and asymptotically normal even though the nuisances converge slowly. This is <a href="../../content/03-regression/multiple-regression.html">FWL</a> made robust to ML noise.</p>
 <p><strong>Honest CATE intervals.</strong> Split the data: use sample <span class="math inline">\mathcal I_1</span> to grow the tree (choose splits maximising <span class="math inline">\sum_{\text{children}} n_c\,\hat\tau_c^2</span>, effect heterogeneity), and the <em>independent</em> sample <span class="math inline">\mathcal I_2</span> to estimate each leaf’s <span class="math inline">\hat\tau(x)</span>. Because the leaf was not chosen using <span class="math inline">\mathcal I_2</span>’s outcomes, the leaf estimate is (asymptotically) unbiased with a usable variance — the formal basis for confidence intervals on <span class="math inline">\tau(x)</span>.</p>
+<p><strong>Why the pseudo-outcome works.</strong> Write <span class="math inline">H=D/\mu_0(Z)-(1-D)/(1-\mu_0(Z))</span>. With the true nuisances, <span class="math inline">\mathbb E[H(Y-g_0(D,Z))\mid Z]=0</span>, because the residual has mean zero within each arm and <span class="math inline">H</span> only reweights the arms. So <span class="math inline">\mathbb E[Y(\eta_0)\mid Z]=g_0(1,Z)-g_0(0,Z)</span>, and averaging over <span class="math inline">Z</span> given <span class="math inline">X</span> gives <span class="math inline">\tau_0(X)</span>. With estimated nuisances the bias is <span class="math inline">\mathbb E[(H(\mu_0)-H(\hat\mu))(\hat g-g_0)\mid X]</span>, a <strong>product</strong> of the two errors. That product is the source of both double robustness and the DR-learner’s error rate, <span class="math inline">\lesssim r_n^2+\text{Error}(\hat g)^2\,\text{Error}(H(\hat\mu))^2</span>, where <span class="math inline">r_n</span> is the oracle’s own rate.</p>
+<p><strong>BLP and GATEs.</strong> <span class="math inline">\beta_0=\arg\min_\beta\mathbb E[(\tau_0(X)-p(X)'\beta)^2]
+=(\mathbb E[pp'])^{-1}\mathbb E[p(X)Y(\eta_0)]</span>, so OLS of <span class="math inline">Y_i(\hat\eta)</span> on <span class="math inline">p(X_i)</span> estimates it, with the sandwich variance <span class="math inline">\hat Q^{-1}\mathbb E_n[pp'(Y(\hat\eta)-p'\hat\beta)^2]\hat Q^{-1}</span>. If <span class="math inline">p(X)=(\mathbf 1\{X\in R_1\},\dots,\mathbf 1\{X\in R_K\})</span> for disjoint groups, then <span class="math inline">\beta_{0k}</span> is the mean of <span class="math inline">\tau_0</span> on <span class="math inline">R_k</span>, which is exactly the GATE.</p>
+<p><strong>The R-loss.</strong> In <span class="math inline">Y=\delta_0(Z)D+g(Z)+\varepsilon</span>, residualising gives <span class="math inline">\check Y=\delta_0(Z)\check D+\varepsilon</span>. The R-learner minimises <span class="math inline">\mathbb E[(\check Y-\tau(X)\check D)^2]</span>. If <span class="math inline">\tau</span> cannot represent <span class="math inline">\delta_0</span>, the limit is <span class="math inline">\arg\min_\tau\mathbb E[(\delta_0(Z)-\tau(X))^2\,\mathrm{Var}(D\mid Z)]</span>. Units with propensity near 0 or 1 get almost no weight, which is why the result is an overlap-weighted projection.</p>
+<p><strong>The BLP slope test.</strong> In the population regression of <span class="math inline">Y(\eta_0)</span> on <span class="math inline">(1,\tau^*(X))</span>, the slope is <span class="math inline">\beta_1=\mathrm{Cov}(\tau_0(X),\tau^*(X))/\mathrm{Var}(\tau^*(X))</span>, because <span class="math inline">\mathbb E[Y(\eta_0)\mid X]=\tau_0(X)</span>. <span class="math inline">\beta_1\neq0</span> implies that <span class="math inline">\tau_0</span> varies with <span class="math inline">X</span>. <span class="math inline">\beta_1=1</span> holds if <span class="math inline">\tau^*</span> is calibrated, meaning <span class="math inline">\mathbb E[\tau_0\mid\tau^*]=\tau^*</span>.</p>
+<p><strong>Uplift curves.</strong> With <span class="math inline">\mu(\tau^*,q)</span> the <span class="math inline">(1-q)</span> quantile of the predictions, <span class="math inline">\mathrm{TOC}(q)=\mathbb E[Y(1)-Y(0)\mid\tau^*\ge\mu(\tau^*,q)]-\mathrm{ATE}</span> and <span class="math inline">\mathrm{QINI}(q)=\mathrm{TOC}(q)\cdot P(\tau^*\ge\mu)</span>. Both are covariances of the individual effect with an indicator of being in the top group, so both are identified by replacing <span class="math inline">Y(1)-Y(0)</span> with <span class="math inline">Y(\eta_0)</span>.</p>
 <p><strong>Policy value.</strong> A rule <span class="math inline">\pi</span> earns welfare <span class="math inline">V(\pi)=\mathbb E[\,Y(\pi(X))\,]=\mathbb E[\,\pi(X)\tau(X)\,]+\text{const}</span>, maximised pointwise by <span class="math inline">\pi^*(x)=\mathbf 1\{\tau(x)\ge0\}</span> — treat exactly where the effect is positive; the regret of any rule is <span class="math inline">\mathbb E[(\pi^*-\pi)\tau]</span>, which weights mistakes by effect size.</p>
 </div>
 </section>
@@ -2669,7 +2794,7 @@ Chernozhukov, Victor, Christian Hansen, Nathan Kallus, Martin Spindler, and Vasi
 <span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-cate</span></span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Heterogeneous treatment effects. The true CATE τ(x) (green) rises with a covariate x — the treatment helps high-x units far more than low-x units, a pattern the ATE (grey dashed) completely hides. An honest, binned effect estimator (blue points, with 95% intervals) recovers τ(x) by comparing treated and control outcomes within strata of x — the intuition behind causal forests, which split to maximise effect heterogeneity and estimate honestly for valid intervals."</span></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Heterogeneous treatment effects. The true CATE τ(x) (solid grey line) rises with a covariate x, so the treatment helps high-x units far more than low-x units. The ATE (light dashed line) hides this completely. An honest, binned estimator (ink points, with 95% intervals) recovers τ(x) by comparing treated and control outcomes within strata of x. That is the intuition behind causal forests, which split to maximise effect heterogeneity and estimate honestly for valid intervals. Binning by x is also a GATE estimator, the simplest version of the 'inference on a summary' route below."</span></span>
 <span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
 <span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
 <span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a></span>
@@ -2722,121 +2847,309 @@ Chernozhukov, Victor, Christian Hansen, Nathan Kallus, Martin Spindler, and Vasi
 <span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>  $\tau(x)$, instead of the overconfident ones you'd get from estimating effects in the very leaves you</span>
 <span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>  carved to maximise them.</span>
 <span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="fu">## Policy learning</span></span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>The point of knowing $\tau(x)$ is often to **act**. **Policy learning** turns CATEs into an assignment</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>rule $\pi(x)$. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> The unconstrained optimum is simple — *treat everyone with a</span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>positive predicted effect*:</span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>\pi^*(x)=\mathbf 1<span class="sc">\{</span>\tau(x)\ge 0<span class="sc">\}</span>.</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>Framed as a <span class="co">[</span><span class="ot">classification</span><span class="co">](../04-predictive/classification-and-knn.qmd)</span> problem, it predicts the</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>**sign** of the effect, **weighted by its magnitude** — misclassifying a *large* positive effect costs</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>more than fumbling a near-zero one (cost-sensitive classification). <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> This is</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>where causal inference meets <span class="co">[</span><span class="ot">decision-making</span><span class="co">](../06-field-realities/index.qmd)</span>: not "what is the</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>effect?" but "whom should we treat?"</span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="fu">## The cautions: ML is not a license</span></span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>The most important sentence in the chapter: **machine learning does not fix identification.**</span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> Every method here delivers *causal* answers only if the</span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">identifying assumptions still hold</span><span class="co">](matching-and-propensity-scores.qmd)</span> — **conditional exogeneity</span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>(unconfoundedness)** and **overlap** $0&lt;\Pr(D=1\mid X)&lt;1$. DML and causal forests make you *efficient</span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>and flexible* under those assumptions; they cannot conjure them. Throwing a forest at confounded data</span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>yields a beautifully estimated **biased** effect. Two further risks: <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>Even honest forests come with a warning. Their confidence intervals are "more brittle and are not as</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>assumption-lean as inference based on OLS" <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. They are valid only for</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>low-dimensional $X$ and particular hyperparameter choices, and those choices are "typically violated in</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>practice", especially once the hyperparameters are tuned by cross-validation.</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why τ(x) is hard, and how to lower your sights</span></span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>Chernozhukov and coauthors put the difficulty bluntly. This is "the first time" in the book that the</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>causal target "is actually a function" <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. Even if you could see both</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>counterfactuals, estimating $\tau(x)$ would be as hard as a high-dimensional regression of $Y(1)-Y(0)$ on</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>$X$. A deep result makes it worse: there are no **adaptive confidence bands** for the whole curve</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>$\tau_0(x)$ except under very restrictive assumptions (Genovese and Wasserman 2008)</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. So we have to "re-calibrate our expectations and potentially relax our goals."</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>The book offers four ways to do that <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>:</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Infer a summary, not the curve.** Project $\tau(x)$ onto a few pre-specified features to get a best</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>   linear approximation or a set of group effects. These come with ordinary confidence intervals.</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Infer other summaries**, such as the effect among the top responders or the value of a policy.</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Pointwise intervals from causal forests.** These work only for low-dimensional $X$, with the</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>   brittleness noted above.</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Give up on intervals.** Aim for a $\tau(x)$ with small prediction error, then *validate* it on</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>   held-out data.</span>
 <span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Fairness.** ML models absorb the prejudices in their training data (gender and racial bias in text</span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>  embeddings, biased historical decisions) — a <span class="co">[</span><span class="ot">Part IV worry</span><span class="co">](../04-predictive/interpretability-and-ml.qmd)</span></span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>  with higher stakes when the output *assigns treatment*.</span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Interpretability ≠ mechanism.** Tools like <span class="co">[</span><span class="ot">SHAP</span><span class="co">](../04-predictive/interpretability-and-ml.qmd)</span> or</span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>  distilling a forest into a shallow tree explain **how the model guesses**, not the **causal</span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>  mechanism** of the world. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Naive ML on the outcome.** Regularization shrinks small treatment effects toward zero. Orthogonalise</span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>  (DML) — estimate the *effect*, not $Y$. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>The rest of this entry covers routes 1 and 4.</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="fu">## Inference on a summary: best linear predictor and group effects</span></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>The key tool is a **doubly robust pseudo-outcome** for each unit:</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>Y_i(\hat\eta)=\hat g(1,Z_i)-\hat g(0,Z_i)+\Big(\tfrac{D_i}{\hat\mu(Z_i)}-\tfrac{1-D_i}{1-\hat\mu(Z_i)}\Big)\big(Y_i-\hat g(D_i,Z_i)\big),</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>with the outcome model $\hat g$ and the propensity $\hat\mu$ cross-fitted</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. It is the <span class="co">[</span><span class="ot">AIPW</span><span class="co">](combining-and-triangulating-designs.qmd)</span> score computed one unit</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>at a time. Each $Y_i(\hat\eta)$ is a very noisy estimate of that unit's effect, but its conditional mean is</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>exactly $\tau_0(X)$. It is also Neyman-orthogonal, so small errors in the two nuisances do not bias it to</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>first order <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>.</span>
 <span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping cross-fitting.** Using a unit's own data to fit its nuisance reintroduces overfitting bias</span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>  into the effect. Split the folds. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dishonest forests.** Choosing splits *and* estimating effects on the same data gives invalid,</span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>  overconfident intervals on $\tau(x)$. Use honest estimation. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Believing ML earns identification.** Unconfoundedness and overlap are still required; ML buys</span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>  flexibility, not exogeneity. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>That turns CATE inference into ordinary regression. Regress $Y_i(\hat\eta)$ on a handful of chosen</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>features $p(X_i)$ with OLS and robust standard errors. The result is the **best linear predictor (BLP)**</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>of $\tau(x)$ in those features, and it has the same large-sample behaviour as if the nuisances were known</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. If the features are group dummies, such as income quintiles, the BLP</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>coefficients *are* the **group average treatment effects (GATEs)** <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. You get</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>pointwise intervals for one pre-chosen group and wider simultaneous bands that cover all of them at once.</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>Two running examples from the book show the scope:</span>
 <span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Acting on a biased CATE.** A policy rule is only as causal as the $\tau(x)$ beneath it — garbage</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  identification in, harmful targeting out. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chernozhukov et al., *Applied Causal Inference Powered by ML and AI*** — the **CATE**</span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>  $\tau(x)=\mathbb E<span class="co">[</span><span class="ot">Y(1)-Y(0)\mid X=x</span><span class="co">]</span>$ and the "four-feet-deep river"; **regularization bias** from</span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>  naive outcome-prediction ML; **double/debiased ML** — nuisances $g_0(X),m_0(X)$, **Neyman</span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>  orthogonality**, **cross-fitting**; **causal forests / GRF** with **causal splitting** and **honest**</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>  estimation for valid CIs; **policy learning** $\pi^*(x)=\mathbf 1<span class="sc">\{</span>\tau(x)\ge0<span class="sc">\}</span>$ as cost-sensitive</span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>  classification; and the cautions — ML doesn't fix **identification** (needs unconfoundedness +</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>  overlap), fairness, and interpretability-vs-mechanism.</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Jacobucci, Grimm &amp; Zhang, *ML for Social &amp; Behavioral Research*** — heterogeneous effects for social</span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>  science, encoded bias/fairness, and interpretability tools (SHAP, distillation) describing the model,</span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>  not the mechanism.</span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>**The orthogonalised (partialling-out) estimator.** In the partially linear model</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>$Y=\theta D+g_0(X)+\varepsilon$, $D=m_0(X)+v$, define residuals $\tilde Y=Y-\mathbb E<span class="co">[</span><span class="ot">Y\mid X</span><span class="co">]</span>$ and</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>$\tilde D=D-m_0(X)$. The DML estimate solves the **Neyman-orthogonal** moment</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>\hat\theta=\frac{\frac1n\sum_i \tilde D_i\,\tilde Y_i}{\frac1n\sum_i \tilde D_i^2},</span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>each nuisance fit on a *separate fold*. Orthogonality means $\partial_{\eta}\mathbb E<span class="co">[</span><span class="ot">\psi(W;\theta,\eta)</span><span class="co">]</span>=0$</span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>at the truth: small errors $\hat g-g_0$, $\hat m-m_0$ enter the estimating equation only at **second</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>order**, so $\hat\theta$ stays $\sqrt n$-consistent and asymptotically normal even though the nuisances</span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>converge slowly. This is <span class="co">[</span><span class="ot">FWL</span><span class="co">](../03-regression/multiple-regression.qmd)</span> made robust to ML noise.</span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>**Honest CATE intervals.** Split the data: use sample $\mathcal I_1$ to grow the tree (choose splits</span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>maximising $\sum_{\text{children}} n_c\,\hat\tau_c^2$, effect heterogeneity), and the *independent*</span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>sample $\mathcal I_2$ to estimate each leaf's $\hat\tau(x)$. Because the leaf was not chosen using</span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>$\mathcal I_2$'s outcomes, the leaf estimate is (asymptotically) unbiased with a usable variance — the</span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>formal basis for confidence intervals on $\tau(x)$.</span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>**Policy value.** A rule $\pi$ earns welfare</span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>$V(\pi)=\mathbb E<span class="co">[</span><span class="ot">\,Y(\pi(X))\,</span><span class="co">]</span>=\mathbb E<span class="co">[</span><span class="ot">\,\pi(X)\tau(X)\,</span><span class="co">]</span>+\text{const}$, maximised pointwise by</span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>$\pi^*(x)=\mathbf 1<span class="sc">\{</span>\tau(x)\ge0<span class="sc">\}</span>$ — treat exactly where the effect is positive; the regret of any rule</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>is $\mathbb E<span class="co">[</span><span class="ot">(\pi^*-\pi)\tau</span><span class="co">]</span>$, which weights mistakes by effect size.</span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">interpretability &amp; ML</span><span class="co">](../04-predictive/interpretability-and-ml.qmd)</span> (the DML/causal-</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>  forest preview, now full), <span class="co">[</span><span class="ot">regularization</span><span class="co">](../04-predictive/regularization.qmd)</span> and</span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](../04-predictive/cross-validation.qmd)</span> (the bias they cause and cure here),</span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">FWL partialling-out</span><span class="co">](../03-regression/multiple-regression.qmd)</span>,</span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Double Lasso</span><span class="co">](../04-predictive/double-lasso.qmd)</span> (the same orthogonal score with the Lasso, and why</span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>  single selection fails), and</span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">matching/overlap</span><span class="co">](matching-and-propensity-scores.qmd)</span> (the identification ML still needs).</span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Closes:** the summit — from the <span class="co">[</span><span class="ot">fundamental problem</span><span class="co">](potential-outcomes.qmd)</span> to estimating *who*</span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>  benefits and *whom to treat*.</span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Complements:** <span class="co">[</span><span class="ot">heterogeneous effects in experiments</span><span class="co">](heterogeneous-effects-in-experiments.qmd)</span> — the same</span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>  machinery seen from the research-design side: how to *explore* a randomized experiment for heterogeneity</span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>  reproducibly (prediction rule ensembles, RATE validation) without p-hacking.</span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">combining &amp; triangulating designs</span><span class="co">](combining-and-triangulating-designs.qmd)</span> (doubly</span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>  robust estimation is the stacking of the propensity and outcome models seen here), then</span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">sensitivity analysis &amp; external validity</span><span class="co">](sensitivity-and-external-validity.qmd)</span> (how fragile and how</span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  generalisable any of these estimates are, including the same book's partial-$R^2$ bounds on</span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  omitted-confounder bias for a DML estimate), and onward to</span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Part VI · doing research in the world</span><span class="co">](../06-field-realities/index.qmd)</span>, where these estimates meet</span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>  measurement, incentives, fairness, and the tyranny of metrics.</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**401(k) eligibility** and net financial assets. GATEs by income quintile, and a polynomial in log</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  income, show the effect rising with income <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. Forests trained on the same</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>  pseudo-outcomes trace a sigmoid curve between roughly \$5k and \$22k of income, with very wide</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  uncertainty in the top tail <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>.</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The "welfare" wording experiment.** The General Social Survey randomly asked respondents about</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>  spending on "welfare programs" or on "assistance to the poor". Same meaning, different words. Across</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>  12,907 respondents from 1986–2010, with 42 covariates, the simple two-means ATE of the "welfare"</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>  wording is **−0.3681** (SE 0.007) <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. Both kinds of forest single out political</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>  views as the most important moderator.</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="fu">## The meta-learners: five ways to build τ(x) from any ML method</span></span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>Route 4 asks for the best possible estimate of the *curve*. The book's answer is **meta-learning**: treat</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>any regression or classification method as a black-box "oracle", and combine oracle calls into an</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>estimate of $\tau(x)$ <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. The recipes differ in what they ask the oracle to</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>predict:</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Learner <span class="pp">|</span> Recipe <span class="pp">|</span> Strength <span class="pp">|</span> Weakness <span class="pp">|</span></span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|</span></span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **S** (single) <span class="pp">|</span> one model of $Y$ on $(D,Z)$; $\hat\tau=\hat g(1,Z)-\hat g(0,Z)$ <span class="pp">|</span> low variance <span class="pp">|</span> can "overly regularize the treatment variable", shrinking a small effect toward zero <span class="pp">|</span></span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **T** (two) <span class="pp">|</span> separate models for treated and controls; subtract <span class="pp">|</span> simple; good when both arms are well represented <span class="pp">|</span> errors in two outcome models add up <span class="pp">|</span></span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **X** (cross) <span class="pp">|</span> impute each unit's effect from the *other* arm's model, then blend the two by the propensity <span class="pp">|</span> shines when one arm is rare and the effect is simpler than the baselines <span class="pp">|</span> still essentially outcome modelling <span class="pp">|</span></span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **DR** (doubly robust) <span class="pp">|</span> regress the pseudo-outcome $Y(\hat\eta)$ on $X$ <span class="pp">|</span> the error depends only on the *product* of nuisance errors <span class="pp">|</span> unstable with extreme propensities <span class="pp">|</span></span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **R** (residual) | regress $\check Y=Y-\hat h(Z)$ on $\check D=D-\hat\mu(Z)$, with the slope allowed to vary in $X$ | Neyman-orthogonal and stable | needs an accurate propensity; targets an **overlap-weighted** projection, not $\tau^*$ itself <span class="pp">|</span></span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>The R-learner is the DML <span class="co">[</span><span class="ot">partialling-out</span><span class="co">](../04-predictive/double-lasso.qmd)</span> idea from above, with the</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>slope allowed to vary. It minimises $\mathbb E<span class="co">[</span><span class="ot">(\check Y-\tau(X)\check D)^2</span><span class="co">]</span>$, which is a weighted regression of</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>$\check Y/\check D$ with weights $\check D^2$ <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. Its weakness shows when $\tau$ is</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>misspecified. It then converges to the approximation that best fits units with plenty of overlap, and for</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>the R-learner propensity accuracy "cannot be compensated by more accurate estimation of the outcome</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>regression" <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>.</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>Which learner wins depends on the problem. The book's simulations make this concrete</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. All use 500 units, and in all of them only 5% (or 95%) of units are treated:</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**DGP 1:** a constant effect of 0.5 on top of a baseline with a step in it. The R-learner's RMSE is 0.002, against 0.038</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>  for the T-learner.</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**DGP 2:** the effect exists only for $Z\in<span class="co">[</span><span class="ot">0.6,0.8</span><span class="co">]</span>$, and treatment is rare. Here the R-learner is the</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>  *worst* (0.374).</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**DGP 3:** the same as DGP 2, but treatment is common. The T-learner (0.036) and the DR-learner (0.049)</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>  do best.</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>Hence the honest summary: "there is no clear winner among the X-, R- and DR-Learner methods"</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>.</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a><span class="fu">## Choosing and stacking learners</span></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>If no learner wins everywhere, you need a way to choose. You cannot score a CATE model against the truth,</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>because $Y(1)-Y(0)$ is never observed. But the pseudo-outcome stands in for it. The **DR loss**</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>$\mathbb E_n<span class="co">[</span><span class="ot">(Y(\hat\eta)-\tau(X))^2</span><span class="co">]</span>$ ranks candidate models consistently, since the differences in loss</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>between models target the differences in their true mean squared error. A theorem in the book gives</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>confidence intervals for those differences <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. Instead of picking one model you can</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>**stack** them. Q-aggregation, a convex-weight scheme, stays "consistently close to the best performer</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>across the board" in the simulations: 0.017, 0.165 and 0.037 RMSE on the three DGPs</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>.</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>Two cautions come with this. First, the stacked ensemble "does not come with confidence intervals", and</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>it can shift with the data split and the random seed <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. Second, the evidence may</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>simply not be there. In the 401(k) data the authors "cannot statistically conclude" that any meta-learner</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>predicts effects better than a constant <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. A distilled tree still says something</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>sensible: about \$6k for lower-income, younger savers and about \$13k for high earners. But that</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>description is a hypothesis, not a finding.</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a><span class="fu">## Did the model find real heterogeneity? Validation on held-out data</span></span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>Before anyone acts on a CATE model, the book prescribes diagnostics on a **test set** that played no part</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>in fitting or choosing the model <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. All of them run on the held-out pseudo-outcomes:</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The BLP slope test.** Regress $Y(\hat\eta)$ on $(1,\tau^*(X))$. The slope estimates</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>  $\mathrm{Cov}(\tau_0,\tau^*)/\mathrm{Var}(\tau^*)$. A significant slope means the model has found real</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>  heterogeneity, and a perfectly calibrated model would have a slope of exactly 1 <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>.</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Calibration by group.** Split the test set into quartiles of predicted effect and estimate each</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>  quartile's GATE from the pseudo-outcomes. A good model's predicted and estimated group effects line up</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>.</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Uplift curves.** The **TOC** asks how much larger the effect is among the top $q$ share of predicted</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>  responders than on average. The **Qini** scales that by the share treated. The areas under them (AUTOC,</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>  AUQC) give one-sided tests for useful targeting <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>. This is the same RATE logic</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>  as in <span class="co">[</span><span class="ot">heterogeneous effects in experiments</span><span class="co">](heterogeneous-effects-in-experiments.qmd)</span>, now with</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>  doubly robust scores so that it also works with observational data.</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>The results show how much the data can and cannot say <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span>:</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**401(k)** (9,716 households, split 60/20/20). The BLP slope is 2.24 (95% CI 0.83 to 3.65), so the model</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>  carries real signal. The AUTOC is 5,229 (SE 1,472). The authors warn that the specific numbers varied a</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>  lot depending on the random split.</span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**"Welfare" wording.** The slope is 1.47 (CI 0.94 to 1.99), which includes the ideal value of 1. A</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>  shallow tree distilled from the ensemble finds the least adverse reaction among left-leaning</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>  respondents with a four-year degree, and the most adverse among right-leaning respondents who do not</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>  identify as Black. Political views alone create less variation than the combination of views and</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>  education.</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>Validation like this is what turns a pretty CATE plot into evidence.</span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a><span class="fu">## Policy learning</span></span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>The point of knowing $\tau(x)$ is often to **act**. **Policy learning** turns CATEs into an assignment</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>rule $\pi(x)$. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> The unconstrained optimum is simple — *treat everyone with a</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>positive predicted effect*:</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>\pi^*(x)=\mathbf 1<span class="sc">\{</span>\tau(x)\ge 0<span class="sc">\}</span>.</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>Framed as a <span class="co">[</span><span class="ot">classification</span><span class="co">](../04-predictive/classification-and-knn.qmd)</span> problem, it predicts the</span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>**sign** of the effect, **weighted by its magnitude** — misclassifying a *large* positive effect costs</span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>more than fumbling a near-zero one (cost-sensitive classification). <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> This is</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>where causal inference meets <span class="co">[</span><span class="ot">decision-making</span><span class="co">](../06-field-realities/index.qmd)</span>: not "what is the</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>effect?" but "whom should we treat?"</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a><span class="fu">## The cautions: ML is not a license</span></span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>The most important sentence in the chapter: **machine learning does not fix identification.**</span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> Every method here delivers *causal* answers only if the</span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">identifying assumptions still hold</span><span class="co">](matching-and-propensity-scores.qmd)</span> — **conditional exogeneity</span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a>(unconfoundedness)** and **overlap** $0&lt;\Pr(D=1\mid X)&lt;1$. DML and causal forests make you *efficient</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>and flexible* under those assumptions; they cannot conjure them. Throwing a forest at confounded data</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>yields a beautifully estimated **biased** effect. Two further risks: <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Fairness.** ML models absorb the prejudices in their training data (gender and racial bias in text</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>  embeddings, biased historical decisions) — a <span class="co">[</span><span class="ot">Part IV worry</span><span class="co">](../04-predictive/interpretability-and-ml.qmd)</span></span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>  with higher stakes when the output *assigns treatment*.</span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Interpretability ≠ mechanism.** Tools like <span class="co">[</span><span class="ot">SHAP</span><span class="co">](../04-predictive/interpretability-and-ml.qmd)</span> or</span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>  distilling a forest into a shallow tree explain **how the model guesses**, not the **causal</span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>  mechanism** of the world. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Naive ML on the outcome.** Regularization shrinks small treatment effects toward zero. Orthogonalise</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>  (DML) — estimate the *effect*, not $Y$. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping cross-fitting.** Using a unit's own data to fit its nuisance reintroduces overfitting bias</span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>  into the effect. Split the folds. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dishonest forests.** Choosing splits *and* estimating effects on the same data gives invalid,</span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a>  overconfident intervals on $\tau(x)$. Use honest estimation. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Believing ML earns identification.** Unconfoundedness and overlap are still required; ML buys</span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>  flexibility, not exogeneity. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Acting on a biased CATE.** A policy rule is only as causal as the $\tau(x)$ beneath it — garbage</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>  identification in, harmful targeting out. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Promising confidence bands for the whole curve.** No adaptive bands exist for $\tau_0(x)$ in general.</span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>  Put intervals on pre-specified summaries (BLP, GATEs), and validate everything else.</span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Crowning one meta-learner.** S, T, X, DR and R each win on some data-generating processes and lose on</span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a>  others. Score them with the DR loss on held-out data, or stack them. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping validation.** A CATE plot is not evidence of heterogeneity. Run the BLP slope test,</span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a>  calibration and uplift curves on a test set the model never saw, and check that the conclusion</span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a>  survives a different split. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chernozhukov et al., *Applied Causal Inference Powered by ML and AI*** — the **CATE**</span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a>  $\tau(x)=\mathbb E<span class="co">[</span><span class="ot">Y(1)-Y(0)\mid X=x</span><span class="co">]</span>$ and the "four-feet-deep river"; **regularization bias** from</span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>  naive outcome-prediction ML; **double/debiased ML** — nuisances $g_0(X),m_0(X)$, **Neyman</span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a>  orthogonality**, **cross-fitting**; **causal forests / GRF** with **causal splitting** and **honest**</span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a>  estimation for valid CIs; **policy learning** $\pi^*(x)=\mathbf 1<span class="sc">\{</span>\tau(x)\ge0<span class="sc">\}</span>$ as cost-sensitive</span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a>  classification; and the cautions — ML doesn't fix **identification** (needs unconfoundedness +</span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a>  overlap), fairness, and interpretability-vs-mechanism. **Ch. 14–15 in detail:** CATE as "the first"</span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a>  function-valued target, the Genovese–Wasserman no-adaptive-bands result and the four ways to relax</span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a>  the goal; the doubly robust pseudo-outcome, **BLP** and **GATEs** with simultaneous bands; the</span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a>  brittleness of forest intervals; the **S/T/X/DR/R meta-learners**, the R-learner's overlap-weighted</span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a>  limit and the "no clear winner" verdict with the three-DGP RMSE comparison; DR-loss scoring,</span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a>  stacking and **Q-aggregation**; held-out **validation** by the BLP slope test, calibration and</span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a>  **TOC/Qini** uplift curves; and the 401(k) and GSS "welfare"-wording applications (ATE −0.3681,</span>
+<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a>  12,907 respondents; slopes 2.24 and 1.47; the distilled trees).</span>
+<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Jacobucci, Grimm &amp; Zhang, *ML for Social &amp; Behavioral Research*** — heterogeneous effects for social</span>
+<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a>  science, encoded bias/fairness, and interpretability tools (SHAP, distillation) describing the model,</span>
+<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a>  not the mechanism.</span>
+<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a>**The orthogonalised (partialling-out) estimator.** In the partially linear model</span>
+<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a>$Y=\theta D+g_0(X)+\varepsilon$, $D=m_0(X)+v$, define residuals $\tilde Y=Y-\mathbb E<span class="co">[</span><span class="ot">Y\mid X</span><span class="co">]</span>$ and</span>
+<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a>$\tilde D=D-m_0(X)$. The DML estimate solves the **Neyman-orthogonal** moment</span>
+<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a>\hat\theta=\frac{\frac1n\sum_i \tilde D_i\,\tilde Y_i}{\frac1n\sum_i \tilde D_i^2},</span>
+<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a>each nuisance fit on a *separate fold*. Orthogonality means $\partial_{\eta}\mathbb E<span class="co">[</span><span class="ot">\psi(W;\theta,\eta)</span><span class="co">]</span>=0$</span>
+<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a>at the truth: small errors $\hat g-g_0$, $\hat m-m_0$ enter the estimating equation only at **second</span>
+<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a>order**, so $\hat\theta$ stays $\sqrt n$-consistent and asymptotically normal even though the nuisances</span>
+<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a>converge slowly. This is <span class="co">[</span><span class="ot">FWL</span><span class="co">](../03-regression/multiple-regression.qmd)</span> made robust to ML noise.</span>
+<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a>**Honest CATE intervals.** Split the data: use sample $\mathcal I_1$ to grow the tree (choose splits</span>
+<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>maximising $\sum_{\text{children}} n_c\,\hat\tau_c^2$, effect heterogeneity), and the *independent*</span>
+<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a>sample $\mathcal I_2$ to estimate each leaf's $\hat\tau(x)$. Because the leaf was not chosen using</span>
+<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a>$\mathcal I_2$'s outcomes, the leaf estimate is (asymptotically) unbiased with a usable variance — the</span>
+<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a>formal basis for confidence intervals on $\tau(x)$.</span>
+<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a>**Why the pseudo-outcome works.** Write $H=D/\mu_0(Z)-(1-D)/(1-\mu_0(Z))$. With the true nuisances,</span>
+<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a>$\mathbb E<span class="co">[</span><span class="ot">H(Y-g_0(D,Z))\mid Z</span><span class="co">]</span>=0$, because the residual has mean zero within each arm and $H$ only</span>
+<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a>reweights the arms. So $\mathbb E<span class="co">[</span><span class="ot">Y(\eta_0)\mid Z</span><span class="co">]</span>=g_0(1,Z)-g_0(0,Z)$, and averaging over $Z$ given $X$</span>
+<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a>gives $\tau_0(X)$. With estimated nuisances the bias is</span>
+<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a>$\mathbb E<span class="co">[</span><span class="ot">(H(\mu_0)-H(\hat\mu))(\hat g-g_0)\mid X</span><span class="co">]</span>$, a **product** of the two errors. That product is the</span>
+<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a>source of both double robustness and the DR-learner's error rate,</span>
+<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a>$\lesssim r_n^2+\text{Error}(\hat g)^2\,\text{Error}(H(\hat\mu))^2$, where $r_n$ is the oracle's own rate.</span>
+<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a>**BLP and GATEs.** $\beta_0=\arg\min_\beta\mathbb E<span class="co">[</span><span class="ot">(\tau_0(X)-p(X)'\beta)^2</span><span class="co">]</span></span>
+<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a>=(\mathbb E<span class="co">[</span><span class="ot">pp'</span><span class="co">]</span>)^{-1}\mathbb E<span class="co">[</span><span class="ot">p(X)Y(\eta_0)</span><span class="co">]</span>$, so OLS of $Y_i(\hat\eta)$ on $p(X_i)$ estimates it, with</span>
+<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a>the sandwich variance $\hat Q^{-1}\mathbb E_n<span class="co">[</span><span class="ot">pp'(Y(\hat\eta)-p'\hat\beta)^2</span><span class="co">]</span>\hat Q^{-1}$. If</span>
+<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a>$p(X)=(\mathbf 1<span class="sc">\{</span>X\in R_1<span class="sc">\}</span>,\dots,\mathbf 1<span class="sc">\{</span>X\in R_K<span class="sc">\}</span>)$ for disjoint groups, then $\beta_{0k}$ is the mean</span>
+<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a>of $\tau_0$ on $R_k$, which is exactly the GATE.</span>
+<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a>**The R-loss.** In $Y=\delta_0(Z)D+g(Z)+\varepsilon$, residualising gives $\check Y=\delta_0(Z)\check D+\varepsilon$.</span>
+<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a>The R-learner minimises $\mathbb E<span class="co">[</span><span class="ot">(\check Y-\tau(X)\check D)^2</span><span class="co">]</span>$. If $\tau$ cannot represent $\delta_0$, the</span>
+<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a>limit is $\arg\min_\tau\mathbb E<span class="co">[</span><span class="ot">(\delta_0(Z)-\tau(X))^2\,\mathrm{Var}(D\mid Z)</span><span class="co">]</span>$. Units with propensity near 0</span>
+<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a>or 1 get almost no weight, which is why the result is an overlap-weighted projection.</span>
+<span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a>**The BLP slope test.** In the population regression of $Y(\eta_0)$ on $(1,\tau^*(X))$, the slope is</span>
+<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a>$\beta_1=\mathrm{Cov}(\tau_0(X),\tau^*(X))/\mathrm{Var}(\tau^*(X))$, because $\mathbb E<span class="co">[</span><span class="ot">Y(\eta_0)\mid X</span><span class="co">]</span>=\tau_0(X)$.</span>
+<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a>$\beta_1\neq0$ implies that $\tau_0$ varies with $X$. $\beta_1=1$ holds if $\tau^*$ is calibrated, meaning</span>
+<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a>$\mathbb E<span class="co">[</span><span class="ot">\tau_0\mid\tau^*</span><span class="co">]</span>=\tau^*$.</span>
+<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a>**Uplift curves.** With $\mu(\tau^*,q)$ the $(1-q)$ quantile of the predictions,</span>
+<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a>$\mathrm{TOC}(q)=\mathbb E<span class="co">[</span><span class="ot">Y(1)-Y(0)\mid\tau^*\ge\mu(\tau^*,q)</span><span class="co">]</span>-\mathrm{ATE}$ and</span>
+<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a>$\mathrm{QINI}(q)=\mathrm{TOC}(q)\cdot P(\tau^*\ge\mu)$. Both are covariances of the individual effect with an</span>
+<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a>indicator of being in the top group, so both are identified by replacing $Y(1)-Y(0)$ with $Y(\eta_0)$.</span>
+<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a>**Policy value.** A rule $\pi$ earns welfare</span>
+<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a>$V(\pi)=\mathbb E<span class="co">[</span><span class="ot">\,Y(\pi(X))\,</span><span class="co">]</span>=\mathbb E<span class="co">[</span><span class="ot">\,\pi(X)\tau(X)\,</span><span class="co">]</span>+\text{const}$, maximised pointwise by</span>
+<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a>$\pi^*(x)=\mathbf 1<span class="sc">\{</span>\tau(x)\ge0<span class="sc">\}</span>$ — treat exactly where the effect is positive; the regret of any rule</span>
+<span id="cb2-413"><a href="#cb2-413" aria-hidden="true" tabindex="-1"></a>is $\mathbb E<span class="co">[</span><span class="ot">(\pi^*-\pi)\tau</span><span class="co">]</span>$, which weights mistakes by effect size.</span>
+<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">interpretability &amp; ML</span><span class="co">](../04-predictive/interpretability-and-ml.qmd)</span> (the DML/causal-</span>
+<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a>  forest preview, now full), <span class="co">[</span><span class="ot">regularization</span><span class="co">](../04-predictive/regularization.qmd)</span> and</span>
+<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](../04-predictive/cross-validation.qmd)</span> (the bias they cause and cure here),</span>
+<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">FWL partialling-out</span><span class="co">](../03-regression/multiple-regression.qmd)</span>,</span>
+<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Double Lasso</span><span class="co">](../04-predictive/double-lasso.qmd)</span> (the same orthogonal score with the Lasso, and why</span>
+<span id="cb2-424"><a href="#cb2-424" aria-hidden="true" tabindex="-1"></a>  single selection fails), and</span>
+<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">matching/overlap</span><span class="co">](matching-and-propensity-scores.qmd)</span> (the identification ML still needs).</span>
+<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Closes:** the summit — from the <span class="co">[</span><span class="ot">fundamental problem</span><span class="co">](potential-outcomes.qmd)</span> to estimating *who*</span>
+<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a>  benefits and *whom to treat*.</span>
+<span id="cb2-428"><a href="#cb2-428" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Complements:** <span class="co">[</span><span class="ot">heterogeneous effects in experiments</span><span class="co">](heterogeneous-effects-in-experiments.qmd)</span> — the same</span>
+<span id="cb2-429"><a href="#cb2-429" aria-hidden="true" tabindex="-1"></a>  machinery seen from the research-design side: how to *explore* a randomized experiment for heterogeneity</span>
+<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a>  reproducibly (prediction rule ensembles, RATE validation) without p-hacking.</span>
+<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">combining &amp; triangulating designs</span><span class="co">](combining-and-triangulating-designs.qmd)</span> (doubly</span>
+<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a>  robust estimation is the stacking of the propensity and outcome models seen here), then</span>
+<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">sensitivity analysis &amp; external validity</span><span class="co">](sensitivity-and-external-validity.qmd)</span> (how fragile and how</span>
+<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a>  generalisable any of these estimates are, including the same book's partial-$R^2$ bounds on</span>
+<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a>  omitted-confounder bias for a DML estimate), and onward to</span>
+<span id="cb2-436"><a href="#cb2-436" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Part VI · doing research in the world</span><span class="co">](../06-field-realities/index.qmd)</span>, where these estimates meet</span>
+<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a>  measurement, incentives, fairness, and the tyranny of metrics.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
