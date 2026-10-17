@@ -736,6 +736,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../content/03-regression/repeated-measures-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Repeated-Measures ANOVA: The Same People, Measured Again</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../content/03-regression/regression-diagnostics.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Diagnostics &amp; Robust Inference</span></a>
   </div>
@@ -1893,8 +1899,11 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#the-core-question" id="toc-the-core-question" class="nav-link" data-scroll-target="#the-core-question">The core question</a></li>
   <li><a href="#rosenbaum-bounds-γ" id="toc-rosenbaum-bounds-γ" class="nav-link" data-scroll-target="#rosenbaum-bounds-γ">Rosenbaum bounds (Γ)</a></li>
-  <li><a href="#osters-δ-coefficient-stability" id="toc-osters-δ-coefficient-stability" class="nav-link" data-scroll-target="#osters-δ-coefficient-stability">Oster’s δ: coefficient stability</a></li>
-  <li><a href="#the-e-value" id="toc-the-e-value" class="nav-link" data-scroll-target="#the-e-value">The E-value</a></li>
+  <li><a href="#partial-r²-how-much-would-the-confounder-have-to-explain" id="toc-partial-r²-how-much-would-the-confounder-have-to-explain" class="nav-link" data-scroll-target="#partial-r²-how-much-would-the-confounder-have-to-explain">Partial R²: how much would the confounder have to explain?</a>
+  <ul class="collapse">
+  <li><a href="#worked-example-violence-and-attitudes-to-peace-in-darfur" id="toc-worked-example-violence-and-attitudes-to-peace-in-darfur" class="nav-link" data-scroll-target="#worked-example-violence-and-attitudes-to-peace-in-darfur">Worked example: violence and attitudes to peace in Darfur</a></li>
+  <li><a href="#the-benchmark-is-an-argument-not-a-fact" id="toc-the-benchmark-is-an-argument-not-a-fact" class="nav-link" data-scroll-target="#the-benchmark-is-an-argument-not-a-fact">The benchmark is an argument, not a fact</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#part-b-external-validity-where-does-the-estimate-apply" id="toc-part-b-external-validity-where-does-the-estimate-apply" class="nav-link" data-scroll-target="#part-b-external-validity-where-does-the-estimate-apply">Part B · External validity: where does the estimate apply?</a>
   <ul class="collapse">
@@ -1945,69 +1954,96 @@ window.Quarto = {
 <h1>Part A · Sensitivity analysis: how fragile is the estimate?</h1>
 <section id="the-core-question" class="level2">
 <h2 class="anchored" data-anchor-id="the-core-question">The core question</h2>
-<p>Selection-on-observables designs assume that conditioning on <span class="math inline">X</span> makes treatment as-good-as-random — <strong>untestable</strong>, because the confounder you fear is unobserved. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> Sensitivity analysis converts that worry into a number by asking: <strong>how strong would an unobserved confounder have to be to explain away the result?</strong> <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> If the estimate only breaks under an <em>implausibly powerful</em> hidden factor, it is robust; if a <em>whisper</em> of confounding undoes it, it is fragile. You never prove no confounding — you measure how much it would take.</p>
+<p>Selection-on-observables designs assume that conditioning on <span class="math inline">X</span> makes treatment as-good-as-random — <strong>untestable</strong>, because the confounder you fear is unobserved. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> Chernozhukov et al. put the problem starkly. A model in which education raises wages and a model in which latent ability drives both education and wages <em>with no causal effect at all</em> are <strong>statistically indistinguishable</strong> if ability is unobserved. Any observed correlation can be rationalised either way. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> No amount of data settles it. What you <em>can</em> do is make the worry quantitative, by asking: <strong>how strong would an unobserved confounder have to be to explain away the result?</strong> <span class="citation" data-cites="chernozhukov_causalml dayal_r_datascience">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>; <a href="#ref-dayal_r_datascience" role="doc-biblioref">Dayal 2020</a>)</span> If the estimate only breaks under an <em>implausibly powerful</em> hidden factor, it is robust; if a <em>whisper</em> of confounding undoes it, it is fragile. You never prove no confounding — you measure how much it would take.</p>
 </section>
 <section id="rosenbaum-bounds-γ" class="level2">
 <h2 class="anchored" data-anchor-id="rosenbaum-bounds-γ">Rosenbaum bounds (Γ)</h2>
-<p>For <strong>matched</strong> designs, Paul Rosenbaum’s bounds introduce a parameter <strong><span class="math inline">\Gamma</span></strong> measuring <strong>hidden bias</strong>: the differential odds that two units <em>identical on observed <span class="math inline">X</span></em> receive treatment. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p>
+<p>For <strong>matched</strong> designs, Paul Rosenbaum’s bounds introduce a parameter <strong><span class="math inline">\Gamma</span></strong> measuring <strong>hidden bias</strong>: how much larger one subject’s odds of treatment can be than another’s, for two subjects who look <em>identical on observed <span class="math inline">X</span></em>. <span class="citation" data-cites="dayal_r_datascience">(<a href="#ref-dayal_r_datascience" role="doc-biblioref">Dayal 2020</a>)</span></p>
 <ul>
-<li><span class="math inline">\Gamma=1</span>: no hidden bias — matched units are equally likely to be treated (a perfect experiment).</li>
-<li><span class="math inline">\Gamma=2</span>: one unit is <em>twice</em> as likely as its match to be treated, because of something unseen.</li>
+<li><span class="math inline">\Gamma=1</span>: no hidden bias — matched units are equally likely to be treated (a simple randomised experiment).</li>
+<li><span class="math inline">\Gamma=2</span>: one unit may be <em>twice</em> as likely as its match to be treated, because of unobserved pre-treatment differences.</li>
 </ul>
-<p>The procedure: raise <span class="math inline">\Gamma</span> from 1 upward (1.1, 1.2, …) and watch the treatment effect’s <span class="math inline">p</span>-value; the <strong>breaking point</strong> is the <span class="math inline">\Gamma</span> at which significance is lost. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span> A result that survives to <strong><span class="math inline">\Gamma=5</span></strong> is highly robust — only an enormous hidden bias could overturn it; one that dies at <strong><span class="math inline">\Gamma=1.1</span></strong> is hostage to the faintest unobserved difference. The figure contrasts the two.</p>
+<p>The procedure: raise <span class="math inline">\Gamma</span> from 1 upward (1.1, 1.2, …) and watch the worst-case <span class="math inline">p</span>-value of the treatment effect. A study is <strong>highly sensitive</strong> to hidden bias if its conclusions change for <span class="math inline">\Gamma</span> barely above 1, and <strong>insensitive</strong> if they change only for quite large <span class="math inline">\Gamma</span>. <span class="citation" data-cites="dayal_r_datascience">(<a href="#ref-dayal_r_datascience" role="doc-biblioref">Dayal 2020</a>)</span></p>
+<p><strong>Worked example: the LaLonde job-training data.</strong> Dayal runs this on the familiar LaLonde sample (185 treated workers), using genetic matching followed by Rosenbaum’s test for the Wilcoxon signed-rank <span class="math inline">p</span>-value. <span class="citation" data-cites="dayal_r_datascience">(<a href="#ref-dayal_r_datascience" role="doc-biblioref">Dayal 2020</a>)</span> The matched estimate of the earnings effect is about <strong>$766</strong>, with an Abadie–Imbens standard error of about <strong>$700</strong>, so <span class="math inline">p = 0.27</span> <em>even at <span class="math inline">\Gamma = 1</span></em>. The sensitivity table then shows how quickly the worst case deteriorates. The upper-bound <span class="math inline">p</span>-value is 0.47 at <span class="math inline">\Gamma = 1.1</span>, 0.66 at 1.2 and 0.95 at 1.5. Dayal’s reading: a large sensitivity to hidden bias from missing covariates. <span class="citation" data-cites="dayal_r_datascience">(<a href="#ref-dayal_r_datascience" role="doc-biblioref">Dayal 2020</a>)</span> Notice the logic. A result that was not significant to begin with has no breaking point to find, and the table can only confirm how little it is worth. Rosenbaum bounds are most informative for a result that <em>is</em> significant under <span class="math inline">\Gamma = 1</span>: you report the <span class="math inline">\Gamma</span> at which it stops being so.</p>
+</section>
+<section id="partial-r²-how-much-would-the-confounder-have-to-explain" class="level2">
+<h2 class="anchored" data-anchor-id="partial-r²-how-much-would-the-confounder-have-to-explain">Partial R²: how much would the confounder have to explain?</h2>
+<p>Rosenbaum’s <span class="math inline">\Gamma</span> lives in the world of matched pairs and <span class="math inline">p</span>-values. Chernozhukov et al.&nbsp;give a regression-native version that bounds the <strong>bias</strong> itself, in a unit that is easy to argue about: the <strong>share of variation</strong> the hidden confounder would explain. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p>
+<p>Start from the partially linear model: the outcome depends on the treatment <span class="math inline">D</span>, an unobserved confounder <span class="math inline">A</span> and observed controls <span class="math inline">X</span>; the treatment depends on <span class="math inline">A</span> and <span class="math inline">X</span>. Partial <span class="math inline">X</span> out of everything. The regression of the residualised outcome on the residualised treatment then recovers not the causal effect <span class="math inline">\alpha</span> but <span class="math inline">\beta = \alpha + \phi</span>, where <span class="math inline">\phi</span> is the <strong>omitted-confounder bias</strong>. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> Their Theorem 12.2.1, which generalises a result of Cinelli and Hazlett, writes the size of that bias in terms of just two unknowns: <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p>
+<ul>
+<li><strong>how much of the remaining variation in the outcome</strong> the confounder explains, after the treatment and controls are accounted for (a partial <span class="math inline">R^2</span>), and</li>
+<li><strong>how much of the remaining variation in the treatment</strong> it explains, after the controls (another partial <span class="math inline">R^2</span>).</li>
+</ul>
+<p>Everything else in the formula (the residual variances) is estimable from the data. So instead of arguing about an invisible variable in the abstract, you argue about two numbers between 0 and 1. If you are willing to bound them, the bias is bounded. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p>
+<section id="worked-example-violence-and-attitudes-to-peace-in-darfur" class="level3">
+<h3 class="anchored" data-anchor-id="worked-example-violence-and-attitudes-to-peace-in-darfur">Worked example: violence and attitudes to peace in Darfur</h3>
+<p>The book’s example, taken from Cinelli and Hazlett’s reanalysis of Hazlett’s study, uses a survey of Darfurian refugees in eastern Chad. The question is whether having <strong>directly experienced war violence</strong> changes <strong>attitudes towards peace</strong>. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> Exposure to violence is clearly not randomly assigned, so the analysis controls for observed demographics. The estimate is <span class="math inline">\hat\beta = 0.1003</span>.</p>
+<p>Now the benchmark. In the data, the observed controls explain <strong>13%</strong> of the remaining variation in the peace outcome and <strong>1%</strong> of the variation in violence. Suppose a hidden confounder is <em>no stronger than the observed controls</em> on either count. Plugging those two numbers and the two residual variances (0.0597 and 0.1402) into the theorem gives a bias of at most <strong>0.0236</strong>. The effect then lies in <span class="math inline">0.1003 \pm 0.0236</span>, with a lower bound of <strong>0.0767</strong>. Still clearly positive. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p>
+<p>The figure maps the whole space. The dashed curve is the book’s own contour: every combination of the two partial <span class="math inline">R^2</span>s that produces a bias of exactly 0.0236. The book points out that if the confounder could explain even 5% of the variation in treatment, it would need <strong>almost no</strong> relationship with the outcome to keep the bias that small. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> The orange curve answers the book’s follow-up question, <em>when does the lower bound reach zero?</em> (our arithmetic, from the same formula). A confounder equally strong on both sides would need to explain about <strong>14%</strong> of each to erase the effect. And no confounder that explains only as much of the treatment as the observed controls do (1%) could erase it, <em>however</em> strongly it predicts the outcome. At that treatment strength the largest possible bias is about 0.066, below the estimate.</p>
 <div id="cell-fig-sensitivity" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show the figure code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>gamma <span class="op">=</span> np.linspace(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">200</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Illustrative worst-case p-value as a function of hidden bias Γ (monotone increasing).</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Robust study: strong signal, p climbs slowly. Fragile: weak signal, p climbs fast.</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>p_robust <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>(<span class="fl">2.2</span> <span class="op">*</span> (gamma <span class="op">-</span> <span class="fl">3.4</span>))))   <span class="co"># crosses 0.05 near Γ≈3.4</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>p_robust <span class="op">=</span> <span class="fl">0.001</span> <span class="op">+</span> <span class="fl">0.6</span> <span class="op">*</span> p_robust</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>p_fragile <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>(<span class="fl">6.0</span> <span class="op">*</span> (gamma <span class="op">-</span> <span class="fl">1.2</span>))))  <span class="co"># crosses 0.05 near Γ≈1.2</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>p_fragile <span class="op">=</span> <span class="fl">0.02</span> <span class="op">+</span> <span class="fl">0.7</span> <span class="op">*</span> p_fragile</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Darfur example (Chernozhukov et al., Example 12.2.2)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>beta, s2_res, s2_d <span class="op">=</span> <span class="fl">0.1003</span>, <span class="fl">0.0597</span>, <span class="fl">0.1402</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>scale <span class="op">=</span> s2_res <span class="op">/</span> s2_d</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bias(r2_y, r2_d):</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""|omitted-confounder bias| from Theorem 12.2.1 (partially linear model)."""</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.sqrt(r2_y <span class="op">*</span> r2_d <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> r2_d) <span class="op">*</span> scale)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> crossing(g, p): <span class="cf">return</span> g[np.argmin(np.<span class="bu">abs</span>(p <span class="op">-</span> <span class="fl">0.05</span>))]</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.0</span>, <span class="fl">4.2</span>))</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>ax.plot(gamma, p_robust, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="st">"robust study"</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>ax.plot(gamma, p_fragile, color<span class="op">=</span><span class="st">"#8a8a7e"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="st">"fragile study"</span>)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="fl">0.05</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.4</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">4.4</span>, <span class="fl">0.065</span>, <span class="st">"p = 0.05"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p, c <span class="kw">in</span> [(p_robust, <span class="st">"#161613"</span>), (p_fragile, <span class="st">"#8a8a7e"</span>)]:</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    gx <span class="op">=</span> crossing(gamma, p)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    ax.axvline(gx, color<span class="op">=</span>c, ls<span class="op">=</span><span class="st">":"</span>, lw<span class="op">=</span><span class="fl">1.2</span>)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    ax.text(gx <span class="op">+</span> <span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="ss">f"breaks at</span><span class="ch">\n</span><span class="ss">Γ ≈ </span><span class="sc">{</span>gx<span class="sc">:.1f}</span><span class="ss">"</span>, color<span class="op">=</span>c, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"hidden-bias parameter  Γ  (1 = no hidden bias)"</span>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"worst-case p-value"</span>)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"How much unobserved confounding would it take to break the result?"</span>)</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"center right"</span>)</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>bench <span class="op">=</span> bias(<span class="fl">0.13</span>, <span class="fl">0.01</span>)                       <span class="co"># ~0.0236</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> beta <span class="op">**</span> <span class="dv">2</span> <span class="op">/</span> scale                          <span class="co"># bias = beta  &lt;=&gt;  r2_y * r2_d / (1 - r2_d) = k</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>r_eq <span class="op">=</span> (<span class="op">-</span>k <span class="op">+</span> np.sqrt(k <span class="op">*</span> k <span class="op">+</span> <span class="dv">4</span> <span class="op">*</span> k)) <span class="op">/</span> <span class="dv">2</span>       <span class="co"># equal-strength confounder that erases the effect</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>rd <span class="op">=</span> np.linspace(<span class="fl">0.001</span>, <span class="fl">0.30</span>, <span class="dv">300</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>ry <span class="op">=</span> np.linspace(<span class="fl">0.0</span>, <span class="fl">1.0</span>, <span class="dv">300</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>RD, RY <span class="op">=</span> np.meshgrid(rd, ry)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>B <span class="op">=</span> bias(RY, RD)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.0</span>, <span class="fl">4.6</span>))</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>ax.contourf(RD, RY, B, levels<span class="op">=</span>[<span class="dv">0</span>, beta], colors<span class="op">=</span>[<span class="st">"#e4e3d8"</span>])</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>ax.contour(RD, RY, B, levels<span class="op">=</span>[bench], colors<span class="op">=</span>[<span class="st">"#5e5e54"</span>], linewidths<span class="op">=</span><span class="fl">1.4</span>, linestyles<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ax.contour(RD, RY, B, levels<span class="op">=</span>[beta], colors<span class="op">=</span>[<span class="st">"#e8531d"</span>], linewidths<span class="op">=</span><span class="fl">2.4</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="fl">0.01</span>, <span class="fl">0.13</span>, <span class="st">"o"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, ms<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="ss">f"benchmark: as strong as the</span><span class="ch">\n</span><span class="ss">observed controls (0.01, 0.13)</span><span class="ch">\n</span><span class="ss">bias ≈ </span><span class="sc">{</span>bench<span class="sc">:.3f}</span><span class="ss">, effect ≥ </span><span class="sc">{</span>beta <span class="op">-</span> bench<span class="sc">:.3f}</span><span class="ss">"</span>,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>            (<span class="fl">0.01</span>, <span class="fl">0.13</span>), xytext<span class="op">=</span>(<span class="fl">0.035</span>, <span class="fl">0.30</span>), fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"#161613"</span>,</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">0.9</span>))</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.12</span>, <span class="fl">0.018</span>, <span class="st">"|bias| = 0.0236 (the book's contour)"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.10</span>, <span class="fl">0.52</span>, <span class="st">"|bias| = 0.100 = the estimate:</span><span class="ch">\n</span><span class="st">beyond this line the effect</span><span class="ch">\n</span><span class="st">could be zero"</span>,</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>ax.plot(r_eq, r_eq, <span class="st">"s"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, ms<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="ss">f"equal strength: </span><span class="sc">{</span>r_eq<span class="sc">:.2f}</span><span class="ss"> each"</span>, (r_eq, r_eq), xytext<span class="op">=</span>(<span class="fl">0.185</span>, <span class="fl">0.26</span>), fontsize<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"#e8531d"</span>, arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">0.9</span>))</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="dv">0</span>, <span class="fl">0.30</span>)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"partial R² of treatment (violence) with the confounder"</span>)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"partial R² of outcome (peace) with the confounder"</span>)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"How strong would a hidden confounder have to be?"</span>)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-sensitivity" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sensitivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="sensitivity-and-external-validity_files/figure-html/fig-sensitivity-output-1.png" width="662" height="394" class="figure-img">
+<img src="sensitivity-and-external-validity_files/figure-html/fig-sensitivity-output-1.png" width="662" height="429" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sensitivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Rosenbaum-bounds sensitivity curves. As the hidden-bias parameter Γ rises (a stronger unobserved confounder), the worst-case p-value for the treatment effect climbs. The robust study (blue) stays significant until Γ ≈ 3.4 — only a large unseen bias could explain it away. The fragile study (orange) crosses p = 0.05 at Γ ≈ 1.2 — even a slight departure from as-good-as-random assignment dissolves it. Same point estimate, very different credibility.
+Figure&nbsp;1: Partial-R² sensitivity map for the Darfur example in Chernozhukov et al.&nbsp;(Ch 12), computed from their Theorem 12.2.1 with the book’s numbers (estimate 0.1003; residual variances 0.0597 and 0.1402). Each point is a hypothetical hidden confounder, located by how much of the remaining variation in treatment (horizontal) and outcome (vertical) it explains. The black dot is the benchmark, a confounder as strong as the observed controls (bias ≈ 0.024, so the effect is at least 0.077). The dashed curve is the book’s |bias| = 0.0236 contour. The orange curve is where the bias equals the estimate itself: confounders in the shaded region leave the effect positive. A confounder equally strong on both axes would have to explain about 14% of each to erase it.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="osters-δ-coefficient-stability" class="level2">
-<h2 class="anchored" data-anchor-id="osters-δ-coefficient-stability">Oster’s δ: coefficient stability</h2>
-<p>A complementary idea, due to Emily Oster (and used in <a href="../../content/05-causal-inference/causal-machine-learning.html">causal ML</a> by Chernozhukov), reads robustness off <strong>how the treatment coefficient moves as you add controls</strong>. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> The logic: if piling in observed controls <strong>barely budges</strong> the coefficient <em>while</em> the <span class="math inline">R^2</span> rises substantially, then the unobservables — <em>assumed to behave like the observables</em> — are unlikely to drive it to zero. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> The key assumption is <strong><span class="math inline">\delta=1</span></strong>: unobserved confounders are <em>at most as important</em> as the observed controls in explaining the outcome. Setting <span class="math inline">\delta=1</span> yields a <strong>bias-adjusted bound</strong> on the coefficient; if that bound stays away from zero, the effect is robust. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> (Coefficient <em>stability alone</em> is not enough — it must be paired with the <span class="math inline">R^2</span> movement, or a coefficient can be stable simply because the controls explain nothing.)</p>
+<section id="the-benchmark-is-an-argument-not-a-fact" class="level3">
+<h3 class="anchored" data-anchor-id="the-benchmark-is-an-argument-not-a-fact">The benchmark is an argument, not a fact</h3>
+<p>Why compare the hidden confounder with the observed controls at all? The usual story is that the controls were chosen <em>because</em> they were the best available proxies for confounding, so anything left over is probably weaker. Chernozhukov et al.&nbsp;adopt this benchmark for illustration but warn against trusting it. Controls are often chosen for <strong>convenience</strong>, because they are available and measurable, not after careful thought about confounding. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> The benchmark turns an unanswerable question into a debatable one. It does not answer it. The book also notes the natural extensions: asking how strong the confounder must be before the <em>conclusion</em> changes (the orange curve), and doing sensitivity analysis on confidence intervals rather than point estimates. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p>
+<p>Two other yardsticks are common in applied work: Oster’s coefficient-stability δ, and the E-value on the risk-ratio scale. Both follow the same idea of benchmarking an unseen confounder against something you can see. Neither is developed in this site’s source library, so they are not covered here.</p>
 </section>
-<section id="the-e-value" class="level2">
-<h2 class="anchored" data-anchor-id="the-e-value">The E-value</h2>
-<p>A third framing measures sensitivity in the language of <strong>association strength</strong>. The <strong>E-value</strong> is the <strong>minimum strength of association</strong> — on the risk-ratio scale — that an unmeasured confounder would need with <strong>both</strong> the treatment <strong>and</strong> the outcome to fully explain away the observed effect. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> A large E-value (say, the confounder would need a risk ratio of 4 with each) means only a <em>very strong</em> hidden factor could do it; if that exceeds the association of any <em>measured</em> control, the result is credible. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> The E-value’s appeal is interpretability: it puts the burden of doubt in concrete terms a reader can weigh against known predictors.</p>
 </section>
 </section>
 <section id="part-b-external-validity-where-does-the-estimate-apply" class="level1">
@@ -2056,8 +2092,9 @@ Figure&nbsp;1: Rosenbaum-bounds sensitivity curves. As the hidden-bias parameter
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li><p><strong>Reporting a point estimate with no sensitivity analysis.</strong> If CIA is untestable, show how much confounding would break the result (Rosenbaum Γ, Oster δ, E-value). Silence is not robustness. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
-<li><p><strong>Coefficient stability without the <span class="math inline">R^2</span> movement.</strong> A coefficient can be stable because the controls explain nothing; Oster’s logic needs both. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
+<li><p><strong>Reporting a point estimate with no sensitivity analysis.</strong> If CIA is untestable, show how much confounding would break the result (Rosenbaum’s Γ for matched designs, partial-<span class="math inline">R^2</span> bias bounds for regressions). Silence is not robustness. <span class="citation" data-cites="dayal_r_datascience chernozhukov_causalml">(<a href="#ref-dayal_r_datascience" role="doc-biblioref">Dayal 2020</a>; <a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
+<li><p><strong>Treating the benchmark as a fact.</strong> “No hidden confounder is stronger than my observed controls” is an assumption, and a shaky one when the controls were chosen because they were easy to get. Report the benchmark <em>and</em> the frontier where the conclusion flips, so readers can apply their own beliefs. <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span></p></li>
+<li><p><strong>Running a sensitivity analysis on a result that was never significant.</strong> If <span class="math inline">p = 0.27</span> at <span class="math inline">\Gamma = 1</span>, as in the matched LaLonde example, there is no breaking point to find. Sensitivity analysis grades a finding; it cannot rescue one. <span class="citation" data-cites="dayal_r_datascience">(<a href="#ref-dayal_r_datascience" role="doc-biblioref">Dayal 2020</a>)</span></p></li>
 <li><p><strong>Reading a LATE or RD estimate as a population effect.</strong> They are local — to compliers, to the cutoff. Name the subpopulation. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></p></li>
 <li><p><strong>Generalising from a convenience sample.</strong> A flawless SATE on volunteers need not be the PATE; re-weight or replicate before extrapolating. <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span></p></li>
 <li><p><strong>Extrapolating RD far from the cutoff.</strong> Beyond the boundary you are trusting functional form, not the design. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
@@ -2080,8 +2117,11 @@ Figure&nbsp;1: Rosenbaum-bounds sensitivity curves. As the hidden-bias parameter
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Cunningham, <em>The Mixtape</em></strong> — sensitivity analysis as the response to untestable CIA; <strong>Rosenbaum bounds</strong> and the hidden-bias parameter <strong><span class="math inline">\Gamma</span></strong> (differential odds of assignment; raise <span class="math inline">\Gamma</span> until significance breaks; robust if it survives large <span class="math inline">\Gamma</span>); RD estimates as <strong>local to the cutoff</strong>.</li>
-<li><strong>Chernozhukov et al., <em>Applied Causal Inference Powered by ML and AI</em></strong> — <strong>Oster’s <span class="math inline">\delta</span> / coefficient stability</strong> (coefficient movement + <span class="math inline">R^2</span>, <span class="math inline">\delta=1</span> assuming unobservables as important as observables) and the <strong>E-value</strong> (minimum confounder association with treatment <em>and</em> outcome to nullify the effect).</li>
+<li><strong>Cunningham, <em>The Mixtape</em></strong> — the conditional independence assumption as untestable; RD estimates as <strong>local to the cutoff</strong>.</li>
+<li><strong>Chernozhukov et al., <em>Applied Causal Inference Powered by ML and AI</em></strong> (Ch 12) — confounded and causal models as <strong>statistically indistinguishable</strong> when the confounder is latent; the partially linear SEM and the omitted-confounder bias <span class="math inline">\phi</span>; <strong>Theorem 12.2.1</strong> (bias in terms of two partial <span class="math inline">R^2</span>s, generalising Cinelli &amp; Hazlett); the <strong>Darfur</strong> example (benchmarks 0.13 / 0.01, residual variances 0.0597 / 0.1402, <span class="math inline">\hat\beta = 0.1003 \pm 0.0236</span>, lower bound 0.0767), the sensitivity contour, and the warning that controls are often chosen for convenience, which weakens the benchmark.</li>
+<li><strong>Dayal, <em>Quantitative Economics with R</em></strong> (§10.4) — <strong>Rosenbaum’s <span class="math inline">\Gamma</span></strong> as the odds of differential assignment due to unobserved factors; highly sensitive vs insensitive studies; the genetic-matching LaLonde example (estimate ≈ $766, SE ≈ $700, <span class="math inline">p = 0.27</span>) and its Wilcoxon sensitivity table.</li>
+<li><strong>This entry’s own arithmetic, from Chernozhukov et al.’s formula and numbers:</strong> the zero-crossing frontier, the equal-strength value (≈ 0.14), and the maximum bias at a treatment partial <span class="math inline">R^2</span> of 0.01 (≈ 0.066).</li>
+<li><em>Earlier versions of this entry attributed Rosenbaum bounds to Cunningham and Oster’s δ and the E-value to Chernozhukov et al.&nbsp;Neither text contains them. Rosenbaum is now credited to Dayal; Oster and the E-value are no longer covered.</em></li>
 <li><strong>Angrist &amp; Pischke</strong> — <strong>internal vs external validity</strong>; <strong>LATE</strong> as a local (complier) effect with limited transportability.</li>
 <li><strong>Gerber &amp; Green, <em>Field Experiments</em></strong> — <strong>SATE vs PATE</strong> and the transportability problem from convenience sampling/heterogeneity; <strong>replication, meta-analysis, and re-weighting</strong> as routes to generalisation.</li>
 </ul>
@@ -2094,13 +2134,20 @@ Figure&nbsp;1: Rosenbaum-bounds sensitivity curves. As the hidden-bias parameter
 <div class="math-appendix">
 <p><strong>Rosenbaum’s odds bound.</strong> For two matched units <span class="math inline">j,k</span> with identical observed <span class="math inline">X</span> but treatment probabilities <span class="math inline">\pi_j,\pi_k</span>, hidden bias is bounded by <span class="math display">
 \frac1\Gamma \le \frac{\pi_j(1-\pi_k)}{\pi_k(1-\pi_j)} \le \Gamma .
-</span> <span class="math inline">\Gamma=1</span> forces <span class="math inline">\pi_j=\pi_k</span> (no hidden bias). For each <span class="math inline">\Gamma&gt;1</span> one computes the <strong>worst-case</strong> <span class="math inline">p</span>-value over all assignments consistent with the bound; the smallest <span class="math inline">\Gamma</span> pushing it above <span class="math inline">0.05</span> is the study’s breaking point — the curve in the figure.</p>
-<p><strong>Oster’s bias-adjusted coefficient.</strong> Let <span class="math inline">\dot\beta,\dot R^2</span> be from the <em>short</em> regression (no controls) and <span class="math inline">\tilde\beta,\tilde R^2</span> from the <em>controlled</em> one, with <span class="math inline">R^2_{\max}</span> the (hypothetical) <span class="math inline">R^2</span> from regressing on observables <em>and</em> unobservables. The bias-adjusted estimate is approximately <span class="math display">
-\beta^\ast \approx \tilde\beta - \delta\,(\dot\beta-\tilde\beta)\,\frac{R^2_{\max}-\tilde R^2}{\tilde R^2-\dot R^2}.
-</span> Setting <span class="math inline">\delta=1</span> (unobservables as important as observables) and a plausible <span class="math inline">R^2_{\max}</span> gives a bound; robustness means <span class="math inline">\beta^\ast</span> stays away from <span class="math inline">0</span>.</p>
-<p><strong>E-value (risk-ratio scale).</strong> For an observed risk ratio <span class="math inline">RR\ge1</span>, the E-value is <span class="math display">
-\text{E-value}=RR+\sqrt{RR\,(RR-1)},
-</span> the minimum association (with both treatment and outcome) an unmeasured confounder would need to reduce <span class="math inline">RR</span> to <span class="math inline">1</span>. Larger E-value ⇒ more robust.</p>
+</span> <span class="math inline">\Gamma=1</span> forces <span class="math inline">\pi_j=\pi_k</span> (no hidden bias). For each <span class="math inline">\Gamma&gt;1</span> one computes the <strong>worst-case</strong> <span class="math inline">p</span>-value over all assignments consistent with the bound; the smallest <span class="math inline">\Gamma</span> pushing it above <span class="math inline">0.05</span> is the study’s breaking point.</p>
+<p><strong>Omitted-confounder bias in the partially linear model.</strong> Following Chernozhukov et al.&nbsp;(Example 12.2.1): <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> <span class="math display">
+Y = \alpha D + \delta A + f_Y(X) + \epsilon_Y,\qquad D = \gamma A + f_D(X) + \epsilon_D,\qquad A = f_A(X) + \epsilon_A,
+</span> with the <span class="math inline">\epsilon</span>’s mean zero and mutually uncorrelated given <span class="math inline">X</span>, and <span class="math inline">\mathbb E[\epsilon_A^2]=1</span>. Write <span class="math inline">\tilde V = V - \mathbb E[V\mid X]</span> for partialling out. Then <span class="math inline">\tilde Y = \alpha\tilde D + \delta\tilde A + \epsilon_Y</span> and <span class="math inline">\tilde D = \gamma\tilde A + \epsilon_D</span>, so the projection of <span class="math inline">\tilde Y</span> on <span class="math inline">\tilde D</span> gives <span class="math display">
+\beta = \frac{\mathbb E[\tilde Y\tilde D]}{\mathbb E[\tilde D^2]} = \alpha + \phi,\qquad
+\phi = \frac{\delta\gamma}{\mathbb E[\gamma^2 + \epsilon_D^2]} .
+</span></p>
+<p><strong>Theorem 12.2.1 (bias in partial <span class="math inline">R^2</span>s).</strong> <span class="citation" data-cites="chernozhukov_causalml">(<a href="#ref-chernozhukov_causalml" role="doc-biblioref">Chernozhukov et al. 2024</a>)</span> <span class="math display">
+\phi^2 = \frac{R^2_{\tilde Y\sim\tilde A\mid\tilde D}\;R^2_{\tilde D\sim\tilde A}}{1-R^2_{\tilde D\sim\tilde A}}
+\cdot\frac{\mathbb E\big[(\tilde Y-\beta\tilde D)^2\big]}{\mathbb E\big[\tilde D^2\big]} .
+</span> The second factor is estimable: the residual variance of the partialled-out regression over the residual variance of the treatment. Bounding the two partial <span class="math inline">R^2</span>s bounds <span class="math inline">|\phi|</span>. Darfur: <span class="math inline">\sqrt{(0.13 \times 0.01/0.99)(0.0597/0.1402)} \approx 0.0236</span>.</p>
+<p><strong>The frontier where the effect could vanish (our arithmetic).</strong> Setting <span class="math inline">|\phi| = \hat\beta</span> gives the curve <span class="math display">
+\frac{R^2_{Y}\,R^2_{D}}{1-R^2_{D}} = \frac{\hat\beta^2\,\mathbb E[\tilde D^2]}{\mathbb E[(\tilde Y-\beta\tilde D)^2]} \equiv \kappa ,
+</span> with <span class="math inline">\kappa = 0.1003^2/0.4258 \approx 0.0236</span> in the example. (That this matches the benchmark bias to three decimals is a coincidence of these particular numbers; the two are different quantities.) With equal strengths <span class="math inline">R^2_Y = R^2_D = r</span>, this is <span class="math inline">r^2 + \kappa r - \kappa = 0</span>, so <span class="math inline">r = \big(-\kappa+\sqrt{\kappa^2+4\kappa}\big)/2 \approx 0.142</span>. Since <span class="math inline">R^2_Y \le 1</span>, the effect can be erased only if <span class="math inline">R^2_D \ge \kappa/(1+\kappa) \approx 0.023</span>. At the benchmark <span class="math inline">R^2_D = 0.01</span> the bias is at most <span class="math inline">\sqrt{(0.01/0.99)(0.4258)} \approx 0.066</span>.</p>
 <p><strong>Re-weighting SATE to PATE.</strong> If effects vary as <span class="math inline">\tau(x)</span> and the target population has covariate density <span class="math inline">g(x)</span> while the sample has <span class="math inline">f(x)</span>, <span class="math display">
 \text{PATE}=\mathbb E_{g}[\tau(X)]=\int \tau(x)\,g(x)\,dx=\mathbb E_{f}\!\left[\frac{g(X)}{f(X)}\,\tau(X)\right],
 </span> so weighting sample units by <span class="math inline">g(X)/f(X)</span> transports the estimate — valid only if <span class="math inline">\tau(x)</span> is identified and the reweighting covariates capture the heterogeneity.</p>
@@ -2130,6 +2177,9 @@ Chernozhukov, Victor, Christian Hansen, Nathan Kallus, Martin Spindler, and Vasi
 </div>
 <div id="ref-cunningham_mixtape" class="csl-entry" role="listitem">
 Cunningham, Scott. 2021. <em>Causal Inference: The Mixtape</em>. Yale University Press.
+</div>
+<div id="ref-dayal_r_datascience" class="csl-entry" role="listitem">
+Dayal, Vikram. 2020. <em>Quantitative Economics with r: A Data Science Approach</em>. Springer Singapore.
 </div>
 <div id="ref-gerber_green" class="csl-entry" role="listitem">
 Gerber, Alan S., and Donald P. Green. 2012. <em>Field Experiments: Design, Analysis, and Interpretation</em>. W. W. Norton.
@@ -2637,225 +2687,328 @@ Gerber, Alan S., and Donald P. Green. 2012. <em>Field Experiments: Design, Analy
 <span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="fu">## The core question</span></span>
 <span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>Selection-on-observables designs assume that conditioning on $X$ makes treatment as-good-as-random —</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>**untestable**, because the confounder you fear is unobserved. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> Sensitivity</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>analysis converts that worry into a number by asking: **how strong would an unobserved confounder have</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>to be to explain away the result?** <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> If the estimate only breaks under an</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>*implausibly powerful* hidden factor, it is robust; if a *whisper* of confounding undoes it, it is</span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>fragile. You never prove no confounding — you measure how much it would take.</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="fu">## Rosenbaum bounds (Γ)</span></span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>For **matched** designs, Paul Rosenbaum's bounds introduce a parameter **$\Gamma$** measuring **hidden</span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>bias**: the differential odds that two units *identical on observed $X$* receive treatment.</span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>**untestable**, because the confounder you fear is unobserved. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> Chernozhukov et al.</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>put the problem starkly. A model in which education raises wages and a model in which latent ability</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>drives both education and wages *with no causal effect at all* are **statistically indistinguishable**</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>if ability is unobserved. Any observed correlation can be rationalised either way.</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> No amount of data settles it. What you *can* do is make the worry quantitative,</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>by asking: **how strong would an unobserved confounder have to be to explain away the result?**</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml; @dayal_r_datascience</span><span class="co">]</span> If the estimate only breaks under an *implausibly</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>powerful* hidden factor, it is robust; if a *whisper* of confounding undoes it, it is fragile. You never</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>prove no confounding — you measure how much it would take.</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="fu">## Rosenbaum bounds (Γ)</span></span>
 <span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\Gamma=1$: no hidden bias — matched units are equally likely to be treated (a perfect experiment).</span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\Gamma=2$: one unit is *twice* as likely as its match to be treated, because of something unseen.</span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>The procedure: raise $\Gamma$ from 1 upward (1.1, 1.2, …) and watch the treatment effect's $p$-value;</span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>the **breaking point** is the $\Gamma$ at which significance is lost. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span> A result that</span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>survives to **$\Gamma=5$** is highly robust — only an enormous hidden bias could overturn it; one that</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>dies at **$\Gamma=1.1$** is hostage to the faintest unobserved difference. The figure contrasts the two.</span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-sensitivity</span></span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Rosenbaum-bounds sensitivity curves. As the hidden-bias parameter Γ rises (a stronger unobserved confounder), the worst-case p-value for the treatment effect climbs. The robust study (blue) stays significant until Γ ≈ 3.4 — only a large unseen bias could explain it away. The fragile study (orange) crosses p = 0.05 at Γ ≈ 1.2 — even a slight departure from as-good-as-random assignment dissolves it. Same point estimate, very different credibility."</span></span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>gamma <span class="op">=</span> np.linspace(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">200</span>)</span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="co"># Illustrative worst-case p-value as a function of hidden bias Γ (monotone increasing).</span></span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="co"># Robust study: strong signal, p climbs slowly. Fragile: weak signal, p climbs fast.</span></span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>p_robust <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>(<span class="fl">2.2</span> <span class="op">*</span> (gamma <span class="op">-</span> <span class="fl">3.4</span>))))   <span class="co"># crosses 0.05 near Γ≈3.4</span></span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>p_robust <span class="op">=</span> <span class="fl">0.001</span> <span class="op">+</span> <span class="fl">0.6</span> <span class="op">*</span> p_robust</span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>p_fragile <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>(<span class="fl">6.0</span> <span class="op">*</span> (gamma <span class="op">-</span> <span class="fl">1.2</span>))))  <span class="co"># crosses 0.05 near Γ≈1.2</span></span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>p_fragile <span class="op">=</span> <span class="fl">0.02</span> <span class="op">+</span> <span class="fl">0.7</span> <span class="op">*</span> p_fragile</span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> crossing(g, p): <span class="cf">return</span> g[np.argmin(np.<span class="bu">abs</span>(p <span class="op">-</span> <span class="fl">0.05</span>))]</span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.0</span>, <span class="fl">4.2</span>))</span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>ax.plot(gamma, p_robust, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="st">"robust study"</span>)</span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>ax.plot(gamma, p_fragile, color<span class="op">=</span><span class="st">"#8a8a7e"</span>, lw<span class="op">=</span><span class="fl">2.4</span>, label<span class="op">=</span><span class="st">"fragile study"</span>)</span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="fl">0.05</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.4</span>)</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">4.4</span>, <span class="fl">0.065</span>, <span class="st">"p = 0.05"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p, c <span class="kw">in</span> [(p_robust, <span class="st">"#161613"</span>), (p_fragile, <span class="st">"#8a8a7e"</span>)]:</span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>    gx <span class="op">=</span> crossing(gamma, p)</span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>    ax.axvline(gx, color<span class="op">=</span>c, ls<span class="op">=</span><span class="st">":"</span>, lw<span class="op">=</span><span class="fl">1.2</span>)</span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>    ax.text(gx <span class="op">+</span> <span class="fl">0.05</span>, <span class="fl">0.5</span>, <span class="ss">f"breaks at</span><span class="ch">\n</span><span class="ss">Γ ≈ </span><span class="sc">{</span>gx<span class="sc">:.1f}</span><span class="ss">"</span>, color<span class="op">=</span>c, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"hidden-bias parameter  Γ  (1 = no hidden bias)"</span>)</span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"worst-case p-value"</span>)</span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"How much unobserved confounding would it take to break the result?"</span>)</span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"center right"</span>)</span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>For **matched** designs, Paul Rosenbaum's bounds introduce a parameter **$\Gamma$** measuring **hidden</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>bias**: how much larger one subject's odds of treatment can be than another's, for two subjects who look</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>*identical on observed $X$*. <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\Gamma=1$: no hidden bias — matched units are equally likely to be treated (a simple randomised</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>  experiment).</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\Gamma=2$: one unit may be *twice* as likely as its match to be treated, because of unobserved</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>  pre-treatment differences.</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>The procedure: raise $\Gamma$ from 1 upward (1.1, 1.2, …) and watch the worst-case $p$-value of the</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>treatment effect. A study is **highly sensitive** to hidden bias if its conclusions change for $\Gamma$</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>barely above 1, and **insensitive** if they change only for quite large $\Gamma$. <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>**Worked example: the LaLonde job-training data.** Dayal runs this on the familiar LaLonde sample</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>(185 treated workers), using genetic matching followed by Rosenbaum's test for the Wilcoxon signed-rank</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>$p$-value. <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span> The matched estimate of the earnings effect is about **\$766**, with an</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>Abadie–Imbens standard error of about **\$700**, so $p = 0.27$ *even at $\Gamma = 1$*. The sensitivity</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>table then shows how quickly the worst case deteriorates. The upper-bound $p$-value is 0.47 at</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>$\Gamma = 1.1$, 0.66 at 1.2 and 0.95 at 1.5. Dayal's reading: a large sensitivity to hidden bias from</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>missing covariates. <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span> Notice the logic. A result that was not significant to begin</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>with has no breaking point to find, and the table can only confirm how little it is worth. Rosenbaum</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>bounds are most informative for a result that *is* significant under $\Gamma = 1$: you report the</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>$\Gamma$ at which it stops being so.</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="fu">## Partial R²: how much would the confounder have to explain?</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>Rosenbaum's $\Gamma$ lives in the world of matched pairs and $p$-values. Chernozhukov et al. give a</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>regression-native version that bounds the **bias** itself, in a unit that is easy to argue about: the</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>**share of variation** the hidden confounder would explain. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>Start from the partially linear model: the outcome depends on the treatment $D$, an unobserved</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>confounder $A$ and observed controls $X$; the treatment depends on $A$ and $X$. Partial $X$ out of</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>everything. The regression of the residualised outcome on the residualised treatment then recovers not</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>the causal effect $\alpha$ but $\beta = \alpha + \phi$, where $\phi$ is the **omitted-confounder bias**.</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> Their Theorem 12.2.1, which generalises a result of Cinelli and Hazlett, writes</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>the size of that bias in terms of just two unknowns: <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**how much of the remaining variation in the outcome** the confounder explains, after the treatment</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>  and controls are accounted for (a partial $R^2$), and</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**how much of the remaining variation in the treatment** it explains, after the controls (another</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>  partial $R^2$).</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>Everything else in the formula (the residual variances) is estimable from the data. So instead of</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>arguing about an invisible variable in the abstract, you argue about two numbers between 0 and 1. If</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>you are willing to bound them, the bias is bounded. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
 <span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="fu">## Oster's δ: coefficient stability</span></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="fu">### Worked example: violence and attitudes to peace in Darfur</span></span>
 <span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>A complementary idea, due to Emily Oster (and used in <span class="co">[</span><span class="ot">causal ML</span><span class="co">](causal-machine-learning.qmd)</span> by</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>Chernozhukov), reads robustness off **how the treatment coefficient moves as you add controls**.</span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> The logic: if piling in observed controls **barely budges** the coefficient</span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>*while* the $R^2$ rises substantially, then the unobservables — *assumed to behave like the observables*</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>— are unlikely to drive it to zero. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> The key assumption is **$\delta=1$**:</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>unobserved confounders are *at most as important* as the observed controls in explaining the outcome.</span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>Setting $\delta=1$ yields a **bias-adjusted bound** on the coefficient; if that bound stays away from</span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>zero, the effect is robust. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> (Coefficient *stability alone* is not enough — it</span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>must be paired with the $R^2$ movement, or a coefficient can be stable simply because the controls</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>explain nothing.)</span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a><span class="fu">## The E-value</span></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>The book's example, taken from Cinelli and Hazlett's reanalysis of Hazlett's study, uses a survey of</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>Darfurian refugees in eastern Chad. The question is whether having **directly experienced war</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>violence** changes **attitudes towards peace**. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> Exposure to violence is clearly</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>not randomly assigned, so the analysis controls for observed demographics. The estimate is</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>$\hat\beta = 0.1003$.</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>Now the benchmark. In the data, the observed controls explain **13%** of the remaining variation in the</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>peace outcome and **1%** of the variation in violence. Suppose a hidden confounder is *no stronger than</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>the observed controls* on either count. Plugging those two numbers and the two residual variances</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>(0.0597 and 0.1402) into the theorem gives a bias of at most **0.0236**. The effect then lies in</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>$0.1003 \pm 0.0236$, with a lower bound of **0.0767**. Still clearly positive.</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
 <span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>A third framing measures sensitivity in the language of **association strength**. The **E-value** is the</span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>**minimum strength of association** — on the risk-ratio scale — that an unmeasured confounder would need</span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>with **both** the treatment **and** the outcome to fully explain away the observed effect.</span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> A large E-value (say, the confounder would need a risk ratio of 4 with each)</span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>means only a *very strong* hidden factor could do it; if that exceeds the association of any *measured*</span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>control, the result is credible. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> The E-value's appeal is interpretability: it</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>puts the burden of doubt in concrete terms a reader can weigh against known predictors.</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="fu"># Part B · External validity: where does the estimate apply?</span></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>The figure maps the whole space. The dashed curve is the book's own contour: every combination of the</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>two partial $R^2$s that produces a bias of exactly 0.0236. The book points out that if the confounder</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>could explain even 5% of the variation in treatment, it would need **almost no** relationship with the</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>outcome to keep the bias that small. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> The orange curve answers the book's</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>follow-up question, *when does the lower bound reach zero?* (our arithmetic, from the same formula). A</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>confounder equally strong on both sides would need to explain about **14%** of each to erase the effect.</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>And no confounder that explains only as much of the treatment as the observed controls do (1%) could</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>erase it, *however* strongly it predicts the outcome. At that treatment strength the largest possible</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>bias is about 0.066, below the estimate.</span>
 <span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="fu">## Internal vs external validity</span></span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>A study has **internal validity** if it correctly identifies the effect *for the sample under study*,</span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>and **external validity** if that finding **applies to other populations, settings, and times**.</span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span> The designs of this Part are engineered for internal validity — and a</span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>recurring theme is that they often buy it by **narrowing** external validity. A causal estimate can be</span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>airtight *and* parochial.</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-sensitivity</span></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Partial-R² sensitivity map for the Darfur example in Chernozhukov et al. (Ch 12), computed from their Theorem 12.2.1 with the book's numbers (estimate 0.1003; residual variances 0.0597 and 0.1402). Each point is a hypothetical hidden confounder, located by how much of the remaining variation in treatment (horizontal) and outcome (vertical) it explains. The black dot is the benchmark, a confounder as strong as the observed controls (bias ≈ 0.024, so the effect is at least 0.077). The dashed curve is the book's |bias| = 0.0236 contour. The orange curve is where the bias equals the estimate itself: confounders in the shaded region leave the effect positive. A confounder equally strong on both axes would have to explain about 14% of each to erase it."</span></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
 <span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="fu">## SATE vs PATE</span></span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>The distinction sharpens with two estimands: <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**SATE** — the **sample** average treatment effect, for the units *actually in the study*. Its</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>  standard errors are smaller (it treats the sample's potential outcomes as fixed).</span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**PATE** — the **population** average treatment effect, for the broader super-population the sample</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>  was meant to represent.</span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>The **transportability problem**: a clean SATE may not equal the PATE if the sample was a **convenience</span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>sample** or if effects are **heterogeneous** across the population. <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span> An experiment on</span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>volunteer undergraduates can be internally flawless and still mispredict the effect in the general</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>public — not because the analysis is wrong, but because the *people* are different.</span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="fu">## The local designs, revisited</span></span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>Two of the most *credible* designs are precisely the most *local* — a trade we've met before:</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**[LATE](instrumental-variables.qmd)** identifies the effect only for **compliers** — those moved by</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>  the instrument. Always-takers and never-takers are invisible, and their effects may differ. A</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>  draft-lottery LATE speaks for lottery-induced soldiers, not volunteers.</span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**[RD](regression-discontinuity.qmd)** identifies the effect only **at the cutoff**; extrapolating to</span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>  units far away leans on bold functional-form assumptions. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>Internal validity and external validity are often in *tension*: the design tricks that make a</span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>comparison airtight (a narrow window, a specific instrument) are exactly what localise the answer.</span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="fu">## Generalising honestly</span></span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>Three routes extend a local or sample estimate toward a target: <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Replication** — re-run the study in *new contexts* and see whether the effect is stable; the single</span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>  most convincing evidence of transportability.</span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Meta-analysis** — pool many studies (often in a <span class="co">[</span><span class="ot">Bayesian</span><span class="co">](../02-inference/bayesian-worldview.qmd)</span></span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>  frame), weighting by precision and accounting for sampling bias, to triangulate a general effect.</span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Re-weighting** — if the sample's covariate distribution differs from the target population's,</span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>  **re-weight** (e.g. <span class="co">[</span><span class="ot">inverse-probability weighting</span><span class="co">](matching-and-propensity-scores.qmd)</span> toward the</span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>  target) so the estimate reflects *their* composition, not the study's. Transportability becomes a</span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>  weighting problem — *if* you observe the covariates that drive effect heterogeneity.</span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="co"># Darfur example (Chernozhukov et al., Example 12.2.2)</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>beta, s2_res, s2_d <span class="op">=</span> <span class="fl">0.1003</span>, <span class="fl">0.0597</span>, <span class="fl">0.1402</span></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>scale <span class="op">=</span> s2_res <span class="op">/</span> s2_d</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bias(r2_y, r2_d):</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""|omitted-confounder bias| from Theorem 12.2.1 (partially linear model)."""</span></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.sqrt(r2_y <span class="op">*</span> r2_d <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> r2_d) <span class="op">*</span> scale)</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>bench <span class="op">=</span> bias(<span class="fl">0.13</span>, <span class="fl">0.01</span>)                       <span class="co"># ~0.0236</span></span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> beta <span class="op">**</span> <span class="dv">2</span> <span class="op">/</span> scale                          <span class="co"># bias = beta  &lt;=&gt;  r2_y * r2_d / (1 - r2_d) = k</span></span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>r_eq <span class="op">=</span> (<span class="op">-</span>k <span class="op">+</span> np.sqrt(k <span class="op">*</span> k <span class="op">+</span> <span class="dv">4</span> <span class="op">*</span> k)) <span class="op">/</span> <span class="dv">2</span>       <span class="co"># equal-strength confounder that erases the effect</span></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>rd <span class="op">=</span> np.linspace(<span class="fl">0.001</span>, <span class="fl">0.30</span>, <span class="dv">300</span>)</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>ry <span class="op">=</span> np.linspace(<span class="fl">0.0</span>, <span class="fl">1.0</span>, <span class="dv">300</span>)</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>RD, RY <span class="op">=</span> np.meshgrid(rd, ry)</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>B <span class="op">=</span> bias(RY, RD)</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.0</span>, <span class="fl">4.6</span>))</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>ax.contourf(RD, RY, B, levels<span class="op">=</span>[<span class="dv">0</span>, beta], colors<span class="op">=</span>[<span class="st">"#e4e3d8"</span>])</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>ax.contour(RD, RY, B, levels<span class="op">=</span>[bench], colors<span class="op">=</span>[<span class="st">"#5e5e54"</span>], linewidths<span class="op">=</span><span class="fl">1.4</span>, linestyles<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>ax.contour(RD, RY, B, levels<span class="op">=</span>[beta], colors<span class="op">=</span>[<span class="st">"#e8531d"</span>], linewidths<span class="op">=</span><span class="fl">2.4</span>)</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="fl">0.01</span>, <span class="fl">0.13</span>, <span class="st">"o"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, ms<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="ss">f"benchmark: as strong as the</span><span class="ch">\n</span><span class="ss">observed controls (0.01, 0.13)</span><span class="ch">\n</span><span class="ss">bias ≈ </span><span class="sc">{</span>bench<span class="sc">:.3f}</span><span class="ss">, effect ≥ </span><span class="sc">{</span>beta <span class="op">-</span> bench<span class="sc">:.3f}</span><span class="ss">"</span>,</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>            (<span class="fl">0.01</span>, <span class="fl">0.13</span>), xytext<span class="op">=</span>(<span class="fl">0.035</span>, <span class="fl">0.30</span>), fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"#161613"</span>,</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">0.9</span>))</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.12</span>, <span class="fl">0.018</span>, <span class="st">"|bias| = 0.0236 (the book's contour)"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>)</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.10</span>, <span class="fl">0.52</span>, <span class="st">"|bias| = 0.100 = the estimate:</span><span class="ch">\n</span><span class="st">beyond this line the effect</span><span class="ch">\n</span><span class="st">could be zero"</span>,</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>        fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>)</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>ax.plot(r_eq, r_eq, <span class="st">"s"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, ms<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="ss">f"equal strength: </span><span class="sc">{</span>r_eq<span class="sc">:.2f}</span><span class="ss"> each"</span>, (r_eq, r_eq), xytext<span class="op">=</span>(<span class="fl">0.185</span>, <span class="fl">0.26</span>), fontsize<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"#e8531d"</span>, arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">0.9</span>))</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="dv">0</span>, <span class="fl">0.30</span>)</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"partial R² of treatment (violence) with the confounder"</span>)</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"partial R² of outcome (peace) with the confounder"</span>)</span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"How strong would a hidden confounder have to be?"</span>)</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="fu">### The benchmark is an argument, not a fact</span></span>
 <span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reporting a point estimate with no sensitivity analysis.** If CIA is untestable, show how much</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>  confounding would break the result (Rosenbaum Γ, Oster δ, E-value). Silence is not robustness.</span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Coefficient stability without the $R^2$ movement.** A coefficient can be stable because the controls</span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>  explain nothing; Oster's logic needs both. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a LATE or RD estimate as a population effect.** They are local — to compliers, to the</span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>  cutoff. Name the subpopulation. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>Why compare the hidden confounder with the observed controls at all? The usual story is that the</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>controls were chosen *because* they were the best available proxies for confounding, so anything left</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>over is probably weaker. Chernozhukov et al. adopt this benchmark for illustration but warn against</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>trusting it. Controls are often chosen for **convenience**, because they are available and measurable,</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>not after careful thought about confounding. <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span> The benchmark turns an</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>unanswerable question into a debatable one. It does not answer it. The book also notes the natural</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>extensions: asking how strong the confounder must be before the *conclusion* changes (the orange curve),</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>and doing sensitivity analysis on confidence intervals rather than point estimates.</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
 <span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Generalising from a convenience sample.** A flawless SATE on volunteers need not be the PATE;</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  re-weight or replicate before extrapolating. <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Extrapolating RD far from the cutoff.** Beyond the boundary you are trusting functional form, not</span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>  the design. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>Two other yardsticks are common in applied work: Oster's coefficient-stability δ, and the E-value on the</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>risk-ratio scale. Both follow the same idea of benchmarking an unseen confounder against something you</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>can see. Neither is developed in this site's source library, so they are not covered here.</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="fu"># Part B · External validity: where does the estimate apply?</span></span>
 <span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a><span class="fu">## Internal vs external validity</span></span>
 <span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *The Mixtape*** — sensitivity analysis as the response to untestable CIA; **Rosenbaum</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>  bounds** and the hidden-bias parameter **$\Gamma$** (differential odds of assignment; raise $\Gamma$</span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>  until significance breaks; robust if it survives large $\Gamma$); RD estimates as **local to the</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>  cutoff**.</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chernozhukov et al., *Applied Causal Inference Powered by ML and AI*** — **Oster's $\delta$ /</span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>  coefficient stability** (coefficient movement + $R^2$, $\delta=1$ assuming unobservables as important</span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>  as observables) and the **E-value** (minimum confounder association with treatment *and* outcome to</span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>  nullify the effect).</span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke** — **internal vs external validity**; **LATE** as a local (complier) effect with</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>  limited transportability.</span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Gerber &amp; Green, *Field Experiments*** — **SATE vs PATE** and the transportability problem from</span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>  convenience sampling/heterogeneity; **replication, meta-analysis, and re-weighting** as routes to</span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  generalisation.</span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>A study has **internal validity** if it correctly identifies the effect *for the sample under study*,</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>and **external validity** if that finding **applies to other populations, settings, and times**.</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span> The designs of this Part are engineered for internal validity — and a</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>recurring theme is that they often buy it by **narrowing** external validity. A causal estimate can be</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>airtight *and* parochial.</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="fu">## SATE vs PATE</span></span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>The distinction sharpens with two estimands: <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**SATE** — the **sample** average treatment effect, for the units *actually in the study*. Its</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>  standard errors are smaller (it treats the sample's potential outcomes as fixed).</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**PATE** — the **population** average treatment effect, for the broader super-population the sample</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>  was meant to represent.</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>The **transportability problem**: a clean SATE may not equal the PATE if the sample was a **convenience</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>sample** or if effects are **heterogeneous** across the population. <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span> An experiment on</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>volunteer undergraduates can be internally flawless and still mispredict the effect in the general</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>public — not because the analysis is wrong, but because the *people* are different.</span>
 <span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a><span class="fu">## The local designs, revisited</span></span>
 <span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>**Rosenbaum's odds bound.** For two matched units $j,k$ with identical observed $X$ but treatment</span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>probabilities $\pi_j,\pi_k$, hidden bias is bounded by</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>\frac1\Gamma \le \frac{\pi_j(1-\pi_k)}{\pi_k(1-\pi_j)} \le \Gamma .</span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>$\Gamma=1$ forces $\pi_j=\pi_k$ (no hidden bias). For each $\Gamma&gt;1$ one computes the **worst-case**</span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>$p$-value over all assignments consistent with the bound; the smallest $\Gamma$ pushing it above $0.05$</span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>is the study's breaking point — the curve in the figure.</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>Two of the most *credible* designs are precisely the most *local* — a trade we've met before:</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**[LATE](instrumental-variables.qmd)** identifies the effect only for **compliers** — those moved by</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>  the instrument. Always-takers and never-takers are invisible, and their effects may differ. A</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>  draft-lottery LATE speaks for lottery-induced soldiers, not volunteers.</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**[RD](regression-discontinuity.qmd)** identifies the effect only **at the cutoff**; extrapolating to</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  units far away leans on bold functional-form assumptions. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
 <span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>**Oster's bias-adjusted coefficient.** Let $\dot\beta,\dot R^2$ be from the *short* regression (no</span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>controls) and $\tilde\beta,\tilde R^2$ from the *controlled* one, with $R^2_{\max}$ the (hypothetical)</span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>$R^2$ from regressing on observables *and* unobservables. The bias-adjusted estimate is approximately</span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>\beta^\ast \approx \tilde\beta - \delta\,(\dot\beta-\tilde\beta)\,\frac{R^2_{\max}-\tilde R^2}{\tilde R^2-\dot R^2}.</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>Setting $\delta=1$ (unobservables as important as observables) and a plausible $R^2_{\max}$ gives a</span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>bound; robustness means $\beta^\ast$ stays away from $0$.</span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>**E-value (risk-ratio scale).** For an observed risk ratio $RR\ge1$, the E-value is</span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>\text{E-value}=RR+\sqrt{RR\,(RR-1)},</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>the minimum association (with both treatment and outcome) an unmeasured confounder would need to reduce</span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>$RR$ to $1$. Larger E-value ⇒ more robust.</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>Internal validity and external validity are often in *tension*: the design tricks that make a</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>comparison airtight (a narrow window, a specific instrument) are exactly what localise the answer.</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a><span class="fu">## Generalising honestly</span></span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>Three routes extend a local or sample estimate toward a target: <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Replication** — re-run the study in *new contexts* and see whether the effect is stable; the single</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>  most convincing evidence of transportability.</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Meta-analysis** — pool many studies (often in a <span class="co">[</span><span class="ot">Bayesian</span><span class="co">](../02-inference/bayesian-worldview.qmd)</span></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>  frame), weighting by precision and accounting for sampling bias, to triangulate a general effect.</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Re-weighting** — if the sample's covariate distribution differs from the target population's,</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>  **re-weight** (e.g. <span class="co">[</span><span class="ot">inverse-probability weighting</span><span class="co">](matching-and-propensity-scores.qmd)</span> toward the</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>  target) so the estimate reflects *their* composition, not the study's. Transportability becomes a</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>  weighting problem — *if* you observe the covariates that drive effect heterogeneity.</span>
 <span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>**Re-weighting SATE to PATE.** If effects vary as $\tau(x)$ and the target population has covariate</span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>density $g(x)$ while the sample has $f(x)$,</span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>\text{PATE}=\mathbb E_{g}<span class="co">[</span><span class="ot">\tau(X)</span><span class="co">]</span>=\int \tau(x)\,g(x)\,dx=\mathbb E_{f}<span class="sc">\!</span>\left<span class="co">[</span><span class="ot">\frac{g(X)}{f(X)}\,\tau(X)\right</span><span class="co">]</span>,</span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>so weighting sample units by $g(X)/f(X)$ transports the estimate — valid only if $\tau(x)$ is identified</span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>and the reweighting covariates capture the heterogeneity.</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reporting a point estimate with no sensitivity analysis.** If CIA is untestable, show how much</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>  confounding would break the result (Rosenbaum's Γ for matched designs, partial-$R^2$ bias bounds for</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>  regressions). Silence is not robustness. <span class="co">[</span><span class="ot">@dayal_r_datascience; @chernozhukov_causalml</span><span class="co">]</span></span>
 <span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">matching &amp; propensity scores</span><span class="co">](matching-and-propensity-scores.qmd)</span> (the untestable CIA</span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>  this stress-tests), <span class="co">[</span><span class="ot">IV/LATE</span><span class="co">](instrumental-variables.qmd)</span> and <span class="co">[</span><span class="ot">RD</span><span class="co">](regression-discontinuity.qmd)</span> (the</span>
-<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>  local effects whose reach this examines), and <span class="co">[</span><span class="ot">IPW</span><span class="co">](matching-and-propensity-scores.qmd)</span> (re-weighting</span>
-<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>  to a target).</span>
-<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Closes:** the summit's logic — from defining an effect to **estimating** it to **stress-testing and</span>
-<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>  generalising** it.</span>
-<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">Part VI · doing research in the world</span><span class="co">](../06-field-realities/index.qmd)</span>, where external</span>
-<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>  validity, replication, and the gap between a clean estimate and a messy decision become the whole game.</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating the benchmark as a fact.** "No hidden confounder is stronger than my observed controls" is</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>  an assumption, and a shaky one when the controls were chosen because they were easy to get. Report</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  the benchmark *and* the frontier where the conclusion flips, so readers can apply their own beliefs.</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Running a sensitivity analysis on a result that was never significant.** If $p = 0.27$ at</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>  $\Gamma = 1$, as in the matched LaLonde example, there is no breaking point to find. Sensitivity</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>  analysis grades a finding; it cannot rescue one. <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span></span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a LATE or RD estimate as a population effect.** They are local — to compliers, to the</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>  cutoff. Name the subpopulation. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Generalising from a convenience sample.** A flawless SATE on volunteers need not be the PATE;</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>  re-weight or replicate before extrapolating. <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Extrapolating RD far from the cutoff.** Beyond the boundary you are trusting functional form, not</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>  the design. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *The Mixtape*** — the conditional independence assumption as untestable; RD estimates</span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>  as **local to the cutoff**.</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chernozhukov et al., *Applied Causal Inference Powered by ML and AI*** (Ch 12) — confounded and</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>  causal models as **statistically indistinguishable** when the confounder is latent; the partially</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>  linear SEM and the omitted-confounder bias $\phi$; **Theorem 12.2.1** (bias in terms of two partial</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>  $R^2$s, generalising Cinelli &amp; Hazlett); the **Darfur** example (benchmarks 0.13 / 0.01, residual</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>  variances 0.0597 / 0.1402, $\hat\beta = 0.1003 \pm 0.0236$, lower bound 0.0767), the sensitivity</span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>  contour, and the warning that controls are often chosen for convenience, which weakens the benchmark.</span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dayal, *Quantitative Economics with R*** (§10.4) — **Rosenbaum's $\Gamma$** as the odds of</span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>  differential assignment due to unobserved factors; highly sensitive vs insensitive studies; the</span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>  genetic-matching LaLonde example (estimate ≈ \$766, SE ≈ \$700, $p = 0.27$) and its Wilcoxon</span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>  sensitivity table.</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**This entry's own arithmetic, from Chernozhukov et al.'s formula and numbers:** the zero-crossing</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>  frontier, the equal-strength value (≈ 0.14), and the maximum bias at a treatment partial $R^2$ of 0.01</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>  (≈ 0.066).</span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*Earlier versions of this entry attributed Rosenbaum bounds to Cunningham and Oster's δ and the E-value</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>  to Chernozhukov et al. Neither text contains them. Rosenbaum is now credited to Dayal; Oster and the</span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>  E-value are no longer covered.*</span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke** — **internal vs external validity**; **LATE** as a local (complier) effect with</span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>  limited transportability.</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Gerber &amp; Green, *Field Experiments*** — **SATE vs PATE** and the transportability problem from</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>  convenience sampling/heterogeneity; **replication, meta-analysis, and re-weighting** as routes to</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>  generalisation.</span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>**Rosenbaum's odds bound.** For two matched units $j,k$ with identical observed $X$ but treatment</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>probabilities $\pi_j,\pi_k$, hidden bias is bounded by</span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>\frac1\Gamma \le \frac{\pi_j(1-\pi_k)}{\pi_k(1-\pi_j)} \le \Gamma .</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>$\Gamma=1$ forces $\pi_j=\pi_k$ (no hidden bias). For each $\Gamma&gt;1$ one computes the **worst-case**</span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>$p$-value over all assignments consistent with the bound; the smallest $\Gamma$ pushing it above $0.05$</span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>is the study's breaking point.</span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a>**Omitted-confounder bias in the partially linear model.** Following Chernozhukov et al. (Example</span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a>12.2.1): <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>Y = \alpha D + \delta A + f_Y(X) + \epsilon_Y,\qquad D = \gamma A + f_D(X) + \epsilon_D,\qquad A = f_A(X) + \epsilon_A,</span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>with the $\epsilon$'s mean zero and mutually uncorrelated given $X$, and $\mathbb E<span class="co">[</span><span class="ot">\epsilon_A^2</span><span class="co">]</span>=1$.</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>Write $\tilde V = V - \mathbb E<span class="co">[</span><span class="ot">V\mid X</span><span class="co">]</span>$ for partialling out. Then</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>$\tilde Y = \alpha\tilde D + \delta\tilde A + \epsilon_Y$ and $\tilde D = \gamma\tilde A + \epsilon_D$, so the</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>projection of $\tilde Y$ on $\tilde D$ gives</span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a>\beta = \frac{\mathbb E<span class="co">[</span><span class="ot">\tilde Y\tilde D</span><span class="co">]</span>}{\mathbb E<span class="co">[</span><span class="ot">\tilde D^2</span><span class="co">]</span>} = \alpha + \phi,\qquad</span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a>\phi = \frac{\delta\gamma}{\mathbb E<span class="co">[</span><span class="ot">\gamma^2 + \epsilon_D^2</span><span class="co">]</span>} .</span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a>**Theorem 12.2.1 (bias in partial $R^2$s).** <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a>\phi^2 = \frac{R^2_{\tilde Y\sim\tilde A\mid\tilde D}\;R^2_{\tilde D\sim\tilde A}}{1-R^2_{\tilde D\sim\tilde A}}</span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>\cdot\frac{\mathbb E\big<span class="co">[</span><span class="ot">(\tilde Y-\beta\tilde D)^2\big</span><span class="co">]</span>}{\mathbb E\big<span class="co">[</span><span class="ot">\tilde D^2\big</span><span class="co">]</span>} .</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a>The second factor is estimable: the residual variance of the partialled-out regression over the residual</span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>variance of the treatment. Bounding the two partial $R^2$s bounds $|\phi|$. Darfur:</span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>$\sqrt{(0.13 \times 0.01/0.99)(0.0597/0.1402)} \approx 0.0236$.</span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a>**The frontier where the effect could vanish (our arithmetic).** Setting $|\phi| = \hat\beta$ gives the</span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>curve</span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a>\frac{R^2_{Y}\,R^2_{D}}{1-R^2_{D}} = \frac{\hat\beta^2\,\mathbb E<span class="co">[</span><span class="ot">\tilde D^2</span><span class="co">]</span>}{\mathbb E<span class="co">[</span><span class="ot">(\tilde Y-\beta\tilde D)^2</span><span class="co">]</span>} \equiv \kappa ,</span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a>with $\kappa = 0.1003^2/0.4258 \approx 0.0236$ in the example. (That this matches the benchmark bias to</span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a>three decimals is a coincidence of these particular numbers; the two are different quantities.) With equal strengths $R^2_Y = R^2_D = r$,</span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a>this is $r^2 + \kappa r - \kappa = 0$, so $r = \big(-\kappa+\sqrt{\kappa^2+4\kappa}\big)/2 \approx 0.142$.</span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a>Since $R^2_Y \le 1$, the effect can be erased only if $R^2_D \ge \kappa/(1+\kappa) \approx 0.023$.</span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a>At the benchmark $R^2_D = 0.01$ the bias is at most $\sqrt{(0.01/0.99)(0.4258)} \approx 0.066$.</span>
+<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a>**Re-weighting SATE to PATE.** If effects vary as $\tau(x)$ and the target population has covariate</span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a>density $g(x)$ while the sample has $f(x)$,</span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a>\text{PATE}=\mathbb E_{g}<span class="co">[</span><span class="ot">\tau(X)</span><span class="co">]</span>=\int \tau(x)\,g(x)\,dx=\mathbb E_{f}<span class="sc">\!</span>\left<span class="co">[</span><span class="ot">\frac{g(X)}{f(X)}\,\tau(X)\right</span><span class="co">]</span>,</span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a>so weighting sample units by $g(X)/f(X)$ transports the estimate — valid only if $\tau(x)$ is identified</span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a>and the reweighting covariates capture the heterogeneity.</span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">matching &amp; propensity scores</span><span class="co">](matching-and-propensity-scores.qmd)</span> (the untestable CIA</span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a>  this stress-tests), <span class="co">[</span><span class="ot">IV/LATE</span><span class="co">](instrumental-variables.qmd)</span> and <span class="co">[</span><span class="ot">RD</span><span class="co">](regression-discontinuity.qmd)</span> (the</span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a>  local effects whose reach this examines), and <span class="co">[</span><span class="ot">IPW</span><span class="co">](matching-and-propensity-scores.qmd)</span> (re-weighting</span>
+<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a>  to a target).</span>
+<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Closes:** the summit's logic — from defining an effect to **estimating** it to **stress-testing and</span>
+<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a>  generalising** it.</span>
+<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">Part VI · doing research in the world</span><span class="co">](../06-field-realities/index.qmd)</span>, where external</span>
+<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a>  validity, replication, and the gap between a clean estimate and a messy decision become the whole game.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
