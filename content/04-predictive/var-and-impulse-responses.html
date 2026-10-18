@@ -912,6 +912,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/text-as-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text as Data: Tokens, Sentiment &amp; Topic Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../content/04-predictive/interpretability-and-ml.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Interpretability &amp; ML for Social Science</span></a>
   </div>
@@ -1925,6 +1931,12 @@ window.Quarto = {
   <li><a href="#impulse-response-functions" id="toc-impulse-response-functions" class="nav-link" data-scroll-target="#impulse-response-functions">Impulse-response functions</a></li>
   <li><a href="#identification-why-the-ordering-matters" id="toc-identification-why-the-ordering-matters" class="nav-link" data-scroll-target="#identification-why-the-ordering-matters">Identification: why the ordering matters</a></li>
   <li><a href="#variance-decomposition" id="toc-variance-decomposition" class="nav-link" data-scroll-target="#variance-decomposition">Variance decomposition</a></li>
+  <li><a href="#beyond-cholesky-structural-vars" id="toc-beyond-cholesky-structural-vars" class="nav-link" data-scroll-target="#beyond-cholesky-structural-vars">Beyond Cholesky: structural VARs</a>
+  <ul class="collapse">
+  <li><a href="#one-residual-series-five-identifications" id="toc-one-residual-series-five-identifications" class="nav-link" data-scroll-target="#one-residual-series-five-identifications">One residual series, five identifications</a></li>
+  <li><a href="#when-theory-says-more-over-identification" id="toc-when-theory-says-more-over-identification" class="nav-link" data-scroll-target="#when-theory-says-more-over-identification">When theory says more: over-identification</a></li>
+  </ul></li>
+  <li><a href="#long-run-restrictions-blanchardquah" id="toc-long-run-restrictions-blanchardquah" class="nav-link" data-scroll-target="#long-run-restrictions-blanchardquah">Long-run restrictions: Blanchard–Quah</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
   <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
@@ -2032,28 +2044,72 @@ B\mathbf{x}_t = \Gamma_0 + \Gamma_1 \mathbf{x}_{t-1} + \cdots + \Gamma_p \mathbf
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        cur <span class="op">=</span> A <span class="op">@</span> cur                          <span class="co"># Phi_i = A^i applied to the shock</span></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> resp</span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">8.6</span>, <span class="fl">3.8</span>), sharey<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, order, lab <span class="kw">in</span> [(axes[<span class="dv">0</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">"Ordering X → Y"</span>),</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>                       (axes[<span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>], <span class="st">"Ordering Y → X"</span>)]:</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> orth_irf(A, Sigma, order)</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, lw<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    ax.plot(<span class="bu">range</span>(H), r[:, <span class="dv">0</span>], <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"response of X"</span>)</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    ax.plot(<span class="bu">range</span>(H), r[:, <span class="dv">1</span>], <span class="st">"s-"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"response of Y"</span>)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    ax.set_title(lab, fontsize<span class="op">=</span><span class="dv">10</span>)<span class="op">;</span> ax.set_xlabel(<span class="st">"horizon (periods after shock)"</span>)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"response to a 1-SD shock"</span>)</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Same VAR, two Cholesky orderings → different impulse responses"</span>, fontsize<span class="op">=</span><span class="fl">11.5</span>)</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>fig, axd <span class="op">=</span> plt.subplot_mosaic([[<span class="st">"L"</span>, <span class="st">"R"</span>], [<span class="st">"B"</span>, <span class="st">"B"</span>]], figsize<span class="op">=</span>(<span class="fl">8.6</span>, <span class="fl">7.4</span>),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>                               gridspec_kw<span class="op">=</span>{<span class="st">"height_ratios"</span>: [<span class="dv">1</span>, <span class="fl">1.05</span>]})</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, order, lab <span class="kw">in</span> [(axd[<span class="st">"L"</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">"Ordering X → Y"</span>),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>                       (axd[<span class="st">"R"</span>], [<span class="dv">1</span>, <span class="dv">0</span>], <span class="st">"Ordering Y → X"</span>)]:</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> orth_irf(A, Sigma, order)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, lw<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    ax.plot(<span class="bu">range</span>(H), r[:, <span class="dv">0</span>], <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"response of X"</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    ax.plot(<span class="bu">range</span>(H), r[:, <span class="dv">1</span>], <span class="st">"s-"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"response of Y"</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    ax.set_title(lab, fontsize<span class="op">=</span><span class="dv">10</span>)<span class="op">;</span> ax.set_xlabel(<span class="st">"horizon (periods after shock)"</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>axd[<span class="st">"R"</span>].sharey(axd[<span class="st">"L"</span>])</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>axd[<span class="st">"L"</span>].set_ylabel(<span class="st">"response to a 1-SD shock"</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Blanchard–Quah: identify shocks from a long-run restriction ----</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">7</span>)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>A_bq <span class="op">=</span> np.array([[<span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.4</span>],          <span class="co"># x = (output growth, second series), stable</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>                 [<span class="fl">0.1</span>, <span class="fl">0.8</span>]])</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>C_lr <span class="op">=</span> np.array([[<span class="fl">1.0</span>, <span class="fl">0.0</span>],           <span class="co"># true long-run multipliers (I - A)^-1 C0:</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>                 [<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">0.6</span>]])         <span class="co"># col 0 supply, col 1 demand (0 = no long-run output effect)</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>C0 <span class="op">=</span> (np.eye(<span class="dv">2</span>) <span class="op">-</span> A_bq) <span class="op">@</span> C_lr         <span class="co"># true impact matrix implied by that restriction</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> <span class="dv">600</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> rng.normal(size<span class="op">=</span>(T <span class="op">+</span> <span class="dv">100</span>, <span class="dv">2</span>))<span class="op">;</span> x <span class="op">=</span> np.zeros((T <span class="op">+</span> <span class="dv">100</span>, <span class="dv">2</span>))</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, T <span class="op">+</span> <span class="dv">100</span>):</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    x[t] <span class="op">=</span> A_bq <span class="op">@</span> x[t <span class="op">-</span> <span class="dv">1</span>] <span class="op">+</span> C0 <span class="op">@</span> eps[t]</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> x[<span class="dv">100</span>:]                            <span class="co"># drop burn-in</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>Xl <span class="op">=</span> np.c_[np.ones(T <span class="op">-</span> <span class="dv">1</span>), x[:<span class="op">-</span><span class="dv">1</span>]]     <span class="co"># OLS equation by equation (same regressors)</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>coef <span class="op">=</span> np.linalg.lstsq(Xl, x[<span class="dv">1</span>:], rcond<span class="op">=</span><span class="va">None</span>)[<span class="dv">0</span>]</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>A_hat <span class="op">=</span> coef[<span class="dv">1</span>:].T</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>e <span class="op">=</span> x[<span class="dv">1</span>:] <span class="op">-</span> Xl <span class="op">@</span> coef</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>Sig <span class="op">=</span> e.T <span class="op">@</span> e <span class="op">/</span> <span class="bu">len</span>(e)</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>F <span class="op">=</span> np.linalg.inv(np.eye(<span class="dv">2</span>) <span class="op">-</span> A_hat)              <span class="co"># long-run multiplier of the reduced form</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> np.linalg.cholesky(F <span class="op">@</span> Sig <span class="op">@</span> F.T)             <span class="co"># lower-triangular long-run impact</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>C0_hat <span class="op">=</span> (np.eye(<span class="dv">2</span>) <span class="op">-</span> A_hat) <span class="op">@</span> P                  <span class="co"># back out the impact matrix</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> C0_hat[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">&lt;</span> <span class="dv">0</span>:                              <span class="co"># BQ fixes zeros, not signs: normalise so</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    C0_hat[:, <span class="dv">1</span>] <span class="op">*=</span> <span class="op">-</span><span class="dv">1</span>                            <span class="co"># demand raises output on impact</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> level_irf(A, C0, H<span class="op">=</span><span class="dv">21</span>):</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>    out, M <span class="op">=</span> np.empty((H, <span class="dv">2</span>)), C0.copy()</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> h <span class="kw">in</span> <span class="bu">range</span>(H):</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>        out[h] <span class="op">=</span> M[<span class="dv">0</span>]<span class="op">;</span> M <span class="op">=</span> A <span class="op">@</span> M                  <span class="co"># row 0 = response of output GROWTH</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.cumsum(out, axis<span class="op">=</span><span class="dv">0</span>)                 <span class="co"># cumulate growth -&gt; output LEVEL</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>true_lvl, est_lvl <span class="op">=</span> level_irf(A_bq, C0), level_irf(A_hat, C0_hat)</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axd[<span class="st">"B"</span>]<span class="op">;</span> hz <span class="op">=</span> np.arange(true_lvl.shape[<span class="dv">0</span>])</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, lw<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>ax.plot(hz, true_lvl[:, <span class="dv">0</span>], <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, lw<span class="op">=</span><span class="fl">1.6</span>)</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>ax.plot(hz, true_lvl[:, <span class="dv">1</span>], <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, lw<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="st">"true response"</span>)</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>ax.plot(hz, est_lvl[:, <span class="dv">0</span>], <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"supply shock (BQ estimate)"</span>)</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>ax.plot(hz, est_lvl[:, <span class="dv">1</span>], <span class="st">"s-"</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"demand shock (BQ estimate)"</span>)</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Blanchard–Quah: output level after each identified shock"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"horizon (periods after shock)"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"output level response"</span>)</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(<span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">21</span>, <span class="dv">2</span>))</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"center right"</span>)</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Cholesky orderings disagree; a long-run restriction pins the shocks down"</span>, fontsize<span class="op">=</span><span class="fl">11.5</span>)</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-irf-ordering" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-irf-ordering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="var-and-impulse-responses_files/figure-html/fig-irf-ordering-output-1.png" width="815" height="363" class="figure-img">
+<img src="var-and-impulse-responses_files/figure-html/fig-irf-ordering-output-1.png" width="816" height="700" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-irf-ordering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Orthogonalized impulse responses from a 2-variable VAR(1), computed by hand, under two Cholesky orderings of the same system (residual correlation 0.8). Each panel shows both variables’ response to a one-standard-deviation shock to the variable ordered FIRST. Note the contemporaneous (h=0) response of the second variable: it is forced to react in one ordering and forced to zero in the other. Same data, same VAR — different causal story, purely from the ordering. This is the Sims–Bernanke warning made visible.
+Figure&nbsp;1: Top: orthogonalized impulse responses from a 2-variable VAR(1), computed by hand, under two Cholesky orderings of the same system (residual correlation 0.8). Each panel shows both variables’ response to a one-standard-deviation shock to the variable ordered FIRST. Note the contemporaneous (h=0) response of the second variable: it is forced to react in one ordering and forced to zero in the other. Same data, same VAR, different causal story, purely from the ordering. This is the Sims–Bernanke warning made visible. Bottom: the Blanchard–Quah alternative, also by hand (our own simulation, not from the sources). We simulate output growth and a stationary second series driven by a ‘supply’ shock with a permanent effect on the output level and a ‘demand’ shock with none, estimate a VAR(1) by OLS on 600 periods, and identify the shocks only from the long-run restriction. The estimated output-level responses (solid) land on the true ones (dashed). Demand lifts output for a few periods and then decays to zero, while supply ratchets output to a new permanent level.
 </figcaption>
 </figure>
 </div>
@@ -2063,6 +2119,143 @@ Figure&nbsp;1: Orthogonalized impulse responses from a 2-variable VAR(1), comput
 <section id="variance-decomposition" class="level2">
 <h2 class="anchored" data-anchor-id="variance-decomposition">Variance decomposition</h2>
 <p>The <strong>forecast-error variance decomposition (FEVD)</strong> is the IRF’s complement: it <strong>partitions the variance of each variable’s forecast error into the share attributable to each structural shock</strong> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. It answers “what % of the movement in <span class="math inline">z</span> comes from <span class="math inline">z</span>’s <em>own</em> shocks versus shocks to other variables?” Typically a variable explains most of its <em>own</em> variance at <strong>short horizons</strong>, with other variables’ shocks growing more important at <strong>longer horizons</strong> as effects diffuse through the system <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. IRFs and FEVD together are Sims’s <strong>“innovation accounting”</strong> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</p>
+</section>
+<section id="beyond-cholesky-structural-vars" class="level2">
+<h2 class="anchored" data-anchor-id="beyond-cholesky-structural-vars">Beyond Cholesky: structural VARs</h2>
+<p>The atheoretical VAR has an awkward ending. It refuses to impose “incredible” restrictions on the dynamics, and then, to draw impulse responses, it imposes an arbitrary recursive ordering on the shocks. Enders puts it plainly: given the “somewhat ad hoc nature” of the Choleski decomposition, “the beauty of the approach seems diminished,” and the VAR has been “criticized as being devoid of any economic content” <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. A <strong>structural VAR</strong> replaces the arbitrary ordering with restrictions taken from economic theory. The lag coefficients are still estimated freely. Theory only constrains how the shocks hit the variables <strong>within the period</strong>.</p>
+<p>Why bother? Setting <span class="math inline">b_{21}=0</span> (the Cholesky choice) <strong>assumes</strong> that a <span class="math inline">y</span> innovation has no same-period effect on <span class="math inline">z</span>. Unless something justifies that, the shocks are misidentified and the impulse responses can be “quite misleading.” Trying every ordering is no escape. A four-variable model already has <span class="math inline">4! = 24</span> of them <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. Sims (1986) and Bernanke (1986) proposed the alternative: model the contemporaneous relations among the innovations with an economic argument <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</p>
+<p><strong>Counting is the whole game.</strong> OLS hands you <span class="math inline">\Sigma</span>, which has only <span class="math inline">(n^2+n)/2</span> distinct elements. The structural model has <span class="math inline">n^2</span> unknowns: <span class="math inline">n^2-n</span> off-diagonal elements of <span class="math inline">B</span> and <span class="math inline">n</span> shock variances. So you need <span class="math inline">(n^2-n)/2</span> extra restrictions. The Cholesky triangle supplies exactly that many, and that is the only reason it “works” <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. But counting is only a <strong>necessary</strong> condition. Because the equations are nonlinear in the <span class="math inline">b_{ij}</span>, there is “no simple rule” that guarantees exact identification <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</p>
+<section id="one-residual-series-five-identifications" class="level3">
+<h3 class="anchored" data-anchor-id="one-residual-series-five-identifications">One residual series, five identifications</h3>
+<p>Enders makes the point with five hand-sized residuals, <span class="math inline">e_1 = (1, -0.5, 0, -1, 0.5)</span> and <span class="math inline">e_2 = (0.5, -1, 0, -0.5, 1)</span>. They give <span class="math inline">\sigma_1^2=\sigma_2^2=0.5</span> and <span class="math inline">\sigma_{12}=0.4</span>, a correlation of <strong>0.8</strong>. That leaves three equations in four unknowns. Each extra restriction below identifies the system, and each gives a <strong>different</strong> set of “structural” shocks <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. (We re-derived every row from <span class="math inline">\Sigma_\varepsilon = B\Sigma B'</span>; they all reproduce.)</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Restriction</th>
+<th>Solution</th>
+<th>What it claims</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Cholesky, <span class="math inline">b_{12}=0</span></td>
+<td><span class="math inline">b_{21}=-0.8</span>; var<span class="math inline">(\varepsilon_1)=0.5</span>, var<span class="math inline">(\varepsilon_2)=0.18</span></td>
+<td>shock 1 moves both variables at once; shock 2 reaches <span class="math inline">x_1</span> only with a lag</td>
+</tr>
+<tr class="even">
+<td>Cholesky, <span class="math inline">b_{21}=0</span></td>
+<td><span class="math inline">b_{12}=-0.8</span>; var<span class="math inline">(\varepsilon_1)=0.18</span>, var<span class="math inline">(\varepsilon_2)=0.5</span></td>
+<td>the reverse: same data, the “typical” shock 1 shrinks from 0.5 to 0.18 in variance</td>
+</tr>
+<tr class="odd">
+<td>Coefficient, <span class="math inline">b_{12}=1</span></td>
+<td><span class="math inline">b_{21}=-1</span>; var 1.8 and 0.2</td>
+<td>a known unit effect, no triangle needed</td>
+</tr>
+<tr class="even">
+<td>Variance, var<span class="math inline">(\varepsilon_1)=1.8</span></td>
+<td><strong>two</strong> solutions: <span class="math inline">b_{12}=1</span> or <span class="math inline">b_{12}=-2.6</span> (<span class="math inline">b_{21}=-5/3</span>, var<span class="math inline">(\varepsilon_2)=5/9</span>)</td>
+<td>variance restrictions always give multiple roots</td>
+</tr>
+<tr class="odd">
+<td>Symmetry, <span class="math inline">b_{12}=b_{21}</span></td>
+<td><strong>two</strong> solutions: <span class="math inline">-0.5</span> (variances 0.225) or <span class="math inline">-2.0</span> (variances 0.9)</td>
+<td>equal cross-effects, common in open-economy models</td>
+</tr>
+</tbody>
+</table>
+<p>The fourth family is <strong>sign restrictions</strong>, a newer line of work (Mountford and Uhlig 2008). Instead of setting coefficients, you require that, say, an oil shock leave GDP unaffected for two quarters, or that a monetary shock raise inflation <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. One more note on the table: with a residual correlation of 0.8, the choice of ordering alone decides which shock looks big. That is the same lesson the figure’s top panels draw from impulse responses.</p>
+</section>
+<section id="when-theory-says-more-over-identification" class="level3">
+<h3 class="anchored" data-anchor-id="when-theory-says-more-over-identification">When theory says more: over-identification</h3>
+<p>Sometimes theory supplies <strong>more</strong> than <span class="math inline">(n^2-n)/2</span> restrictions. Then the restrictions become <strong>testable</strong>. You estimate the unrestricted VAR as usual (restrictions on <span class="math inline">B</span> do not change the lag coefficients). You then maximise the likelihood over the free elements of <span class="math inline">B</span> and <span class="math inline">\Sigma_\varepsilon</span>, and compare restricted and unrestricted fit with a <span class="math inline">\chi^2</span> test whose degrees of freedom equal the number of over-identifying restrictions <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. Sims also warned that the standard errors may be inaccurate, and Waggoner and Zha (1997) showed that the normalisation can matter for inference <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Two over-identified systems">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Two over-identified systems
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>What drove the 2000s grain-price boom?</strong> By December 2011 the World Bank food price index was almost three times its 2000 level. Enders and Holt (2013) fitted a monthly VAR (January 1974 to December 2011) in real energy prices, the real dollar, the real T-bill rate, and real grain prices. The SBC chose 2 lags and general-to-specific chose 11; they used 7, because grain prices could not plausibly adjust in two months. Exact identification needs 6 restrictions. They first tried 9, making the three macro shocks mutually independent. The test rejected it (<span class="math inline">\chi^2 = 13.53</span>, 3 df, <span class="math inline">p = 0.003</span>). Freeing the exchange-rate–interest-rate link (8 restrictions) was not rejected (<span class="math inline">\chi^2 = 4.57</span>, 2 df, <span class="math inline">p = 0.102</span>). Under that scheme, an energy shock leaves grain prices unmoved on impact but has raised them by nearly 40% by six months. A stronger dollar and higher interest rates both push grain prices down <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</li>
+<li><strong>Sims’s money market.</strong> Sims (1986) fitted a six-variable quarterly VAR (1948Q1–1979Q3). A Cholesky ordering produced a money-supply shock with little effect on prices, output, or interest rates, which is hard to square with money demand. He replaced it with <strong>17</strong> zero restrictions, against the <strong>15</strong> needed for exact identification. They give a money-supply equation (<span class="math inline">r_t = 71.20\,m_t +
+\varepsilon_{rt}</span>), a money-demand equation that rises with income and prices and falls with the interest rate, and autonomous investment. Under this scheme, money-supply shocks do move prices, income, and rates <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+<section id="long-run-restrictions-blanchardquah" class="level2">
+<h2 class="anchored" data-anchor-id="long-run-restrictions-blanchardquah">Long-run restrictions: Blanchard–Quah</h2>
+<p>Blanchard and Quah (1989) found a different kind of theory to lean on, and it does not concern the same period at all. Under the natural-rate hypothesis, <strong>demand shocks have no long-run effect on real output</strong>, while <strong>supply (productivity) shocks can move it permanently</strong> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. That single long-run claim is enough to identify a bivariate VAR.</p>
+<p>The set-up takes an I(1) series <span class="math inline">y_t</span>, the log of real GNP, and enters it in first differences. A second, stationary series <span class="math inline">z_t</span> (unemployment in their case) is driven by the same two shocks. Unlike Sims–Bernanke, the shocks are <strong>not</strong> attached to particular equations. They are the economist’s exogenous forces, and both variables respond to both <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. The restriction says the demand shock’s effects on <span class="math inline">\Delta y</span> must <strong>sum to zero</strong> over all horizons, so the output <strong>level</strong> returns to where it was. Three moments of <span class="math inline">\Sigma</span> plus that one long-run zero give four equations for the four impact coefficients <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. The bottom panel of <a href="#fig-irf-ordering" class="quarto-xref">Figure&nbsp;1</a> runs the whole procedure by hand on simulated data. It recovers a supply shock that ratchets output to a new level and a demand shock whose effect on output dies out.</p>
+<p>The method has preconditions. <strong>At least one series must actually have a unit root</strong>, since an I(0) variable has no permanent component to decompose. If <span class="math inline">y_t</span> is stationary, “there is no reason to proceed.” Both series must enter the VAR in stationary form, and the residuals should pass the usual white-noise checks <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. That makes <a href="../../content/04-predictive/unit-roots-and-stationarity.html">unit-root testing</a> the first step, not an optional one.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="What Blanchard and Quah found, and an exchange-rate replay">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What Blanchard and Quah found, and an exchange-rate replay
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><p><strong>Output and unemployment, 1950Q2–1987Q4 (8 lags, four VAR variants).</strong> Demand shocks have <strong>hump-shaped</strong>, mirror-image effects. Output rises as unemployment falls, both peak after about four quarters, and both then return to baseline. Supply shocks have <strong>cumulative</strong> effects on output. Unemployment rises slightly at first, then falls, staying below its long-run level for nearly five years. The variance decomposition (output-growth dummy, detrended unemployment) gives the share of forecast-error variance due to <strong>demand</strong> shocks <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Horizon (quarters)</th>
+<th>1</th>
+<th>4</th>
+<th>12</th>
+<th>40</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Output</td>
+<td>99.0</td>
+<td>97.9</td>
+<td>67.6</td>
+<td>39.3</td>
+</tr>
+<tr class="even">
+<td>Unemployment</td>
+<td>51.9</td>
+<td>80.2</td>
+<td>86.2</td>
+<td>85.6</td>
+</tr>
+</tbody>
+</table>
+<p>Demand dominates short-run output movements, which contradicts the Beveridge–Nelson decomposition. Its share must fall towards zero at long horizons, because its effects are temporary by construction <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</p></li>
+<li><p><strong>Real and nominal exchange rates (Enders and Lee 1997, updated to 2013Q1).</strong> For the Canadian–US dollar, the restriction is that <strong>nominal shocks cannot move the real exchange rate permanently</strong>. If Canada doubles its money supply, prices and the exchange rate both double and the real rate is unchanged. A likelihood-ratio test of 3 lags against 1 gives <span class="math inline">(157-7)(-16.823+16.934) = 16.63</span>, which is significant at 0.034 with 8 df. The AIC agrees, but the SBC picks 1 lag, so a careful researcher would run both <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. The identification changes the story. Under Cholesky, real shocks explain 100% of the real rate’s one-quarter forecast-error variance and 73.93% of the nominal rate’s. Under BQ the shares are 88.31% and <strong>40.11%</strong> <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. A nominal shock moves the real rate by at most about 0.4 standard deviations, and only temporarily, because prices adjust to offset it <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</p></li>
+</ul>
+</div>
+</div>
+<p><strong>Limits.</strong> BQ can identify at most as many distinct shocks as there are variables. Blanchard and Quah’s own propositions for the case of three or more shocks amount to “there are really only two.” So avoid the decomposition when several important disturbances are suspected, or build a model with enough long-run restrictions, as Clarida and Gali (1994) did with three variables <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>. The restrictions are also <strong>quadratic</strong>. They fix zeros but not <strong>signs</strong>: our figure code has to choose the sign of the demand shock by convention. Larger systems can have many solutions, and Taylor (2003) recommends over-identifying restrictions or theory-based normalisations to choose among them <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="VAR hygiene (Enders after Todd 1990)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>VAR hygiene (Enders after Todd 1990)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>VAR results can be fragile. Adding a trend, changing the lag length, dropping a variable, switching from monthly to quarterly data, or swapping one plausible interest-rate measure for another can all change the impulse responses. Todd re-ran Sims’s results with three money measures, two interest rates, and with and without a trend. Enders’s advice is to choose variables carefully, know whether each series is stationary, trend-stationary, or difference-stationary, and try several reasonable specifications. “Maintain a healthy skepticism” when they disagree <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span>.</p>
+</div>
+</div>
 </section>
 <section id="common-pitfalls" class="level2">
 <h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
@@ -2082,6 +2275,8 @@ Figure&nbsp;1: Orthogonalized impulse responses from a 2-variable VAR(1), comput
 <li><strong>Running a VAR on non-stationary levels.</strong> If the series are I(1) and <em>cointegrated</em>, you need a <a href="../../content/04-predictive/cointegration-and-error-correction.html">VECM</a>, not a plain VAR; if I(1) and not cointegrated, model the differences. <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span></li>
 <li><strong>Over-lagging.</strong> Each extra lag costs <span class="math inline">n^2</span> parameters; let AIC/SBC and LR tests discipline <span class="math inline">p</span>. <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span></li>
 <li><strong>Over-interpreting structural shocks from a reduced form.</strong> Reduced-form residuals have no economic meaning until identified. <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span></li>
+<li><strong>Treating the order condition as sufficient.</strong> Having <span class="math inline">(n^2-n)/2</span> restrictions is necessary, not sufficient. Variance and symmetry restrictions produced <strong>two</strong> valid solutions each in Enders’s five-residual example, and nothing in the data picks between them. <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span></li>
+<li><strong>Running Blanchard–Quah on a stationary series.</strong> With no unit root there is no permanent component, so “demand versus supply” is not identified by the long-run zero. Test first. BQ is also limited to as many shocks as variables, so a two-variable BQ in a three-shock world mislabels what it finds. <span class="citation" data-cites="enders_time_series">(<a href="#ref-enders_time_series" role="doc-biblioref">Enders 2014</a>)</span></li>
 </ul>
 </div>
 </div>
@@ -2089,7 +2284,7 @@ Figure&nbsp;1: Orthogonalized impulse responses from a 2-variable VAR(1), comput
 <section id="from-the-sources" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
 <div class="callout callout-style-default callout-note callout-titled" title="Who says what">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2098,10 +2293,10 @@ Figure&nbsp;1: Orthogonalized impulse responses from a 2-variable VAR(1), comput
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Enders, <em>Applied Econometric Time Series</em></strong> — Sims’s “incredible restrictions” critique and the atheoretical VAR; the <strong>structural vs reduced-form</strong> systems and why reduced-form errors are correlated composites; <strong>OLS equation-by-equation</strong> estimation and lag-length selection (AIC/SBC, the LR statistic); <strong>Granger causality</strong> as predictive precedence with the joint <span class="math inline">F</span>-test and <strong>block exogeneity</strong>; <strong>impulse responses</strong> from the <strong>VMA</strong> representation <span class="math inline">\mathbf{x}_t=\mu+\sum\Phi_i\epsilon_{t-i}</span>; the <strong>identification</strong> problem, the <strong>Choleski</strong> recursive ordering with <span class="math inline">(n^2-n)/2</span> restrictions, and why <strong>ordering matters</strong> (Sims–Bernanke); the <strong>FEVD</strong> and “innovation accounting.”</li>
+<li><strong>Enders, <em>Applied Econometric Time Series</em></strong> — Sims’s “incredible restrictions” critique and the atheoretical VAR; the <strong>structural vs reduced-form</strong> systems and why reduced-form errors are correlated composites; <strong>OLS equation-by-equation</strong> estimation and lag-length selection (AIC/SBC, the LR statistic); <strong>Granger causality</strong> as predictive precedence with the joint <span class="math inline">F</span>-test and <strong>block exogeneity</strong>; <strong>impulse responses</strong> from the <strong>VMA</strong> representation <span class="math inline">\mathbf{x}_t=\mu+\sum\Phi_i\epsilon_{t-i}</span>; the <strong>identification</strong> problem, the <strong>Choleski</strong> recursive ordering with <span class="math inline">(n^2-n)/2</span> restrictions, and why <strong>ordering matters</strong> (Sims–Bernanke); the <strong>FEVD</strong> and “innovation accounting.” <strong>Ch 5 §§10–15 (structural VARs):</strong> the “devoid of economic content” critique; why <span class="math inline">b_{21}=0</span> is an assumption; 4! = 24 orderings; the <span class="math inline">(n^2+n)/2</span> vs <span class="math inline">n^2</span> count and “no simple rules” for sufficiency; the <strong>five-residual worked example</strong> under Cholesky, coefficient, variance, symmetry, and sign restrictions (Mountford–Uhlig); the over-identification steps and <span class="math inline">\chi^2</span> test (Waggoner–Zha normalisation caveat); <strong>Enders–Holt grain prices</strong> (13.53 → 4.57) and <strong>Sims’s 17-restriction money market</strong>; the <strong>Blanchard–Quah</strong> decomposition (natural-rate long-run zero, four restrictions, the unit-root precondition, BQ’s 1950–87 hump shapes and 99.0 → 39.3 output FEVD); <strong>Enders–Lee</strong> real/nominal exchange rates (Cholesky vs BQ shares); BQ’s limits (number of shocks, unidentified signs, Clarida–Gali, Taylor); Todd’s robustness checklist. <em>We re-derived every row of the five-residual example and the quoted <span class="math inline">\chi^2</span> <span class="math inline">p</span>-values; the source’s ADF passage for the real exchange rate (t = −2.59) is garbled and is not used here.</em></li>
 </ul>
 </div>
 </div>
@@ -2113,6 +2308,18 @@ Figure&nbsp;1: Orthogonalized impulse responses from a 2-variable VAR(1), comput
 <p><strong>From VAR to VMA.</strong> Write the VAR(1) <span class="math inline">\mathbf{x}_t = A\mathbf{x}_{t-1} + \mathbf{e}_t</span> (demeaned). Back- substituting, <span class="math inline">\mathbf{x}_t = \sum_{i=0}^{\infty} A^i \mathbf{e}_{t-i}</span>, so the reduced-form impulse matrices are <span class="math inline">A^i</span>. Stationarity requires every eigenvalue of <span class="math inline">A</span> to lie <strong>inside the unit circle</strong>, which makes <span class="math inline">A^i \to 0</span> and the responses decay. A VAR(<span class="math inline">p</span>) is recast as a VAR(1) in <em>companion form</em> to apply the same result.</p>
 <p><strong>Orthogonalizing the shocks.</strong> With reduced-form covariance <span class="math inline">\Sigma = \mathbb{E}[\mathbf{e}_t\mathbf{e}_t']</span>, the Cholesky factor <span class="math inline">L</span> (lower-triangular, <span class="math inline">LL'=\Sigma</span>) defines orthogonal shocks <span class="math inline">\mathbf{u}_t = L^{-1}\mathbf{e}_t</span> with identity covariance. The <strong>orthogonalized IRF</strong> to a unit shock in the <span class="math inline">k</span>-th orthogonal innovation is <span class="math inline">\Phi_i L\,\mathbf{s}_k</span> (with <span class="math inline">\mathbf{s}_k</span> the <span class="math inline">k</span>-th unit vector). Triangularity is the recursive assumption — variable 1 reacts to none of the others contemporaneously, and so on — which is exactly why a different ordering yields a different <span class="math inline">L</span> and different responses.</p>
 <p><strong>Counting restrictions.</strong> Identifying <span class="math inline">n^2</span> structural parameters from the <span class="math inline">n(n+1)/2</span> distinct elements of <span class="math inline">\Sigma</span> requires <span class="math inline">(n^2 - n)/2</span> extra restrictions; a recursive (triangular) <span class="math inline">B</span> supplies exactly that many, which is why Cholesky <em>just</em> identifies the system.</p>
+<p><strong>The structural map and the two-variable count.</strong> With <span class="math inline">B\mathbf{x}_t=\Gamma_0+\Gamma_1\mathbf{x}_{t-1}+
+\boldsymbol\varepsilon_t</span> and <span class="math inline">\mathbf{e}_t=B^{-1}\boldsymbol\varepsilon_t</span>, the variances satisfy <span class="math display">
+\Sigma_\varepsilon = B\,\Sigma\,B' \quad\Longleftrightarrow\quad \Sigma = B^{-1}\Sigma_\varepsilon (B^{-1})'.
+</span> For <span class="math inline">n=2</span> with <span class="math inline">B=\begin{pmatrix}1&amp;b_{12}\\ b_{21}&amp;1\end{pmatrix}</span> and Enders’s <span class="math inline">\Sigma=\begin{pmatrix}0.5&amp;0.4\\0.4&amp;0.5\end{pmatrix}</span>, multiplying out gives <span class="math display">
+\text{var}(\varepsilon_1)=0.5+0.8b_{12}+0.5b_{12}^2,\qquad
+0=0.4+0.5b_{12}+0.5b_{21}+0.4b_{12}b_{21},\qquad
+\text{var}(\varepsilon_2)=0.5+0.8b_{21}+0.5b_{21}^2 .
+</span> That is three equations in four unknowns. Setting <span class="math inline">b_{12}=0</span> forces <span class="math inline">b_{21}=-0.8</span> and var<span class="math inline">(\varepsilon_2)=0.18</span>. Under the symmetry restriction <span class="math inline">b_{12}=b_{21}=b</span>, the middle equation becomes the quadratic <span class="math inline">0.4b^2+b+0.4=0</span>, with roots <span class="math inline">b=-0.5</span> and <span class="math inline">b=-2</span>: two observationally equivalent structures.</p>
+<p><strong>Testing over-identification.</strong> The concentrated log likelihood is <span class="math inline">-\tfrac T2\ln|\Sigma|</span> up to constants, so restricted and unrestricted fits are compared through <span class="math inline">T(\ln|\Sigma_R|-\ln|\Sigma|)</span>, which is asymptotically <span class="math inline">\chi^2_R</span> with <span class="math inline">R</span> = the number of restrictions beyond <span class="math inline">(n^2-n)/2</span>. (Enders writes the statistic loosely as <span class="math inline">|\Sigma_R|-|\Sigma|</span>; the log-determinant form is the likelihood-ratio statistic used for lag-length tests above.)</p>
+<p><strong>Blanchard–Quah in matrix form.</strong> Let <span class="math inline">\mathbf{x}_t=(\Delta y_t,z_t)'</span> follow the VAR <span class="math inline">\mathbf{x}_t=A(L)\mathbf{x}_{t-1}+\mathbf{e}_t</span> and let <span class="math inline">\mathbf{e}_t=C_0\boldsymbol\varepsilon_t</span> with <span class="math inline">\text{var}(\boldsymbol\varepsilon_t)=I</span>. The cumulated (long-run) response of <span class="math inline">\mathbf{x}</span> to the shocks is <span class="math display">
+C(1)=[I-A(1)]^{-1}C_0,\qquad A(1)=\textstyle\sum_k A_k .
+</span> The BQ restriction is that the demand column of <span class="math inline">C(1)</span> has a zero in the output row. Ordering the permanent shock first, <span class="math inline">C(1)</span> is lower-triangular, and <span class="math inline">C(1)C(1)'=[I-A(1)]^{-1}\Sigma\,[I-A(1)]^{-1\,\prime}</span>. So <span class="math inline">C(1)</span> is the Cholesky factor of the <strong>long-run</strong> covariance, and <span class="math inline">C_0=[I-A(1)]\,C(1)</span>. That is the four-line computation in the figure code. Enders’s scalar version of the fourth restriction, <span class="math inline">c_{11}(0)[1-\sum a_{22}(k)]+c_{21}(0)\sum a_{12}(k)=0</span>, is the corresponding element of <span class="math inline">[I-A(1)]^{-1}C_0</span> written out (up to the determinant, which is nonzero). Cholesky factors are unique only up to column signs, which is the formal version of “BQ does not identify signs.”</p>
 </div>
 </section>
 <section id="connections" class="level2 unnumbered">
@@ -2121,6 +2328,8 @@ Figure&nbsp;1: Orthogonalized impulse responses from a 2-variable VAR(1), comput
 <li><strong>Builds on:</strong> <a href="../../content/04-predictive/arima-forecasting.html">ARIMA</a> (the univariate AR generalised to a system), <a href="../../content/04-predictive/unit-roots-and-stationarity.html">unit roots</a> (VARs need stationary inputs), and <a href="../../content/03-regression/multiple-regression.html">multiple regression</a> (each equation is an OLS).</li>
 <li><strong>Single-equation cousin:</strong> <a href="../../content/04-predictive/distributed-lags-and-interventions.html">distributed lags, interventions &amp; transfer functions</a> — the one-input model whose <em>no-feedback</em> assumption (Enders’s thermostat) is what the VAR abandons.</li>
 <li><strong>Leads to:</strong> <a href="../../content/04-predictive/cointegration-and-error-correction.html">cointegration &amp; error-correction</a> — the VECM is a VAR for cointegrated I(1) series.</li>
+<li><strong>Identification, the same problem elsewhere:</strong> <a href="../../content/05-causal-inference/simultaneous-equations.html">simultaneous equations</a> — the order and rank conditions there are the static version of the structural VAR’s counting problem; <a href="../../content/05-causal-inference/instrumental-variables.html">instrumental variables</a> — exclusion restrictions are to IV what zero restrictions on <span class="math inline">B</span> are to a structural VAR.</li>
+<li><strong>Permanent vs transitory:</strong> <a href="../../content/04-predictive/unit-roots-and-stationarity.html">unit roots</a> — Blanchard–Quah needs one, and the trend-versus-difference question decides whether a shock can be permanent at all.</li>
 <li><strong>Contrasts with:</strong> <a href="../../content/05-causal-inference/index.html">causal inference</a> — Granger causality is <em>predictive</em>, not the structural causality of potential outcomes and DAGs.</li>
 </ul>
 
@@ -2703,7 +2912,7 @@ Enders, Walter. 2014. <em>Applied Econometric Time Series</em>. 4th ed. Wiley.
 <span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-irf-ordering</span></span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Orthogonalized impulse responses from a 2-variable VAR(1), computed by hand, under two Cholesky orderings of the same system (residual correlation 0.8). Each panel shows both variables' response to a one-standard-deviation shock to the variable ordered FIRST. Note the contemporaneous (h=0) response of the second variable: it is forced to react in one ordering and forced to zero in the other. Same data, same VAR — different causal story, purely from the ordering. This is the Sims–Bernanke warning made visible."</span></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Top: orthogonalized impulse responses from a 2-variable VAR(1), computed by hand, under two Cholesky orderings of the same system (residual correlation 0.8). Each panel shows both variables' response to a one-standard-deviation shock to the variable ordered FIRST. Note the contemporaneous (h=0) response of the second variable: it is forced to react in one ordering and forced to zero in the other. Same data, same VAR, different causal story, purely from the ordering. This is the Sims–Bernanke warning made visible. Bottom: the Blanchard–Quah alternative, also by hand (our own simulation, not from the sources). We simulate output growth and a stationary second series driven by a 'supply' shock with a permanent effect on the output level and a 'demand' shock with none, estimate a VAR(1) by OLS on 600 periods, and identify the shocks only from the long-run restriction. The estimated output-level responses (solid) land on the true ones (dashed). Demand lifts output for a few periods and then decays to zero, while supply ratchets output to a new permanent level."</span></span>
 <span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
 <span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
 <span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a></span>
@@ -2728,93 +2937,342 @@ Enders, Walter. 2014. <em>Applied Econometric Time Series</em>. 4th ed. Wiley.
 <span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>        cur <span class="op">=</span> A <span class="op">@</span> cur                          <span class="co"># Phi_i = A^i applied to the shock</span></span>
 <span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> resp</span>
 <span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">8.6</span>, <span class="fl">3.8</span>), sharey<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, order, lab <span class="kw">in</span> [(axes[<span class="dv">0</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">"Ordering X → Y"</span>),</span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>                       (axes[<span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>], <span class="st">"Ordering Y → X"</span>)]:</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> orth_irf(A, Sigma, order)</span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>    ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, lw<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>    ax.plot(<span class="bu">range</span>(H), r[:, <span class="dv">0</span>], <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"response of X"</span>)</span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>    ax.plot(<span class="bu">range</span>(H), r[:, <span class="dv">1</span>], <span class="st">"s-"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"response of Y"</span>)</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>    ax.set_title(lab, fontsize<span class="op">=</span><span class="dv">10</span>)<span class="op">;</span> ax.set_xlabel(<span class="st">"horizon (periods after shock)"</span>)</span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>    ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"response to a 1-SD shock"</span>)</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Same VAR, two Cholesky orderings → different impulse responses"</span>, fontsize<span class="op">=</span><span class="fl">11.5</span>)</span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a><span class="fu">## Variance decomposition</span></span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>The **forecast-error variance decomposition (FEVD)** is the IRF's complement: it **partitions the variance</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>of each variable's forecast error into the share attributable to each structural shock**</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. It answers "what % of the movement in $z$ comes from $z$'s *own* shocks versus</span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>shocks to other variables?" Typically a variable explains most of its *own* variance at **short horizons**,</span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>with other variables' shocks growing more important at **longer horizons** as effects diffuse through the</span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>system <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. IRFs and FEVD together are Sims's **"innovation accounting"**</span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading Granger causality as causation.** It is predictive precedence; a significant $F$-test is not a</span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>  causal license. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring the Cholesky ordering.** Highly correlated residuals make IRFs/FEVD ordering-dependent;</span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>  justify the ordering or report robustness across orderings. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Running a VAR on non-stationary levels.** If the series are I(1) and *cointegrated*, you need a</span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">VECM</span><span class="co">](cointegration-and-error-correction.qmd)</span>, not a plain VAR; if I(1) and not cointegrated, model the</span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>  differences. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Over-lagging.** Each extra lag costs $n^2$ parameters; let AIC/SBC and LR tests discipline $p$.</span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Over-interpreting structural shocks from a reduced form.** Reduced-form residuals have no economic</span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>  meaning until identified. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>fig, axd <span class="op">=</span> plt.subplot_mosaic([[<span class="st">"L"</span>, <span class="st">"R"</span>], [<span class="st">"B"</span>, <span class="st">"B"</span>]], figsize<span class="op">=</span>(<span class="fl">8.6</span>, <span class="fl">7.4</span>),</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>                               gridspec_kw<span class="op">=</span>{<span class="st">"height_ratios"</span>: [<span class="dv">1</span>, <span class="fl">1.05</span>]})</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, order, lab <span class="kw">in</span> [(axd[<span class="st">"L"</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">"Ordering X → Y"</span>),</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>                       (axd[<span class="st">"R"</span>], [<span class="dv">1</span>, <span class="dv">0</span>], <span class="st">"Ordering Y → X"</span>)]:</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> orth_irf(A, Sigma, order)</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>    ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, lw<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>    ax.plot(<span class="bu">range</span>(H), r[:, <span class="dv">0</span>], <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"response of X"</span>)</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>    ax.plot(<span class="bu">range</span>(H), r[:, <span class="dv">1</span>], <span class="st">"s-"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"response of Y"</span>)</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>    ax.set_title(lab, fontsize<span class="op">=</span><span class="dv">10</span>)<span class="op">;</span> ax.set_xlabel(<span class="st">"horizon (periods after shock)"</span>)</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>    ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>axd[<span class="st">"R"</span>].sharey(axd[<span class="st">"L"</span>])</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>axd[<span class="st">"L"</span>].set_ylabel(<span class="st">"response to a 1-SD shock"</span>)</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Blanchard–Quah: identify shocks from a long-run restriction ----</span></span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">7</span>)</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>A_bq <span class="op">=</span> np.array([[<span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.4</span>],          <span class="co"># x = (output growth, second series), stable</span></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>                 [<span class="fl">0.1</span>, <span class="fl">0.8</span>]])</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>C_lr <span class="op">=</span> np.array([[<span class="fl">1.0</span>, <span class="fl">0.0</span>],           <span class="co"># true long-run multipliers (I - A)^-1 C0:</span></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>                 [<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">0.6</span>]])         <span class="co"># col 0 supply, col 1 demand (0 = no long-run output effect)</span></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>C0 <span class="op">=</span> (np.eye(<span class="dv">2</span>) <span class="op">-</span> A_bq) <span class="op">@</span> C_lr         <span class="co"># true impact matrix implied by that restriction</span></span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> <span class="dv">600</span></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> rng.normal(size<span class="op">=</span>(T <span class="op">+</span> <span class="dv">100</span>, <span class="dv">2</span>))<span class="op">;</span> x <span class="op">=</span> np.zeros((T <span class="op">+</span> <span class="dv">100</span>, <span class="dv">2</span>))</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, T <span class="op">+</span> <span class="dv">100</span>):</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>    x[t] <span class="op">=</span> A_bq <span class="op">@</span> x[t <span class="op">-</span> <span class="dv">1</span>] <span class="op">+</span> C0 <span class="op">@</span> eps[t]</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> x[<span class="dv">100</span>:]                            <span class="co"># drop burn-in</span></span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>Xl <span class="op">=</span> np.c_[np.ones(T <span class="op">-</span> <span class="dv">1</span>), x[:<span class="op">-</span><span class="dv">1</span>]]     <span class="co"># OLS equation by equation (same regressors)</span></span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>coef <span class="op">=</span> np.linalg.lstsq(Xl, x[<span class="dv">1</span>:], rcond<span class="op">=</span><span class="va">None</span>)[<span class="dv">0</span>]</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>A_hat <span class="op">=</span> coef[<span class="dv">1</span>:].T</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>e <span class="op">=</span> x[<span class="dv">1</span>:] <span class="op">-</span> Xl <span class="op">@</span> coef</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>Sig <span class="op">=</span> e.T <span class="op">@</span> e <span class="op">/</span> <span class="bu">len</span>(e)</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>F <span class="op">=</span> np.linalg.inv(np.eye(<span class="dv">2</span>) <span class="op">-</span> A_hat)              <span class="co"># long-run multiplier of the reduced form</span></span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> np.linalg.cholesky(F <span class="op">@</span> Sig <span class="op">@</span> F.T)             <span class="co"># lower-triangular long-run impact</span></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>C0_hat <span class="op">=</span> (np.eye(<span class="dv">2</span>) <span class="op">-</span> A_hat) <span class="op">@</span> P                  <span class="co"># back out the impact matrix</span></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> C0_hat[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">&lt;</span> <span class="dv">0</span>:                              <span class="co"># BQ fixes zeros, not signs: normalise so</span></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>    C0_hat[:, <span class="dv">1</span>] <span class="op">*=</span> <span class="op">-</span><span class="dv">1</span>                            <span class="co"># demand raises output on impact</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> level_irf(A, C0, H<span class="op">=</span><span class="dv">21</span>):</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>    out, M <span class="op">=</span> np.empty((H, <span class="dv">2</span>)), C0.copy()</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> h <span class="kw">in</span> <span class="bu">range</span>(H):</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>        out[h] <span class="op">=</span> M[<span class="dv">0</span>]<span class="op">;</span> M <span class="op">=</span> A <span class="op">@</span> M                  <span class="co"># row 0 = response of output GROWTH</span></span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.cumsum(out, axis<span class="op">=</span><span class="dv">0</span>)                 <span class="co"># cumulate growth -&gt; output LEVEL</span></span>
 <span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Enders, *Applied Econometric Time Series*** — Sims's "incredible restrictions" critique and the</span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>  atheoretical VAR; the **structural vs reduced-form** systems and why reduced-form errors are correlated</span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>  composites; **OLS equation-by-equation** estimation and lag-length selection (AIC/SBC, the LR statistic);</span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>  **Granger causality** as predictive precedence with the joint $F$-test and **block exogeneity**;</span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>  **impulse responses** from the **VMA** representation $\mathbf{x}_t=\mu+\sum\Phi_i\epsilon_{t-i}$; the</span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>  **identification** problem, the **Choleski** recursive ordering with $(n^2-n)/2$ restrictions, and why</span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>  **ordering matters** (Sims–Bernanke); the **FEVD** and "innovation accounting."</span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>**From VAR to VMA.** Write the VAR(1) $\mathbf{x}_t = A\mathbf{x}_{t-1} + \mathbf{e}_t$ (demeaned). Back-</span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>substituting, $\mathbf{x}_t = \sum_{i=0}^{\infty} A^i \mathbf{e}_{t-i}$, so the reduced-form impulse</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>matrices are $A^i$. Stationarity requires every eigenvalue of $A$ to lie **inside the unit circle**, which</span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>makes $A^i \to 0$ and the responses decay. A VAR($p$) is recast as a VAR(1) in *companion form* to apply</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>the same result.</span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>**Orthogonalizing the shocks.** With reduced-form covariance $\Sigma = \mathbb{E}<span class="co">[</span><span class="ot">\mathbf{e}_t\mathbf{e}_t'</span><span class="co">]</span>$,</span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>the Cholesky factor $L$ (lower-triangular, $LL'=\Sigma$) defines orthogonal shocks</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>$\mathbf{u}_t = L^{-1}\mathbf{e}_t$ with identity covariance. The **orthogonalized IRF** to a unit shock in</span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>the $k$-th orthogonal innovation is $\Phi_i L\,\mathbf{s}_k$ (with $\mathbf{s}_k$ the $k$-th unit vector).</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>Triangularity is the recursive assumption — variable 1 reacts to none of the others contemporaneously, and</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>so on — which is exactly why a different ordering yields a different $L$ and different responses.</span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>**Counting restrictions.** Identifying $n^2$ structural parameters from the $n(n+1)/2$ distinct elements of</span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>$\Sigma$ requires $(n^2 - n)/2$ extra restrictions; a recursive (triangular) $B$ supplies exactly that</span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>many, which is why Cholesky *just* identifies the system.</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">ARIMA</span><span class="co">](arima-forecasting.qmd)</span> (the univariate AR generalised to a system),</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">unit roots</span><span class="co">](unit-roots-and-stationarity.qmd)</span> (VARs need stationary inputs), and</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](../03-regression/multiple-regression.qmd)</span> (each equation is an OLS).</span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Single-equation cousin:** <span class="co">[</span><span class="ot">distributed lags, interventions &amp; transfer functions</span><span class="co">](distributed-lags-and-interventions.qmd)</span></span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>  — the one-input model whose *no-feedback* assumption (Enders's thermostat) is what the VAR abandons.</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">cointegration &amp; error-correction</span><span class="co">](cointegration-and-error-correction.qmd)</span> — the VECM is a</span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>  VAR for cointegrated I(1) series.</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Contrasts with:** <span class="co">[</span><span class="ot">causal inference</span><span class="co">](../05-causal-inference/index.qmd)</span> — Granger causality is</span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>  *predictive*, not the structural causality of potential outcomes and DAGs.</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>true_lvl, est_lvl <span class="op">=</span> level_irf(A_bq, C0), level_irf(A_hat, C0_hat)</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axd[<span class="st">"B"</span>]<span class="op">;</span> hz <span class="op">=</span> np.arange(true_lvl.shape[<span class="dv">0</span>])</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, lw<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>ax.plot(hz, true_lvl[:, <span class="dv">0</span>], <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, lw<span class="op">=</span><span class="fl">1.6</span>)</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>ax.plot(hz, true_lvl[:, <span class="dv">1</span>], <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, lw<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="st">"true response"</span>)</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>ax.plot(hz, est_lvl[:, <span class="dv">0</span>], <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"supply shock (BQ estimate)"</span>)</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>ax.plot(hz, est_lvl[:, <span class="dv">1</span>], <span class="st">"s-"</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, lw<span class="op">=</span><span class="dv">2</span>, ms<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"demand shock (BQ estimate)"</span>)</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Blanchard–Quah: output level after each identified shock"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"horizon (periods after shock)"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"output level response"</span>)</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(<span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">21</span>, <span class="dv">2</span>))</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"center right"</span>)</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Cholesky orderings disagree; a long-run restriction pins the shocks down"</span>, fontsize<span class="op">=</span><span class="fl">11.5</span>)</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a><span class="fu">## Variance decomposition</span></span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>The **forecast-error variance decomposition (FEVD)** is the IRF's complement: it **partitions the variance</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>of each variable's forecast error into the share attributable to each structural shock**</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. It answers "what % of the movement in $z$ comes from $z$'s *own* shocks versus</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>shocks to other variables?" Typically a variable explains most of its *own* variance at **short horizons**,</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>with other variables' shocks growing more important at **longer horizons** as effects diffuse through the</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>system <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. IRFs and FEVD together are Sims's **"innovation accounting"**</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a><span class="fu">## Beyond Cholesky: structural VARs</span></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>The atheoretical VAR has an awkward ending. It refuses to impose "incredible" restrictions on the</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>dynamics, and then, to draw impulse responses, it imposes an arbitrary recursive ordering on the shocks.</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>Enders puts it plainly: given the "somewhat ad hoc nature" of the Choleski decomposition, "the beauty of</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>the approach seems diminished," and the VAR has been "criticized as being devoid of any economic</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>content" <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. A **structural VAR** replaces the arbitrary ordering with restrictions</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>taken from economic theory. The lag coefficients are still estimated freely. Theory only constrains how</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>the shocks hit the variables **within the period**.</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>Why bother? Setting $b_{21}=0$ (the Cholesky choice) **assumes** that a $y$ innovation has no same-period</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>effect on $z$. Unless something justifies that, the shocks are misidentified and the impulse responses can</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>be "quite misleading." Trying every ordering is no escape. A four-variable model already has</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>$4! = 24$ of them <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. Sims (1986) and Bernanke (1986) proposed the alternative: model</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>the contemporaneous relations among the innovations with an economic argument <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>**Counting is the whole game.** OLS hands you $\Sigma$, which has only $(n^2+n)/2$ distinct elements. The</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>structural model has $n^2$ unknowns: $n^2-n$ off-diagonal elements of $B$ and $n$ shock variances. So</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>you need $(n^2-n)/2$ extra restrictions. The Cholesky triangle supplies exactly that many, and that is</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>the only reason it "works" <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. But counting is only a **necessary** condition. Because</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>the equations are nonlinear in the $b_{ij}$, there is "no simple rule" that guarantees exact</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>identification <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="fu">### One residual series, five identifications</span></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>Enders makes the point with five hand-sized residuals, $e_1 = (1, -0.5, 0, -1, 0.5)$ and</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>$e_2 = (0.5, -1, 0, -0.5, 1)$. They give $\sigma_1^2=\sigma_2^2=0.5$ and $\sigma_{12}=0.4$, a correlation of</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>**0.8**. That leaves three equations in four unknowns. Each extra restriction below identifies the system,</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>and each gives a **different** set of "structural" shocks <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. (We re-derived every</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>row from $\Sigma_\varepsilon = B\Sigma B'$; they all reproduce.)</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Restriction <span class="pp">|</span> Solution <span class="pp">|</span> What it claims <span class="pp">|</span></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Cholesky, $b_{12}=0$ <span class="pp">|</span> $b_{21}=-0.8$; var$(\varepsilon_1)=0.5$, var$(\varepsilon_2)=0.18$ <span class="pp">|</span> shock 1 moves both variables at once; shock 2 reaches $x_1$ only with a lag <span class="pp">|</span></span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Cholesky, $b_{21}=0$ <span class="pp">|</span> $b_{12}=-0.8$; var$(\varepsilon_1)=0.18$, var$(\varepsilon_2)=0.5$ <span class="pp">|</span> the reverse: same data, the "typical" shock 1 shrinks from 0.5 to 0.18 in variance <span class="pp">|</span></span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Coefficient, $b_{12}=1$ <span class="pp">|</span> $b_{21}=-1$; var 1.8 and 0.2 <span class="pp">|</span> a known unit effect, no triangle needed <span class="pp">|</span></span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Variance, var$(\varepsilon_1)=1.8$ <span class="pp">|</span> **two** solutions: $b_{12}=1$ or $b_{12}=-2.6$ ($b_{21}=-5/3$, var$(\varepsilon_2)=5/9$) <span class="pp">|</span> variance restrictions always give multiple roots <span class="pp">|</span></span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Symmetry, $b_{12}=b_{21}$ <span class="pp">|</span> **two** solutions: $-0.5$ (variances 0.225) or $-2.0$ (variances 0.9) <span class="pp">|</span> equal cross-effects, common in open-economy models <span class="pp">|</span></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>The fourth family is **sign restrictions**, a newer line of work (Mountford and Uhlig 2008). Instead of</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>setting coefficients, you require that, say, an oil shock leave GDP unaffected for two quarters, or that</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>a monetary shock raise inflation <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. One more note on the table: with a residual</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>correlation of 0.8, the choice of ordering alone decides which shock looks big. That is the same lesson</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>the figure's top panels draw from impulse responses.</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a><span class="fu">### When theory says more: over-identification</span></span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>Sometimes theory supplies **more** than $(n^2-n)/2$ restrictions. Then the restrictions become</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>**testable**. You estimate the unrestricted VAR as usual (restrictions on $B$ do not change the lag</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>coefficients). You then maximise the likelihood over the free elements of $B$ and $\Sigma_\varepsilon$, and</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>compare restricted and unrestricted fit with a $\chi^2$ test whose degrees of freedom equal the number of</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>over-identifying restrictions <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. Sims also warned that the standard errors may be</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>inaccurate, and Waggoner and Zha (1997) showed that the normalisation can matter for inference</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Two over-identified systems"}</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What drove the 2000s grain-price boom?** By December 2011 the World Bank food price index was</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>  almost three times its 2000 level. Enders and Holt (2013) fitted a monthly VAR (January 1974 to</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>  December 2011) in real energy prices, the real dollar, the real T-bill rate, and real grain prices.</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>  The SBC chose 2 lags and general-to-specific chose 11; they used 7, because grain prices could not</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>  plausibly adjust in two months. Exact identification needs 6 restrictions. They first tried 9, making</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>  the three macro shocks mutually independent. The test rejected it ($\chi^2 = 13.53$, 3 df,</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>  $p = 0.003$). Freeing the exchange-rate–interest-rate link (8 restrictions) was not rejected</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>  ($\chi^2 = 4.57$, 2 df, $p = 0.102$). Under that scheme, an energy shock leaves grain prices unmoved</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>  on impact but has raised them by nearly 40% by six months. A stronger dollar and higher interest</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>  rates both push grain prices down <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Sims's money market.** Sims (1986) fitted a six-variable quarterly VAR (1948Q1–1979Q3). A Cholesky</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>  ordering produced a money-supply shock with little effect on prices, output, or interest rates, which</span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>  is hard to square with money demand. He replaced it with **17** zero restrictions, against the</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>  **15** needed for exact identification. They give a money-supply equation ($r_t = 71.20\,m_t +</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>  \varepsilon_{rt}$), a money-demand equation that rises with income and prices and falls with the</span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>  interest rate, and autonomous investment. Under this scheme, money-supply shocks do move prices,</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>  income, and rates <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a><span class="fu">## Long-run restrictions: Blanchard–Quah</span></span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>Blanchard and Quah (1989) found a different kind of theory to lean on, and it does not concern the</span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>same period at all. Under the natural-rate hypothesis, **demand shocks have no long-run effect on real</span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>output**, while **supply (productivity) shocks can move it permanently** <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. That</span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>single long-run claim is enough to identify a bivariate VAR.</span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>The set-up takes an I(1) series $y_t$, the log of real GNP, and enters it in first differences. A second,</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>stationary series $z_t$ (unemployment in their case) is driven by the same two shocks. Unlike</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>Sims–Bernanke, the shocks are **not** attached to particular equations. They are the economist's</span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>exogenous forces, and both variables respond to both <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. The restriction says the</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>demand shock's effects on $\Delta y$ must **sum to zero** over all horizons, so the output **level**</span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>returns to where it was. Three moments of $\Sigma$ plus that one long-run zero give four equations</span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>for the four impact coefficients <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. The bottom panel of</span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>@fig-irf-ordering runs the whole procedure by hand on simulated data. It recovers a supply shock that</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>ratchets output to a new level and a demand shock whose effect on output dies out.</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>The method has preconditions. **At least one series must actually have a unit root**, since an I(0)</span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>variable has no permanent component to decompose. If $y_t$ is stationary, "there is no reason to</span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a>proceed." Both series must enter the VAR in stationary form, and the residuals should pass the usual</span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>white-noise checks <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. That makes <span class="co">[</span><span class="ot">unit-root testing</span><span class="co">](unit-roots-and-stationarity.qmd)</span></span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>the first step, not an optional one.</span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="What Blanchard and Quah found, and an exchange-rate replay"}</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Output and unemployment, 1950Q2–1987Q4 (8 lags, four VAR variants).** Demand shocks have</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>  **hump-shaped**, mirror-image effects. Output rises as unemployment falls, both peak after about four</span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>  quarters, and both then return to baseline. Supply shocks have **cumulative** effects on output.</span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>  Unemployment rises slightly at first, then falls, staying below its long-run level for nearly five</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>  years. The variance decomposition (output-growth dummy, detrended unemployment) gives the share of</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>  forecast-error variance due to **demand** shocks <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>:</span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>  | Horizon (quarters) | 1 | 4 | 12 | 40 |</span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>  |---|---|---|---|---|</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a>  | Output | 99.0 | 97.9 | 67.6 | 39.3 |</span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a>  | Unemployment | 51.9 | 80.2 | 86.2 | 85.6 |</span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>  Demand dominates short-run output movements, which contradicts the Beveridge–Nelson decomposition. Its</span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>  share must fall towards zero at long horizons, because its effects are temporary by construction</span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Real and nominal exchange rates (Enders and Lee 1997, updated to 2013Q1).** For the Canadian–US</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>  dollar, the restriction is that **nominal shocks cannot move the real exchange rate permanently**. If</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>  Canada doubles its money supply, prices and the exchange rate both double and the real rate is</span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>  unchanged. A likelihood-ratio test of 3 lags against 1 gives $(157-7)(-16.823+16.934) = 16.63$, which is</span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a>  significant at 0.034 with 8 df. The AIC agrees, but the SBC picks 1 lag, so a careful researcher</span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a>  would run both <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. The identification changes the story. Under Cholesky, real</span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a>  shocks explain 100% of the real rate's one-quarter forecast-error variance and 73.93% of the nominal</span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a>  rate's. Under BQ the shares are 88.31% and **40.11%** <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. A nominal shock moves the</span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a>  real rate by at most about 0.4 standard deviations, and only temporarily, because prices adjust to</span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>  offset it <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>**Limits.** BQ can identify at most as many distinct shocks as there are variables. Blanchard and Quah's</span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a>own propositions for the case of three or more shocks amount to "there are really only two." So avoid</span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>the decomposition when several important disturbances are suspected, or build a model with enough</span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>long-run restrictions, as Clarida and Gali (1994) did with three variables <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>. The</span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>restrictions are also **quadratic**. They fix zeros but not **signs**: our figure code has to choose the</span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a>sign of the demand shock by convention. Larger systems can have many solutions, and Taylor (2003)</span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>recommends over-identifying restrictions or theory-based normalisations to choose among them</span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="VAR hygiene (Enders after Todd 1990)"}</span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a>VAR results can be fragile. Adding a trend, changing the lag length, dropping a variable, switching from</span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a>monthly to quarterly data, or swapping one plausible interest-rate measure for another can all change</span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a>the impulse responses. Todd re-ran Sims's results with three money measures, two interest rates, and</span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a>with and without a trend. Enders's advice is to choose variables carefully, know whether each series is</span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a>stationary, trend-stationary, or difference-stationary, and try several reasonable specifications.</span>
+<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a>"Maintain a healthy skepticism" when they disagree <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span>.</span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading Granger causality as causation.** It is predictive precedence; a significant $F$-test is not a</span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a>  causal license. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring the Cholesky ordering.** Highly correlated residuals make IRFs/FEVD ordering-dependent;</span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a>  justify the ordering or report robustness across orderings. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Running a VAR on non-stationary levels.** If the series are I(1) and *cointegrated*, you need a</span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">VECM</span><span class="co">](cointegration-and-error-correction.qmd)</span>, not a plain VAR; if I(1) and not cointegrated, model the</span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a>  differences. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Over-lagging.** Each extra lag costs $n^2$ parameters; let AIC/SBC and LR tests discipline $p$.</span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Over-interpreting structural shocks from a reduced form.** Reduced-form residuals have no economic</span>
+<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a>  meaning until identified. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating the order condition as sufficient.** Having $(n^2-n)/2$ restrictions is necessary, not</span>
+<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a>  sufficient. Variance and symmetry restrictions produced **two** valid solutions each in Enders's</span>
+<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a>  five-residual example, and nothing in the data picks between them. <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Running Blanchard–Quah on a stationary series.** With no unit root there is no permanent component,</span>
+<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a>  so "demand versus supply" is not identified by the long-run zero. Test first. BQ is also limited to as</span>
+<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a>  many shocks as variables, so a two-variable BQ in a three-shock world mislabels what it finds.</span>
+<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@enders_time_series</span><span class="co">]</span></span>
+<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Enders, *Applied Econometric Time Series*** — Sims's "incredible restrictions" critique and the</span>
+<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a>  atheoretical VAR; the **structural vs reduced-form** systems and why reduced-form errors are correlated</span>
+<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a>  composites; **OLS equation-by-equation** estimation and lag-length selection (AIC/SBC, the LR statistic);</span>
+<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a>  **Granger causality** as predictive precedence with the joint $F$-test and **block exogeneity**;</span>
+<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a>  **impulse responses** from the **VMA** representation $\mathbf{x}_t=\mu+\sum\Phi_i\epsilon_{t-i}$; the</span>
+<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a>  **identification** problem, the **Choleski** recursive ordering with $(n^2-n)/2$ restrictions, and why</span>
+<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a>  **ordering matters** (Sims–Bernanke); the **FEVD** and "innovation accounting." **Ch 5 §§10–15</span>
+<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a>  (structural VARs):** the "devoid of economic content" critique; why $b_{21}=0$ is an assumption; 4! = 24</span>
+<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a>  orderings; the $(n^2+n)/2$ vs $n^2$ count and "no simple rules" for sufficiency; the **five-residual</span>
+<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>  worked example** under Cholesky, coefficient, variance, symmetry, and sign restrictions (Mountford–Uhlig);</span>
+<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a>  the over-identification steps and $\chi^2$ test (Waggoner–Zha normalisation caveat); **Enders–Holt</span>
+<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a>  grain prices** (13.53 → 4.57) and **Sims's 17-restriction money market**; the **Blanchard–Quah**</span>
+<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a>  decomposition (natural-rate long-run zero, four restrictions, the unit-root precondition, BQ's</span>
+<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a>  1950–87 hump shapes and 99.0 → 39.3 output FEVD); **Enders–Lee** real/nominal exchange rates</span>
+<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a>  (Cholesky vs BQ shares); BQ's limits (number of shocks, unidentified signs, Clarida–Gali, Taylor);</span>
+<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a>  Todd's robustness checklist. *We re-derived every row of the five-residual example and the quoted</span>
+<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a>  $\chi^2$ $p$-values; the source's ADF passage for the real exchange rate (t = −2.59) is garbled and is</span>
+<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a>  not used here.*</span>
+<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a>**From VAR to VMA.** Write the VAR(1) $\mathbf{x}_t = A\mathbf{x}_{t-1} + \mathbf{e}_t$ (demeaned). Back-</span>
+<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a>substituting, $\mathbf{x}_t = \sum_{i=0}^{\infty} A^i \mathbf{e}_{t-i}$, so the reduced-form impulse</span>
+<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a>matrices are $A^i$. Stationarity requires every eigenvalue of $A$ to lie **inside the unit circle**, which</span>
+<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a>makes $A^i \to 0$ and the responses decay. A VAR($p$) is recast as a VAR(1) in *companion form* to apply</span>
+<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a>the same result.</span>
+<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a>**Orthogonalizing the shocks.** With reduced-form covariance $\Sigma = \mathbb{E}<span class="co">[</span><span class="ot">\mathbf{e}_t\mathbf{e}_t'</span><span class="co">]</span>$,</span>
+<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a>the Cholesky factor $L$ (lower-triangular, $LL'=\Sigma$) defines orthogonal shocks</span>
+<span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a>$\mathbf{u}_t = L^{-1}\mathbf{e}_t$ with identity covariance. The **orthogonalized IRF** to a unit shock in</span>
+<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a>the $k$-th orthogonal innovation is $\Phi_i L\,\mathbf{s}_k$ (with $\mathbf{s}_k$ the $k$-th unit vector).</span>
+<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a>Triangularity is the recursive assumption — variable 1 reacts to none of the others contemporaneously, and</span>
+<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a>so on — which is exactly why a different ordering yields a different $L$ and different responses.</span>
+<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a>**Counting restrictions.** Identifying $n^2$ structural parameters from the $n(n+1)/2$ distinct elements of</span>
+<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a>$\Sigma$ requires $(n^2 - n)/2$ extra restrictions; a recursive (triangular) $B$ supplies exactly that</span>
+<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a>many, which is why Cholesky *just* identifies the system.</span>
+<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a>**The structural map and the two-variable count.** With $B\mathbf{x}_t=\Gamma_0+\Gamma_1\mathbf{x}_{t-1}+</span>
+<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a>\boldsymbol\varepsilon_t$ and $\mathbf{e}_t=B^{-1}\boldsymbol\varepsilon_t$, the variances satisfy</span>
+<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a>\Sigma_\varepsilon = B\,\Sigma\,B' \quad\Longleftrightarrow\quad \Sigma = B^{-1}\Sigma_\varepsilon (B^{-1})'.</span>
+<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-413"><a href="#cb2-413" aria-hidden="true" tabindex="-1"></a>For $n=2$ with $B=\begin{pmatrix}1&amp;b_{12}<span class="sc">\\</span> b_{21}&amp;1\end{pmatrix}$ and Enders's $\Sigma=\begin{pmatrix}0.5&amp;0.4<span class="sc">\\</span>0.4&amp;0.5\end{pmatrix}$,</span>
+<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a>multiplying out gives</span>
+<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a>\text{var}(\varepsilon_1)=0.5+0.8b_{12}+0.5b_{12}^2,\qquad</span>
+<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a>0=0.4+0.5b_{12}+0.5b_{21}+0.4b_{12}b_{21},\qquad</span>
+<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a>\text{var}(\varepsilon_2)=0.5+0.8b_{21}+0.5b_{21}^2 .</span>
+<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a>That is three equations in four unknowns. Setting $b_{12}=0$ forces $b_{21}=-0.8$ and</span>
+<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a>var$(\varepsilon_2)=0.18$. Under the symmetry restriction $b_{12}=b_{21}=b$, the middle equation becomes the</span>
+<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a>quadratic $0.4b^2+b+0.4=0$, with roots $b=-0.5$ and $b=-2$: two observationally equivalent structures.</span>
+<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-424"><a href="#cb2-424" aria-hidden="true" tabindex="-1"></a>**Testing over-identification.** The concentrated log likelihood is $-\tfrac T2\ln|\Sigma|$ up to</span>
+<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a>constants, so restricted and unrestricted fits are compared through $T(\ln|\Sigma_R|-\ln|\Sigma|)$, which is</span>
+<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a>asymptotically $\chi^2_R$ with $R$ = the number of restrictions beyond $(n^2-n)/2$. (Enders writes the</span>
+<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a>statistic loosely as $|\Sigma_R|-|\Sigma|$; the log-determinant form is the likelihood-ratio statistic used</span>
+<span id="cb2-428"><a href="#cb2-428" aria-hidden="true" tabindex="-1"></a>for lag-length tests above.)</span>
+<span id="cb2-429"><a href="#cb2-429" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a>**Blanchard–Quah in matrix form.** Let $\mathbf{x}_t=(\Delta y_t,z_t)'$ follow the VAR</span>
+<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a>$\mathbf{x}_t=A(L)\mathbf{x}_{t-1}+\mathbf{e}_t$ and let $\mathbf{e}_t=C_0\boldsymbol\varepsilon_t$ with</span>
+<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a>$\text{var}(\boldsymbol\varepsilon_t)=I$. The cumulated (long-run) response of $\mathbf{x}$ to the shocks is</span>
+<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a>C(1)=<span class="co">[</span><span class="ot">I-A(1)</span><span class="co">]</span>^{-1}C_0,\qquad A(1)=\textstyle\sum_k A_k .</span>
+<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-436"><a href="#cb2-436" aria-hidden="true" tabindex="-1"></a>The BQ restriction is that the demand column of $C(1)$ has a zero in the output row. Ordering the</span>
+<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a>permanent shock first, $C(1)$ is lower-triangular, and $C(1)C(1)'=<span class="co">[</span><span class="ot">I-A(1)</span><span class="co">]</span>^{-1}\Sigma\,<span class="co">[</span><span class="ot">I-A(1)</span><span class="co">]</span>^{-1\,\prime}$.</span>
+<span id="cb2-438"><a href="#cb2-438" aria-hidden="true" tabindex="-1"></a>So $C(1)$ is the Cholesky factor of the **long-run** covariance, and</span>
+<span id="cb2-439"><a href="#cb2-439" aria-hidden="true" tabindex="-1"></a>$C_0=<span class="co">[</span><span class="ot">I-A(1)</span><span class="co">]</span>\,C(1)$. That is the four-line computation in the figure code. Enders's scalar</span>
+<span id="cb2-440"><a href="#cb2-440" aria-hidden="true" tabindex="-1"></a>version of the fourth restriction, $c_{11}(0)<span class="co">[</span><span class="ot">1-\sum a_{22}(k)</span><span class="co">]</span>+c_{21}(0)\sum a_{12}(k)=0$, is the</span>
+<span id="cb2-441"><a href="#cb2-441" aria-hidden="true" tabindex="-1"></a>corresponding element of $<span class="co">[</span><span class="ot">I-A(1)</span><span class="co">]</span>^{-1}C_0$ written out (up to the determinant, which is nonzero).</span>
+<span id="cb2-442"><a href="#cb2-442" aria-hidden="true" tabindex="-1"></a>Cholesky factors are unique only up to column signs, which is the formal version of "BQ does not</span>
+<span id="cb2-443"><a href="#cb2-443" aria-hidden="true" tabindex="-1"></a>identify signs."</span>
+<span id="cb2-444"><a href="#cb2-444" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-445"><a href="#cb2-445" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-446"><a href="#cb2-446" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-447"><a href="#cb2-447" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-448"><a href="#cb2-448" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-449"><a href="#cb2-449" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">ARIMA</span><span class="co">](arima-forecasting.qmd)</span> (the univariate AR generalised to a system),</span>
+<span id="cb2-450"><a href="#cb2-450" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">unit roots</span><span class="co">](unit-roots-and-stationarity.qmd)</span> (VARs need stationary inputs), and</span>
+<span id="cb2-451"><a href="#cb2-451" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](../03-regression/multiple-regression.qmd)</span> (each equation is an OLS).</span>
+<span id="cb2-452"><a href="#cb2-452" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Single-equation cousin:** <span class="co">[</span><span class="ot">distributed lags, interventions &amp; transfer functions</span><span class="co">](distributed-lags-and-interventions.qmd)</span></span>
+<span id="cb2-453"><a href="#cb2-453" aria-hidden="true" tabindex="-1"></a>  — the one-input model whose *no-feedback* assumption (Enders's thermostat) is what the VAR abandons.</span>
+<span id="cb2-454"><a href="#cb2-454" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">cointegration &amp; error-correction</span><span class="co">](cointegration-and-error-correction.qmd)</span> — the VECM is a</span>
+<span id="cb2-455"><a href="#cb2-455" aria-hidden="true" tabindex="-1"></a>  VAR for cointegrated I(1) series.</span>
+<span id="cb2-456"><a href="#cb2-456" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Identification, the same problem elsewhere:** <span class="co">[</span><span class="ot">simultaneous equations</span><span class="co">](../05-causal-inference/simultaneous-equations.qmd)</span></span>
+<span id="cb2-457"><a href="#cb2-457" aria-hidden="true" tabindex="-1"></a>  — the order and rank conditions there are the static version of the structural VAR's counting</span>
+<span id="cb2-458"><a href="#cb2-458" aria-hidden="true" tabindex="-1"></a>  problem; <span class="co">[</span><span class="ot">instrumental variables</span><span class="co">](../05-causal-inference/instrumental-variables.qmd)</span> — exclusion</span>
+<span id="cb2-459"><a href="#cb2-459" aria-hidden="true" tabindex="-1"></a>  restrictions are to IV what zero restrictions on $B$ are to a structural VAR.</span>
+<span id="cb2-460"><a href="#cb2-460" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Permanent vs transitory:** <span class="co">[</span><span class="ot">unit roots</span><span class="co">](unit-roots-and-stationarity.qmd)</span> — Blanchard–Quah needs one,</span>
+<span id="cb2-461"><a href="#cb2-461" aria-hidden="true" tabindex="-1"></a>  and the trend-versus-difference question decides whether a shock can be permanent at all.</span>
+<span id="cb2-462"><a href="#cb2-462" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Contrasts with:** <span class="co">[</span><span class="ot">causal inference</span><span class="co">](../05-causal-inference/index.qmd)</span> — Granger causality is</span>
+<span id="cb2-463"><a href="#cb2-463" aria-hidden="true" tabindex="-1"></a>  *predictive*, not the structural causality of potential outcomes and DAGs.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

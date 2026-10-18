@@ -912,6 +912,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/text-as-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text as Data: Tokens, Sentiment &amp; Topic Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../content/04-predictive/interpretability-and-ml.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Interpretability &amp; ML for Social Science</span></a>
   </div>
@@ -1923,6 +1929,10 @@ window.Quarto = {
   <li><a href="#principal-component-analysis" id="toc-principal-component-analysis" class="nav-link" data-scroll-target="#principal-component-analysis">Principal component analysis</a></li>
   <li><a href="#clustering-k-means" id="toc-clustering-k-means" class="nav-link" data-scroll-target="#clustering-k-means">Clustering: k-means</a></li>
   <li><a href="#hierarchical-clustering" id="toc-hierarchical-clustering" class="nav-link" data-scroll-target="#hierarchical-clustering">Hierarchical clustering</a></li>
+  <li><a href="#before-you-cluster-scaling-dominant-variables-and-mixed-data" id="toc-before-you-cluster-scaling-dominant-variables-and-mixed-data" class="nav-link" data-scroll-target="#before-you-cluster-scaling-dominant-variables-and-mixed-data">Before you cluster: scaling, dominant variables, and mixed data</a>
+  <ul class="collapse">
+  <li><a href="#gowers-distance" id="toc-gowers-distance" class="nav-link" data-scroll-target="#gowers-distance">Gower’s distance</a></li>
+  </ul></li>
   <li><a href="#practical-cautions" id="toc-practical-cautions" class="nav-link" data-scroll-target="#practical-cautions">Practical cautions</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
@@ -2013,55 +2023,90 @@ window.Quarto = {
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">1</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fig, (axL, axR) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">7.8</span>, <span class="fl">3.9</span>))</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Left: PCA via eigendecomposition of the covariance ----</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> np.array([[<span class="fl">1.0</span>, <span class="fl">0.8</span>], [<span class="fl">0.8</span>, <span class="fl">1.0</span>]])</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>L <span class="op">=</span> np.linalg.cholesky(cov)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> (rng.normal(size<span class="op">=</span>(<span class="dv">300</span>, <span class="dv">2</span>)) <span class="op">@</span> L.T) <span class="op">*</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.7</span>])</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>Xc <span class="op">=</span> X <span class="op">-</span> X.mean(<span class="dv">0</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> np.cov(Xc.T)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>vals, vecs <span class="op">=</span> np.linalg.eigh(C)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> np.argsort(vals)[::<span class="op">-</span><span class="dv">1</span>]<span class="op">;</span> vals, vecs <span class="op">=</span> vals[order], vecs[:, order]</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>axL.scatter(Xc[:, <span class="dv">0</span>], Xc[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, c <span class="kw">in</span> <span class="bu">zip</span>(<span class="bu">range</span>(<span class="dv">2</span>), [<span class="st">"#e8531d"</span>, <span class="st">"#8a8a7e"</span>]):</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> vecs[:, k] <span class="op">*</span> np.sqrt(vals[k]) <span class="op">*</span> <span class="fl">2.5</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    axL.annotate(<span class="st">""</span>, xy<span class="op">=</span>v, xytext<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>), arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-|&gt;"</span>, color<span class="op">=</span>c, lw<span class="op">=</span><span class="fl">2.4</span>))</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="op">*</span>(vecs[:, <span class="dv">0</span>]<span class="op">*</span>np.sqrt(vals[<span class="dv">0</span>])<span class="op">*</span><span class="fl">2.7</span>), <span class="st">"PC1"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="op">*</span>(vecs[:, <span class="dv">1</span>]<span class="op">*</span>np.sqrt(vals[<span class="dv">1</span>])<span class="op">*</span><span class="fl">2.9</span>), <span class="st">"PC2"</span>, color<span class="op">=</span><span class="st">"#3a3a33"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>axL.set_title(<span class="st">"PCA: directions of maximal variance"</span>)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>axL.set_xlabel(<span class="st">"x₁"</span>)<span class="op">;</span> axL.set_ylabel(<span class="st">"x₂"</span>)<span class="op">;</span> axL.set_aspect(<span class="st">"equal"</span>)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Right: k-means by hand (assign / recompute) ----</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>centers0 <span class="op">=</span> np.array([[<span class="op">-</span><span class="fl">2.5</span>, <span class="dv">0</span>], [<span class="fl">2.5</span>, <span class="fl">0.5</span>], [<span class="dv">0</span>, <span class="fl">3.0</span>]])</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>pts <span class="op">=</span> np.vstack([rng.normal(c, <span class="fl">0.7</span>, (<span class="dv">60</span>, <span class="dv">2</span>)) <span class="cf">for</span> c <span class="kw">in</span> centers0])</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> <span class="dv">3</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>cent <span class="op">=</span> pts[rng.choice(<span class="bu">len</span>(pts), K, replace<span class="op">=</span><span class="va">False</span>)]</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> ((pts[:, <span class="va">None</span>, :] <span class="op">-</span> cent[<span class="va">None</span>, :, :])<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>(<span class="dv">2</span>)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    lab <span class="op">=</span> d.argmin(<span class="dv">1</span>)</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    newc <span class="op">=</span> np.array([pts[lab <span class="op">==</span> k].mean(<span class="dv">0</span>) <span class="cf">if</span> np.<span class="bu">any</span>(lab <span class="op">==</span> k) <span class="cf">else</span> cent[k] <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> np.allclose(newc, cent): <span class="cf">break</span></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    cent <span class="op">=</span> newc</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Clusters are nominal -- no cluster outranks another -- so this uses the</span></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co"># brand categorical register (--cat-*), not the emphasis ramp.</span></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#e8531d"</span>, <span class="st">"#2b7a74"</span>, <span class="st">"#3f5c78"</span>]</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K):</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    axR.scatter(pts[lab <span class="op">==</span> k, <span class="dv">0</span>], pts[lab <span class="op">==</span> k, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">12</span>, color<span class="op">=</span>colors[k], alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    axR.scatter(<span class="op">*</span>cent[k], marker<span class="op">=</span><span class="st">"X"</span>, s<span class="op">=</span><span class="dv">140</span>, color<span class="op">=</span>colors[k], edgecolors<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">1.5</span>, zorder<span class="op">=</span><span class="dv">5</span>)</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>axR.set_title(<span class="st">"k-means clusters (K=3) with centroids"</span>)</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>axR.set_xlabel(<span class="st">"x₁"</span>)<span class="op">;</span> axR.set_ylabel(<span class="st">"x₂"</span>)</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fig, axd <span class="op">=</span> plt.subplot_mosaic([[<span class="st">"L"</span>, <span class="st">"R"</span>], [<span class="st">"raw"</span>, <span class="st">"z"</span>]], figsize<span class="op">=</span>(<span class="fl">7.8</span>, <span class="fl">7.6</span>))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>axL, axR <span class="op">=</span> axd[<span class="st">"L"</span>], axd[<span class="st">"R"</span>]</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Left: PCA via eigendecomposition of the covariance ----</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> np.array([[<span class="fl">1.0</span>, <span class="fl">0.8</span>], [<span class="fl">0.8</span>, <span class="fl">1.0</span>]])</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>L <span class="op">=</span> np.linalg.cholesky(cov)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> (rng.normal(size<span class="op">=</span>(<span class="dv">300</span>, <span class="dv">2</span>)) <span class="op">@</span> L.T) <span class="op">*</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.7</span>])</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>Xc <span class="op">=</span> X <span class="op">-</span> X.mean(<span class="dv">0</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> np.cov(Xc.T)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>vals, vecs <span class="op">=</span> np.linalg.eigh(C)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> np.argsort(vals)[::<span class="op">-</span><span class="dv">1</span>]<span class="op">;</span> vals, vecs <span class="op">=</span> vals[order], vecs[:, order]</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># PC arrows stay neutral (ink / grey) so that colour in this figure means only "which cluster".</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>axL.scatter(Xc[:, <span class="dv">0</span>], Xc[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, c <span class="kw">in</span> <span class="bu">zip</span>(<span class="bu">range</span>(<span class="dv">2</span>), [<span class="st">"#161613"</span>, <span class="st">"#5e5e54"</span>]):</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> vecs[:, k] <span class="op">*</span> np.sqrt(vals[k]) <span class="op">*</span> <span class="fl">2.5</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    axL.annotate(<span class="st">""</span>, xy<span class="op">=</span>v, xytext<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>), arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-|&gt;"</span>, color<span class="op">=</span>c, lw<span class="op">=</span><span class="fl">2.4</span>))</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="op">*</span>(vecs[:, <span class="dv">0</span>]<span class="op">*</span>np.sqrt(vals[<span class="dv">0</span>])<span class="op">*</span><span class="fl">2.7</span>), <span class="st">"PC1"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="op">*</span>(vecs[:, <span class="dv">1</span>]<span class="op">*</span>np.sqrt(vals[<span class="dv">1</span>])<span class="op">*</span><span class="fl">2.9</span>), <span class="st">"PC2"</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>axL.set_title(<span class="st">"PCA: directions of maximal variance"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>axL.set_xlabel(<span class="st">"x₁"</span>)<span class="op">;</span> axL.set_ylabel(<span class="st">"x₂"</span>)<span class="op">;</span> axL.set_aspect(<span class="st">"equal"</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Right: k-means by hand (assign / recompute) ----</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>centers0 <span class="op">=</span> np.array([[<span class="op">-</span><span class="fl">2.5</span>, <span class="dv">0</span>], [<span class="fl">2.5</span>, <span class="fl">0.5</span>], [<span class="dv">0</span>, <span class="fl">3.0</span>]])</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>pts <span class="op">=</span> np.vstack([rng.normal(c, <span class="fl">0.7</span>, (<span class="dv">60</span>, <span class="dv">2</span>)) <span class="cf">for</span> c <span class="kw">in</span> centers0])</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>cent <span class="op">=</span> pts[rng.choice(<span class="bu">len</span>(pts), K, replace<span class="op">=</span><span class="va">False</span>)]</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> ((pts[:, <span class="va">None</span>, :] <span class="op">-</span> cent[<span class="va">None</span>, :, :])<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>(<span class="dv">2</span>)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    lab <span class="op">=</span> d.argmin(<span class="dv">1</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    newc <span class="op">=</span> np.array([pts[lab <span class="op">==</span> k].mean(<span class="dv">0</span>) <span class="cf">if</span> np.<span class="bu">any</span>(lab <span class="op">==</span> k) <span class="cf">else</span> cent[k] <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> np.allclose(newc, cent): <span class="cf">break</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    cent <span class="op">=</span> newc</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Clusters are nominal -- no cluster outranks another -- so this uses the</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="co"># brand categorical register (--cat-*), not the emphasis ramp.</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#e8531d"</span>, <span class="st">"#2b7a74"</span>, <span class="st">"#3f5c78"</span>]</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, mk <span class="kw">in</span> <span class="bu">zip</span>(<span class="bu">range</span>(K), [<span class="st">"o"</span>, <span class="st">"s"</span>, <span class="st">"^"</span>]):</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    axR.scatter(pts[lab <span class="op">==</span> k, <span class="dv">0</span>], pts[lab <span class="op">==</span> k, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">12</span>, color<span class="op">=</span>colors[k], marker<span class="op">=</span>mk, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    axR.scatter(<span class="op">*</span>cent[k], marker<span class="op">=</span><span class="st">"X"</span>, s<span class="op">=</span><span class="dv">140</span>, color<span class="op">=</span>colors[k], edgecolors<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">1.5</span>, zorder<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>axR.set_title(<span class="st">"k-means clusters (K=3) with centroids"</span>)</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>axR.set_xlabel(<span class="st">"x₁"</span>)<span class="op">;</span> axR.set_ylabel(<span class="st">"x₂"</span>)</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Bottom: the same k-means on raw units vs z-scores ----</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>r2 <span class="op">=</span> np.random.default_rng(<span class="dv">3</span>)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">120</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>dti <span class="op">=</span> np.concatenate([r2.normal(m, <span class="fl">3.0</span>, n) <span class="cf">for</span> m <span class="kw">in</span> [<span class="dv">10</span>, <span class="dv">26</span>]])   <span class="co"># two real groups, by DTI</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>inc <span class="op">=</span> np.exp(r2.normal(np.log(<span class="dv">60000</span>), <span class="fl">0.4</span>, <span class="dv">2</span> <span class="op">*</span> n))                 <span class="co"># income: no group signal</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>truth <span class="op">=</span> np.repeat([<span class="dv">0</span>, <span class="dv">1</span>], n)</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>X2 <span class="op">=</span> np.c_[inc, dti]</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> kmeans(Z, K, nstart<span class="op">=</span><span class="dv">10</span>, seed<span class="op">=</span><span class="dv">0</span>):</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> np.random.default_rng(seed)<span class="op">;</span> best <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(nstart):                                        <span class="co"># keep the lowest-WSS restart</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> Z[r.choice(<span class="bu">len</span>(Z), K, replace<span class="op">=</span><span class="va">False</span>)]</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>            lab <span class="op">=</span> ((Z[:, <span class="va">None</span>] <span class="op">-</span> c[<span class="va">None</span>]) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(<span class="dv">2</span>).argmin(<span class="dv">1</span>)</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>            nc <span class="op">=</span> np.array([Z[lab <span class="op">==</span> k].mean(<span class="dv">0</span>) <span class="cf">if</span> np.<span class="bu">any</span>(lab <span class="op">==</span> k) <span class="cf">else</span> c[k] <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> np.allclose(nc, c): <span class="cf">break</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>            c <span class="op">=</span> nc</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>        wss <span class="op">=</span> ((Z <span class="op">-</span> c[lab]) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>()</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> best <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> wss <span class="op">&lt;</span> best[<span class="dv">0</span>]: best <span class="op">=</span> (wss, lab)</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best[<span class="dv">1</span>]</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, Z, name <span class="kw">in</span> [(<span class="st">"raw"</span>, X2, <span class="st">"raw units"</span>),</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>                     (<span class="st">"z"</span>, (X2 <span class="op">-</span> X2.mean(<span class="dv">0</span>)) <span class="op">/</span> X2.std(<span class="dv">0</span>), <span class="st">"z-scores"</span>)]:</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>    lab <span class="op">=</span> kmeans(Z, <span class="dv">2</span>)</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>    agree <span class="op">=</span> <span class="bu">max</span>(np.mean(lab <span class="op">==</span> truth), np.mean(lab <span class="op">!=</span> truth))    <span class="co"># best label matching</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>    ax <span class="op">=</span> axd[key]</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k, (col, mk) <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">zip</span>([<span class="st">"#e8531d"</span>, <span class="st">"#2b7a74"</span>], [<span class="st">"o"</span>, <span class="st">"s"</span>])):</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X2[lab <span class="op">==</span> k, <span class="dv">0</span>] <span class="op">/</span> <span class="dv">1000</span>, X2[lab <span class="op">==</span> k, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">12</span>, color<span class="op">=</span>col, marker<span class="op">=</span>mk, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"k-means on </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>agree<span class="sc">:.1%}</span><span class="ss"> match true groups"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"annual income ($ thousands)"</span>)</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>axd[<span class="st">"raw"</span>].set_ylabel(<span class="st">"debt-to-income ratio (%)"</span>)</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>axd[<span class="st">"z"</span>].sharey(axd[<span class="st">"raw"</span>])</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-pca-kmeans" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-pca-kmeans-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="unsupervised-learning_files/figure-html/fig-pca-kmeans-output-1.png" width="739" height="365" class="figure-img">
+<img src="unsupervised-learning_files/figure-html/fig-pca-kmeans-output-1.png" width="739" height="718" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pca-kmeans-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Left: PCA on correlated 2-D data. The first principal component (red) points along the direction of maximal variance — the line closest to the cloud; the second (orange) is orthogonal, capturing the rest. PCA simply rotates to these axes. Right: k-means with K=3 on three blobs. Points are coloured by their assigned cluster and each centroid (✕) is the mean of its members; the algorithm iterates assign-and-recompute until the partition stabilises.
+Figure&nbsp;1: Top left: PCA on correlated 2-D data. The first principal component (black) points along the direction of maximal variance, the line closest to the cloud. The second (grey) is orthogonal and captures the rest. PCA simply rotates to these axes. Top right: k-means with K=3 on three blobs. Points are coloured by their assigned cluster, and each centroid (✕) is the mean of its members. The algorithm iterates assign-and-recompute until the partition stabilises. Bottom: why scaling comes first (our own simulation, in the spirit of Bruce &amp; Bruce’s loan example). 240 borrowers form two real groups that differ only in debt-to-income ratio. Income, in dollars, carries no group information. Bottom left: k-means (K=2, 10 restarts) on the raw units cuts along income, because income’s SD is about 27,000 against about 9 for DTI. The two clusters are unequal in size and match the true groups no better than a coin. Bottom right: the same algorithm on z-scores recovers the DTI groups almost perfectly. Both panels are plotted in original units, and each panel title reports the measured agreement.
 </figcaption>
 </figure>
 </div>
@@ -2078,6 +2123,79 @@ Figure&nbsp;1: Left: PCA on correlated 2-D data. The first principal component (
 <li><strong>Centroid</strong> — distance between cluster centroids.</li>
 </ul>
 <p>The payoff: <strong>one dendrogram yields any number of clusters</strong> — just <strong>cut the tree</strong> at a chosen height. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span> (Bruce &amp; Bruce cluster the <strong>S&amp;P 500</strong>: energy, financial, and consumer stocks fall into distinct subtrees — sectors emerging with no labels. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>)</p>
+</section>
+<section id="before-you-cluster-scaling-dominant-variables-and-mixed-data" class="level2">
+<h2 class="anchored" data-anchor-id="before-you-cluster-scaling-dominant-variables-and-mixed-data">Before you cluster: scaling, dominant variables, and mixed data</h2>
+<p>Every method above starts from a <strong>distance</strong>, and a distance has no idea what your units mean. That is the main practical difference from regression and classification, where scaling usually does not matter (k-nearest neighbours is the exception). Unsupervised methods “generally require that the data be appropriately scaled” <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>. Three situations come up again and again.</p>
+<p><strong>1. Variables on wildly different scales.</strong> Bruce &amp; Bruce run k-means (<span class="math inline">K=4</span>) on six features of defaulted loans: loan amount, annual income, revolving balance, open accounts, debt-to-income, and revolving utilisation. On the raw numbers, <strong>income and revolving balance dominate</strong>. The clusters have very unequal sizes (13,902 / 1,192 / 7,525 / 52) and are essentially income bands, the smallest one centred on an income near $490,000. After converting every variable to <strong>z-scores</strong>, the sizes even out (7,355 / 6,294 / 3,713 / 5,309). The clusters are no longer just income and balance bands; in the rescaled table they also separate on utilisation (31% to 78%), open accounts, and DTI <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>. (The book’s text calls the tiny cluster “Cluster 1 … 55 members”; its own table shows cluster 4 with 52.) The same logic applies to PCA. Standardising first is the same as running PCA on the <strong>correlation</strong> matrix rather than the covariance matrix <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>. The bottom row of <a href="#fig-pca-kmeans" class="quarto-xref">Figure&nbsp;1</a> rebuilds the effect from scratch.</p>
+<p><strong>2. Variables on the same scale where a few still dominate.</strong> Scaling is not only about units. Add Alphabet and Amazon to a PCA of S&amp;P 500 daily price changes and the scree plot shows two giant components. Their loadings are almost entirely those two stocks (GOOGL 0.781 / 0.609, AMZN 0.593 / −0.792; the other stocks printed load 0.08 or less), because those two stocks’ price movements dominate the variability <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>. You can keep them, rescale, or analyse them separately. “There is no ‘correct’ approach, and the treatment depends on the application” <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>.</p>
+<p><strong>3. Mixed numeric and categorical data.</strong> A categorical variable has to become numbers first: ranks for an ordered factor, 0/1 dummies for an unordered one. Then the trouble starts <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>. Bruce &amp; Bruce z-score DTI, payment-to-income, home-ownership dummies, and a no-public-record flag, then run k-means with <span class="math inline">K=4</span>. The four clusters turn out to be <strong>proxies for the factor levels</strong>: one is all owners, one all renters, one all mortgage-holders, and one is everyone with a public record. DTI and payment-to-income barely differ across them <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>. A 0/1 variable has only two values, so k-means can cut within-cluster variance cheaply by putting all the 0s in one cluster and all the 1s in another. The binary columns end up defining the clusters. Their remedies are to give binaries a smaller variance than the other variables, or, with large data, to cluster <strong>separately within each category</strong> (owners, mortgage-holders, renters) <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>.</p>
+<section id="gowers-distance" class="level3">
+<h3 class="anchored" data-anchor-id="gowers-distance">Gower’s distance</h3>
+<p>The standard answer for mixed data is <strong>Gower’s distance</strong>, which compares each variable on its own terms and then averages <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>:</p>
+<ul>
+<li><strong>numeric or ordered</strong> variables: the absolute difference, rescaled by that variable’s range so it lies between 0 and 1;</li>
+<li><strong>categorical</strong> variables: 0 if the two records match, 1 if they differ;</li>
+<li>average the per-variable distances (simple or weighted) to get one dissimilarity between 0 and 1.</li>
+</ul>
+<p>Bruce &amp; Bruce compute it for five loans described by DTI, payment-to-income, home ownership, and loan purpose (R’s <code>daisy(x, metric = "gower")</code>). We recomputed the whole matrix by hand from their five rows, and it reproduces their output to seven decimals <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>2</strong></td>
+<td>0.622</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><strong>3</strong></td>
+<td>0.686</td>
+<td><strong>0.814</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><strong>4</strong></td>
+<td>0.633</td>
+<td>0.761</td>
+<td>0.431</td>
+<td></td>
+</tr>
+<tr class="even">
+<td><strong>5</strong></td>
+<td>0.377</td>
+<td>0.539</td>
+<td><strong>0.309</strong></td>
+<td>0.506</td>
+</tr>
+</tbody>
+</table>
+<p>Loans 2 and 3 are farthest apart. They differ on home ownership <em>and</em> purpose, and their DTIs and payment ratios are far apart too. Loans 3 and 5 are closest. Both are renters with purpose “other”, so the two categorical terms contribute zero and only the small numeric gaps remain <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>.</p>
+<p>Because Gower gives a <strong>dissimilarity matrix</strong> rather than coordinates, it pairs naturally with <a href="#hierarchical-clustering">hierarchical clustering</a>, which needs only pairwise dissimilarities. K-means needs means of coordinates, so it cannot use it. On 250 sampled defaults, a Gower-plus-<code>hclust</code> dendrogram cut at height 0.5 produces subtrees that are homogeneous in the categorical variables. Not every subtree separates cleanly, but “the categorical variables tend to be grouped together” <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>. (The book describes its example subtree as “renters with a loan purpose labeled as ‘other’”. The rows it prints are all owners, mostly debt consolidation. The point about homogeneity holds either way.)</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Which method for which data (Bruce &amp; Bruce's summary)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Which method for which data (Bruce &amp; Bruce’s summary)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>K-means</strong> scales to very large data and is easy to understand. <strong>Hierarchical clustering</strong> handles mixed numeric and categorical data and gives the dendrogram, so for smaller mixed data sets, use it <strong>with Gower’s distance</strong>. <strong>Model-based</strong> clustering (see <a href="../../content/ml-track/mixture-models-and-em.html">mixture models &amp; EM</a>) rests on statistical theory. When clusters are well separated, all three agree. On noisy real data such as loans or stocks, they “all produce very different solutions” <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>. That is another reason to treat any one clustering as a hypothesis.</p>
+</div>
+</div>
+</section>
 </section>
 <section id="practical-cautions" class="level2">
 <h2 class="anchored" data-anchor-id="practical-cautions">Practical cautions</h2>
@@ -2104,6 +2222,9 @@ Figure&nbsp;1: Left: PCA on correlated 2-D data. The first principal component (
 <li><p><strong>PCA without standardising.</strong> Unscaled variables let measurement units, not information, define the components. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p></li>
 <li><p><strong>Taking clusters as real subgroups.</strong> k-means and hierarchical clustering partition <em>any</em> data; verify structure exists before interpreting it. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p></li>
 <li><p><strong>One run of k-means.</strong> It converges to a local optimum; use many random restarts. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p></li>
+<li><p><strong>Clustering raw units.</strong> Dollars against percentages means the dollar variable <em>is</em> the clustering. Standardise, or choose a distance that rescales, before reading anything into the groups. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span></p></li>
+<li><p><strong>One-hot dummies straight into k-means.</strong> Z-scored 0/1 columns become the cluster definitions, and you rediscover your own categorical variables. Use Gower’s distance with hierarchical clustering, down-weight the binaries, or cluster within categories. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span></p></li>
+<li><p><strong>Assuming z-scores make variables “equal”.</strong> Standardising gives a pure-noise variable the same spread as an informative one. (In a trial version of our figure with three closely spaced DTI groups, z-scored k-means recovered only about 66% of them, because the noise income axis competed. The two well-separated groups in the final figure come out almost perfectly.) Scaling is a choice about what counts as similar, not a neutral fix.</p></li>
 <li><p><strong>Over-reading the dendrogram.</strong> Only fusion <em>heights</em> (not horizontal proximity) encode similarity, and the linkage choice reshapes the tree. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p></li>
 <li><p><strong>Treating components or clusters as causal.</strong> They are descriptive structure in <span class="math inline">X</span> — never effects. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p></li>
 </ul>
@@ -2113,7 +2234,7 @@ Figure&nbsp;1: Left: PCA on correlated 2-D data. The first principal component (
 <section id="from-the-sources" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
 <div class="callout callout-style-default callout-note callout-titled" title="Who says what">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2122,11 +2243,11 @@ Figure&nbsp;1: Left: PCA on correlated 2-D data. The first principal component (
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
 <li><strong>James, Witten, Hastie &amp; Tibshirani, <em>ISL</em> (Ch 12)</strong> — the unsupervised setting (no <span class="math inline">Y</span>, hard to validate, subjective); <strong>PCA</strong> (first PC = max-variance/closest line, orthogonal components, loadings &amp; scores, <strong>PVE</strong> &amp; <strong>scree/elbow</strong>, mandatory scaling) with <strong>USArrests</strong> and <strong>NCI60</strong>; <strong>k-means</strong> (minimise within-cluster sum of squares, the iterate-assign-recompute algorithm, local optima/nstart, elbow for <span class="math inline">K</span>); <strong>hierarchical</strong> clustering (agglomerative, <strong>dendrogram</strong>, <strong>linkage</strong> — complete/single/average/centroid, cut the tree); the cautions (no ground truth, clustering noise, parameter sensitivity).</li>
-<li><strong>Bruce &amp; Bruce</strong> — applied clustering/dimension reduction, the <strong>S&amp;P 500</strong> hierarchical example.</li>
+<li><strong>Bruce &amp; Bruce, <em>Practical Statistics for Data Scientists</em> (Ch 7)</strong> — applied clustering/dimension reduction, the <strong>S&amp;P 500</strong> hierarchical example; <strong>“Scaling and Categorical Variables”</strong>: why unsupervised methods need scaling (unlike most regression), the loan-default k-means before/after z-scores, PCA on z-scores = correlation matrix, <strong>dominant variables</strong> (GOOGL/AMZN loadings and the three options), dummy coding, <strong>Gower’s distance</strong> (definition, <code>daisy</code> five-loan example, Gower + <code>hclust</code> dendrogram cut at 0.5), <strong>binary variables hijacking k-means</strong> and the remedies, and the method-choice summary. <em>Two slips in the source are flagged in the text: the “Cluster 1 … 55 members” remark (the table shows cluster 4, 52) and the subtree described as renters/“other” (the printed rows are owners, mostly debt consolidation). The 66% figure in the pitfalls and the whole bottom row of the figure are our own simulation, not Bruce &amp; Bruce’s.</em></li>
 </ul>
 </div>
 </div>
@@ -2139,13 +2260,21 @@ Figure&nbsp;1: Left: PCA on correlated 2-D data. The first principal component (
 <p><strong>k-means minimises within-cluster sum of squares.</strong> The objective is <span class="math display">
 \min_{C_1,\dots,C_K}\ \sum_{k=1}^K \sum_{i\in C_k}\|x_i-\mu_k\|^2,\qquad \mu_k=\tfrac1{|C_k|}\sum_{i\in C_k}x_i .
 </span> The two-step algorithm is <strong>coordinate descent</strong>: step (a) fixes assignments and the optimal centroid is the cluster <strong>mean</strong>; step (b) fixes centroids and the optimal assignment is the <strong>nearest</strong> centroid. Each step weakly decreases the objective, so it converges — but to a <strong>local</strong> minimum depending on the initialisation, hence multiple restarts.</p>
+<p><strong>Why units decide the answer.</strong> Squared Euclidean distance is a sum over variables, <span class="math inline">\|x_i-x_j\|^2=\sum_v (x_{iv}-x_{jv})^2</span>, so each variable’s contribution scales with its variance. Rescaling variable <span class="math inline">v</span> by <span class="math inline">s_v</span> multiplies its term by <span class="math inline">s_v^2</span>. Z-scoring sets every <span class="math inline">s_v=1/\text{SD}_v</span>. That is a <strong>weighting choice</strong> that gives each variable equal total variance, whatever its information content.</p>
+<p><strong>Why z-scored binaries dominate.</strong> A 0/1 variable with share <span class="math inline">p</span> has SD <span class="math inline">\sqrt{p(1-p)}</span>. After z-scoring, the two values sit <span class="math inline">1/\sqrt{p(1-p)}</span> apart, which is at least 2 SD and larger for rare categories (≈3.3 at <span class="math inline">p=0.1</span>). Splitting on that variable removes <strong>all</strong> of its within-cluster variance at once, which no continuous variable can match.</p>
+<p><strong>Gower’s distance.</strong> For records <span class="math inline">i,j</span> and variables <span class="math inline">v=1,\dots,p</span> with weights <span class="math inline">w_v</span>, <span class="math display">
+d_{ij}=\frac{\sum_v w_v\,d_{ij}^{(v)}}{\sum_v w_v},\qquad
+d_{ij}^{(v)}=\begin{cases}|x_{iv}-x_{jv}|/R_v &amp; \text{numeric/ordered (}R_v=\text{range)}\\[2pt]
+\mathbb 1[x_{iv}\ne x_{jv}] &amp; \text{categorical.}\end{cases}
+</span> Each term lies in <span class="math inline">[0,1]</span>, so <span class="math inline">d_{ij}\in[0,1]</span>. Worked check, loans 1 and 2 of Bruce &amp; Bruce’s example (equal weights): DTI <span class="math inline">|1.00-5.55|/17.08=0.266</span>, payment ratio <span class="math inline">|2.393-4.572|/9.822=0.222</span>, home and purpose both differ, giving <span class="math inline">1+1</span>. So <span class="math inline">d_{12}=(0.266+0.222+2)/4=0.622</span>, matching <code>daisy</code>.</p>
 </div>
 </section>
 <section id="connections" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
 <ul>
 <li><strong>Builds on:</strong> <a href="../../content/01-foundations/exploratory-data-analysis.html">exploratory data analysis</a> (the exploratory spirit), <a href="../../content/01-foundations/covariance-and-correlation.html">correlation/covariance</a> (what PCA decomposes), and <a href="../../content/ml-track/model-selection-and-dimension-reduction.html">PCR</a> (PCA as a regression pre-processor).</li>
-<li><strong>Leads to:</strong> <a href="../../content/ml-track/ml-for-social-science.html">ML for social science</a> — using PCA/clustering for measurement and typology-building, with discipline.</li>
+<li><strong>Leads to:</strong> <a href="../../content/ml-track/ml-for-social-science.html">ML for social science</a> — using PCA/clustering for measurement and typology-building, with discipline; <a href="../../content/ml-track/mixture-models-and-em.html">mixture models &amp; EM</a> — the model-based alternative to distance-based clustering.</li>
+<li><strong>Same distance problem, supervised:</strong> <a href="../../content/04-predictive/classification-and-knn.html">classification &amp; k-NN</a> — k-nearest neighbours is the one supervised method where scaling matters as much as it does here.</li>
 <li><strong>Bridges back:</strong> structure in <span class="math inline">X</span> is <strong>descriptive</strong> — a principal component is not a cause, and a cluster is not a kind; the <a href="../../content/05-causal-inference/index.html">causal questions</a> need a different toolkit.</li>
 </ul>
 
@@ -2710,7 +2839,7 @@ James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2021. <em>A
 <span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-pca-kmeans</span></span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Left: PCA on correlated 2-D data. The first principal component (red) points along the direction of maximal variance — the line closest to the cloud; the second (orange) is orthogonal, capturing the rest. PCA simply rotates to these axes. Right: k-means with K=3 on three blobs. Points are coloured by their assigned cluster and each centroid (✕) is the mean of its members; the algorithm iterates assign-and-recompute until the partition stabilises."</span></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Top left: PCA on correlated 2-D data. The first principal component (black) points along the direction of maximal variance, the line closest to the cloud. The second (grey) is orthogonal and captures the rest. PCA simply rotates to these axes. Top right: k-means with K=3 on three blobs. Points are coloured by their assigned cluster, and each centroid (✕) is the mean of its members. The algorithm iterates assign-and-recompute until the partition stabilises. Bottom: why scaling comes first (our own simulation, in the spirit of Bruce &amp; Bruce's loan example). 240 borrowers form two real groups that differ only in debt-to-income ratio. Income, in dollars, carries no group information. Bottom left: k-means (K=2, 10 restarts) on the raw units cuts along income, because income's SD is about 27,000 against about 9 for DTI. The two clusters are unequal in size and match the true groups no better than a coin. Bottom right: the same algorithm on z-scores recovers the DTI groups almost perfectly. Both panels are plotted in original units, and each panel title reports the measured agreement."</span></span>
 <span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
 <span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
 <span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a></span>
@@ -2718,141 +2847,304 @@ James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2021. <em>A
 <span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">1</span>)</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>fig, (axL, axR) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">7.8</span>, <span class="fl">3.9</span>))</span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Left: PCA via eigendecomposition of the covariance ----</span></span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> np.array([[<span class="fl">1.0</span>, <span class="fl">0.8</span>], [<span class="fl">0.8</span>, <span class="fl">1.0</span>]])</span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>L <span class="op">=</span> np.linalg.cholesky(cov)</span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> (rng.normal(size<span class="op">=</span>(<span class="dv">300</span>, <span class="dv">2</span>)) <span class="op">@</span> L.T) <span class="op">*</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.7</span>])</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>Xc <span class="op">=</span> X <span class="op">-</span> X.mean(<span class="dv">0</span>)</span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> np.cov(Xc.T)</span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>vals, vecs <span class="op">=</span> np.linalg.eigh(C)</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> np.argsort(vals)[::<span class="op">-</span><span class="dv">1</span>]<span class="op">;</span> vals, vecs <span class="op">=</span> vals[order], vecs[:, order]</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>axL.scatter(Xc[:, <span class="dv">0</span>], Xc[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, c <span class="kw">in</span> <span class="bu">zip</span>(<span class="bu">range</span>(<span class="dv">2</span>), [<span class="st">"#e8531d"</span>, <span class="st">"#8a8a7e"</span>]):</span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> vecs[:, k] <span class="op">*</span> np.sqrt(vals[k]) <span class="op">*</span> <span class="fl">2.5</span></span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>    axL.annotate(<span class="st">""</span>, xy<span class="op">=</span>v, xytext<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>), arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-|&gt;"</span>, color<span class="op">=</span>c, lw<span class="op">=</span><span class="fl">2.4</span>))</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="op">*</span>(vecs[:, <span class="dv">0</span>]<span class="op">*</span>np.sqrt(vals[<span class="dv">0</span>])<span class="op">*</span><span class="fl">2.7</span>), <span class="st">"PC1"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="op">*</span>(vecs[:, <span class="dv">1</span>]<span class="op">*</span>np.sqrt(vals[<span class="dv">1</span>])<span class="op">*</span><span class="fl">2.9</span>), <span class="st">"PC2"</span>, color<span class="op">=</span><span class="st">"#3a3a33"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>axL.set_title(<span class="st">"PCA: directions of maximal variance"</span>)</span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>axL.set_xlabel(<span class="st">"x₁"</span>)<span class="op">;</span> axL.set_ylabel(<span class="st">"x₂"</span>)<span class="op">;</span> axL.set_aspect(<span class="st">"equal"</span>)</span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Right: k-means by hand (assign / recompute) ----</span></span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>centers0 <span class="op">=</span> np.array([[<span class="op">-</span><span class="fl">2.5</span>, <span class="dv">0</span>], [<span class="fl">2.5</span>, <span class="fl">0.5</span>], [<span class="dv">0</span>, <span class="fl">3.0</span>]])</span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>pts <span class="op">=</span> np.vstack([rng.normal(c, <span class="fl">0.7</span>, (<span class="dv">60</span>, <span class="dv">2</span>)) <span class="cf">for</span> c <span class="kw">in</span> centers0])</span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> <span class="dv">3</span></span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>cent <span class="op">=</span> pts[rng.choice(<span class="bu">len</span>(pts), K, replace<span class="op">=</span><span class="va">False</span>)]</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> ((pts[:, <span class="va">None</span>, :] <span class="op">-</span> cent[<span class="va">None</span>, :, :])<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>(<span class="dv">2</span>)</span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>    lab <span class="op">=</span> d.argmin(<span class="dv">1</span>)</span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>    newc <span class="op">=</span> np.array([pts[lab <span class="op">==</span> k].mean(<span class="dv">0</span>) <span class="cf">if</span> np.<span class="bu">any</span>(lab <span class="op">==</span> k) <span class="cf">else</span> cent[k] <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> np.allclose(newc, cent): <span class="cf">break</span></span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>    cent <span class="op">=</span> newc</span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="co"># Clusters are nominal -- no cluster outranks another -- so this uses the</span></span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a><span class="co"># brand categorical register (--cat-*), not the emphasis ramp.</span></span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#e8531d"</span>, <span class="st">"#2b7a74"</span>, <span class="st">"#3f5c78"</span>]</span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K):</span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>    axR.scatter(pts[lab <span class="op">==</span> k, <span class="dv">0</span>], pts[lab <span class="op">==</span> k, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">12</span>, color<span class="op">=</span>colors[k], alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>    axR.scatter(<span class="op">*</span>cent[k], marker<span class="op">=</span><span class="st">"X"</span>, s<span class="op">=</span><span class="dv">140</span>, color<span class="op">=</span>colors[k], edgecolors<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">1.5</span>, zorder<span class="op">=</span><span class="dv">5</span>)</span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>axR.set_title(<span class="st">"k-means clusters (K=3) with centroids"</span>)</span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>axR.set_xlabel(<span class="st">"x₁"</span>)<span class="op">;</span> axR.set_ylabel(<span class="st">"x₂"</span>)</span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="fu">## Hierarchical clustering</span></span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>**Hierarchical clustering** avoids pre-specifying $K$. The **agglomerative** (bottom-up) version starts</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>with every point its own cluster and repeatedly **merges the two closest**, recording the result as a</span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>**dendrogram** — a tree whose **fusion heights** show how dissimilar the merged groups were. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span> To</span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>measure distance *between groups* you pick a **linkage**: <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>fig, axd <span class="op">=</span> plt.subplot_mosaic([[<span class="st">"L"</span>, <span class="st">"R"</span>], [<span class="st">"raw"</span>, <span class="st">"z"</span>]], figsize<span class="op">=</span>(<span class="fl">7.8</span>, <span class="fl">7.6</span>))</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>axL, axR <span class="op">=</span> axd[<span class="st">"L"</span>], axd[<span class="st">"R"</span>]</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Left: PCA via eigendecomposition of the covariance ----</span></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> np.array([[<span class="fl">1.0</span>, <span class="fl">0.8</span>], [<span class="fl">0.8</span>, <span class="fl">1.0</span>]])</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>L <span class="op">=</span> np.linalg.cholesky(cov)</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> (rng.normal(size<span class="op">=</span>(<span class="dv">300</span>, <span class="dv">2</span>)) <span class="op">@</span> L.T) <span class="op">*</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.7</span>])</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>Xc <span class="op">=</span> X <span class="op">-</span> X.mean(<span class="dv">0</span>)</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> np.cov(Xc.T)</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>vals, vecs <span class="op">=</span> np.linalg.eigh(C)</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> np.argsort(vals)[::<span class="op">-</span><span class="dv">1</span>]<span class="op">;</span> vals, vecs <span class="op">=</span> vals[order], vecs[:, order]</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a><span class="co"># PC arrows stay neutral (ink / grey) so that colour in this figure means only "which cluster".</span></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>axL.scatter(Xc[:, <span class="dv">0</span>], Xc[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, c <span class="kw">in</span> <span class="bu">zip</span>(<span class="bu">range</span>(<span class="dv">2</span>), [<span class="st">"#161613"</span>, <span class="st">"#5e5e54"</span>]):</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> vecs[:, k] <span class="op">*</span> np.sqrt(vals[k]) <span class="op">*</span> <span class="fl">2.5</span></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>    axL.annotate(<span class="st">""</span>, xy<span class="op">=</span>v, xytext<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>), arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-|&gt;"</span>, color<span class="op">=</span>c, lw<span class="op">=</span><span class="fl">2.4</span>))</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="op">*</span>(vecs[:, <span class="dv">0</span>]<span class="op">*</span>np.sqrt(vals[<span class="dv">0</span>])<span class="op">*</span><span class="fl">2.7</span>), <span class="st">"PC1"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>axL.text(<span class="op">*</span>(vecs[:, <span class="dv">1</span>]<span class="op">*</span>np.sqrt(vals[<span class="dv">1</span>])<span class="op">*</span><span class="fl">2.9</span>), <span class="st">"PC2"</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>axL.set_title(<span class="st">"PCA: directions of maximal variance"</span>)</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>axL.set_xlabel(<span class="st">"x₁"</span>)<span class="op">;</span> axL.set_ylabel(<span class="st">"x₂"</span>)<span class="op">;</span> axL.set_aspect(<span class="st">"equal"</span>)</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Right: k-means by hand (assign / recompute) ----</span></span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>centers0 <span class="op">=</span> np.array([[<span class="op">-</span><span class="fl">2.5</span>, <span class="dv">0</span>], [<span class="fl">2.5</span>, <span class="fl">0.5</span>], [<span class="dv">0</span>, <span class="fl">3.0</span>]])</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>pts <span class="op">=</span> np.vstack([rng.normal(c, <span class="fl">0.7</span>, (<span class="dv">60</span>, <span class="dv">2</span>)) <span class="cf">for</span> c <span class="kw">in</span> centers0])</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>cent <span class="op">=</span> pts[rng.choice(<span class="bu">len</span>(pts), K, replace<span class="op">=</span><span class="va">False</span>)]</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> ((pts[:, <span class="va">None</span>, :] <span class="op">-</span> cent[<span class="va">None</span>, :, :])<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>(<span class="dv">2</span>)</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>    lab <span class="op">=</span> d.argmin(<span class="dv">1</span>)</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>    newc <span class="op">=</span> np.array([pts[lab <span class="op">==</span> k].mean(<span class="dv">0</span>) <span class="cf">if</span> np.<span class="bu">any</span>(lab <span class="op">==</span> k) <span class="cf">else</span> cent[k] <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> np.allclose(newc, cent): <span class="cf">break</span></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>    cent <span class="op">=</span> newc</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="co"># Clusters are nominal -- no cluster outranks another -- so this uses the</span></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a><span class="co"># brand categorical register (--cat-*), not the emphasis ramp.</span></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#e8531d"</span>, <span class="st">"#2b7a74"</span>, <span class="st">"#3f5c78"</span>]</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, mk <span class="kw">in</span> <span class="bu">zip</span>(<span class="bu">range</span>(K), [<span class="st">"o"</span>, <span class="st">"s"</span>, <span class="st">"^"</span>]):</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>    axR.scatter(pts[lab <span class="op">==</span> k, <span class="dv">0</span>], pts[lab <span class="op">==</span> k, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">12</span>, color<span class="op">=</span>colors[k], marker<span class="op">=</span>mk, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>    axR.scatter(<span class="op">*</span>cent[k], marker<span class="op">=</span><span class="st">"X"</span>, s<span class="op">=</span><span class="dv">140</span>, color<span class="op">=</span>colors[k], edgecolors<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">1.5</span>, zorder<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>axR.set_title(<span class="st">"k-means clusters (K=3) with centroids"</span>)</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>axR.set_xlabel(<span class="st">"x₁"</span>)<span class="op">;</span> axR.set_ylabel(<span class="st">"x₂"</span>)</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Bottom: the same k-means on raw units vs z-scores ----</span></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>r2 <span class="op">=</span> np.random.default_rng(<span class="dv">3</span>)</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">120</span></span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>dti <span class="op">=</span> np.concatenate([r2.normal(m, <span class="fl">3.0</span>, n) <span class="cf">for</span> m <span class="kw">in</span> [<span class="dv">10</span>, <span class="dv">26</span>]])   <span class="co"># two real groups, by DTI</span></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>inc <span class="op">=</span> np.exp(r2.normal(np.log(<span class="dv">60000</span>), <span class="fl">0.4</span>, <span class="dv">2</span> <span class="op">*</span> n))                 <span class="co"># income: no group signal</span></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>truth <span class="op">=</span> np.repeat([<span class="dv">0</span>, <span class="dv">1</span>], n)</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>X2 <span class="op">=</span> np.c_[inc, dti]</span>
 <span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Complete** — the *maximal* pairwise dissimilarity (compact, balanced clusters).</span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Single** — the *minimal* (can produce straggly, "trailing" chains).</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Average** — the mean pairwise dissimilarity.</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Centroid** — distance between cluster centroids.</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>The payoff: **one dendrogram yields any number of clusters** — just **cut the tree** at a chosen height.</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@islr</span><span class="co">]</span> (Bruce &amp; Bruce cluster the **S&amp;P 500**: energy, financial, and consumer stocks fall into distinct</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>subtrees — sectors emerging with no labels. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>)</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a><span class="fu">## Practical cautions</span></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>The looseness is real, and ignoring it is how unsupervised learning misleads: <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> kmeans(Z, K, nstart<span class="op">=</span><span class="dv">10</span>, seed<span class="op">=</span><span class="dv">0</span>):</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> np.random.default_rng(seed)<span class="op">;</span> best <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(nstart):                                        <span class="co"># keep the lowest-WSS restart</span></span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> Z[r.choice(<span class="bu">len</span>(Z), K, replace<span class="op">=</span><span class="va">False</span>)]</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>            lab <span class="op">=</span> ((Z[:, <span class="va">None</span>] <span class="op">-</span> c[<span class="va">None</span>]) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(<span class="dv">2</span>).argmin(<span class="dv">1</span>)</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>            nc <span class="op">=</span> np.array([Z[lab <span class="op">==</span> k].mean(<span class="dv">0</span>) <span class="cf">if</span> np.<span class="bu">any</span>(lab <span class="op">==</span> k) <span class="cf">else</span> c[k] <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> np.allclose(nc, c): <span class="cf">break</span></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>            c <span class="op">=</span> nc</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>        wss <span class="op">=</span> ((Z <span class="op">-</span> c[lab]) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>()</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> best <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> wss <span class="op">&lt;</span> best[<span class="dv">0</span>]: best <span class="op">=</span> (wss, lab)</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best[<span class="dv">1</span>]</span>
 <span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**No ground truth.** You cannot validate a clustering the way you validate a classifier; treat results</span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>  as **hypotheses**, not truths. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Clustering the noise.** Algorithms **always return clusters — even when none exist.** A tidy</span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>  partition is not evidence of real subgroups. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Parameter sensitivity.** Scaling, the distance metric, $K$, and the linkage can **change the answer</span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>  drastically** — report your choices and check robustness. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**PCA without standardising.** Unscaled variables let measurement units, not information, define the</span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>  components. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Taking clusters as real subgroups.** k-means and hierarchical clustering partition *any* data; verify</span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>  structure exists before interpreting it. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, Z, name <span class="kw">in</span> [(<span class="st">"raw"</span>, X2, <span class="st">"raw units"</span>),</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>                     (<span class="st">"z"</span>, (X2 <span class="op">-</span> X2.mean(<span class="dv">0</span>)) <span class="op">/</span> X2.std(<span class="dv">0</span>), <span class="st">"z-scores"</span>)]:</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>    lab <span class="op">=</span> kmeans(Z, <span class="dv">2</span>)</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>    agree <span class="op">=</span> <span class="bu">max</span>(np.mean(lab <span class="op">==</span> truth), np.mean(lab <span class="op">!=</span> truth))    <span class="co"># best label matching</span></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>    ax <span class="op">=</span> axd[key]</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k, (col, mk) <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">zip</span>([<span class="st">"#e8531d"</span>, <span class="st">"#2b7a74"</span>], [<span class="st">"o"</span>, <span class="st">"s"</span>])):</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X2[lab <span class="op">==</span> k, <span class="dv">0</span>] <span class="op">/</span> <span class="dv">1000</span>, X2[lab <span class="op">==</span> k, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">12</span>, color<span class="op">=</span>col, marker<span class="op">=</span>mk, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"k-means on </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>agree<span class="sc">:.1%}</span><span class="ss"> match true groups"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"annual income ($ thousands)"</span>)</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>axd[<span class="st">"raw"</span>].set_ylabel(<span class="st">"debt-to-income ratio (%)"</span>)</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>axd[<span class="st">"z"</span>].sharey(axd[<span class="st">"raw"</span>])</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a><span class="fu">## Hierarchical clustering</span></span>
 <span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**One run of k-means.** It converges to a local optimum; use many random restarts. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Over-reading the dendrogram.** Only fusion *heights* (not horizontal proximity) encode similarity, and</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>  the linkage choice reshapes the tree. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>**Hierarchical clustering** avoids pre-specifying $K$. The **agglomerative** (bottom-up) version starts</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>with every point its own cluster and repeatedly **merges the two closest**, recording the result as a</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>**dendrogram** — a tree whose **fusion heights** show how dissimilar the merged groups were. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span> To</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>measure distance *between groups* you pick a **linkage**: <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
 <span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating components or clusters as causal.** They are descriptive structure in $X$ — never effects.</span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Complete** — the *maximal* pairwise dissimilarity (compact, balanced clusters).</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Single** — the *minimal* (can produce straggly, "trailing" chains).</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Average** — the mean pairwise dissimilarity.</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Centroid** — distance between cluster centroids.</span>
 <span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**James, Witten, Hastie &amp; Tibshirani, *ISL* (Ch 12)** — the unsupervised setting (no $Y$, hard to</span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>  validate, subjective); **PCA** (first PC = max-variance/closest line, orthogonal components, loadings &amp;</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  scores, **PVE** &amp; **scree/elbow**, mandatory scaling) with **USArrests** and **NCI60**; **k-means**</span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>  (minimise within-cluster sum of squares, the iterate-assign-recompute algorithm, local optima/nstart,</span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>  elbow for $K$); **hierarchical** clustering (agglomerative, **dendrogram**, **linkage** —</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>  complete/single/average/centroid, cut the tree); the cautions (no ground truth, clustering noise,</span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>  parameter sensitivity).</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bruce &amp; Bruce** — applied clustering/dimension reduction, the **S&amp;P 500** hierarchical example.</span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>**PCA as an eigenproblem.** With standardised data $X$ (columns mean 0, SD 1) and sample covariance</span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>$C=\tfrac1n X^\top X$, the **loadings** of the $m$-th component are the **eigenvector** $\phi_m$ of $C$</span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>with the $m$-th largest **eigenvalue** $\lambda_m$; the **scores** are $z_{im}=\phi_m^\top x_i$. Because</span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>$\phi_m$ maximises $\operatorname{Var}(X\phi)=\phi^\top C\phi$ subject to $<span class="sc">\|</span>\phi<span class="sc">\|</span>=1$ and orthogonality,</span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>the first component is the max-variance direction, and $\lambda_m$ *is* the variance along it. The **PVE**</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>of component $m$ is $\lambda_m/\sum_k\lambda_k$. (Equivalently, via the SVD $X=UDV^\top$: loadings are</span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>columns of $V$, scores are $UD$, and $\lambda_m=d_m^2/n$.)</span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>**k-means minimises within-cluster sum of squares.** The objective is</span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>\min_{C_1,\dots,C_K}\ \sum_{k=1}^K \sum_{i\in C_k}<span class="sc">\|</span>x_i-\mu_k<span class="sc">\|</span>^2,\qquad \mu_k=\tfrac1{|C_k|}\sum_{i\in C_k}x_i .</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>The two-step algorithm is **coordinate descent**: step (a) fixes assignments and the optimal centroid is</span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>the cluster **mean**; step (b) fixes centroids and the optimal assignment is the **nearest** centroid.</span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>Each step weakly decreases the objective, so it converges — but to a **local** minimum depending on the</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>initialisation, hence multiple restarts.</span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">exploratory data analysis</span><span class="co">](../01-foundations/exploratory-data-analysis.qmd)</span> (the</span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  exploratory spirit), <span class="co">[</span><span class="ot">correlation/covariance</span><span class="co">](../01-foundations/covariance-and-correlation.qmd)</span> (what</span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>  PCA decomposes), and <span class="co">[</span><span class="ot">PCR</span><span class="co">](model-selection-and-dimension-reduction.qmd)</span> (PCA as a regression</span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>  pre-processor).</span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">ML for social science</span><span class="co">](ml-for-social-science.qmd)</span> — using PCA/clustering for</span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>  measurement and typology-building, with discipline.</span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bridges back:** structure in $X$ is **descriptive** — a principal component is not a cause, and a</span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>  cluster is not a kind; the <span class="co">[</span><span class="ot">causal questions</span><span class="co">](../05-causal-inference/index.qmd)</span> need a different toolkit.</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>The payoff: **one dendrogram yields any number of clusters** — just **cut the tree** at a chosen height.</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@islr</span><span class="co">]</span> (Bruce &amp; Bruce cluster the **S&amp;P 500**: energy, financial, and consumer stocks fall into distinct</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>subtrees — sectors emerging with no labels. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>)</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a><span class="fu">## Before you cluster: scaling, dominant variables, and mixed data</span></span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>Every method above starts from a **distance**, and a distance has no idea what your units mean. That</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>is the main practical difference from regression and classification, where scaling usually does not</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>matter (k-nearest neighbours is the exception). Unsupervised methods "generally require that the data be</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>appropriately scaled" <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>. Three situations come up again and again.</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>**1. Variables on wildly different scales.** Bruce &amp; Bruce run k-means ($K=4$) on six features of</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>defaulted loans: loan amount, annual income, revolving balance, open accounts, debt-to-income, and</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>revolving utilisation. On the raw numbers, **income and revolving balance dominate**. The clusters have</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>very unequal sizes (13,902 / 1,192 / 7,525 / 52) and are essentially income bands, the smallest one</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>centred on an income near \$490,000. After converting every variable to **z-scores**, the sizes even out</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>(7,355 / 6,294 / 3,713 / 5,309). The clusters are no longer just income and balance bands; in the</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>rescaled table they also separate on utilisation (31% to 78%), open accounts, and DTI</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>. (The book's text calls the tiny cluster "Cluster 1 … 55</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>members"; its own table shows cluster 4 with 52.) The same logic applies to PCA. Standardising first is</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>the same as running PCA on the **correlation** matrix rather than the covariance matrix</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>. The bottom row of @fig-pca-kmeans rebuilds the effect from scratch.</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>**2. Variables on the same scale where a few still dominate.** Scaling is not only about units. Add</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>Alphabet and Amazon to a PCA of S&amp;P 500 daily price changes and the scree plot shows two giant</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>components. Their loadings are almost entirely those two stocks (GOOGL 0.781 / 0.609, AMZN</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>0.593 / −0.792; the other stocks printed load 0.08 or less), because those two stocks' price movements</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>dominate the variability <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>. You can keep them, rescale, or analyse them separately. "There is no 'correct'</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>approach, and the treatment depends on the application" <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>.</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>**3. Mixed numeric and categorical data.** A categorical variable has to become numbers first: ranks for</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>an ordered factor, 0/1 dummies for an unordered one. Then the trouble starts <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>.</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>Bruce &amp; Bruce z-score DTI, payment-to-income, home-ownership dummies, and a no-public-record flag, then</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>run k-means with $K=4$. The four clusters turn out to be **proxies for the factor levels**: one is all</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>owners, one all renters, one all mortgage-holders, and one is everyone with a public record. DTI and</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>payment-to-income barely differ across them <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>. A 0/1 variable has only two values, so</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>k-means can cut within-cluster variance cheaply by putting all the 0s in one cluster and all the 1s in</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>another. The binary columns end up defining the clusters. Their remedies are to give binaries a</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>smaller variance than the other variables, or, with large data, to cluster **separately within each</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>category** (owners, mortgage-holders, renters) <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>.</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="fu">### Gower's distance</span></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>The standard answer for mixed data is **Gower's distance**, which compares each variable on its own</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>terms and then averages <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>:</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**numeric or ordered** variables: the absolute difference, rescaled by that variable's range so it</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>  lies between 0 and 1;</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**categorical** variables: 0 if the two records match, 1 if they differ;</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>average the per-variable distances (simple or weighted) to get one dissimilarity between 0 and 1.</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>Bruce &amp; Bruce compute it for five loans described by DTI, payment-to-income, home ownership, and loan</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>purpose (R's <span class="in">`daisy(x, metric = "gower")`</span>). We recomputed the whole matrix by hand from their five rows,</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>and it reproduces their output to seven decimals <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>:</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="pp">|</span> 1 <span class="pp">|</span> 2 <span class="pp">|</span> 3 <span class="pp">|</span> 4 <span class="pp">|</span></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|---|</span></span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **2** <span class="pp">|</span> 0.622 <span class="pp">|</span> <span class="pp">|</span> <span class="pp">|</span> <span class="pp">|</span></span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **3** | 0.686 | **0.814** <span class="pp">|</span> <span class="pp">|</span> <span class="pp">|</span></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **4** <span class="pp">|</span> 0.633 <span class="pp">|</span> 0.761 <span class="pp">|</span> 0.431 <span class="pp">|</span> <span class="pp">|</span></span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **5** | 0.377 | 0.539 | **0.309** <span class="pp">|</span> 0.506 <span class="pp">|</span></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>Loans 2 and 3 are farthest apart. They differ on home ownership *and* purpose, and their DTIs and</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>payment ratios are far apart too. Loans 3 and 5 are closest. Both are renters with purpose "other",</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>so the two categorical terms contribute zero and only the small numeric gaps remain</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>.</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>Because Gower gives a **dissimilarity matrix** rather than coordinates, it pairs naturally with</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">hierarchical clustering</span><span class="co">](#hierarchical-clustering)</span>, which needs only pairwise dissimilarities. K-means</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>needs means of coordinates, so it cannot use it. On 250 sampled defaults, a Gower-plus-<span class="in">`hclust`</span></span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>dendrogram cut at height 0.5 produces subtrees that are homogeneous in the categorical variables. Not</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>every subtree separates cleanly, but "the categorical variables tend to be grouped together"</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>. (The book describes its example subtree as "renters with a loan purpose labeled as</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>'other'". The rows it prints are all owners, mostly debt consolidation. The point about homogeneity</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>holds either way.)</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Which method for which data (Bruce &amp; Bruce's summary)"}</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>**K-means** scales to very large data and is easy to understand. **Hierarchical clustering** handles</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>mixed numeric and categorical data and gives the dendrogram, so for smaller mixed data sets, use it</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>**with Gower's distance**. **Model-based** clustering (see <span class="co">[</span><span class="ot">mixture models &amp; EM</span><span class="co">](mixture-models-and-em.qmd)</span>)</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>rests on statistical theory. When clusters are well separated, all three agree. On noisy real data</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>such as loans or stocks, they "all produce very different solutions" <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>. That is</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>another reason to treat any one clustering as a hypothesis.</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a><span class="fu">## Practical cautions</span></span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>The looseness is real, and ignoring it is how unsupervised learning misleads: <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**No ground truth.** You cannot validate a clustering the way you validate a classifier; treat results</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>  as **hypotheses**, not truths. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Clustering the noise.** Algorithms **always return clusters — even when none exist.** A tidy</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>  partition is not evidence of real subgroups. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Parameter sensitivity.** Scaling, the distance metric, $K$, and the linkage can **change the answer</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>  drastically** — report your choices and check robustness. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**PCA without standardising.** Unscaled variables let measurement units, not information, define the</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>  components. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Taking clusters as real subgroups.** k-means and hierarchical clustering partition *any* data; verify</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>  structure exists before interpreting it. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**One run of k-means.** It converges to a local optimum; use many random restarts. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Clustering raw units.** Dollars against percentages means the dollar variable *is* the clustering.</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>  Standardise, or choose a distance that rescales, before reading anything into the groups.</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**One-hot dummies straight into k-means.** Z-scored 0/1 columns become the cluster definitions, and you</span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>  rediscover your own categorical variables. Use Gower's distance with hierarchical clustering,</span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>  down-weight the binaries, or cluster within categories. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Assuming z-scores make variables "equal".** Standardising gives a pure-noise variable the same</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>  spread as an informative one. (In a trial version of our figure with three closely spaced DTI groups,</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>  z-scored k-means recovered only about 66% of them, because the noise income axis competed. The two</span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>  well-separated groups in the final figure come out almost perfectly.) Scaling is a choice about what</span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>  counts as similar, not a neutral fix.</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Over-reading the dendrogram.** Only fusion *heights* (not horizontal proximity) encode similarity, and</span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>  the linkage choice reshapes the tree. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating components or clusters as causal.** They are descriptive structure in $X$ — never effects.</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**James, Witten, Hastie &amp; Tibshirani, *ISL* (Ch 12)** — the unsupervised setting (no $Y$, hard to</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>  validate, subjective); **PCA** (first PC = max-variance/closest line, orthogonal components, loadings &amp;</span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>  scores, **PVE** &amp; **scree/elbow**, mandatory scaling) with **USArrests** and **NCI60**; **k-means**</span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a>  (minimise within-cluster sum of squares, the iterate-assign-recompute algorithm, local optima/nstart,</span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a>  elbow for $K$); **hierarchical** clustering (agglomerative, **dendrogram**, **linkage** —</span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a>  complete/single/average/centroid, cut the tree); the cautions (no ground truth, clustering noise,</span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a>  parameter sensitivity).</span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bruce &amp; Bruce, *Practical Statistics for Data Scientists* (Ch 7)** — applied clustering/dimension</span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>  reduction, the **S&amp;P 500** hierarchical example; **"Scaling and Categorical Variables"**: why</span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a>  unsupervised methods need scaling (unlike most regression), the loan-default k-means before/after</span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>  z-scores, PCA on z-scores = correlation matrix, **dominant variables** (GOOGL/AMZN loadings and the</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>  three options), dummy coding, **Gower's distance** (definition, <span class="in">`daisy`</span> five-loan example, Gower +</span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a>  <span class="in">`hclust`</span> dendrogram cut at 0.5), **binary variables hijacking k-means** and the remedies, and the</span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>  method-choice summary. *Two slips in the source are flagged in the text: the "Cluster 1 … 55 members"</span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>  remark (the table shows cluster 4, 52) and the subtree described as renters/"other" (the printed rows</span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>  are owners, mostly debt consolidation). The 66% figure in the pitfalls and the whole bottom row of the</span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a>  figure are our own simulation, not Bruce &amp; Bruce's.*</span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a>**PCA as an eigenproblem.** With standardised data $X$ (columns mean 0, SD 1) and sample covariance</span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a>$C=\tfrac1n X^\top X$, the **loadings** of the $m$-th component are the **eigenvector** $\phi_m$ of $C$</span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a>with the $m$-th largest **eigenvalue** $\lambda_m$; the **scores** are $z_{im}=\phi_m^\top x_i$. Because</span>
+<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a>$\phi_m$ maximises $\operatorname{Var}(X\phi)=\phi^\top C\phi$ subject to $<span class="sc">\|</span>\phi<span class="sc">\|</span>=1$ and orthogonality,</span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a>the first component is the max-variance direction, and $\lambda_m$ *is* the variance along it. The **PVE**</span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a>of component $m$ is $\lambda_m/\sum_k\lambda_k$. (Equivalently, via the SVD $X=UDV^\top$: loadings are</span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a>columns of $V$, scores are $UD$, and $\lambda_m=d_m^2/n$.)</span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>**k-means minimises within-cluster sum of squares.** The objective is</span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a>\min_{C_1,\dots,C_K}\ \sum_{k=1}^K \sum_{i\in C_k}<span class="sc">\|</span>x_i-\mu_k<span class="sc">\|</span>^2,\qquad \mu_k=\tfrac1{|C_k|}\sum_{i\in C_k}x_i .</span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a>The two-step algorithm is **coordinate descent**: step (a) fixes assignments and the optimal centroid is</span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a>the cluster **mean**; step (b) fixes centroids and the optimal assignment is the **nearest** centroid.</span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a>Each step weakly decreases the objective, so it converges — but to a **local** minimum depending on the</span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a>initialisation, hence multiple restarts.</span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a>**Why units decide the answer.** Squared Euclidean distance is a sum over variables,</span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a>$<span class="sc">\|</span>x_i-x_j<span class="sc">\|</span>^2=\sum_v (x_{iv}-x_{jv})^2$, so each variable's contribution scales with its variance.</span>
+<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a>Rescaling variable $v$ by $s_v$ multiplies its term by $s_v^2$. Z-scoring sets every $s_v=1/\text{SD}_v$.</span>
+<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a>That is a **weighting choice** that gives each variable equal total variance, whatever its information</span>
+<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a>content.</span>
+<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a>**Why z-scored binaries dominate.** A 0/1 variable with share $p$ has SD $\sqrt{p(1-p)}$. After</span>
+<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a>z-scoring, the two values sit $1/\sqrt{p(1-p)}$ apart, which is at least 2 SD and larger for rare</span>
+<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a>categories (≈3.3 at $p=0.1$). Splitting on that variable removes **all** of its within-cluster variance</span>
+<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a>at once, which no continuous variable can match.</span>
+<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a>**Gower's distance.** For records $i,j$ and variables $v=1,\dots,p$ with weights $w_v$,</span>
+<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a>d_{ij}=\frac{\sum_v w_v\,d_{ij}^{(v)}}{\sum_v w_v},\qquad</span>
+<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a>d_{ij}^{(v)}=\begin{cases}|x_{iv}-x_{jv}|/R_v &amp; \text{numeric/ordered (}R_v=\text{range)}<span class="sc">\\</span><span class="co">[</span><span class="ot">2pt</span><span class="co">]</span></span>
+<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a>\mathbb 1<span class="co">[</span><span class="ot">x_{iv}\ne x_{jv}</span><span class="co">]</span> &amp; \text{categorical.}\end{cases}</span>
+<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a>Each term lies in $<span class="co">[</span><span class="ot">0,1</span><span class="co">]</span>$, so $d_{ij}\in<span class="co">[</span><span class="ot">0,1</span><span class="co">]</span>$. Worked check, loans 1 and 2 of Bruce &amp; Bruce's example</span>
+<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a>(equal weights): DTI $|1.00-5.55|/17.08=0.266$, payment ratio $|2.393-4.572|/9.822=0.222$, home and</span>
+<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a>purpose both differ, giving $1+1$. So $d_{12}=(0.266+0.222+2)/4=0.622$, matching <span class="in">`daisy`</span>.</span>
+<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">exploratory data analysis</span><span class="co">](../01-foundations/exploratory-data-analysis.qmd)</span> (the</span>
+<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a>  exploratory spirit), <span class="co">[</span><span class="ot">correlation/covariance</span><span class="co">](../01-foundations/covariance-and-correlation.qmd)</span> (what</span>
+<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a>  PCA decomposes), and <span class="co">[</span><span class="ot">PCR</span><span class="co">](model-selection-and-dimension-reduction.qmd)</span> (PCA as a regression</span>
+<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a>  pre-processor).</span>
+<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">ML for social science</span><span class="co">](ml-for-social-science.qmd)</span> — using PCA/clustering for</span>
+<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a>  measurement and typology-building, with discipline; <span class="co">[</span><span class="ot">mixture models &amp; EM</span><span class="co">](mixture-models-and-em.qmd)</span></span>
+<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a>  — the model-based alternative to distance-based clustering.</span>
+<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Same distance problem, supervised:** <span class="co">[</span><span class="ot">classification &amp; k-NN</span><span class="co">](../04-predictive/classification-and-knn.qmd)</span></span>
+<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a>  — k-nearest neighbours is the one supervised method where scaling matters as much as it does here.</span>
+<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bridges back:** structure in $X$ is **descriptive** — a principal component is not a cause, and a</span>
+<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a>  cluster is not a kind; the <span class="co">[</span><span class="ot">causal questions</span><span class="co">](../05-causal-inference/index.qmd)</span> need a different toolkit.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
