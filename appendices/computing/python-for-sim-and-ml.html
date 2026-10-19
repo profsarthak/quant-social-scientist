@@ -126,6 +126,49 @@ div.csl-indent {
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -1899,11 +1942,14 @@ div.csl-indent {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#numpy-think-in-arrays" id="toc-numpy-think-in-arrays" class="nav-link active" data-scroll-target="#numpy-think-in-arrays">numpy: think in arrays</a></li>
-  <li><a href="#randomness-and-simulation" id="toc-randomness-and-simulation" class="nav-link" data-scroll-target="#randomness-and-simulation">Randomness and simulation</a></li>
-  <li><a href="#linear-algebra-done-right" id="toc-linear-algebra-done-right" class="nav-link" data-scroll-target="#linear-algebra-done-right">Linear algebra, done right</a></li>
-  <li><a href="#matplotlib-is-the-figure-engine" id="toc-matplotlib-is-the-figure-engine" class="nav-link" data-scroll-target="#matplotlib-is-the-figure-engine">matplotlib is the figure engine</a></li>
-  <li><a href="#where-scikit-learn-fits" id="toc-where-scikit-learn-fits" class="nav-link" data-scroll-target="#where-scikit-learn-fits">Where scikit-learn fits</a></li>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#sec-idea" id="toc-sec-idea" class="nav-link" data-scroll-target="#sec-idea">The idea in words</a></li>
+  <li><a href="#sec-by-hand" id="toc-sec-by-hand" class="nav-link" data-scroll-target="#sec-by-hand">A bootstrap, line by line</a></li>
+  <li><a href="#sec-numpy" id="toc-sec-numpy" class="nav-link" data-scroll-target="#sec-numpy">numpy: think in arrays</a></li>
+  <li><a href="#sec-random" id="toc-sec-random" class="nav-link" data-scroll-target="#sec-random">Randomness and simulation</a></li>
+  <li><a href="#sec-linalg" id="toc-sec-linalg" class="nav-link" data-scroll-target="#sec-linalg">Linear algebra, done right</a></li>
+  <li><a href="#sec-mpl" id="toc-sec-mpl" class="nav-link" data-scroll-target="#sec-mpl">matplotlib is the figure engine</a></li>
+  <li><a href="#sec-sklearn" id="toc-sec-sklearn" class="nav-link" data-scroll-target="#sec-sklearn">Where scikit-learn fits</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
   <li><a href="#connections" id="toc-connections" class="nav-link" data-scroll-target="#connections">Connections</a></li>
@@ -1916,7 +1962,7 @@ div.csl-indent {
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Appendices</li><li class="breadcrumb-item"><a href="../../appendices/computing/index.html">Computing</a></li><li class="breadcrumb-item"><a href="../../appendices/computing/python-for-sim-and-ml.html">Python for Simulation &amp; ML</a></li></ol></nav>
 <div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">Python for Simulation &amp; ML</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
-<p class="subtitle lead">numpy for arrays and randomness, matplotlib for figures, scikit-learn for applied machine learning — the small Python stack behind every simulation and predictive model in this encyclopedia.</p>
+<p class="subtitle lead">The small set of Python tools behind every figure on this site: one for doing arithmetic on whole lists of numbers, one for drawing random numbers, one for plotting, and one for fitting machine-learning models.</p>
 </div>
 
 
@@ -1934,95 +1980,188 @@ div.csl-indent {
 
 
 <div class="lead-kernel">
-<p>Where the corpus is R-first for statistics, it turns to <strong>Python</strong> for two jobs: <strong>simulation</strong> (numpy’s fast vectorised arrays and random-number engine) and <strong>machine learning</strong> (scikit-learn’s uniform fit/predict API). Every figure in this encyclopedia is built by hand with <strong>numpy + matplotlib</strong> — no plotting library doing the thinking for you — precisely so the computation is legible. This is that stack, and where each piece earns its place.</p>
+<p>Python earns its place here for two jobs. The first is simulation: make up random data thousands of times and watch what a statistic does. The second is machine learning: fit a prediction model and check it on data it has not seen. Every figure in this encyclopedia is drawn by hand with two Python packages, so the code under each figure shows the whole computation. This page is the key to reading that code.</p>
 </div>
-<section id="numpy-think-in-arrays" class="level2">
-<h2 class="anchored" data-anchor-id="numpy-think-in-arrays">numpy: think in arrays</h2>
-<p>numpy’s <code>ndarray</code> is Python’s answer to R’s vector: a homogeneous block of numbers that operations run over <em>all at once</em>, in fast compiled code, with <strong>no Python loop</strong>. <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span></p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Where you probably came from — and what you need">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Where you probably came from — and what you need
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>You likely arrived from</strong> <a href="../../content/01-foundations/simulation-and-monte-carlo.html">simulation &amp; Monte Carlo</a> or <a href="../../content/02-inference/the-bootstrap.html">the bootstrap</a>, wanting to run the idea yourself; from the “Show the figure code” fold under any figure on the site; or from the <a href="../../content/ml-track/index.html">ML track</a>. The question you came with is probably “what do <code>rng</code>, <code>np.</code> and <code>@</code> mean in this code?”</p>
+<p><strong>You need:</strong> to recognise a variable and a function call (<code>name = value</code>, <code>f(x)</code>). If you have read <a href="../../appendices/computing/getting-started-in-r.html">getting started in R</a>, most ideas carry straight over: a numpy array behaves much like an R vector. <strong>You don’t need</strong> to have written Python, or to know pandas or object-oriented programming.</p>
+<p><strong>Jump to what you came for:</strong> <a href="#sec-idea">the idea in words</a> · <a href="#sec-by-hand">a bootstrap, line by line</a> · <a href="#sec-numpy">numpy arrays</a> · <a href="#sec-random">randomness and simulation</a> · <a href="#sec-linalg">linear algebra</a> · <a href="#sec-mpl">matplotlib</a> · <a href="#sec-sklearn">scikit-learn</a></p>
+</div>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p>Many of the ideas in this encyclopedia are easiest to understand by simulating them. The bootstrap, a permutation test, the Central Limit Theorem and the power of a study all come down to “generate data, compute a statistic, repeat, look at the spread”. Bruce &amp; Bruce present the bootstrap as exactly such a recipe <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>. Reinhart suggests the same check for power: simulate many artificial datasets with the effect size you expect and count how often the test detects it <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>. A few lines of Python carry out any of these recipes, and once you can read those lines you can change the inputs and rerun the experiment.</p>
+</section>
+<section id="sec-idea" class="level2">
+<h2 class="anchored" data-anchor-id="sec-idea">The idea in words</h2>
+<p>Four tools, four jobs.</p>
+<ul>
+<li><strong>numpy</strong> stores numbers as an <strong>array</strong>: a block of values of one type, like an R vector or a column of a spreadsheet. Arithmetic on an array applies to every element at once, with no loop.</li>
+<li><strong>A random-number generator</strong> (<code>rng</code>) is a machine that produces random draws. You start it from a <strong>seed</strong>, a number that fixes which stream of random numbers you get, so the same seed always gives the same draws.</li>
+<li><strong>matplotlib</strong> draws figures. A <em>figure</em> is the canvas; an <em>axes</em> is one panel on it; you add marks (lines, points, bars) to the axes one at a time.</li>
+<li><strong>scikit-learn</strong> fits machine-learning models. Every model is used the same way: create it, <code>fit</code> it on training data, <code>predict</code> on new data.</li>
+</ul>
+<p>Python code often reads as <code>thing.action()</code>. The dot means “the action that belongs to this thing”, so <code>x.mean()</code> is the mean of <code>x</code> and <code>rng.normal(...)</code> asks the generator <code>rng</code> for normal draws. A function attached to an object like this is called a <strong>method</strong>.</p>
+</section>
+<section id="sec-by-hand" class="level2">
+<h2 class="anchored" data-anchor-id="sec-by-hand">A bootstrap, line by line</h2>
+<p>Bruce &amp; Bruce describe the bootstrap for a sample mean as an algorithm: draw a value from the sample, record it and put it back; repeat until you have as many values as the sample; record their mean; do all of that many times; then use the spread of the recorded means as the standard error <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>. Here it is in numpy, on a six-number sample. Lines starting with <code>#&gt;</code> show the output.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.array([<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">23</span>, <span class="dv">42</span>])</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>x <span class="op">*</span> <span class="dv">2</span>                    <span class="co"># array([ 8, 16, 30, 32, 46, 84]) — vectorised</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>x[x <span class="op">&gt;</span> <span class="dv">15</span>]                <span class="co"># array([16, 23, 42])            — boolean mask</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>x.mean(), x.std()        <span class="co"># reductions over the whole array</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>M <span class="op">=</span> np.ones((<span class="dv">3</span>, <span class="dv">2</span>))      <span class="co"># a 3x2 matrix of ones</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>M <span class="op">@</span> M.T                  <span class="co"># matrix multiply (the @ operator)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.array([<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">23</span>, <span class="dv">42</span>])</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>rng.choice(x, size<span class="op">=</span><span class="dv">6</span>, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; array([ 4, 23, 16, 15, 15, 42])</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>means <span class="op">=</span> np.array([rng.choice(x, size<span class="op">=</span><span class="dv">6</span>, replace<span class="op">=</span><span class="va">True</span>).mean() <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1000</span>)])</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>means.std(ddof<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4.902136...</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>np.percentile(means, [<span class="fl">2.5</span>, <span class="fl">97.5</span>])</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; array([ 9.4958, 28.6667])</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Reading it line by line:</p>
+<ol type="1">
+<li><code>import numpy as np</code> loads numpy and lets you call it <code>np</code> for short.</li>
+<li><code>np.array([...])</code> turns a Python list into an array: the sample of six numbers, with mean 18.</li>
+<li><code>np.random.default_rng(42)</code> creates a random-number generator from seed 42. Anyone who runs this gets the same draws.</li>
+<li><code>rng.choice(x, size=6, replace=True)</code> draws six values from <code>x</code> <strong>with replacement</strong>, so a value can come up twice (15 does here) and another not at all (8). This is one <strong>bootstrap resample</strong>.</li>
+<li>The next line does that 1,000 times. <code>for _ in range(1000)</code> means “repeat 1,000 times” (the <code>_</code> is a name for a counter you don’t use). Each time it takes the <code>.mean()</code> of the resample, and <code>np.array(...)</code> collects the 1,000 means.</li>
+<li><code>means.std(ddof=1)</code> is their standard deviation, about 4.9: the bootstrap standard error of the mean. The textbook formula <span class="math inline">s/\sqrt{n}</span> gives 5.5. With only six numbers the two are close but not equal; the bootstrap needs no formula at all.</li>
+<li><code>np.percentile(means, [2.5, 97.5])</code> finds the values that cut off the lowest and highest 2.5% of the 1,000 means. The middle 95% runs from about 9.5 to 28.7: a bootstrap confidence interval.</li>
+</ol>
+<p>The <code>ddof=1</code> matters. numpy’s <code>.std()</code> divides by <span class="math inline">n</span> unless told otherwise, so <code>x.std()</code> gives 12.32, while R’s <code>sd(x)</code> and <code>x.std(ddof=1)</code> divide by <span class="math inline">n-1</span> and give 13.49. <strong>ddof</strong> stands for “delta degrees of freedom”, the number subtracted from <span class="math inline">n</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Jargon key — open if a term is unfamiliar">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Jargon key — open if a term is unfamiliar
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Package / module</strong> — a bundle of code you load with <code>import</code>; <code>np</code> and <code>plt</code> are the usual short names for numpy and matplotlib’s plotting module.</li>
+<li><strong>Array (<code>ndarray</code>)</strong> — numpy’s block of numbers of one type; one-dimensional like a vector, or two-dimensional like a matrix.</li>
+<li><strong>Shape</strong> — an array’s size along each dimension: <code>(6,)</code> for six numbers in a row, <code>(3, 2)</code> for 3 rows and 2 columns.</li>
+<li><strong>Axis</strong> — one of those dimensions; <code>axis=0</code> runs down the rows (so <code>mean(axis=0)</code> averages each column).</li>
+<li><strong>Vectorised</strong> — applied to every element at once, in fast compiled code, with no Python loop.</li>
+<li><strong>Broadcasting</strong> — numpy’s rule for combining arrays of different but compatible shapes by stretching the smaller one.</li>
+<li><strong>Method</strong> — a function attached to an object, called with a dot: <code>x.mean()</code>.</li>
+<li><strong>Generator and seed</strong> — the random-number machine (<code>rng</code>) and the number that fixes its stream.</li>
+<li><strong>With replacement</strong> — each drawn value is put back before the next draw, so it can be drawn again.</li>
+<li><strong>View vs copy</strong> — a view is a window onto an existing array (changing it changes the original); a copy is independent.</li>
+<li><strong>Estimator</strong> — in scikit-learn, a model object with <code>fit</code> and <code>predict</code> methods.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-numpy" class="level2">
+<h2 class="anchored" data-anchor-id="sec-numpy">numpy: think in arrays</h2>
+<p>numpy’s <code>ndarray</code> is Python’s answer to R’s vector: a homogeneous block of numbers that operations run over <em>all at once</em>, in fast compiled code, with <strong>no Python loop</strong>. It is the same habit as <a href="../../appendices/computing/getting-started-in-r.html#sec-vectors">thinking in vectors in R</a>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.array([<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">23</span>, <span class="dv">42</span>])</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>x <span class="op">*</span> <span class="dv">2</span>                    <span class="co"># array([ 8, 16, 30, 32, 46, 84]) — vectorised</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>x[x <span class="op">&gt;</span> <span class="dv">15</span>]                <span class="co"># array([16, 23, 42])            — boolean mask</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>x.mean(), x.std()        <span class="co"># reductions over the whole array (18.0 and 12.32: std divides by n)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>M <span class="op">=</span> np.ones((<span class="dv">3</span>, <span class="dv">2</span>))      <span class="co"># a 3x2 matrix of ones</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>M <span class="op">@</span> M.T                  <span class="co"># matrix multiply (the @ operator)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> <code>x &gt; 15</code> makes a list of True/False values, one per element, and <code>x[...]</code> keeps the True ones. <code>M.T</code> is <code>M</code> turned on its side (its transpose), and <code>@</code> multiplies matrices.</p>
+</blockquote>
 <p><strong>Broadcasting</strong> is the one idea to internalise: numpy stretches mismatched-but-compatible shapes so <code>data - data.mean(axis=0)</code> centres every column without a loop. It is the source of numpy’s speed and, occasionally, of silent bugs (below).</p>
 </section>
-<section id="randomness-and-simulation" class="level2">
-<h2 class="anchored" data-anchor-id="randomness-and-simulation">Randomness and simulation</h2>
-<p>Simulation is numpy’s quiet superpower. The modern interface is a <strong>generator</strong> seeded for <a href="../../appendices/computing/reproducible-quarto.html">reproducibility</a>: <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)     <span class="co"># seeded generator</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, size<span class="op">=</span><span class="dv">1000</span>)         <span class="co"># draws from N(0,1)</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>rng.integers(<span class="dv">0</span>, <span class="dv">6</span>, size<span class="op">=</span><span class="dv">10</span>)         <span class="co"># dice</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>rng.choice(data, size<span class="op">=</span><span class="dv">100</span>, replace<span class="op">=</span><span class="va">True</span>)   <span class="co"># a bootstrap resample</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Draw, compute a statistic, repeat — that loop <em>is</em> the <a href="../../content/02-inference/the-bootstrap.html">bootstrap</a>, a <a href="../../content/02-inference/resampling-and-nonparametric-tests.html">permutation test</a>, and every <a href="../../content/01-foundations/simulation-and-monte-carlo.html">Monte-Carlo</a> argument in the book. The figure below is the canonical example.</p>
+<section id="sec-random" class="level2">
+<h2 class="anchored" data-anchor-id="sec-random">Randomness and simulation</h2>
+<p>Simulation is numpy’s quiet superpower. The modern interface is a <strong>generator</strong> seeded for <a href="../../appendices/computing/reproducible-quarto.html">reproducibility</a>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)     <span class="co"># seeded generator</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, size<span class="op">=</span><span class="dv">1000</span>)         <span class="co"># draws from N(0,1)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>rng.integers(<span class="dv">0</span>, <span class="dv">6</span>, size<span class="op">=</span><span class="dv">10</span>)         <span class="co"># dice</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>rng.choice(data, size<span class="op">=</span><span class="dv">100</span>, replace<span class="op">=</span><span class="va">True</span>)   <span class="co"># a bootstrap resample</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Draw, compute a statistic, repeat — that loop <em>is</em> the <a href="../../content/02-inference/the-bootstrap.html">bootstrap</a>, a <a href="../../content/02-inference/resampling-and-nonparametric-tests.html">permutation test</a>, and every <a href="../../content/01-foundations/simulation-and-monte-carlo.html">Monte-Carlo</a> argument in the book. In the bootstrap the resampling is always with replacement; in a permutation test the data are reshuffled without it <span class="citation" data-cites="bruce_practical">(<a href="#ref-bruce_practical" role="doc-biblioref">Bruce et al. 2020</a>)</span>. The figure below is the canonical example.</p>
 </section>
-<section id="linear-algebra-done-right" class="level2">
-<h2 class="anchored" data-anchor-id="linear-algebra-done-right">Linear algebra, done right</h2>
+<section id="sec-linalg" class="level2">
+<h2 class="anchored" data-anchor-id="sec-linalg">Linear algebra, done right</h2>
 <p><code>np.linalg</code> is where the <a href="../../appendices/math/ols-in-matrix-form.html">matrix formulas</a> become code — and it is why those entries <strong>solve</strong> rather than invert:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)   <span class="co"># normal equations — do this</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.inv(X.T <span class="op">@</span> X) <span class="op">@</span> X.T <span class="op">@</span> y    <span class="co"># mathematically equal, numerically worse</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>solve</code> (and <code>lstsq</code>, or a QR/SVD) is faster and more stable than forming an explicit inverse — the practical lesson from OLS in matrix form, in one line.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)   <span class="co"># normal equations — do this</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.inv(X.T <span class="op">@</span> X) <span class="op">@</span> X.T <span class="op">@</span> y    <span class="co"># mathematically equal, numerically worse</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> both lines compute the least-squares coefficients <span class="math inline">\hat\beta = (X^\top X)^{-1}X^\top y</span>. The first asks numpy to solve the equations <span class="math inline">X^\top X\,\beta = X^\top y</span> directly; the second first builds the inverse matrix and then multiplies, which is slower and loses more precision to rounding.</p>
+</blockquote>
+<p><code>solve</code> (and <code>lstsq</code>, or a QR/SVD) is faster and more stable than forming an explicit inverse — the practical lesson from OLS in matrix form, in one line. The <a href="../../appendices/computing/regressions-in-r.html#sec-tidy">coefficient plot</a> in the R regression appendix computes its estimates exactly this way.</p>
 </section>
-<section id="matplotlib-is-the-figure-engine" class="level2">
-<h2 class="anchored" data-anchor-id="matplotlib-is-the-figure-engine">matplotlib is the figure engine</h2>
+<section id="sec-mpl" class="level2">
+<h2 class="anchored" data-anchor-id="sec-mpl">matplotlib is the figure engine</h2>
 <p>Every plot in this encyclopedia is matplotlib, written by hand: a <code>figure</code>, one or more <code>axes</code>, and explicit marks. No <code>seaborn</code>, no <code>ggplot</code>-style grammar — just the primitives, so the code says exactly what the picture means. That is a deliberate house choice, not a limitation.</p>
+<p>The pattern under every figure is the same three steps: <code>fig, ax = plt.subplots()</code> makes the canvas and a panel; calls like <code>ax.plot(...)</code>, <code>ax.scatter(...)</code> and <code>ax.axhline(...)</code> add marks; <code>ax.set_xlabel(...)</code> and <code>ax.set_title(...)</code> label it. Reading those calls top to bottom tells you everything the figure shows.</p>
 </section>
-<section id="where-scikit-learn-fits" class="level2">
-<h2 class="anchored" data-anchor-id="where-scikit-learn-fits">Where scikit-learn fits</h2>
-<p>For <em>applied</em> machine learning — the <a href="../../content/ml-track/index.html">ML track</a> put to work — <strong>scikit-learn</strong> gives every model the same three-verb interface, which is most of what makes Python pleasant for ML: <span class="citation" data-cites="murphy_ml islr">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>; <a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> Lasso</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>Xtr, Xte, ytr, yte <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.3</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Lasso(alpha<span class="op">=</span><span class="fl">0.1</span>).fit(Xtr, ytr)     <span class="co"># fit</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>pred  <span class="op">=</span> model.predict(Xte)                  <span class="co"># predict</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>model.score(Xte, yte)                       <span class="co"># evaluate</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-sklearn" class="level2">
+<h2 class="anchored" data-anchor-id="sec-sklearn">Where scikit-learn fits</h2>
+<p>For <em>applied</em> machine learning — the <a href="../../content/ml-track/index.html">ML track</a> put to work — <strong>scikit-learn</strong> gives every model the same three-verb interface, which is most of what makes Python pleasant for ML. The models themselves (the lasso, trees, boosting) are what Murphy and ISLR explain <span class="citation" data-cites="murphy_ml islr">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>; <a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> Lasso</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>Xtr, Xte, ytr, yte <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.3</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Lasso(alpha<span class="op">=</span><span class="fl">0.1</span>).fit(Xtr, ytr)     <span class="co"># fit</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>pred  <span class="op">=</span> model.predict(Xte)                  <span class="co"># predict</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>model.score(Xte, yte)                       <span class="co"># evaluate</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> hold back 30% of the rows as a test set; fit a lasso on the other 70%; predict the held-back rows; score how well the predictions match. The test rows play no part in the fit, which is the point: ISLR’s validation-set approach estimates test error on observations the model never saw <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span>.</p>
+</blockquote>
 <p><code>fit</code> / <code>predict</code> / <code>score</code> is the same for a random forest, a gradient booster, or a logistic regression — you swap the estimator and the workflow is unchanged. The concepts behind them live in the ML track; this is the tooling that runs them.</p>
 <div id="cell-fig-monte-carlo-pi" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show the figure code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">4000</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>pts <span class="op">=</span> rng.random((N, <span class="dv">2</span>))                       <span class="co"># N points in the unit square</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>inside <span class="op">=</span> (pts[:, <span class="dv">0</span>]<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> pts[:, <span class="dv">1</span>]<span class="op">**</span><span class="dv">2</span>) <span class="op">&lt;=</span> <span class="fl">1.0</span>  <span class="co"># inside the quarter circle?</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>pi_running <span class="op">=</span> <span class="fl">4.0</span> <span class="op">*</span> np.cumsum(inside) <span class="op">/</span> np.arange(<span class="dv">1</span>, N <span class="op">+</span> <span class="dv">1</span>)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>fig, (axL, axR) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">8.6</span>, <span class="fl">4.2</span>),</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                               gridspec_kw<span class="op">=</span>{<span class="st">"width_ratios"</span>: [<span class="dv">1</span>, <span class="fl">1.15</span>]})</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Left: the drops</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>axL.scatter(pts[inside, <span class="dv">0</span>], pts[inside, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">5</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">"inside"</span>)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>axL.scatter(pts[<span class="op">~</span>inside, <span class="dv">0</span>], pts[<span class="op">~</span>inside, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">5</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">"outside"</span>)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> np.linspace(<span class="dv">0</span>, np.pi <span class="op">/</span> <span class="dv">2</span>, <span class="dv">100</span>)</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>axL.plot(np.cos(theta), np.sin(theta), color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">2.0</span>)</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>axL.set_aspect(<span class="st">"equal"</span>)<span class="op">;</span> axL.set_xlim(<span class="dv">0</span>, <span class="dv">1</span>)<span class="op">;</span> axL.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>axL.set_title(<span class="ss">f"</span><span class="sc">{</span>N<span class="sc">}</span><span class="ss"> random points  →  π ≈ </span><span class="sc">{</span>pi_running[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>axL.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>axL.grid(<span class="va">False</span>)</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Right: convergence</span></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>axR.plot(np.arange(<span class="dv">1</span>, N <span class="op">+</span> <span class="dv">1</span>), pi_running, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">1.6</span>)</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>axR.axhline(np.pi, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">1.2</span>, ls<span class="op">=</span>(<span class="dv">0</span>, (<span class="dv">4</span>, <span class="dv">3</span>)))</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>axR.text(N, np.pi <span class="op">+</span> <span class="fl">0.04</span>, <span class="st">" π"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, va<span class="op">=</span><span class="st">"bottom"</span>, ha<span class="op">=</span><span class="st">"right"</span>)</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>axR.set_xscale(<span class="st">"log"</span>)</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>axR.set_ylim(<span class="fl">2.6</span>, <span class="fl">3.7</span>)</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>axR.set_xlabel(<span class="st">"number of draws (log scale)"</span>)<span class="op">;</span> axR.set_ylabel(<span class="st">"running estimate of π"</span>)</span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>axR.set_title(<span class="st">"The estimate converges (LLN)"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Monte-Carlo π: random points and counting, nothing else"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">4000</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>pts <span class="op">=</span> rng.random((N, <span class="dv">2</span>))                       <span class="co"># N points in the unit square</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>inside <span class="op">=</span> (pts[:, <span class="dv">0</span>]<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> pts[:, <span class="dv">1</span>]<span class="op">**</span><span class="dv">2</span>) <span class="op">&lt;=</span> <span class="fl">1.0</span>  <span class="co"># inside the quarter circle?</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>pi_running <span class="op">=</span> <span class="fl">4.0</span> <span class="op">*</span> np.cumsum(inside) <span class="op">/</span> np.arange(<span class="dv">1</span>, N <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>fig, (axL, axR) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">8.6</span>, <span class="fl">4.2</span>),</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>                               gridspec_kw<span class="op">=</span>{<span class="st">"width_ratios"</span>: [<span class="dv">1</span>, <span class="fl">1.15</span>]})</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Left: the drops</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>axL.scatter(pts[inside, <span class="dv">0</span>], pts[inside, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">5</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">"inside"</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>axL.scatter(pts[<span class="op">~</span>inside, <span class="dv">0</span>], pts[<span class="op">~</span>inside, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">5</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">"outside"</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> np.linspace(<span class="dv">0</span>, np.pi <span class="op">/</span> <span class="dv">2</span>, <span class="dv">100</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>axL.plot(np.cos(theta), np.sin(theta), color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">2.0</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>axL.set_aspect(<span class="st">"equal"</span>)<span class="op">;</span> axL.set_xlim(<span class="dv">0</span>, <span class="dv">1</span>)<span class="op">;</span> axL.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>axL.set_title(<span class="ss">f"</span><span class="sc">{</span>N<span class="sc">}</span><span class="ss"> random points  →  π ≈ </span><span class="sc">{</span>pi_running[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>axL.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>axL.grid(<span class="va">False</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Right: convergence</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>axR.plot(np.arange(<span class="dv">1</span>, N <span class="op">+</span> <span class="dv">1</span>), pi_running, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">1.6</span>)</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>axR.axhline(np.pi, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">1.2</span>, ls<span class="op">=</span>(<span class="dv">0</span>, (<span class="dv">4</span>, <span class="dv">3</span>)))</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>axR.text(N, np.pi <span class="op">+</span> <span class="fl">0.04</span>, <span class="st">" π"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, va<span class="op">=</span><span class="st">"bottom"</span>, ha<span class="op">=</span><span class="st">"right"</span>)</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>axR.set_xscale(<span class="st">"log"</span>)</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>axR.set_ylim(<span class="fl">2.6</span>, <span class="fl">3.7</span>)</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>axR.set_xlabel(<span class="st">"number of draws (log scale)"</span>)<span class="op">;</span> axR.set_ylabel(<span class="st">"running estimate of π"</span>)</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>axR.set_title(<span class="st">"The estimate converges (LLN)"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Monte-Carlo π: random points and counting, nothing else"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-monte-carlo-pi" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-monte-carlo-pi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="python-for-sim-and-ml_files/figure-html/fig-monte-carlo-pi-output-1.png" width="795" height="398" class="figure-img">
+<img src="python-for-sim-and-ml_files/figure-html/fig-monte-carlo-pi-output-1.png" width="793" height="399" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-monte-carlo-pi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Monte-Carlo estimation of π — simulation in one screen of numpy. Left: N random points dropped in the unit square; the fraction landing inside the quarter-circle (orange) is an estimate of its area, π/4, so 4× that fraction estimates π. Right: the running estimate over N draws converges on π (dashed line) at the √N rate the Law of Large Numbers guarantees. No formula for π is used — only random points and counting. This is the whole idea of Monte-Carlo methods, and the reason numpy’s vectorised RNG matters.
@@ -2031,6 +2170,7 @@ Figure&nbsp;1: Monte-Carlo estimation of π — simulation in one screen of nump
 </div>
 </div>
 </div>
+<p>Reading the figure code with the jargon key: <code>rng.random((N, 2))</code> is an array of shape <code>(4000, 2)</code>, one row per point; <code>inside</code> is a True/False array; <code>np.cumsum(inside)</code> is the running count of hits, so dividing by <code>1, 2, …, N</code> gives the running fraction. Everything is vectorised; there is no loop over points.</p>
 </section>
 <section id="common-pitfalls" class="level2">
 <h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
@@ -2045,10 +2185,11 @@ Figure&nbsp;1: Monte-Carlo estimation of π — simulation in one screen of nump
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li><p><strong>Float equality.</strong> <code>0.1 + 0.2 == 0.3</code> is <code>False</code>. Compare with <code>np.isclose(a, b)</code>, never <code>==</code>, for floating-point results.</p></li>
+<li><p><strong>Float equality.</strong> <code>0.1 + 0.2 == 0.3</code> is <code>False</code> (the sum is stored as 0.30000000000000004). Compare with <code>np.isclose(a, b)</code>, never <code>==</code>, for floating-point results.</p></li>
+<li><p><strong>The <code>std</code> default.</strong> <code>x.std()</code> divides by <span class="math inline">n</span>, not <span class="math inline">n-1</span>: 12.32 rather than R’s 13.49 for the six-number example. Pass <code>ddof=1</code> when you want the sample standard deviation.</p></li>
 <li><p><strong>Broadcasting surprises.</strong> A <code>(n,)</code> vector and an <code>(n,1)</code> column broadcast to an <code>(n,n)</code> matrix — rarely what you meant. Check <code>.shape</code> when an operation returns something suspiciously large.</p></li>
 <li><p><strong>Views vs copies.</strong> Slicing an array returns a <em>view</em>; writing to it mutates the original. Use <code>.copy()</code> when you need independence, or track down a “why did my data change?” bug.</p></li>
-<li><p><strong>Leakage in scikit-learn.</strong> Fit scalers/imputers on the <strong>training split only</strong>, then apply to test — do it on the full data and your <a href="../../content/04-predictive/cross-validation.html">cross-validation</a> score is optimistic. Use a <code>Pipeline</code> so the preprocessing is refit inside each fold. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p></li>
+<li><p><strong>Leakage in scikit-learn.</strong> Fit scalers/imputers on the <strong>training split only</strong>, then apply to test — do it on the full data and your <a href="../../content/04-predictive/cross-validation.html">cross-validation</a> score is optimistic. Use a <code>Pipeline</code> so the preprocessing is refit inside each fold. This is ISLR’s rule that test observations play no part in fitting <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span>, applied to preprocessing as well as to the model.</p></li>
 <li><p><strong>Reaching for heavy libraries reflexively.</strong> A histogram, a bootstrap, a projection — these are a few lines of numpy. Pulling in <code>seaborn</code>/<code>pandas</code>/<code>sklearn</code> for a one-liner adds dependencies and hides the mechanism the figure is meant to show.</p></li>
 </ul>
 </div>
@@ -2057,7 +2198,7 @@ Figure&nbsp;1: Monte-Carlo estimation of π — simulation in one screen of nump
 <section id="from-the-sources" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
 <div class="callout callout-style-default callout-note callout-titled" title="Who says what">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2066,11 +2207,13 @@ Figure&nbsp;1: Monte-Carlo estimation of π — simulation in one screen of nump
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Bruce, Bruce &amp; Gedeck, <em>Practical Statistics for Data Scientists</em></strong> — the numpy/pandas idiom for data work and the resampling (bootstrap, permutation) simulations that vectorised RNG makes cheap.</li>
-<li><strong>Murphy, <em>Machine Learning: A Probabilistic Perspective</em></strong>, and <strong>James et al., <em>ISLR</em></strong> — the models behind scikit-learn’s estimators, the train/test discipline, and the leakage caution.</li>
+<li><strong>Bruce &amp; Bruce, <em>Practical Statistics for Data Scientists</em></strong> — the bootstrap as an explicit resampling algorithm (draw with replacement, record the statistic, repeat, use the spread), and the bootstrap-vs-permutation distinction. The corpus copy is the 2017 first edition, whose code is in R; the Python translation here is this encyclopedia’s.</li>
+<li><strong>Reinhart, <em>Statistics Done Wrong</em></strong> — estimating power by simulating many artificial datasets.</li>
+<li><strong>Murphy, <em>Machine Learning: A Probabilistic Perspective</em></strong>, and <strong>James et al., <em>ISLR</em></strong> — the models behind scikit-learn’s estimators and the train/test discipline (the validation-set approach).</li>
+<li><strong>What the corpus does not cover:</strong> none of the source texts teaches numpy, matplotlib or scikit-learn as software. Function names and behaviour on this page (<code>default_rng</code>, <code>ddof</code>, broadcasting, views, <code>fit</code>/<code>predict</code>/<code>score</code>) are standard library behaviour, checked by running the code, and are not attributed to any source. An earlier version of this page credited the numpy idiom to Bruce &amp; Bruce and the leakage caution to ISLR; both credits were broader than the texts support.</li>
 <li><strong>This repository</strong> — every figure is hand-built numpy + matplotlib; the Monte-Carlo π above is the template for “simulate, then plot.”</li>
 </ul>
 </div>
@@ -2100,6 +2243,9 @@ James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2021. <em>A
 </div>
 <div id="ref-murphy_ml" class="csl-entry" role="listitem">
 Murphy, Kevin P. 2012. <em>Machine Learning: A Probabilistic Perspective</em>. MIT Press.
+</div>
+<div id="ref-reinhart_swrong" class="csl-entry" role="listitem">
+Reinhart, Alex. 2015. <em>Statistics Done Wrong: The Woefully Complete Guide</em>. No Starch Press.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -2570,179 +2716,316 @@ Murphy, Kevin P. 2012. <em>Machine Learning: A Probabilistic Perspective</em>. M
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Python for Simulation &amp; ML"</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "numpy for arrays and randomness, matplotlib for figures, scikit-learn for applied machine learning — the small Python stack behind every simulation and predictive model in this encyclopedia."</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>Where the corpus is R-first for statistics, it turns to **Python** for two jobs: **simulation** (numpy's fast</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>vectorised arrays and random-number engine) and **machine learning** (scikit-learn's uniform fit/predict API).</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>Every figure in this encyclopedia is built by hand with **numpy + matplotlib** — no plotting library doing the</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>thinking for you — precisely so the computation is legible. This is that stack, and where each piece earns its</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>place.</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## numpy: think in arrays</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>numpy's <span class="in">`ndarray`</span> is Python's answer to R's vector: a homogeneous block of numbers that operations run over *all</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>at once*, in fast compiled code, with **no Python loop**. <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.array([<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">23</span>, <span class="dv">42</span>])</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>x <span class="op">*</span> <span class="dv">2</span>                    <span class="co"># array([ 8, 16, 30, 32, 46, 84]) — vectorised</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>x[x <span class="op">&gt;</span> <span class="dv">15</span>]                <span class="co"># array([16, 23, 42])            — boolean mask</span></span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>x.mean(), x.std()        <span class="co"># reductions over the whole array</span></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>M <span class="op">=</span> np.ones((<span class="dv">3</span>, <span class="dv">2</span>))      <span class="co"># a 3x2 matrix of ones</span></span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>M <span class="op">@</span> M.T                  <span class="co"># matrix multiply (the @ operator)</span></span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>**Broadcasting** is the one idea to internalise: numpy stretches mismatched-but-compatible shapes so</span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="in">`data - data.mean(axis=0)`</span> centres every column without a loop. It is the source of numpy's speed and,</span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>occasionally, of silent bugs (below).</span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="fu">## Randomness and simulation</span></span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>Simulation is numpy's quiet superpower. The modern interface is a **generator** seeded for</span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">reproducibility</span><span class="co">](reproducible-quarto.qmd)</span>: <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span></span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)     <span class="co"># seeded generator</span></span>
-<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, size<span class="op">=</span><span class="dv">1000</span>)         <span class="co"># draws from N(0,1)</span></span>
-<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>rng.integers(<span class="dv">0</span>, <span class="dv">6</span>, size<span class="op">=</span><span class="dv">10</span>)         <span class="co"># dice</span></span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>rng.choice(data, size<span class="op">=</span><span class="dv">100</span>, replace<span class="op">=</span><span class="va">True</span>)   <span class="co"># a bootstrap resample</span></span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>Draw, compute a statistic, repeat — that loop *is* the <span class="co">[</span><span class="ot">bootstrap</span><span class="co">](../../content/02-inference/the-bootstrap.qmd)</span>,</span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>a <span class="co">[</span><span class="ot">permutation test</span><span class="co">](../../content/02-inference/resampling-and-nonparametric-tests.qmd)</span>, and every</span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Monte-Carlo</span><span class="co">](../../content/01-foundations/simulation-and-monte-carlo.qmd)</span> argument in the book. The figure</span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>below is the canonical example.</span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="fu">## Linear algebra, done right</span></span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a><span class="in">`np.linalg`</span> is where the <span class="co">[</span><span class="ot">matrix formulas</span><span class="co">](../math/ols-in-matrix-form.qmd)</span> become code — and it is why those</span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>entries **solve** rather than invert:</span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)   <span class="co"># normal equations — do this</span></span>
-<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.inv(X.T <span class="op">@</span> X) <span class="op">@</span> X.T <span class="op">@</span> y    <span class="co"># mathematically equal, numerically worse</span></span>
-<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a><span class="in">`solve`</span> (and <span class="in">`lstsq`</span>, or a QR/SVD) is faster and more stable than forming an explicit inverse — the practical</span>
-<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>lesson from OLS in matrix form, in one line.</span>
-<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a><span class="fu">## matplotlib is the figure engine</span></span>
-<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>Every plot in this encyclopedia is matplotlib, written by hand: a <span class="in">`figure`</span>, one or more <span class="in">`axes`</span>, and explicit</span>
-<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>marks. No <span class="in">`seaborn`</span>, no <span class="in">`ggplot`</span>-style grammar — just the primitives, so the code says exactly what the picture</span>
-<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>means. That is a deliberate house choice, not a limitation.</span>
-<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a><span class="fu">## Where scikit-learn fits</span></span>
-<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>For *applied* machine learning — the [ML track](../../content/ml-track/index.qmd) put to work — **scikit-learn**</span>
-<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>gives every model the same three-verb interface, which is most of what makes Python pleasant for ML:</span>
-<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@murphy_ml; @islr</span><span class="co">]</span></span>
-<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
-<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> Lasso</span>
-<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>Xtr, Xte, ytr, yte <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.3</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Lasso(alpha<span class="op">=</span><span class="fl">0.1</span>).fit(Xtr, ytr)     <span class="co"># fit</span></span>
-<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>pred  <span class="op">=</span> model.predict(Xte)                  <span class="co"># predict</span></span>
-<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>model.score(Xte, yte)                       <span class="co"># evaluate</span></span>
-<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a><span class="in">`fit`</span> / <span class="in">`predict`</span> / <span class="in">`score`</span> is the same for a random forest, a gradient booster, or a logistic regression — you</span>
-<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>swap the estimator and the workflow is unchanged. The concepts behind them live in the ML track; this is the</span>
-<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>tooling that runs them.</span>
-<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-monte-carlo-pi</span></span>
-<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Monte-Carlo estimation of π — simulation in one screen of numpy. Left: N random points dropped in the unit square; the fraction landing inside the quarter-circle (orange) is an estimate of its area, π/4, so 4× that fraction estimates π. Right: the running estimate over N draws converges on π (dashed line) at the √N rate the Law of Large Numbers guarantees. No formula for π is used — only random points and counting. This is the whole idea of Monte-Carlo methods, and the reason numpy's vectorised RNG matters."</span></span>
-<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
-<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">4000</span></span>
-<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>pts <span class="op">=</span> rng.random((N, <span class="dv">2</span>))                       <span class="co"># N points in the unit square</span></span>
-<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>inside <span class="op">=</span> (pts[:, <span class="dv">0</span>]<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> pts[:, <span class="dv">1</span>]<span class="op">**</span><span class="dv">2</span>) <span class="op">&lt;=</span> <span class="fl">1.0</span>  <span class="co"># inside the quarter circle?</span></span>
-<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>pi_running <span class="op">=</span> <span class="fl">4.0</span> <span class="op">*</span> np.cumsum(inside) <span class="op">/</span> np.arange(<span class="dv">1</span>, N <span class="op">+</span> <span class="dv">1</span>)</span>
-<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>fig, (axL, axR) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">8.6</span>, <span class="fl">4.2</span>),</span>
-<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>                               gridspec_kw<span class="op">=</span>{<span class="st">"width_ratios"</span>: [<span class="dv">1</span>, <span class="fl">1.15</span>]})</span>
-<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a><span class="co"># Left: the drops</span></span>
-<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>axL.scatter(pts[inside, <span class="dv">0</span>], pts[inside, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">5</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">"inside"</span>)</span>
-<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>axL.scatter(pts[<span class="op">~</span>inside, <span class="dv">0</span>], pts[<span class="op">~</span>inside, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">5</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">"outside"</span>)</span>
-<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> np.linspace(<span class="dv">0</span>, np.pi <span class="op">/</span> <span class="dv">2</span>, <span class="dv">100</span>)</span>
-<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>axL.plot(np.cos(theta), np.sin(theta), color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">2.0</span>)</span>
-<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>axL.set_aspect(<span class="st">"equal"</span>)<span class="op">;</span> axL.set_xlim(<span class="dv">0</span>, <span class="dv">1</span>)<span class="op">;</span> axL.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>axL.set_title(<span class="ss">f"</span><span class="sc">{</span>N<span class="sc">}</span><span class="ss"> random points  →  π ≈ </span><span class="sc">{</span>pi_running[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>axL.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
-<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>axL.grid(<span class="va">False</span>)</span>
-<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a><span class="co"># Right: convergence</span></span>
-<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>axR.plot(np.arange(<span class="dv">1</span>, N <span class="op">+</span> <span class="dv">1</span>), pi_running, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">1.6</span>)</span>
-<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a>axR.axhline(np.pi, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">1.2</span>, ls<span class="op">=</span>(<span class="dv">0</span>, (<span class="dv">4</span>, <span class="dv">3</span>)))</span>
-<span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a>axR.text(N, np.pi <span class="op">+</span> <span class="fl">0.04</span>, <span class="st">" π"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, va<span class="op">=</span><span class="st">"bottom"</span>, ha<span class="op">=</span><span class="st">"right"</span>)</span>
-<span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a>axR.set_xscale(<span class="st">"log"</span>)</span>
-<span id="cb6-125"><a href="#cb6-125" aria-hidden="true" tabindex="-1"></a>axR.set_ylim(<span class="fl">2.6</span>, <span class="fl">3.7</span>)</span>
-<span id="cb6-126"><a href="#cb6-126" aria-hidden="true" tabindex="-1"></a>axR.set_xlabel(<span class="st">"number of draws (log scale)"</span>)<span class="op">;</span> axR.set_ylabel(<span class="st">"running estimate of π"</span>)</span>
-<span id="cb6-127"><a href="#cb6-127" aria-hidden="true" tabindex="-1"></a>axR.set_title(<span class="st">"The estimate converges (LLN)"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb6-128"><a href="#cb6-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-129"><a href="#cb6-129" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Monte-Carlo π: random points and counting, nothing else"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
-<span id="cb6-130"><a href="#cb6-130" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb6-131"><a href="#cb6-131" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb6-132"><a href="#cb6-132" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-133"><a href="#cb6-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb6-135"><a href="#cb6-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-136"><a href="#cb6-136" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where the Python stack bites"}</span>
-<span id="cb6-137"><a href="#cb6-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-138"><a href="#cb6-138" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Float equality.** <span class="in">`0.1 + 0.2 == 0.3`</span> is <span class="in">`False`</span>. Compare with <span class="in">`np.isclose(a, b)`</span>, never <span class="in">`==`</span>, for</span>
-<span id="cb6-139"><a href="#cb6-139" aria-hidden="true" tabindex="-1"></a>  floating-point results.</span>
-<span id="cb6-140"><a href="#cb6-140" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-141"><a href="#cb6-141" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Broadcasting surprises.** A <span class="in">`(n,)`</span> vector and an <span class="in">`(n,1)`</span> column broadcast to an <span class="in">`(n,n)`</span> matrix — rarely what</span>
-<span id="cb6-142"><a href="#cb6-142" aria-hidden="true" tabindex="-1"></a>  you meant. Check <span class="in">`.shape`</span> when an operation returns something suspiciously large.</span>
-<span id="cb6-143"><a href="#cb6-143" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-144"><a href="#cb6-144" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Views vs copies.** Slicing an array returns a *view*; writing to it mutates the original. Use <span class="in">`.copy()`</span> when</span>
-<span id="cb6-145"><a href="#cb6-145" aria-hidden="true" tabindex="-1"></a>  you need independence, or track down a "why did my data change?" bug.</span>
-<span id="cb6-146"><a href="#cb6-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-147"><a href="#cb6-147" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leakage in scikit-learn.** Fit scalers/imputers on the **training split only**, then apply to test — do it on</span>
-<span id="cb6-148"><a href="#cb6-148" aria-hidden="true" tabindex="-1"></a>  the full data and your <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](../../content/04-predictive/cross-validation.qmd)</span> score is</span>
-<span id="cb6-149"><a href="#cb6-149" aria-hidden="true" tabindex="-1"></a>  optimistic. Use a <span class="in">`Pipeline`</span> so the preprocessing is refit inside each fold. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb6-150"><a href="#cb6-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-151"><a href="#cb6-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reaching for heavy libraries reflexively.** A histogram, a bootstrap, a projection — these are a few lines of</span>
-<span id="cb6-152"><a href="#cb6-152" aria-hidden="true" tabindex="-1"></a>  numpy. Pulling in <span class="in">`seaborn`</span>/<span class="in">`pandas`</span>/<span class="in">`sklearn`</span> for a one-liner adds dependencies and hides the mechanism the</span>
-<span id="cb6-153"><a href="#cb6-153" aria-hidden="true" tabindex="-1"></a>  figure is meant to show.</span>
-<span id="cb6-154"><a href="#cb6-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-155"><a href="#cb6-155" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb6-156"><a href="#cb6-156" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-157"><a href="#cb6-157" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb6-158"><a href="#cb6-158" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-159"><a href="#cb6-159" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb6-160"><a href="#cb6-160" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bruce, Bruce &amp; Gedeck, *Practical Statistics for Data Scientists*** — the numpy/pandas idiom for data work</span>
-<span id="cb6-161"><a href="#cb6-161" aria-hidden="true" tabindex="-1"></a>  and the resampling (bootstrap, permutation) simulations that vectorised RNG makes cheap.</span>
-<span id="cb6-162"><a href="#cb6-162" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Murphy, *Machine Learning: A Probabilistic Perspective***, and **James et al., *ISLR*** — the models behind</span>
-<span id="cb6-163"><a href="#cb6-163" aria-hidden="true" tabindex="-1"></a>  scikit-learn's estimators, the train/test discipline, and the leakage caution.</span>
-<span id="cb6-164"><a href="#cb6-164" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**This repository** — every figure is hand-built numpy + matplotlib; the Monte-Carlo π above is the template</span>
-<span id="cb6-165"><a href="#cb6-165" aria-hidden="true" tabindex="-1"></a>  for "simulate, then plot."</span>
-<span id="cb6-166"><a href="#cb6-166" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb6-167"><a href="#cb6-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-168"><a href="#cb6-168" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb6-169"><a href="#cb6-169" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-170"><a href="#cb6-170" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Runs:** the <span class="co">[</span><span class="ot">ML track</span><span class="co">](../../content/ml-track/index.qmd)</span> (concepts → scikit-learn estimators) and every</span>
-<span id="cb6-171"><a href="#cb6-171" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Monte-Carlo / simulation</span><span class="co">](../../content/01-foundations/simulation-and-monte-carlo.qmd)</span> argument.</span>
-<span id="cb6-172"><a href="#cb6-172" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Implements:** <span class="co">[</span><span class="ot">OLS in matrix form</span><span class="co">](../math/ols-in-matrix-form.qmd)</span> (<span class="in">`np.linalg.solve`</span>) and the</span>
-<span id="cb6-173"><a href="#cb6-173" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">bootstrap</span><span class="co">](../../content/02-inference/the-bootstrap.qmd)</span> (<span class="in">`rng.choice`</span>).</span>
-<span id="cb6-174"><a href="#cb6-174" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pairs with:** <span class="co">[</span><span class="ot">getting started in R</span><span class="co">](getting-started-in-r.qmd)</span> (the other half of the toolkit) and</span>
-<span id="cb6-175"><a href="#cb6-175" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">reproducible analysis with Quarto</span><span class="co">](reproducible-quarto.qmd)</span> (where both run, seeded).</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Python for Simulation &amp; ML"</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "The small set of Python tools behind every figure on this site: one for doing arithmetic on whole lists of numbers, one for drawing random numbers, one for plotting, and one for fitting machine-learning models."</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>Python earns its place here for two jobs. The first is simulation: make up random data thousands of times</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>and watch what a statistic does. The second is machine learning: fit a prediction model and check it on</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>data it has not seen. Every figure in this encyclopedia is drawn by hand with two Python packages, so the</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>code under each figure shows the whole computation. This page is the key to reading that code.</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Where you probably came from — and what you need"}</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>**You likely arrived from** <span class="co">[</span><span class="ot">simulation &amp; Monte Carlo</span><span class="co">](../../content/01-foundations/simulation-and-monte-carlo.qmd)</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>or <span class="co">[</span><span class="ot">the bootstrap</span><span class="co">](../../content/02-inference/the-bootstrap.qmd)</span>, wanting to run the idea yourself; from the</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>"Show the figure code" fold under any figure on the site; or from the <span class="co">[</span><span class="ot">ML track</span><span class="co">](../../content/ml-track/index.qmd)</span>.</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>The question you came with is probably "what do <span class="in">`rng`</span>, <span class="in">`np.`</span> and <span class="in">`@`</span> mean in this code?"</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>**You need:** to recognise a variable and a function call (<span class="in">`name = value`</span>, <span class="in">`f(x)`</span>). If you have read</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">getting started in R</span><span class="co">](getting-started-in-r.qmd)</span>, most ideas carry straight over: a numpy array behaves much</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>like an R vector. **You don't need** to have written Python, or to know pandas or object-oriented</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>programming.</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>**Jump to what you came for:** <span class="co">[</span><span class="ot">the idea in words</span><span class="co">](#sec-idea)</span> · <span class="co">[</span><span class="ot">a bootstrap, line by line</span><span class="co">](#sec-by-hand)</span> ·</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">numpy arrays</span><span class="co">](#sec-numpy)</span> · <span class="co">[</span><span class="ot">randomness and simulation</span><span class="co">](#sec-random)</span> · <span class="co">[</span><span class="ot">linear algebra</span><span class="co">](#sec-linalg)</span> ·</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">matplotlib</span><span class="co">](#sec-mpl)</span> · <span class="co">[</span><span class="ot">scikit-learn</span><span class="co">](#sec-sklearn)</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>Many of the ideas in this encyclopedia are easiest to understand by simulating them. The bootstrap, a</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>permutation test, the Central Limit Theorem and the power of a study all come down to "generate data, compute</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>a statistic, repeat, look at the spread". Bruce &amp; Bruce present the bootstrap as exactly such a recipe</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>. Reinhart suggests the same check for power: simulate many artificial datasets with the</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>effect size you expect and count how often the test detects it <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>. A few lines of Python</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>carry out any of these recipes, and once you can read those lines you can change the inputs and rerun the</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>experiment.</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="fu">## The idea in words {#sec-idea}</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>Four tools, four jobs.</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**numpy** stores numbers as an **array**: a block of values of one type, like an R vector or a column of a</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>  spreadsheet. Arithmetic on an array applies to every element at once, with no loop.</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A random-number generator** (<span class="in">`rng`</span>) is a machine that produces random draws. You start it from a</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>  **seed**, a number that fixes which stream of random numbers you get, so the same seed always gives the same</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>  draws.</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**matplotlib** draws figures. A *figure* is the canvas; an *axes* is one panel on it; you add marks (lines,</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>  points, bars) to the axes one at a time.</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**scikit-learn** fits machine-learning models. Every model is used the same way: create it, <span class="in">`fit`</span> it on</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>  training data, <span class="in">`predict`</span> on new data.</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>Python code often reads as <span class="in">`thing.action()`</span>. The dot means "the action that belongs to this thing", so</span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="in">`x.mean()`</span> is the mean of <span class="in">`x`</span> and <span class="in">`rng.normal(...)`</span> asks the generator <span class="in">`rng`</span> for normal draws. A function</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>attached to an object like this is called a **method**.</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a><span class="fu">## A bootstrap, line by line {#sec-by-hand}</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>Bruce &amp; Bruce describe the bootstrap for a sample mean as an algorithm: draw a value from the sample, record</span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>it and put it back; repeat until you have as many values as the sample; record their mean; do all of that</span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>many times; then use the spread of the recorded means as the standard error <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>. Here it is in</span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>numpy, on a six-number sample. Lines starting with <span class="in">`#&gt;`</span> show the output.</span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.array([<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">23</span>, <span class="dv">42</span>])</span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>rng.choice(x, size<span class="op">=</span><span class="dv">6</span>, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; array([ 4, 23, 16, 15, 15, 42])</span></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>means <span class="op">=</span> np.array([rng.choice(x, size<span class="op">=</span><span class="dv">6</span>, replace<span class="op">=</span><span class="va">True</span>).mean() <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1000</span>)])</span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>means.std(ddof<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4.902136...</span></span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>np.percentile(means, [<span class="fl">2.5</span>, <span class="fl">97.5</span>])</span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; array([ 9.4958, 28.6667])</span></span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a>Reading it line by line:</span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span><span class="in">`import numpy as np`</span> loads numpy and lets you call it <span class="in">`np`</span> for short.</span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span><span class="in">`np.array([...])`</span> turns a Python list into an array: the sample of six numbers, with mean 18.</span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span><span class="in">`np.random.default_rng(42)`</span> creates a random-number generator from seed 42. Anyone who runs this gets the</span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a>   same draws.</span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span><span class="in">`rng.choice(x, size=6, replace=True)`</span> draws six values from <span class="in">`x`</span> **with replacement**, so a value can come</span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a>   up twice (15 does here) and another not at all (8). This is one **bootstrap resample**.</span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>The next line does that 1,000 times. <span class="in">`for _ in range(1000)`</span> means "repeat 1,000 times" (the <span class="in">`_`</span> is a</span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a>   name for a counter you don't use). Each time it takes the <span class="in">`.mean()`</span> of the resample, and <span class="in">`np.array(...)`</span></span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a>   collects the 1,000 means.</span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span><span class="in">`means.std(ddof=1)`</span> is their standard deviation, about 4.9: the bootstrap standard error of the mean.</span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a>   The textbook formula $s/\sqrt{n}$ gives 5.5. With only six numbers the two are close but not equal; the</span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a>   bootstrap needs no formula at all.</span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span><span class="in">`np.percentile(means, [2.5, 97.5])`</span> finds the values that cut off the lowest and highest 2.5% of the</span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a>   1,000 means. The middle 95% runs from about 9.5 to 28.7: a bootstrap confidence interval.</span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a>The <span class="in">`ddof=1`</span> matters. numpy's <span class="in">`.std()`</span> divides by $n$ unless told otherwise, so <span class="in">`x.std()`</span> gives 12.32, while</span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a>R's <span class="in">`sd(x)`</span> and <span class="in">`x.std(ddof=1)`</span> divide by $n-1$ and give 13.49. **ddof** stands for "delta degrees of</span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a>freedom", the number subtracted from $n$.</span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Jargon key — open if a term is unfamiliar"}</span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Package / module** — a bundle of code you load with <span class="in">`import`</span>; <span class="in">`np`</span> and <span class="in">`plt`</span> are the usual short names</span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a>  for numpy and matplotlib's plotting module.</span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Array (`ndarray`)** — numpy's block of numbers of one type; one-dimensional like a vector, or</span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a>  two-dimensional like a matrix.</span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Shape** — an array's size along each dimension: <span class="in">`(6,)`</span> for six numbers in a row, <span class="in">`(3, 2)`</span> for 3 rows and</span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a>  2 columns.</span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Axis** — one of those dimensions; <span class="in">`axis=0`</span> runs down the rows (so <span class="in">`mean(axis=0)`</span> averages each column).</span>
+<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Vectorised** — applied to every element at once, in fast compiled code, with no Python loop.</span>
+<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Broadcasting** — numpy's rule for combining arrays of different but compatible shapes by stretching the</span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a>  smaller one.</span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Method** — a function attached to an object, called with a dot: <span class="in">`x.mean()`</span>.</span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Generator and seed** — the random-number machine (<span class="in">`rng`</span>) and the number that fixes its stream.</span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**With replacement** — each drawn value is put back before the next draw, so it can be drawn again.</span>
+<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**View vs copy** — a view is a window onto an existing array (changing it changes the original); a copy is</span>
+<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a>  independent.</span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Estimator** — in scikit-learn, a model object with <span class="in">`fit`</span> and <span class="in">`predict`</span> methods.</span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a><span class="fu">## numpy: think in arrays {#sec-numpy}</span></span>
+<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a>numpy's <span class="in">`ndarray`</span> is Python's answer to R's vector: a homogeneous block of numbers that operations run over *all</span>
+<span id="cb7-120"><a href="#cb7-120" aria-hidden="true" tabindex="-1"></a>at once*, in fast compiled code, with **no Python loop**. It is the same habit as</span>
+<span id="cb7-121"><a href="#cb7-121" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">thinking in vectors in R</span><span class="co">](getting-started-in-r.qmd#sec-vectors)</span>.</span>
+<span id="cb7-122"><a href="#cb7-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-123"><a href="#cb7-123" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb7-124"><a href="#cb7-124" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-125"><a href="#cb7-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-126"><a href="#cb7-126" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.array([<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">23</span>, <span class="dv">42</span>])</span>
+<span id="cb7-127"><a href="#cb7-127" aria-hidden="true" tabindex="-1"></a>x <span class="op">*</span> <span class="dv">2</span>                    <span class="co"># array([ 8, 16, 30, 32, 46, 84]) — vectorised</span></span>
+<span id="cb7-128"><a href="#cb7-128" aria-hidden="true" tabindex="-1"></a>x[x <span class="op">&gt;</span> <span class="dv">15</span>]                <span class="co"># array([16, 23, 42])            — boolean mask</span></span>
+<span id="cb7-129"><a href="#cb7-129" aria-hidden="true" tabindex="-1"></a>x.mean(), x.std()        <span class="co"># reductions over the whole array (18.0 and 12.32: std divides by n)</span></span>
+<span id="cb7-130"><a href="#cb7-130" aria-hidden="true" tabindex="-1"></a>M <span class="op">=</span> np.ones((<span class="dv">3</span>, <span class="dv">2</span>))      <span class="co"># a 3x2 matrix of ones</span></span>
+<span id="cb7-131"><a href="#cb7-131" aria-hidden="true" tabindex="-1"></a>M <span class="op">@</span> M.T                  <span class="co"># matrix multiply (the @ operator)</span></span>
+<span id="cb7-132"><a href="#cb7-132" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-133"><a href="#cb7-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-134"><a href="#cb7-134" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** </span><span class="in">`x &gt; 15`</span><span class="at"> makes a list of True/False values, one per element, and </span><span class="in">`x[...]`</span><span class="at"> keeps the</span></span>
+<span id="cb7-135"><a href="#cb7-135" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; True ones. </span><span class="in">`M.T`</span><span class="at"> is </span><span class="in">`M`</span><span class="at"> turned on its side (its transpose), and </span><span class="in">`@`</span><span class="at"> multiplies matrices.</span></span>
+<span id="cb7-136"><a href="#cb7-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-137"><a href="#cb7-137" aria-hidden="true" tabindex="-1"></a>**Broadcasting** is the one idea to internalise: numpy stretches mismatched-but-compatible shapes so</span>
+<span id="cb7-138"><a href="#cb7-138" aria-hidden="true" tabindex="-1"></a><span class="in">`data - data.mean(axis=0)`</span> centres every column without a loop. It is the source of numpy's speed and,</span>
+<span id="cb7-139"><a href="#cb7-139" aria-hidden="true" tabindex="-1"></a>occasionally, of silent bugs (below).</span>
+<span id="cb7-140"><a href="#cb7-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-141"><a href="#cb7-141" aria-hidden="true" tabindex="-1"></a><span class="fu">## Randomness and simulation {#sec-random}</span></span>
+<span id="cb7-142"><a href="#cb7-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-143"><a href="#cb7-143" aria-hidden="true" tabindex="-1"></a>Simulation is numpy's quiet superpower. The modern interface is a **generator** seeded for</span>
+<span id="cb7-144"><a href="#cb7-144" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">reproducibility</span><span class="co">](reproducible-quarto.qmd)</span>:</span>
+<span id="cb7-145"><a href="#cb7-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-146"><a href="#cb7-146" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb7-147"><a href="#cb7-147" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)     <span class="co"># seeded generator</span></span>
+<span id="cb7-148"><a href="#cb7-148" aria-hidden="true" tabindex="-1"></a>rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, size<span class="op">=</span><span class="dv">1000</span>)         <span class="co"># draws from N(0,1)</span></span>
+<span id="cb7-149"><a href="#cb7-149" aria-hidden="true" tabindex="-1"></a>rng.integers(<span class="dv">0</span>, <span class="dv">6</span>, size<span class="op">=</span><span class="dv">10</span>)         <span class="co"># dice</span></span>
+<span id="cb7-150"><a href="#cb7-150" aria-hidden="true" tabindex="-1"></a>rng.choice(data, size<span class="op">=</span><span class="dv">100</span>, replace<span class="op">=</span><span class="va">True</span>)   <span class="co"># a bootstrap resample</span></span>
+<span id="cb7-151"><a href="#cb7-151" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-152"><a href="#cb7-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-153"><a href="#cb7-153" aria-hidden="true" tabindex="-1"></a>Draw, compute a statistic, repeat — that loop *is* the <span class="co">[</span><span class="ot">bootstrap</span><span class="co">](../../content/02-inference/the-bootstrap.qmd)</span>,</span>
+<span id="cb7-154"><a href="#cb7-154" aria-hidden="true" tabindex="-1"></a>a <span class="co">[</span><span class="ot">permutation test</span><span class="co">](../../content/02-inference/resampling-and-nonparametric-tests.qmd)</span>, and every</span>
+<span id="cb7-155"><a href="#cb7-155" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Monte-Carlo</span><span class="co">](../../content/01-foundations/simulation-and-monte-carlo.qmd)</span> argument in the book. In the</span>
+<span id="cb7-156"><a href="#cb7-156" aria-hidden="true" tabindex="-1"></a>bootstrap the resampling is always with replacement; in a permutation test the data are reshuffled without</span>
+<span id="cb7-157"><a href="#cb7-157" aria-hidden="true" tabindex="-1"></a>it <span class="co">[</span><span class="ot">@bruce_practical</span><span class="co">]</span>. The figure below is the canonical example.</span>
+<span id="cb7-158"><a href="#cb7-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-159"><a href="#cb7-159" aria-hidden="true" tabindex="-1"></a><span class="fu">## Linear algebra, done right {#sec-linalg}</span></span>
+<span id="cb7-160"><a href="#cb7-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-161"><a href="#cb7-161" aria-hidden="true" tabindex="-1"></a><span class="in">`np.linalg`</span> is where the <span class="co">[</span><span class="ot">matrix formulas</span><span class="co">](../math/ols-in-matrix-form.qmd)</span> become code — and it is why those</span>
+<span id="cb7-162"><a href="#cb7-162" aria-hidden="true" tabindex="-1"></a>entries **solve** rather than invert:</span>
+<span id="cb7-163"><a href="#cb7-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-164"><a href="#cb7-164" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb7-165"><a href="#cb7-165" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)   <span class="co"># normal equations — do this</span></span>
+<span id="cb7-166"><a href="#cb7-166" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.inv(X.T <span class="op">@</span> X) <span class="op">@</span> X.T <span class="op">@</span> y    <span class="co"># mathematically equal, numerically worse</span></span>
+<span id="cb7-167"><a href="#cb7-167" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-168"><a href="#cb7-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-169"><a href="#cb7-169" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** both lines compute the least-squares coefficients $\hat\beta = (X^\top X)^{-1}X^\top y$.</span></span>
+<span id="cb7-170"><a href="#cb7-170" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; The first asks numpy to solve the equations $X^\top X\,\beta = X^\top y$ directly; the second first builds</span></span>
+<span id="cb7-171"><a href="#cb7-171" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; the inverse matrix and then multiplies, which is slower and loses more precision to rounding.</span></span>
+<span id="cb7-172"><a href="#cb7-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-173"><a href="#cb7-173" aria-hidden="true" tabindex="-1"></a><span class="in">`solve`</span> (and <span class="in">`lstsq`</span>, or a QR/SVD) is faster and more stable than forming an explicit inverse — the practical</span>
+<span id="cb7-174"><a href="#cb7-174" aria-hidden="true" tabindex="-1"></a>lesson from OLS in matrix form, in one line. The <span class="co">[</span><span class="ot">coefficient plot</span><span class="co">](regressions-in-r.qmd#sec-tidy)</span> in the R</span>
+<span id="cb7-175"><a href="#cb7-175" aria-hidden="true" tabindex="-1"></a>regression appendix computes its estimates exactly this way.</span>
+<span id="cb7-176"><a href="#cb7-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-177"><a href="#cb7-177" aria-hidden="true" tabindex="-1"></a><span class="fu">## matplotlib is the figure engine {#sec-mpl}</span></span>
+<span id="cb7-178"><a href="#cb7-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-179"><a href="#cb7-179" aria-hidden="true" tabindex="-1"></a>Every plot in this encyclopedia is matplotlib, written by hand: a <span class="in">`figure`</span>, one or more <span class="in">`axes`</span>, and explicit</span>
+<span id="cb7-180"><a href="#cb7-180" aria-hidden="true" tabindex="-1"></a>marks. No <span class="in">`seaborn`</span>, no <span class="in">`ggplot`</span>-style grammar — just the primitives, so the code says exactly what the picture</span>
+<span id="cb7-181"><a href="#cb7-181" aria-hidden="true" tabindex="-1"></a>means. That is a deliberate house choice, not a limitation.</span>
+<span id="cb7-182"><a href="#cb7-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-183"><a href="#cb7-183" aria-hidden="true" tabindex="-1"></a>The pattern under every figure is the same three steps: <span class="in">`fig, ax = plt.subplots()`</span> makes the canvas and a</span>
+<span id="cb7-184"><a href="#cb7-184" aria-hidden="true" tabindex="-1"></a>panel; calls like <span class="in">`ax.plot(...)`</span>, <span class="in">`ax.scatter(...)`</span> and <span class="in">`ax.axhline(...)`</span> add marks; <span class="in">`ax.set_xlabel(...)`</span> and</span>
+<span id="cb7-185"><a href="#cb7-185" aria-hidden="true" tabindex="-1"></a><span class="in">`ax.set_title(...)`</span> label it. Reading those calls top to bottom tells you everything the figure shows.</span>
+<span id="cb7-186"><a href="#cb7-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-187"><a href="#cb7-187" aria-hidden="true" tabindex="-1"></a><span class="fu">## Where scikit-learn fits {#sec-sklearn}</span></span>
+<span id="cb7-188"><a href="#cb7-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-189"><a href="#cb7-189" aria-hidden="true" tabindex="-1"></a>For *applied* machine learning — the [ML track](../../content/ml-track/index.qmd) put to work — **scikit-learn**</span>
+<span id="cb7-190"><a href="#cb7-190" aria-hidden="true" tabindex="-1"></a>gives every model the same three-verb interface, which is most of what makes Python pleasant for ML. The</span>
+<span id="cb7-191"><a href="#cb7-191" aria-hidden="true" tabindex="-1"></a>models themselves (the lasso, trees, boosting) are what Murphy and ISLR explain <span class="co">[</span><span class="ot">@murphy_ml; @islr</span><span class="co">]</span>.</span>
+<span id="cb7-192"><a href="#cb7-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-193"><a href="#cb7-193" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb7-194"><a href="#cb7-194" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> Lasso</span>
+<span id="cb7-195"><a href="#cb7-195" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb7-196"><a href="#cb7-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-197"><a href="#cb7-197" aria-hidden="true" tabindex="-1"></a>Xtr, Xte, ytr, yte <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.3</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb7-198"><a href="#cb7-198" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Lasso(alpha<span class="op">=</span><span class="fl">0.1</span>).fit(Xtr, ytr)     <span class="co"># fit</span></span>
+<span id="cb7-199"><a href="#cb7-199" aria-hidden="true" tabindex="-1"></a>pred  <span class="op">=</span> model.predict(Xte)                  <span class="co"># predict</span></span>
+<span id="cb7-200"><a href="#cb7-200" aria-hidden="true" tabindex="-1"></a>model.score(Xte, yte)                       <span class="co"># evaluate</span></span>
+<span id="cb7-201"><a href="#cb7-201" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-202"><a href="#cb7-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-203"><a href="#cb7-203" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** hold back 30% of the rows as a test set; fit a lasso on the other 70%; predict the</span></span>
+<span id="cb7-204"><a href="#cb7-204" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; held-back rows; score how well the predictions match. The test rows play no part in the fit, which is the</span></span>
+<span id="cb7-205"><a href="#cb7-205" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; point: ISLR's validation-set approach estimates test error on observations the model never saw </span><span class="co">[</span><span class="ot">@islr</span><span class="co">]</span><span class="at">.</span></span>
+<span id="cb7-206"><a href="#cb7-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-207"><a href="#cb7-207" aria-hidden="true" tabindex="-1"></a><span class="in">`fit`</span> / <span class="in">`predict`</span> / <span class="in">`score`</span> is the same for a random forest, a gradient booster, or a logistic regression — you</span>
+<span id="cb7-208"><a href="#cb7-208" aria-hidden="true" tabindex="-1"></a>swap the estimator and the workflow is unchanged. The concepts behind them live in the ML track; this is the</span>
+<span id="cb7-209"><a href="#cb7-209" aria-hidden="true" tabindex="-1"></a>tooling that runs them.</span>
+<span id="cb7-210"><a href="#cb7-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-213"><a href="#cb7-213" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb7-214"><a href="#cb7-214" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-monte-carlo-pi</span></span>
+<span id="cb7-215"><a href="#cb7-215" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Monte-Carlo estimation of π — simulation in one screen of numpy. Left: N random points dropped in the unit square; the fraction landing inside the quarter-circle (orange) is an estimate of its area, π/4, so 4× that fraction estimates π. Right: the running estimate over N draws converges on π (dashed line) at the √N rate the Law of Large Numbers guarantees. No formula for π is used — only random points and counting. This is the whole idea of Monte-Carlo methods, and the reason numpy's vectorised RNG matters."</span></span>
+<span id="cb7-216"><a href="#cb7-216" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb7-217"><a href="#cb7-217" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb7-218"><a href="#cb7-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-219"><a href="#cb7-219" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-220"><a href="#cb7-220" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-221"><a href="#cb7-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-222"><a href="#cb7-222" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
+<span id="cb7-223"><a href="#cb7-223" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">4000</span></span>
+<span id="cb7-224"><a href="#cb7-224" aria-hidden="true" tabindex="-1"></a>pts <span class="op">=</span> rng.random((N, <span class="dv">2</span>))                       <span class="co"># N points in the unit square</span></span>
+<span id="cb7-225"><a href="#cb7-225" aria-hidden="true" tabindex="-1"></a>inside <span class="op">=</span> (pts[:, <span class="dv">0</span>]<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> pts[:, <span class="dv">1</span>]<span class="op">**</span><span class="dv">2</span>) <span class="op">&lt;=</span> <span class="fl">1.0</span>  <span class="co"># inside the quarter circle?</span></span>
+<span id="cb7-226"><a href="#cb7-226" aria-hidden="true" tabindex="-1"></a>pi_running <span class="op">=</span> <span class="fl">4.0</span> <span class="op">*</span> np.cumsum(inside) <span class="op">/</span> np.arange(<span class="dv">1</span>, N <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb7-227"><a href="#cb7-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-228"><a href="#cb7-228" aria-hidden="true" tabindex="-1"></a>fig, (axL, axR) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">8.6</span>, <span class="fl">4.2</span>),</span>
+<span id="cb7-229"><a href="#cb7-229" aria-hidden="true" tabindex="-1"></a>                               gridspec_kw<span class="op">=</span>{<span class="st">"width_ratios"</span>: [<span class="dv">1</span>, <span class="fl">1.15</span>]})</span>
+<span id="cb7-230"><a href="#cb7-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-231"><a href="#cb7-231" aria-hidden="true" tabindex="-1"></a><span class="co"># Left: the drops</span></span>
+<span id="cb7-232"><a href="#cb7-232" aria-hidden="true" tabindex="-1"></a>axL.scatter(pts[inside, <span class="dv">0</span>], pts[inside, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">5</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">"inside"</span>)</span>
+<span id="cb7-233"><a href="#cb7-233" aria-hidden="true" tabindex="-1"></a>axL.scatter(pts[<span class="op">~</span>inside, <span class="dv">0</span>], pts[<span class="op">~</span>inside, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">5</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">"outside"</span>)</span>
+<span id="cb7-234"><a href="#cb7-234" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> np.linspace(<span class="dv">0</span>, np.pi <span class="op">/</span> <span class="dv">2</span>, <span class="dv">100</span>)</span>
+<span id="cb7-235"><a href="#cb7-235" aria-hidden="true" tabindex="-1"></a>axL.plot(np.cos(theta), np.sin(theta), color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">2.0</span>)</span>
+<span id="cb7-236"><a href="#cb7-236" aria-hidden="true" tabindex="-1"></a>axL.set_aspect(<span class="st">"equal"</span>)<span class="op">;</span> axL.set_xlim(<span class="dv">0</span>, <span class="dv">1</span>)<span class="op">;</span> axL.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb7-237"><a href="#cb7-237" aria-hidden="true" tabindex="-1"></a>axL.set_title(<span class="ss">f"</span><span class="sc">{</span>N<span class="sc">}</span><span class="ss"> random points  →  π ≈ </span><span class="sc">{</span>pi_running[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb7-238"><a href="#cb7-238" aria-hidden="true" tabindex="-1"></a>axL.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
+<span id="cb7-239"><a href="#cb7-239" aria-hidden="true" tabindex="-1"></a>axL.grid(<span class="va">False</span>)</span>
+<span id="cb7-240"><a href="#cb7-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-241"><a href="#cb7-241" aria-hidden="true" tabindex="-1"></a><span class="co"># Right: convergence</span></span>
+<span id="cb7-242"><a href="#cb7-242" aria-hidden="true" tabindex="-1"></a>axR.plot(np.arange(<span class="dv">1</span>, N <span class="op">+</span> <span class="dv">1</span>), pi_running, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">1.6</span>)</span>
+<span id="cb7-243"><a href="#cb7-243" aria-hidden="true" tabindex="-1"></a>axR.axhline(np.pi, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">1.2</span>, ls<span class="op">=</span>(<span class="dv">0</span>, (<span class="dv">4</span>, <span class="dv">3</span>)))</span>
+<span id="cb7-244"><a href="#cb7-244" aria-hidden="true" tabindex="-1"></a>axR.text(N, np.pi <span class="op">+</span> <span class="fl">0.04</span>, <span class="st">" π"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, va<span class="op">=</span><span class="st">"bottom"</span>, ha<span class="op">=</span><span class="st">"right"</span>)</span>
+<span id="cb7-245"><a href="#cb7-245" aria-hidden="true" tabindex="-1"></a>axR.set_xscale(<span class="st">"log"</span>)</span>
+<span id="cb7-246"><a href="#cb7-246" aria-hidden="true" tabindex="-1"></a>axR.set_ylim(<span class="fl">2.6</span>, <span class="fl">3.7</span>)</span>
+<span id="cb7-247"><a href="#cb7-247" aria-hidden="true" tabindex="-1"></a>axR.set_xlabel(<span class="st">"number of draws (log scale)"</span>)<span class="op">;</span> axR.set_ylabel(<span class="st">"running estimate of π"</span>)</span>
+<span id="cb7-248"><a href="#cb7-248" aria-hidden="true" tabindex="-1"></a>axR.set_title(<span class="st">"The estimate converges (LLN)"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb7-249"><a href="#cb7-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-250"><a href="#cb7-250" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Monte-Carlo π: random points and counting, nothing else"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb7-251"><a href="#cb7-251" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb7-252"><a href="#cb7-252" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb7-253"><a href="#cb7-253" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-254"><a href="#cb7-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-255"><a href="#cb7-255" aria-hidden="true" tabindex="-1"></a>Reading the figure code with the jargon key: <span class="in">`rng.random((N, 2))`</span> is an array of shape <span class="in">`(4000, 2)`</span>, one row</span>
+<span id="cb7-256"><a href="#cb7-256" aria-hidden="true" tabindex="-1"></a>per point; <span class="in">`inside`</span> is a True/False array; <span class="in">`np.cumsum(inside)`</span> is the running count of hits, so dividing by</span>
+<span id="cb7-257"><a href="#cb7-257" aria-hidden="true" tabindex="-1"></a><span class="in">`1, 2, …, N`</span> gives the running fraction. Everything is vectorised; there is no loop over points.</span>
+<span id="cb7-258"><a href="#cb7-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-259"><a href="#cb7-259" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb7-260"><a href="#cb7-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-261"><a href="#cb7-261" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where the Python stack bites"}</span>
+<span id="cb7-262"><a href="#cb7-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-263"><a href="#cb7-263" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Float equality.** <span class="in">`0.1 + 0.2 == 0.3`</span> is <span class="in">`False`</span> (the sum is stored as 0.30000000000000004). Compare with</span>
+<span id="cb7-264"><a href="#cb7-264" aria-hidden="true" tabindex="-1"></a>  <span class="in">`np.isclose(a, b)`</span>, never <span class="in">`==`</span>, for floating-point results.</span>
+<span id="cb7-265"><a href="#cb7-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-266"><a href="#cb7-266" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The `std` default.** <span class="in">`x.std()`</span> divides by $n$, not $n-1$: 12.32 rather than R's 13.49 for the six-number</span>
+<span id="cb7-267"><a href="#cb7-267" aria-hidden="true" tabindex="-1"></a>  example. Pass <span class="in">`ddof=1`</span> when you want the sample standard deviation.</span>
+<span id="cb7-268"><a href="#cb7-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-269"><a href="#cb7-269" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Broadcasting surprises.** A <span class="in">`(n,)`</span> vector and an <span class="in">`(n,1)`</span> column broadcast to an <span class="in">`(n,n)`</span> matrix — rarely what</span>
+<span id="cb7-270"><a href="#cb7-270" aria-hidden="true" tabindex="-1"></a>  you meant. Check <span class="in">`.shape`</span> when an operation returns something suspiciously large.</span>
+<span id="cb7-271"><a href="#cb7-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-272"><a href="#cb7-272" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Views vs copies.** Slicing an array returns a *view*; writing to it mutates the original. Use <span class="in">`.copy()`</span> when</span>
+<span id="cb7-273"><a href="#cb7-273" aria-hidden="true" tabindex="-1"></a>  you need independence, or track down a "why did my data change?" bug.</span>
+<span id="cb7-274"><a href="#cb7-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-275"><a href="#cb7-275" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leakage in scikit-learn.** Fit scalers/imputers on the **training split only**, then apply to test — do it on</span>
+<span id="cb7-276"><a href="#cb7-276" aria-hidden="true" tabindex="-1"></a>  the full data and your <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](../../content/04-predictive/cross-validation.qmd)</span> score is</span>
+<span id="cb7-277"><a href="#cb7-277" aria-hidden="true" tabindex="-1"></a>  optimistic. Use a <span class="in">`Pipeline`</span> so the preprocessing is refit inside each fold. This is ISLR's rule that test</span>
+<span id="cb7-278"><a href="#cb7-278" aria-hidden="true" tabindex="-1"></a>  observations play no part in fitting <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span>, applied to preprocessing as well as to the model.</span>
+<span id="cb7-279"><a href="#cb7-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-280"><a href="#cb7-280" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reaching for heavy libraries reflexively.** A histogram, a bootstrap, a projection — these are a few lines of</span>
+<span id="cb7-281"><a href="#cb7-281" aria-hidden="true" tabindex="-1"></a>  numpy. Pulling in <span class="in">`seaborn`</span>/<span class="in">`pandas`</span>/<span class="in">`sklearn`</span> for a one-liner adds dependencies and hides the mechanism the</span>
+<span id="cb7-282"><a href="#cb7-282" aria-hidden="true" tabindex="-1"></a>  figure is meant to show.</span>
+<span id="cb7-283"><a href="#cb7-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-284"><a href="#cb7-284" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-285"><a href="#cb7-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-286"><a href="#cb7-286" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb7-287"><a href="#cb7-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-288"><a href="#cb7-288" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb7-289"><a href="#cb7-289" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bruce &amp; Bruce, *Practical Statistics for Data Scientists*** — the bootstrap as an explicit resampling</span>
+<span id="cb7-290"><a href="#cb7-290" aria-hidden="true" tabindex="-1"></a>  algorithm (draw with replacement, record the statistic, repeat, use the spread), and the</span>
+<span id="cb7-291"><a href="#cb7-291" aria-hidden="true" tabindex="-1"></a>  bootstrap-vs-permutation distinction. The corpus copy is the 2017 first edition, whose code is in R; the</span>
+<span id="cb7-292"><a href="#cb7-292" aria-hidden="true" tabindex="-1"></a>  Python translation here is this encyclopedia's.</span>
+<span id="cb7-293"><a href="#cb7-293" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reinhart, *Statistics Done Wrong*** — estimating power by simulating many artificial datasets.</span>
+<span id="cb7-294"><a href="#cb7-294" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Murphy, *Machine Learning: A Probabilistic Perspective***, and **James et al., *ISLR*** — the models behind</span>
+<span id="cb7-295"><a href="#cb7-295" aria-hidden="true" tabindex="-1"></a>  scikit-learn's estimators and the train/test discipline (the validation-set approach).</span>
+<span id="cb7-296"><a href="#cb7-296" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**What the corpus does not cover:** none of the source texts teaches numpy, matplotlib or scikit-learn as</span>
+<span id="cb7-297"><a href="#cb7-297" aria-hidden="true" tabindex="-1"></a>  software. Function names and behaviour on this page (<span class="in">`default_rng`</span>, <span class="in">`ddof`</span>, broadcasting, views,</span>
+<span id="cb7-298"><a href="#cb7-298" aria-hidden="true" tabindex="-1"></a>  <span class="in">`fit`</span>/<span class="in">`predict`</span>/<span class="in">`score`</span>) are standard library behaviour, checked by running the code, and are not</span>
+<span id="cb7-299"><a href="#cb7-299" aria-hidden="true" tabindex="-1"></a>  attributed to any source. An earlier version of this page credited the numpy idiom to Bruce &amp; Bruce and</span>
+<span id="cb7-300"><a href="#cb7-300" aria-hidden="true" tabindex="-1"></a>  the leakage caution to ISLR; both credits were broader than the texts support.</span>
+<span id="cb7-301"><a href="#cb7-301" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**This repository** — every figure is hand-built numpy + matplotlib; the Monte-Carlo π above is the template</span>
+<span id="cb7-302"><a href="#cb7-302" aria-hidden="true" tabindex="-1"></a>  for "simulate, then plot."</span>
+<span id="cb7-303"><a href="#cb7-303" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-304"><a href="#cb7-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-305"><a href="#cb7-305" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb7-306"><a href="#cb7-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-307"><a href="#cb7-307" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Runs:** the <span class="co">[</span><span class="ot">ML track</span><span class="co">](../../content/ml-track/index.qmd)</span> (concepts → scikit-learn estimators) and every</span>
+<span id="cb7-308"><a href="#cb7-308" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Monte-Carlo / simulation</span><span class="co">](../../content/01-foundations/simulation-and-monte-carlo.qmd)</span> argument.</span>
+<span id="cb7-309"><a href="#cb7-309" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Implements:** <span class="co">[</span><span class="ot">OLS in matrix form</span><span class="co">](../math/ols-in-matrix-form.qmd)</span> (<span class="in">`np.linalg.solve`</span>) and the</span>
+<span id="cb7-310"><a href="#cb7-310" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">bootstrap</span><span class="co">](../../content/02-inference/the-bootstrap.qmd)</span> (<span class="in">`rng.choice`</span>).</span>
+<span id="cb7-311"><a href="#cb7-311" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pairs with:** <span class="co">[</span><span class="ot">getting started in R</span><span class="co">](getting-started-in-r.qmd)</span> (the other half of the toolkit) and</span>
+<span id="cb7-312"><a href="#cb7-312" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">reproducible analysis with Quarto</span><span class="co">](reproducible-quarto.qmd)</span> (where both run, seeded).</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

@@ -1942,10 +1942,13 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-model-formula" id="toc-the-model-formula" class="nav-link active" data-scroll-target="#the-model-formula">The model formula</a></li>
-  <li><a href="#reading-summary" id="toc-reading-summary" class="nav-link" data-scroll-target="#reading-summary">Reading <code>summary()</code></a></li>
-  <li><a href="#tidy-output-you-can-compute-with" id="toc-tidy-output-you-can-compute-with" class="nav-link" data-scroll-target="#tidy-output-you-can-compute-with">Tidy output you can compute with</a></li>
-  <li><a href="#predictions-and-a-first-diagnostic-look" id="toc-predictions-and-a-first-diagnostic-look" class="nav-link" data-scroll-target="#predictions-and-a-first-diagnostic-look">Predictions and a first diagnostic look</a></li>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#sec-idea" id="toc-sec-idea" class="nav-link" data-scroll-target="#sec-idea">The idea in words</a></li>
+  <li><a href="#sec-by-hand" id="toc-sec-by-hand" class="nav-link" data-scroll-target="#sec-by-hand">A five-row regression, by hand</a></li>
+  <li><a href="#sec-formula" id="toc-sec-formula" class="nav-link" data-scroll-target="#sec-formula">The model formula</a></li>
+  <li><a href="#sec-summary" id="toc-sec-summary" class="nav-link" data-scroll-target="#sec-summary">Reading <code>summary()</code></a></li>
+  <li><a href="#sec-tidy" id="toc-sec-tidy" class="nav-link" data-scroll-target="#sec-tidy">Tidy output you can compute with</a></li>
+  <li><a href="#sec-predict" id="toc-sec-predict" class="nav-link" data-scroll-target="#sec-predict">Predictions and a first diagnostic look</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
   <li><a href="#connections" id="toc-connections" class="nav-link" data-scroll-target="#connections">Connections</a></li>
@@ -1958,7 +1961,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Appendices</li><li class="breadcrumb-item"><a href="../../appendices/computing/index.html">Computing</a></li><li class="breadcrumb-item"><a href="../../appendices/computing/regressions-in-r.html">Reading &amp; Running Regressions in R</a></li></ol></nav>
 <div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">Reading &amp; Running Regressions in R</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
-<p class="subtitle lead">The three-line workflow — <code>lm()</code>, <code>summary()</code>, <code>broom::tidy()</code> — and, more importantly, how to <em>read</em> what comes back: which numbers are the estimates, which are the uncertainty, and which ones people misread.</p>
+<p class="subtitle lead">Fitting a regression in R takes one line. Reading what comes back takes practice: which numbers are the estimates, which measure their uncertainty, and which ones people misread.</p>
 </div>
 
 
@@ -1976,100 +1979,197 @@ window.Quarto = {
 
 
 <div class="lead-kernel">
-<p>Fitting a regression in R is one line; the skill is reading the output. <code>lm(y ~ x1 + x2, data)</code> estimates the model, <code>summary()</code> prints the coefficient table, and <code>broom::tidy()</code> turns that table into a tidy data frame you can plot or filter. This entry is a <strong>reference for the output</strong>, not a theory of regression — the theory lives in <a href="../../content/03-regression/index.html">Part III</a> and the matrix algebra in <a href="../../appendices/math/ols-in-matrix-form.html">OLS in matrix form</a>. Here: what each column means, and how to show it honestly.</p>
+<p>R fits a regression with a single command and prints a table. Most of the skill is in reading that table: each row is one predictor, the first number is its estimated effect, the second is how uncertain that estimate is, and the rest are ways of asking whether the effect could plausibly be zero. This page decodes the table, then shows how to turn it into a picture that tells the truth.</p>
 </div>
-<section id="the-model-formula" class="level2">
-<h2 class="anchored" data-anchor-id="the-model-formula">The model formula</h2>
-<p>R’s modelling verbs share one interface: the <strong>formula</strong>. <code>y ~ x1 + x2</code> reads “<code>y</code> explained by <code>x1</code> and <code>x2</code>”; the intercept is included automatically. A few idioms cover most needs: <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># fit: outcome ~ predictors, from a data frame</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lm</span>(wage <span class="sc">~</span> educ <span class="sc">+</span> exper <span class="sc">+</span> female, <span class="at">data =</span> survey)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># formula idioms</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2,      <span class="at">data =</span> d)   <span class="co"># additive</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">*</span> x2,      <span class="at">data =</span> d)   <span class="co"># x1, x2, and their interaction (x1:x2)</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="fu">poly</span>(x, <span class="dv">2</span>),   <span class="at">data =</span> d)   <span class="co"># quadratic in x</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="fu">factor</span>(grp),  <span class="at">data =</span> d)   <span class="co"># categorical -&gt; dummies, first level = baseline</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> . <span class="sc">-</span> id,       <span class="at">data =</span> d)   <span class="co"># every column except id</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>A <strong>categorical</strong> predictor becomes a set of indicator columns automatically; R holds one level out as the <strong>reference</strong>, and every other level’s coefficient is a contrast <em>against that baseline</em> — the single most common source of “why is my category missing?” confusion. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Where you probably came from — and what you need">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Where you probably came from — and what you need
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>You likely arrived from</strong> <a href="../../content/03-regression/multiple-regression.html">multiple regression</a> or <a href="../../content/03-regression/inference-for-regression.html">inference for regression</a>, wanting to see those ideas as software output, or from <a href="../../appendices/computing/getting-started-in-r.html">getting started in R</a>. The question you came with is probably “I ran <code>lm()</code> and got a wall of numbers. Which ones matter?”</p>
+<p><strong>You need:</strong> the idea of a fitted line (an intercept and a slope) and of a standard error, from <a href="../../content/03-regression/index.html">Part III</a>; enough R to read <code>name &lt;- value</code> and <code>f(x)</code>, from <a href="../../appendices/computing/getting-started-in-r.html">getting started in R</a>. <strong>You don’t need</strong> the matrix algebra. It lives in <a href="../../appendices/math/ols-in-matrix-form.html">OLS in matrix form</a>, and this page only points to it.</p>
+<p><strong>Jump to what you came for:</strong> <a href="#sec-idea">the idea in words</a> · <a href="#sec-by-hand">a five-row regression, by hand</a> · <a href="#sec-formula">the model formula</a> · <a href="#sec-summary">reading <code>summary()</code></a> · <a href="#sec-tidy">tidy output and the coefficient plot</a> · <a href="#sec-predict">predictions and diagnostics</a></p>
+</div>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p>Almost every quantitative paper in the social sciences reports a regression table, and almost every one was produced by software like this. Misreading it is easy and common. People treat significance stars as a measure of importance, forget which category a dummy variable is being compared against, or trust standard errors that rest on an assumption the data break. Each of those mistakes is a misreading of one column <span class="citation" data-cites="reinhart_swrong wooldridge_intro">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>; <a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>. Reading the output correctly is the step between knowing regression theory and using it.</p>
 </section>
-<section id="reading-summary" class="level2">
-<h2 class="anchored" data-anchor-id="reading-summary">Reading <code>summary()</code></h2>
-<p><code>summary(m)</code> prints the table everyone stares at. The columns, decoded: <span class="citation" data-cites="mcnulty_rmodeling wooldridge_intro">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>; <a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|)</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)   1.9421     0.2033    9.55  &lt; 2e-16 ***</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; educ          0.4127     0.0158   26.12  &lt; 2e-16 ***</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper         0.0051     0.0049    1.04  0.29863</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; female       -0.3311     0.0921   -3.60  0.00033 ***</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 1.41 on 996 degrees of freedom</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared: 0.318,  Adjusted R-squared: 0.316</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 154.7 on 3 and 996 DF,  p-value: &lt; 2.2e-16</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-idea" class="level2">
+<h2 class="anchored" data-anchor-id="sec-idea">The idea in words</h2>
+<p>Think of <code>summary()</code> as a report card with one row per predictor.</p>
 <ul>
-<li><strong>Estimate</strong> — the fitted coefficient <span class="math inline">\hat\beta_j</span>: the change in the outcome for a one-unit change in that predictor, <em>holding the others fixed</em>. The intercept is the fitted outcome when every predictor is zero.</li>
-<li><strong>Std. Error</strong> — the estimated standard deviation of that coefficient across hypothetical repeated samples; the ruler for how precisely it is pinned down. It is <span class="math inline">\sqrt{\hat\sigma^2\,[(X^\top X)^{-1}]_{jj}}</span> from the <a href="../../appendices/math/ols-in-matrix-form.html">matrix formula</a>. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></li>
-<li><strong>t value</strong> = Estimate / Std. Error — how many standard errors the estimate sits from zero.</li>
-<li><strong>Pr(&gt;|t|)</strong> — the two-sided <span class="math inline">p</span>-value for <span class="math inline">H_0:\beta_j=0</span>. The stars are a significance shorthand, <strong>not</strong> an importance ranking. <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span></li>
-<li><strong>Residual standard error</strong> — <span class="math inline">\hat\sigma</span>, the typical size of a residual, in the outcome’s units.</li>
-<li><strong>R-squared / Adjusted</strong> — the share of outcome variance the model explains; <em>adjusted</em> penalises extra regressors so it can fall when you add a useless one. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></li>
-<li><strong>F-statistic</strong> — the joint test that <em>all</em> slopes are zero at once (the model-vs-intercept comparison).</li>
+<li><strong>The estimate</strong> is the grade: the fitted slope. It says how much the outcome changes, on average, when that predictor goes up by one unit and the other predictors stay where they are <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span>.</li>
+<li><strong>The standard error</strong> is how much that grade would wobble if you collected a fresh sample and fitted the model again. Small means the estimate is pinned down; large means it is loose.</li>
+<li><strong>The t value and p-value</strong> both ask one question: is the estimate far enough from zero, measured in standard errors, that “no effect at all” looks implausible?</li>
+<li><strong>The lines at the bottom</strong> grade the model as a whole: how big a typical miss is, what share of the outcome’s variation the predictors account for, and whether the model beats having no predictors at all.</li>
+</ul>
+<p>R produces the table in three steps. <code>lm()</code> fits the model and stores it as an object, <code>summary()</code> prints the table, and the <strong>broom</strong> package turns the same information into a data frame you can compute with or plot <span class="citation" data-cites="wickham_r4ds">(<a href="#ref-wickham_r4ds" role="doc-biblioref">Wickham et al. 2023</a>)</span>.</p>
+</section>
+<section id="sec-by-hand" class="level2">
+<h2 class="anchored" data-anchor-id="sec-by-hand">A five-row regression, by hand</h2>
+<p>Before reading a real table, build a tiny one where every number can be checked with a calculator. Five students report hours studied and a quiz score out of 10 (this encyclopedia’s own toy data). Lines starting with <code>#&gt;</code> show what R prints; the output is abridged, and every number in it was checked by hand.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">hours =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">score =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">5</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lm</span>(score <span class="sc">~</span> hours, <span class="at">data =</span> d)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)   2.2000     0.9381   2.345    0.101</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; hours         0.6000     0.2828   2.121    0.124</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 0.8944 on 3 degrees of freedom</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:    0.6,  Adjusted R-squared:  0.4667</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic:   4.5 on 1 and 3 DF,  p-value: 0.124</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Where each number comes from:</p>
+<ol type="1">
+<li><strong>Estimate, <code>hours</code> = 0.6.</strong> The average of the hours is 3 and of the scores is 4. Multiply each student’s distance from those averages and add up: <span class="math inline">(-2)(-2) + (-1)(0) + (0)(1) + (1)(0) + (2)(1) = 6</span>. Divide by the sum of squared hour-distances, <span class="math inline">4+1+0+1+4 = 10</span>. The slope is <span class="math inline">6/10 = 0.6</span>: one more hour, 0.6 more points on average.</li>
+<li><strong>Estimate, intercept = 2.2.</strong> The line passes through the two averages, so <span class="math inline">4 - 0.6\times 3 = 2.2</span>. That is the predicted score at zero hours.</li>
+<li><strong>Residuals.</strong> The line predicts 2.8, 3.4, 4.0, 4.6, 5.2. The misses are <span class="math inline">-0.8, 0.6, 1.0, -0.6, -0.2</span>, and their squares add up to 2.4.</li>
+<li><strong>Residual standard error = 0.894.</strong> Divide 2.4 by the <strong>degrees of freedom</strong>: 5 data points minus 2 estimated numbers = 3. That gives 0.8, and <span class="math inline">\sqrt{0.8} = 0.894</span>. A typical miss is just under one point.</li>
+<li><strong>Std. Error, <code>hours</code> = 0.283.</strong> <span class="math inline">\sqrt{0.8 / 10}</span>. More spread in hours (a bigger 10) would shrink it.</li>
+<li><strong>t value = 2.121.</strong> <span class="math inline">0.6 / 0.283</span>: the slope is a bit over two standard errors from zero.</li>
+<li><strong>Pr(&gt;|t|) = 0.124.</strong> With only 3 degrees of freedom, a t value that large happens about 12% of the time even when the true slope is zero, so the slope is not significant at the 5% level. A 95% interval for it runs from about <span class="math inline">-0.30</span> to <span class="math inline">1.50</span>. Five students cannot pin down the effect of an hour of study.</li>
+<li><strong>R-squared = 0.6.</strong> The scores vary by 6 in total (squared distances from 4: <span class="math inline">4+0+1+0+1</span>). The line leaves 2.4 of that unexplained, so it explains <span class="math inline">1 - 2.4/6 = 0.6</span>.</li>
+<li><strong>F = 4.5.</strong> With a single predictor, the F-test asks the same question as the slope’s t-test, and <span class="math inline">F = t^2 = 2.121^2 = 4.5</span>, with the same p-value.</li>
+</ol>
+<p>Every regression table, however large, is built from these same pieces.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Jargon key — open if a term is unfamiliar">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Jargon key — open if a term is unfamiliar
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Model object</strong> — what <code>lm()</code> returns and you store under a name (<code>m</code>). It holds the estimates, residuals, fitted values and more; other functions (<code>summary()</code>, <code>predict()</code>, <code>tidy()</code>) read from it.</li>
+<li><strong>Formula</strong> — the <code>y ~ x1 + x2</code> argument: outcome on the left of the <code>~</code> (“is explained by”), predictors on the right.</li>
+<li><strong>Coefficient / estimate</strong> — a fitted number in the model: the intercept or a slope, written <span class="math inline">\hat\beta_j</span>.</li>
+<li><strong>Residual</strong> — an observed outcome minus the model’s fitted value for it: the miss.</li>
+<li><strong>Degrees of freedom</strong> — the number of observations minus the number of estimated coefficients.</li>
+<li><strong>Standard error</strong> — the estimated standard deviation of an estimate across repeated samples.</li>
+<li><strong>t value</strong> — estimate divided by its standard error.</li>
+<li><strong>p-value</strong> — the probability of a t value at least this far from zero if the true coefficient were zero.</li>
+<li><strong><span class="math inline">R^2</span></strong> — the share of the outcome’s variation the model accounts for, between 0 and 1.</li>
+<li><strong>F-statistic</strong> — a test that all the slopes are zero at once.</li>
+<li><strong>Reference level</strong> — for a categorical predictor, the category left out and absorbed into the intercept.</li>
+<li><strong>Tidy data frame</strong> — a table with one row per thing (per coefficient, per model, per observation) and one column per measurement; what broom produces.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-formula" class="level2">
+<h2 class="anchored" data-anchor-id="sec-formula">The model formula</h2>
+<p>R’s modelling verbs share one interface: the <strong>formula</strong>. <code>y ~ x1 + x2</code> reads “<code>y</code> explained by <code>x1</code> and <code>x2</code>”; the intercept is included automatically. To estimate any model you need, at a minimum, a model function, some data and a formula <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span>. A few idioms cover most needs: <span class="citation" data-cites="mcnulty_rmodeling islr">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>; <a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># fit: outcome ~ predictors, from a data frame</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lm</span>(wage <span class="sc">~</span> educ <span class="sc">+</span> exper <span class="sc">+</span> female, <span class="at">data =</span> survey)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># formula idioms</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2,      <span class="at">data =</span> d)   <span class="co"># additive</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">*</span> x2,      <span class="at">data =</span> d)   <span class="co"># x1, x2, and their interaction (x1:x2)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="fu">poly</span>(x, <span class="dv">2</span>),   <span class="at">data =</span> d)   <span class="co"># quadratic in x</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="fu">factor</span>(grp),  <span class="at">data =</span> d)   <span class="co"># categorical -&gt; dummies, first level = baseline</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> . <span class="sc">-</span> id,       <span class="at">data =</span> d)   <span class="co"># every column except id</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> the formula is a sentence. <code>~</code> means “is explained by”, <code>+</code> means “and”, <code>*</code> means “and how they combine”, and <code>.</code> means “everything else in the data”.</p>
+</blockquote>
+<p>A <strong>categorical</strong> predictor becomes a set of indicator columns automatically; R holds one level out as the <strong>reference</strong>, and every other level’s coefficient is a contrast <em>against that baseline</em> — the single most common source of “why is my category missing?” confusion. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p>
+<p>McNulty’s income example shows it in numbers. Regressing annual income on months of education and gender, with women (<code>F</code>) as the reference, gives an intercept of 15,513 and a <code>genderM</code> coefficient of 16,762. After <code>relevel(ref = "M")</code>, the intercept becomes 32,276 (that is, 15,513 + 16,762) and the coefficient becomes <code>genderF</code> = −16,762. The education slope (269.8) does not move. Nothing about the data or the fit changed, only which group the intercept describes <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span>.</p>
+</section>
+<section id="sec-summary" class="level2">
+<h2 class="anchored" data-anchor-id="sec-summary">Reading <code>summary()</code></h2>
+<p><code>summary(m)</code> prints the table everyone stares at. Here is a real one: McNulty’s model of students’ final-year exam scores on their scores in years 1, 2 and 3, fitted to 975 students <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(full_model)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm(formula = Final ~ Yr1 + Yr2 + Yr3, data = ugtests)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept) 14.14599    5.48006   2.581  0.00999 **</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Yr1          0.07603    0.06538   1.163  0.24519</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Yr2          0.43129    0.03251  13.267  &lt; 2e-16 ***</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Yr3          0.86568    0.02914  29.710  &lt; 2e-16 ***</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 30.43 on 971 degrees of freedom</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.5303,  Adjusted R-squared:  0.5289</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 365.5 on 3 and 971 DF,  p-value: &lt; 2.2e-16</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The columns, decoded: <span class="citation" data-cites="mcnulty_rmodeling wooldridge_intro">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>; <a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></p>
+<ul>
+<li><p><strong>Estimate</strong> — the fitted coefficient <span class="math inline">\hat\beta_j</span>: the change in the outcome for a one-unit change in that predictor, <em>holding the others fixed</em>. The intercept is the fitted outcome when every predictor is zero. Here: among students with the same year-1 and year-2 scores, one more point in year 3 goes with about 0.87 more points in the final year.</p></li>
+<li><p><strong>Std. Error</strong> — the estimated standard deviation of that coefficient across hypothetical repeated samples; the ruler for how precisely it is pinned down. It is <span class="math inline">\sqrt{\hat\sigma^2\,[(X^\top X)^{-1}]_{jj}}</span> from the <a href="../../appendices/math/ols-in-matrix-form.html">matrix formula</a>. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> the typical size of a miss (<span class="math inline">\hat\sigma</span>), scaled by how much independent spread that predictor has. In the five-row example this was <span class="math inline">\sqrt{0.8/10}</span>.</p>
+</blockquote></li>
+<li><p><strong>t value</strong> = Estimate / Std. Error — how many standard errors the estimate sits from zero. Check one: <span class="math inline">0.86568 / 0.02914 = 29.7</span>.</p></li>
+<li><p><strong>Pr(&gt;|t|)</strong> — the two-sided <span class="math inline">p</span>-value for <span class="math inline">H_0:\beta_j=0</span>. The stars are a significance shorthand, <strong>not</strong> an importance ranking. <code>Yr1</code> has <span class="math inline">p = 0.245</span>: with years 2 and 3 already in the model, year 1 adds no detectable association. McNulty’s 95% interval for it, from <code>confint()</code>, runs from −0.05 to 0.20 and crosses zero.</p></li>
+<li><p><strong>Residual standard error</strong> — <span class="math inline">\hat\sigma</span>, the typical size of a residual, in the outcome’s units: about 30 exam points here.</p></li>
+<li><p><strong>R-squared / Adjusted</strong> — the share of outcome variance the model explains; <em>adjusted</em> penalises extra regressors so it can fall when you add a useless one. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span> Dropping <code>Yr1</code> moves <span class="math inline">R^2</span> only from 0.5303 to 0.5297 <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span>.</p></li>
+<li><p><strong>F-statistic</strong> — the joint test that <em>all</em> slopes are zero at once (the model-vs-intercept comparison). A high <span class="math inline">R^2</span> on a handful of observations can still fail it, and a low <span class="math inline">R^2</span> on a large dataset can pass <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span>.</p></li>
 </ul>
 </section>
-<section id="tidy-output-you-can-compute-with" class="level2">
-<h2 class="anchored" data-anchor-id="tidy-output-you-can-compute-with">Tidy output you can compute with</h2>
-<p><code>summary()</code> prints; it does not return something you can plot. <strong>broom</strong> turns model objects into tidy data frames — the bridge from a fitted model back into the <a href="../../content/dataframes/index.html">tidyverse workflow</a>: <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(m, <span class="at">conf.int =</span> <span class="cn">TRUE</span>)   <span class="co"># one row per coefficient: estimate, std.error, statistic, p.value, conf.low/high</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glance</span>(m)                  <span class="co"># one row for the whole model: r.squared, adj.r.squared, sigma, statistic, AIC, BIC, nobs</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">augment</span>(m)                 <span class="co"># original data + .fitted, .resid, .hat (leverage), .cooksd</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>tidy(..., conf.int = TRUE)</code> is the one to remember: a coefficient plus its 95% interval, ready to plot. A <strong>coefficient plot</strong> — each estimate as a dot with its confidence interval as a whisker — communicates a model far better than a wall of stars, because it shows <em>effect size and uncertainty together</em> and lets a reader see at a glance which intervals clear zero. <span class="citation" data-cites="kaplan_lessons">(<a href="#ref-kaplan_lessons" role="doc-biblioref">Kaplan 2024</a>)</span></p>
+<section id="sec-tidy" class="level2">
+<h2 class="anchored" data-anchor-id="sec-tidy">Tidy output you can compute with</h2>
+<p><code>summary()</code> prints; it does not return something you can plot. <strong>broom</strong> turns model objects into tidy data frames — the bridge from a fitted model back into the <a href="../../content/dataframes/index.html">tidyverse workflow</a>. It has three general tools: <code>glance()</code> gives one row per model, <code>tidy()</code> one row per coefficient, and <code>augment()</code> one row per observation of the data, with residuals and influence statistics added <span class="citation" data-cites="wickham_r4ds">(<a href="#ref-wickham_r4ds" role="doc-biblioref">Wickham et al. 2023</a>)</span>. Dayal uses <code>tidy()</code> the same way, to turn a table of robust-standard-error results into a formatted table for a report <span class="citation" data-cites="dayal_r_datascience">(<a href="#ref-dayal_r_datascience" role="doc-biblioref">Dayal 2020</a>)</span>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(m, <span class="at">conf.int =</span> <span class="cn">TRUE</span>)   <span class="co"># one row per coefficient: estimate, std.error, statistic, p.value, conf.low/high</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glance</span>(m)                  <span class="co"># one row for the whole model: r.squared, adj.r.squared, sigma, statistic, AIC, BIC, nobs</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">augment</span>(m)                 <span class="co"># original data + .fitted, .resid, .hat (leverage), .cooksd</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>tidy(..., conf.int = TRUE)</code> is the one to remember: a coefficient plus its 95% interval, ready to plot. A <strong>coefficient plot</strong> — each estimate as a dot with its confidence interval as a whisker — communicates a model far better than a wall of stars, because it shows <em>effect size and uncertainty together</em> and lets a reader see at a glance which intervals clear zero. <span class="citation" data-cites="kaplan_lessons">(<a href="#ref-kaplan_lessons" role="doc-biblioref">Kaplan 2024</a>)</span> A <span class="math inline">p</span>-value says nothing about how big an effect is; a confidence interval carries far more information <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span>.</p>
 <div id="cell-fig-coef-plot" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show the figure code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">5</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">600</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>educ   <span class="op">=</span> rng.normal(<span class="dv">13</span>, <span class="fl">2.5</span>, n)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>exper  <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.0</span>, n)              <span class="co"># a near-null control: no real effect</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>female <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, n).astype(<span class="bu">float</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.column_stack([np.ones(n), educ, exper, female])</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>beta_true <span class="op">=</span> np.array([<span class="fl">2.0</span>, <span class="fl">0.40</span>, <span class="fl">0.00</span>, <span class="op">-</span><span class="fl">0.33</span>])  <span class="co"># exper's true coefficient is zero</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> X <span class="op">@</span> beta_true <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.4</span>, n)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># OLS by the normal equations = exactly what lm() computes</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>resid <span class="op">=</span> y <span class="op">-</span> X <span class="op">@</span> beta</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>sigma2 <span class="op">=</span> resid <span class="op">@</span> resid <span class="op">/</span> (n <span class="op">-</span> X.shape[<span class="dv">1</span>])</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> sigma2 <span class="op">*</span> np.linalg.inv(X.T <span class="op">@</span> X)</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>se <span class="op">=</span> np.sqrt(np.diag(cov))</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>lo, hi <span class="op">=</span> beta <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se, beta <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>terms <span class="op">=</span> [<span class="st">"(Intercept)"</span>, <span class="st">"educ"</span>, <span class="st">"exper"</span>, <span class="st">"female"</span>]</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>ypos <span class="op">=</span> np.arange(<span class="bu">len</span>(terms))[::<span class="op">-</span><span class="dv">1</span>]                 <span class="co"># intercept on top</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co"># highlight the coefficients whose 95% interval clears zero</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>clears0 <span class="op">=</span> (lo <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">|</span> (hi <span class="op">&lt;</span> <span class="dv">0</span>)</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#e8531d"</span> <span class="cf">if</span> c <span class="cf">else</span> <span class="st">"#8a8a7e"</span> <span class="cf">for</span> c <span class="kw">in</span> clears0]</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.4</span>, <span class="fl">3.8</span>))</span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, lw<span class="op">=</span><span class="fl">1.2</span>, ls<span class="op">=</span>(<span class="dv">0</span>, (<span class="dv">4</span>, <span class="dv">3</span>)))</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> yi, b, l, h, c <span class="kw">in</span> <span class="bu">zip</span>(ypos, beta, lo, hi, colors):</span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    ax.plot([l, h], [yi, yi], color<span class="op">=</span>c, lw<span class="op">=</span><span class="fl">2.4</span>, solid_capstyle<span class="op">=</span><span class="st">"round"</span>)</span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    ax.plot(b, yi, <span class="st">"o"</span>, color<span class="op">=</span>c, ms<span class="op">=</span><span class="dv">7</span>, markeredgecolor<span class="op">=</span><span class="st">"#161613"</span>, markeredgewidth<span class="op">=</span><span class="fl">1.0</span>)</span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>ax.set_yticks(ypos)<span class="op">;</span> ax.set_yticklabels(terms)</span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"coefficient estimate  (95% CI)"</span>)</span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Show the interval, not the stars"</span>)</span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="op">-</span><span class="fl">0.6</span>, <span class="bu">len</span>(terms) <span class="op">-</span> <span class="fl">0.4</span>)</span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">5</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">600</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>educ   <span class="op">=</span> rng.normal(<span class="dv">13</span>, <span class="fl">2.5</span>, n)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>exper  <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.0</span>, n)              <span class="co"># a near-null control: no real effect</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>female <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, n).astype(<span class="bu">float</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.column_stack([np.ones(n), educ, exper, female])</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>beta_true <span class="op">=</span> np.array([<span class="fl">2.0</span>, <span class="fl">0.40</span>, <span class="fl">0.00</span>, <span class="op">-</span><span class="fl">0.33</span>])  <span class="co"># exper's true coefficient is zero</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> X <span class="op">@</span> beta_true <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.4</span>, n)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># OLS by the normal equations = exactly what lm() computes</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>resid <span class="op">=</span> y <span class="op">-</span> X <span class="op">@</span> beta</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>sigma2 <span class="op">=</span> resid <span class="op">@</span> resid <span class="op">/</span> (n <span class="op">-</span> X.shape[<span class="dv">1</span>])</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> sigma2 <span class="op">*</span> np.linalg.inv(X.T <span class="op">@</span> X)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>se <span class="op">=</span> np.sqrt(np.diag(cov))</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>lo, hi <span class="op">=</span> beta <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se, beta <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>terms <span class="op">=</span> [<span class="st">"(Intercept)"</span>, <span class="st">"educ"</span>, <span class="st">"exper"</span>, <span class="st">"female"</span>]</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>ypos <span class="op">=</span> np.arange(<span class="bu">len</span>(terms))[::<span class="op">-</span><span class="dv">1</span>]                 <span class="co"># intercept on top</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="co"># highlight the coefficients whose 95% interval clears zero</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>clears0 <span class="op">=</span> (lo <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">|</span> (hi <span class="op">&lt;</span> <span class="dv">0</span>)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#e8531d"</span> <span class="cf">if</span> c <span class="cf">else</span> <span class="st">"#8a8a7e"</span> <span class="cf">for</span> c <span class="kw">in</span> clears0]</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.4</span>, <span class="fl">3.8</span>))</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, lw<span class="op">=</span><span class="fl">1.2</span>, ls<span class="op">=</span>(<span class="dv">0</span>, (<span class="dv">4</span>, <span class="dv">3</span>)))</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> yi, b, l, h, c <span class="kw">in</span> <span class="bu">zip</span>(ypos, beta, lo, hi, colors):</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    ax.plot([l, h], [yi, yi], color<span class="op">=</span>c, lw<span class="op">=</span><span class="fl">2.4</span>, solid_capstyle<span class="op">=</span><span class="st">"round"</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    ax.plot(b, yi, <span class="st">"o"</span>, color<span class="op">=</span>c, ms<span class="op">=</span><span class="dv">7</span>, markeredgecolor<span class="op">=</span><span class="st">"#161613"</span>, markeredgewidth<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>ax.set_yticks(ypos)<span class="op">;</span> ax.set_yticklabels(terms)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"coefficient estimate  (95% CI)"</span>)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Show the interval, not the stars"</span>)</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="op">-</span><span class="fl">0.6</span>, <span class="bu">len</span>(terms) <span class="op">-</span> <span class="fl">0.4</span>)</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-coef-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-coef-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="regressions-in-r_files/figure-html/fig-coef-plot-output-1.png" width="700" height="356" class="figure-img">
+<img src="regressions-in-r_files/figure-html/fig-coef-plot-output-1.png" width="700" height="353" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-coef-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: A coefficient plot — the honest way to show a regression. Each dot is an estimate; each whisker its 95% confidence interval; the dashed line is zero (no effect). An interval that crosses zero is ‘not significant’ — but the plot shows the whole story a p-value hides: the effect’s size, its sign, and how precisely it is pinned down. Here the estimates and standard errors are computed by hand from the normal equations (the same numbers lm()/broom::tidy() would return); only the drawing is Python. This is the shape broom::tidy(m, conf.int = TRUE) |&gt; ggplot(aes(estimate, term)) + geom_pointrange() produces in R.
@@ -2079,13 +2179,14 @@ Figure&nbsp;1: A coefficient plot — the honest way to show a regression. Each 
 </div>
 </div>
 </section>
-<section id="predictions-and-a-first-diagnostic-look" class="level2">
-<h2 class="anchored" data-anchor-id="predictions-and-a-first-diagnostic-look">Predictions and a first diagnostic look</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">educ =</span> <span class="dv">16</span>, <span class="at">exper =</span> <span class="dv">10</span>, <span class="at">female =</span> <span class="dv">0</span>),</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">interval =</span> <span class="st">"confidence"</span>)     <span class="co"># fitted value + CI for the mean</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">interval =</span> <span class="st">"prediction"</span>)   <span class="co"># wider: CI for a new individual</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)                              <span class="co"># 4 base diagnostic plots: residuals-vs-fitted, QQ, scale-location, leverage</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The <code>plot(m)</code> panel is the quickest read on the <a href="../../content/03-regression/gauss-markov-assumptions.html">assumptions</a>: a curved residuals-vs-fitted plot flags <a href="../../content/03-regression/functional-form.html">functional-form</a> problems; a fanning shape flags <a href="../../content/03-regression/heteroskedasticity-and-gls.html">heteroskedasticity</a>; the QQ plot checks residual normality; the leverage panel flags influential points (the <code>.hat</code> and <code>.cooksd</code> from <code>augment()</code>). <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span></p>
+<section id="sec-predict" class="level2">
+<h2 class="anchored" data-anchor-id="sec-predict">Predictions and a first diagnostic look</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">educ =</span> <span class="dv">16</span>, <span class="at">exper =</span> <span class="dv">10</span>, <span class="at">female =</span> <span class="dv">0</span>),</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">interval =</span> <span class="st">"confidence"</span>)     <span class="co"># fitted value + CI for the mean</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">interval =</span> <span class="st">"prediction"</span>)   <span class="co"># wider: CI for a new individual</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)                              <span class="co"># 4 base diagnostic plots: residuals-vs-fitted, QQ, scale-location, leverage</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The two intervals answer different questions. ISLR’s lab shows the gap: predicting median house value at <code>lstat = 10</code>, the confidence interval for the <em>average</em> is (24.47, 25.63) and the prediction interval for a <em>single</em> new neighbourhood is (12.83, 37.28). Both are centred on the same fitted value, 25.05, but the second also has to allow for one observation’s own scatter <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span>.</p>
+<p>The <code>plot(m)</code> panel is the quickest read on the <a href="../../content/03-regression/gauss-markov-assumptions.html">assumptions</a> (ISLR’s lab draws all four at once with <code>par(mfrow = c(2, 2))</code>) <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span>: a curved residuals-vs-fitted plot flags <a href="../../content/03-regression/functional-form.html">functional-form</a> problems; a fanning shape flags <a href="../../content/03-regression/heteroskedasticity-and-gls.html">heteroskedasticity</a>; the QQ plot checks residual normality; the leverage panel flags influential points (the <code>.hat</code> and <code>.cooksd</code> from <code>augment()</code>). McNulty’s list of things to check before trusting the coefficients is the same: highly correlated predictors, non-linear relationships the residuals reveal, and unusual observations (outliers in the outcome, high-leverage points in the inputs) <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span>.</p>
 </section>
 <section id="common-pitfalls" class="level2">
 <h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
@@ -2100,9 +2201,10 @@ Figure&nbsp;1: A coefficient plot — the honest way to show a regression. Each 
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li><p><strong>Reading stars as importance.</strong> <code>***</code> means “precisely estimated as non-zero,” not “big” or “matters most.” A tiny, useless coefficient can be <code>***</code> in a huge sample; a large, decision-relevant one can be <code>n.s.</code> in a small one. Report the <strong>estimate and its interval</strong>, not the star count. <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span></p></li>
+<li><p><strong>Reading stars as importance.</strong> <code>***</code> means “precisely estimated as non-zero,” not “big” or “matters most.” A tiny, useless coefficient can be <code>***</code> in a huge sample; a large, decision-relevant one can be <code>n.s.</code> in a small one, as the five-row example’s slope was. Report the <strong>estimate and its interval</strong>, not the star count. <span class="citation" data-cites="reinhart_swrong">(<a href="#ref-reinhart_swrong" role="doc-biblioref">Reinhart 2015</a>)</span></p></li>
+<li><p><strong>Dropping every non-significant predictor.</strong> McNulty advises removing non-significant variables for a simpler model <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span>, and for description that is reasonable. When the goal is a causal estimate, a control belongs in the model because of what it blocks, not because of its own p-value. See <a href="../../content/03-regression/regression-and-causality.html">what regression can and can’t tell you</a>.</p></li>
 <li><p><strong>Forgetting the reference category.</strong> With <code>factor(grp)</code>, the omitted level is folded into the intercept and every shown coefficient is a contrast against it. “Region B = 2.1” means <em>relative to region A</em>, not in absolute terms. Change the baseline with <code>relevel()</code> when a different comparison reads better. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p></li>
-<li><p><strong>Default standard errors under heteroskedasticity.</strong> <code>lm()</code>/<code>summary()</code> report classical SEs that assume constant error variance. When that fails, the estimates are still fine but the SEs (and <span class="math inline">p</span>-values) are wrong — use <code>lmtest::coeftest(m, vcov = sandwich::vcovHC(m))</code> for <a href="../../content/03-regression/heteroskedasticity-and-gls.html">robust errors</a>. R will not warn you. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span></p></li>
+<li><p><strong>Default standard errors under heteroskedasticity.</strong> <code>lm()</code>/<code>summary()</code> report classical SEs that assume constant error variance. When that fails, the estimates are still fine but the SEs (and <span class="math inline">p</span>-values) are wrong — use <code>lmtest::coeftest(m, vcov = sandwich::vcovHC(m))</code> for <a href="../../content/03-regression/heteroskedasticity-and-gls.html">robust errors</a>. R will not warn you. <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> Dayal’s worked examples do exactly this before tabulating with <code>tidy()</code> <span class="citation" data-cites="dayal_r_datascience">(<a href="#ref-dayal_r_datascience" role="doc-biblioref">Dayal 2020</a>)</span>.</p></li>
 <li><p><strong>Predicting outside the data’s range.</strong> <code>predict()</code> will happily extrapolate a fitted line far beyond where any data supported it; the interval widens but the model’s <em>form</em> was never tested out there.</p></li>
 <li><p><strong>Using a literal <code>```{r}</code> chunk here.</strong> This is a Quarto note, not an R gotcha: in <em>this</em> encyclopedia the R is shown for reading, not executed (there is no R engine wired in), so R appears in plain <code>```r</code> blocks. The one executable figure per entry is Python.</p></li>
 </ul>
@@ -2112,7 +2214,7 @@ Figure&nbsp;1: A coefficient plot — the honest way to show a regression. Each 
 <section id="from-the-sources" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
 <div class="callout callout-style-default callout-note callout-titled" title="Who says what">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2121,13 +2223,17 @@ Figure&nbsp;1: A coefficient plot — the honest way to show a regression. Each 
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>McNulty, <em>Explanatory Statistical Modeling in R</em></strong> — the <code>lm()</code> → <code>summary()</code> → <strong>broom</strong> (<code>tidy</code>/<code>glance</code>/ <code>augment</code>) workflow; decoding the coefficient table (estimate, SE, <span class="math inline">t</span>, <span class="math inline">p</span>, residual SE, <span class="math inline">R^2</span>, <span class="math inline">F</span>); the base <code>plot(m)</code> diagnostics; and the “explanatory, not predictive” framing of reading a fitted model.</li>
-<li><strong>James, Witten, Hastie &amp; Tibshirani, <em>ISLR</em> (the R labs)</strong> — the formula interface, factor/dummy handling and the reference level, interactions and <code>poly()</code>, and adjusted <span class="math inline">R^2</span>.</li>
+<li><strong>McNulty, <em>Explanatory Statistical Modeling in R</em></strong> — the minimum recipe (model function + data + formula); the <code>ugtests</code> exam-score model and its full <code>summary()</code> output, interpreted coefficient by coefficient with <code>confint()</code>; the gender <code>relevel()</code> example; <span class="math inline">R^2</span> and the F-test as “better than nothing?”; model simplification; and the checklist of collinearity, non-linearity and unusual observations.</li>
+<li><strong>Wickham &amp; Grolemund, <em>R for Data Science</em></strong> — the broom package’s three tools (<code>glance</code>, <code>tidy</code>, <code>augment</code>) for turning models into tidy data frames.</li>
+<li><strong>Dayal, <em>Quantitative Economics with R</em></strong> — <code>tidy()</code> applied to a robust-standard-error result (<code>coeftest(..., vcov = vcovHC(...))</code>) to produce a report table.</li>
+<li><strong>James, Witten, Hastie &amp; Tibshirani, <em>ISLR</em> (the R labs)</strong> — the formula interface, factor/dummy handling and the reference level, interactions and <code>poly()</code>, adjusted <span class="math inline">R^2</span>, <code>confint()</code> and <code>predict()</code> with confidence vs prediction intervals (the <code>lstat = 10</code> example), and the four <code>plot()</code> diagnostics.</li>
 <li><strong>Wooldridge, <em>Introductory Econometrics</em></strong> — the <em>interpretation</em> of each coefficient as a ceteris-paribus effect, the standard error as <span class="math inline">\sqrt{\hat\sigma^2[(X^\top X)^{-1}]_{jj}}</span>, and the heteroskedasticity caveat on default SEs.</li>
+<li><strong>Reinhart, <em>Statistics Done Wrong</em></strong> — a <span class="math inline">p</span>-value says nothing about effect size; confidence intervals carry far more information.</li>
 <li><strong>Kaplan, <em>Lessons in Statistical Thinking</em></strong> — the case for showing effects with confidence intervals (the coefficient plot) rather than significance stars.</li>
+<li><em>The five-student hours-and-scores example and the report-card picture are this encyclopedia’s own.</em> An earlier version of this page showed an invented wage table and credited the broom workflow to McNulty; the table is now McNulty’s real output and broom is credited to <em>R for Data Science</em>.</li>
 </ul>
 </div>
 </div>
@@ -2136,7 +2242,7 @@ Figure&nbsp;1: A coefficient plot — the honest way to show a regression. Each 
 <section id="connections" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
 <ul>
-<li><strong>Builds on:</strong> the <a href="../../content/dataframes/index.html">tidyverse data-science workflow</a> (get the data into a tidy data frame first) and <a href="../../content/03-regression/multiple-regression.html">multiple regression</a> (what the numbers mean).</li>
+<li><strong>Builds on:</strong> the <a href="../../content/dataframes/index.html">tidyverse data-science workflow</a> (get the data into a tidy data frame first), <a href="../../appendices/computing/getting-started-in-r.html">getting started in R</a>, and <a href="../../content/03-regression/multiple-regression.html">multiple regression</a> (what the numbers mean).</li>
 <li><strong>The math underneath:</strong> <a href="../../appendices/math/ols-in-matrix-form.html">OLS in matrix form</a> — <code>lm()</code> solves the normal equations, and the reported SEs are the diagonal of <span class="math inline">\hat\sigma^2(X^\top X)^{-1}</span>.</li>
 <li><strong>Reads with:</strong> <a href="../../content/03-regression/inference-for-regression.html">inference for regression</a> (<span class="math inline">t</span>- and <span class="math inline">F</span>-tests), <a href="../../content/03-regression/regression-diagnostics.html">regression diagnostics</a> (<code>plot(m)</code>, leverage, Cook’s distance), and <a href="../../content/03-regression/heteroskedasticity-and-gls.html">heteroskedasticity &amp; robust errors</a>.</li>
 </ul>
@@ -2148,6 +2254,9 @@ Figure&nbsp;1: A coefficient plot — the honest way to show a regression. Each 
 </section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-dayal_r_datascience" class="csl-entry" role="listitem">
+Dayal, Vikram. 2020. <em>Quantitative Economics with r: A Data Science Approach</em>. Springer Singapore.
+</div>
 <div id="ref-islr" class="csl-entry" role="listitem">
 James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2021. <em>An Introduction to Statistical Learning: With Applications in r</em>. 2nd ed. Springer.
 </div>
@@ -2155,7 +2264,13 @@ James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2021. <em>A
 Kaplan, Daniel T. 2024. <em>Lessons in Statistical Thinking</em>. <a href="https://dtkaplan.github.io/Lessons-in-statistical-thinking/">https://dtkaplan.github.io/Lessons-in-statistical-thinking/</a>.
 </div>
 <div id="ref-mcnulty_rmodeling" class="csl-entry" role="listitem">
-McNulty, David. 2021. <em>Explanatory Statistical Modeling in r</em>.
+McNulty, Keith. 2021. <em>Explanatory Statistical Modeling in r</em>.
+</div>
+<div id="ref-reinhart_swrong" class="csl-entry" role="listitem">
+Reinhart, Alex. 2015. <em>Statistics Done Wrong: The Woefully Complete Guide</em>. No Starch Press.
+</div>
+<div id="ref-wickham_r4ds" class="csl-entry" role="listitem">
+Wickham, Hadley, Mine Çetinkaya-Rundel, and Garrett Grolemund. 2023. <em>R for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. 2nd ed. O’Reilly Media. <a href="https://r4ds.hadley.nz/">https://r4ds.hadley.nz/</a>.
 </div>
 <div id="ref-wooldridge_intro" class="csl-entry" role="listitem">
 Wooldridge, Jeffrey M. 2019. <em>Introductory Econometrics: A Modern Approach</em>. 7th ed. Cengage Learning.
@@ -2629,200 +2744,361 @@ Wooldridge, Jeffrey M. 2019. <em>Introductory Econometrics: A Modern Approach</e
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Reading &amp; Running Regressions in R"</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "The three-line workflow — `lm()`, `summary()`, `broom::tidy()` — and, more importantly, how to *read* what comes back: which numbers are the estimates, which are the uncertainty, and which ones people misread."</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>Fitting a regression in R is one line; the skill is reading the output. <span class="in">`lm(y ~ x1 + x2, data)`</span> estimates</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>the model, <span class="in">`summary()`</span> prints the coefficient table, and <span class="in">`broom::tidy()`</span> turns that table into a tidy data</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>frame you can plot or filter. This entry is a **reference for the output**, not a theory of regression — the</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>theory lives in <span class="co">[</span><span class="ot">Part III</span><span class="co">](../../content/03-regression/index.qmd)</span> and the matrix algebra in</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">OLS in matrix form</span><span class="co">](../math/ols-in-matrix-form.qmd)</span>. Here: what each column means, and how to show it honestly.</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## The model formula</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>R's modelling verbs share one interface: the **formula**. <span class="in">`y ~ x1 + x2`</span> reads "<span class="in">`y`</span> explained by <span class="in">`x1`</span> and</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="in">`x2`</span>"; the intercept is included automatically. A few idioms cover most needs: <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co"># fit: outcome ~ predictors, from a data frame</span></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lm</span>(wage <span class="sc">~</span> educ <span class="sc">+</span> exper <span class="sc">+</span> female, <span class="at">data =</span> survey)</span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co"># formula idioms</span></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2,      <span class="at">data =</span> d)   <span class="co"># additive</span></span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">*</span> x2,      <span class="at">data =</span> d)   <span class="co"># x1, x2, and their interaction (x1:x2)</span></span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="fu">poly</span>(x, <span class="dv">2</span>),   <span class="at">data =</span> d)   <span class="co"># quadratic in x</span></span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="fu">factor</span>(grp),  <span class="at">data =</span> d)   <span class="co"># categorical -&gt; dummies, first level = baseline</span></span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> . <span class="sc">-</span> id,       <span class="at">data =</span> d)   <span class="co"># every column except id</span></span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>A **categorical** predictor becomes a set of indicator columns automatically; R holds one level out as the</span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>**reference**, and every other level's coefficient is a contrast *against that baseline* — the single most</span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>common source of "why is my category missing?" confusion. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reading `summary()`</span></span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="in">`summary(m)`</span> prints the table everyone stares at. The columns, decoded: <span class="co">[</span><span class="ot">@mcnulty_rmodeling; @wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
-<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|)</span></span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)   1.9421     0.2033    9.55  &lt; 2e-16 ***</span></span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; educ          0.4127     0.0158   26.12  &lt; 2e-16 ***</span></span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper         0.0051     0.0049    1.04  0.29863</span></span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; female       -0.3311     0.0921   -3.60  0.00033 ***</span></span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 1.41 on 996 degrees of freedom</span></span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared: 0.318,  Adjusted R-squared: 0.316</span></span>
-<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 154.7 on 3 and 996 DF,  p-value: &lt; 2.2e-16</span></span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Estimate** — the fitted coefficient $\hat\beta_j$: the change in the outcome for a one-unit change in that</span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>  predictor, *holding the others fixed*. The intercept is the fitted outcome when every predictor is zero.</span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Std. Error** — the estimated standard deviation of that coefficient across hypothetical repeated samples;</span>
-<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>  the ruler for how precisely it is pinned down. It is $\sqrt{\hat\sigma^2\,<span class="co">[</span><span class="ot">(X^\top X)^{-1}</span><span class="co">]</span>_{jj}}$ from the</span>
-<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">matrix formula</span><span class="co">](../math/ols-in-matrix-form.qmd)</span>. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**t value** = Estimate / Std. Error — how many standard errors the estimate sits from zero.</span>
-<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pr(&gt;|t|)** — the two-sided $p$-value for $H_0:\beta_j=0$. The stars are a significance shorthand, **not** an</span>
-<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>  importance ranking. <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span></span>
-<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Residual standard error** — $\hat\sigma$, the typical size of a residual, in the outcome's units.</span>
-<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**R-squared / Adjusted** — the share of outcome variance the model explains; *adjusted* penalises extra</span>
-<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>  regressors so it can fall when you add a useless one. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**F-statistic** — the joint test that *all* slopes are zero at once (the model-vs-intercept comparison).</span>
-<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="fu">## Tidy output you can compute with</span></span>
-<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a><span class="in">`summary()`</span> prints; it does not return something you can plot. **broom** turns model objects into tidy data</span>
-<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>frames — the bridge from a fitted model back into the <span class="co">[</span><span class="ot">tidyverse workflow</span><span class="co">](../../content/dataframes/index.qmd)</span>:</span>
-<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span></span>
-<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
-<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(m, <span class="at">conf.int =</span> <span class="cn">TRUE</span>)   <span class="co"># one row per coefficient: estimate, std.error, statistic, p.value, conf.low/high</span></span>
-<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="fu">glance</span>(m)                  <span class="co"># one row for the whole model: r.squared, adj.r.squared, sigma, statistic, AIC, BIC, nobs</span></span>
-<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="fu">augment</span>(m)                 <span class="co"># original data + .fitted, .resid, .hat (leverage), .cooksd</span></span>
-<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a><span class="in">`tidy(..., conf.int = TRUE)`</span> is the one to remember: a coefficient plus its 95% interval, ready to plot. A</span>
-<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>**coefficient plot** — each estimate as a dot with its confidence interval as a whisker — communicates a model</span>
-<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>far better than a wall of stars, because it shows *effect size and uncertainty together* and lets a reader see</span>
-<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>at a glance which intervals clear zero. <span class="co">[</span><span class="ot">@kaplan_lessons</span><span class="co">]</span></span>
-<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-coef-plot</span></span>
-<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "A coefficient plot — the honest way to show a regression. Each dot is an estimate; each whisker its 95% confidence interval; the dashed line is zero (no effect). An interval that crosses zero is 'not significant' — but the plot shows the whole story a p-value hides: the effect's size, its sign, and how precisely it is pinned down. Here the estimates and standard errors are computed by hand from the normal equations (the same numbers lm()/broom::tidy() would return); only the drawing is Python. This is the shape broom::tidy(m, conf.int = TRUE) |&gt; ggplot(aes(estimate, term)) + geom_pointrange() produces in R."</span></span>
-<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">5</span>)</span>
-<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">600</span></span>
-<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>educ   <span class="op">=</span> rng.normal(<span class="dv">13</span>, <span class="fl">2.5</span>, n)</span>
-<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a>exper  <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.0</span>, n)              <span class="co"># a near-null control: no real effect</span></span>
-<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>female <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, n).astype(<span class="bu">float</span>)</span>
-<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.column_stack([np.ones(n), educ, exper, female])</span>
-<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>beta_true <span class="op">=</span> np.array([<span class="fl">2.0</span>, <span class="fl">0.40</span>, <span class="fl">0.00</span>, <span class="op">-</span><span class="fl">0.33</span>])  <span class="co"># exper's true coefficient is zero</span></span>
-<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> X <span class="op">@</span> beta_true <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.4</span>, n)</span>
-<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a><span class="co"># OLS by the normal equations = exactly what lm() computes</span></span>
-<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)</span>
-<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>resid <span class="op">=</span> y <span class="op">-</span> X <span class="op">@</span> beta</span>
-<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>sigma2 <span class="op">=</span> resid <span class="op">@</span> resid <span class="op">/</span> (n <span class="op">-</span> X.shape[<span class="dv">1</span>])</span>
-<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> sigma2 <span class="op">*</span> np.linalg.inv(X.T <span class="op">@</span> X)</span>
-<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>se <span class="op">=</span> np.sqrt(np.diag(cov))</span>
-<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a>lo, hi <span class="op">=</span> beta <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se, beta <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se</span>
-<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>terms <span class="op">=</span> [<span class="st">"(Intercept)"</span>, <span class="st">"educ"</span>, <span class="st">"exper"</span>, <span class="st">"female"</span>]</span>
-<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>ypos <span class="op">=</span> np.arange(<span class="bu">len</span>(terms))[::<span class="op">-</span><span class="dv">1</span>]                 <span class="co"># intercept on top</span></span>
-<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a><span class="co"># highlight the coefficients whose 95% interval clears zero</span></span>
-<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>clears0 <span class="op">=</span> (lo <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">|</span> (hi <span class="op">&lt;</span> <span class="dv">0</span>)</span>
-<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#e8531d"</span> <span class="cf">if</span> c <span class="cf">else</span> <span class="st">"#8a8a7e"</span> <span class="cf">for</span> c <span class="kw">in</span> clears0]</span>
-<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.4</span>, <span class="fl">3.8</span>))</span>
-<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, lw<span class="op">=</span><span class="fl">1.2</span>, ls<span class="op">=</span>(<span class="dv">0</span>, (<span class="dv">4</span>, <span class="dv">3</span>)))</span>
-<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> yi, b, l, h, c <span class="kw">in</span> <span class="bu">zip</span>(ypos, beta, lo, hi, colors):</span>
-<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>    ax.plot([l, h], [yi, yi], color<span class="op">=</span>c, lw<span class="op">=</span><span class="fl">2.4</span>, solid_capstyle<span class="op">=</span><span class="st">"round"</span>)</span>
-<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a>    ax.plot(b, yi, <span class="st">"o"</span>, color<span class="op">=</span>c, ms<span class="op">=</span><span class="dv">7</span>, markeredgecolor<span class="op">=</span><span class="st">"#161613"</span>, markeredgewidth<span class="op">=</span><span class="fl">1.0</span>)</span>
-<span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a>ax.set_yticks(ypos)<span class="op">;</span> ax.set_yticklabels(terms)</span>
-<span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"coefficient estimate  (95% CI)"</span>)</span>
-<span id="cb6-125"><a href="#cb6-125" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Show the interval, not the stars"</span>)</span>
-<span id="cb6-126"><a href="#cb6-126" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="op">-</span><span class="fl">0.6</span>, <span class="bu">len</span>(terms) <span class="op">-</span> <span class="fl">0.4</span>)</span>
-<span id="cb6-127"><a href="#cb6-127" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb6-128"><a href="#cb6-128" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb6-129"><a href="#cb6-129" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-130"><a href="#cb6-130" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-131"><a href="#cb6-131" aria-hidden="true" tabindex="-1"></a><span class="fu">## Predictions and a first diagnostic look</span></span>
-<span id="cb6-132"><a href="#cb6-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-133"><a href="#cb6-133" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
-<span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">educ =</span> <span class="dv">16</span>, <span class="at">exper =</span> <span class="dv">10</span>, <span class="at">female =</span> <span class="dv">0</span>),</span>
-<span id="cb6-135"><a href="#cb6-135" aria-hidden="true" tabindex="-1"></a>        <span class="at">interval =</span> <span class="st">"confidence"</span>)     <span class="co"># fitted value + CI for the mean</span></span>
-<span id="cb6-136"><a href="#cb6-136" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">interval =</span> <span class="st">"prediction"</span>)   <span class="co"># wider: CI for a new individual</span></span>
-<span id="cb6-137"><a href="#cb6-137" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)                              <span class="co"># 4 base diagnostic plots: residuals-vs-fitted, QQ, scale-location, leverage</span></span>
-<span id="cb6-138"><a href="#cb6-138" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-139"><a href="#cb6-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-140"><a href="#cb6-140" aria-hidden="true" tabindex="-1"></a>The <span class="in">`plot(m)`</span> panel is the quickest read on the <span class="co">[</span><span class="ot">assumptions</span><span class="co">](../../content/03-regression/gauss-markov-assumptions.qmd)</span>:</span>
-<span id="cb6-141"><a href="#cb6-141" aria-hidden="true" tabindex="-1"></a>a curved residuals-vs-fitted plot flags <span class="co">[</span><span class="ot">functional-form</span><span class="co">](../../content/03-regression/functional-form.qmd)</span></span>
-<span id="cb6-142"><a href="#cb6-142" aria-hidden="true" tabindex="-1"></a>problems; a fanning shape flags <span class="co">[</span><span class="ot">heteroskedasticity</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span>;</span>
-<span id="cb6-143"><a href="#cb6-143" aria-hidden="true" tabindex="-1"></a>the QQ plot checks residual normality; the leverage panel flags influential points (the <span class="in">`.hat`</span> and <span class="in">`.cooksd`</span></span>
-<span id="cb6-144"><a href="#cb6-144" aria-hidden="true" tabindex="-1"></a>from <span class="in">`augment()`</span>). <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span></span>
-<span id="cb6-145"><a href="#cb6-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-146"><a href="#cb6-146" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb6-147"><a href="#cb6-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-148"><a href="#cb6-148" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where R regression output gets misread"}</span>
-<span id="cb6-149"><a href="#cb6-149" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-150"><a href="#cb6-150" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading stars as importance.** `***` means "precisely estimated as non-zero," not "big" or "matters most."</span>
-<span id="cb6-151"><a href="#cb6-151" aria-hidden="true" tabindex="-1"></a>  A tiny, useless coefficient can be <span class="in">`***`</span> in a huge sample; a large, decision-relevant one can be <span class="in">`n.s.`</span> in a</span>
-<span id="cb6-152"><a href="#cb6-152" aria-hidden="true" tabindex="-1"></a>  small one. Report the **estimate and its interval**, not the star count. <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span></span>
-<span id="cb6-153"><a href="#cb6-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-154"><a href="#cb6-154" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting the reference category.** With <span class="in">`factor(grp)`</span>, the omitted level is folded into the intercept and</span>
-<span id="cb6-155"><a href="#cb6-155" aria-hidden="true" tabindex="-1"></a>  every shown coefficient is a contrast against it. "Region B = 2.1" means *relative to region A*, not in</span>
-<span id="cb6-156"><a href="#cb6-156" aria-hidden="true" tabindex="-1"></a>  absolute terms. Change the baseline with <span class="in">`relevel()`</span> when a different comparison reads better. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb6-157"><a href="#cb6-157" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-158"><a href="#cb6-158" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Default standard errors under heteroskedasticity.** <span class="in">`lm()`</span>/<span class="in">`summary()`</span> report classical SEs that assume</span>
-<span id="cb6-159"><a href="#cb6-159" aria-hidden="true" tabindex="-1"></a>  constant error variance. When that fails, the estimates are still fine but the SEs (and $p$-values) are</span>
-<span id="cb6-160"><a href="#cb6-160" aria-hidden="true" tabindex="-1"></a>  wrong — use <span class="in">`lmtest::coeftest(m, vcov = sandwich::vcovHC(m))`</span> for</span>
-<span id="cb6-161"><a href="#cb6-161" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">robust errors</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span>. R will not warn you. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb6-162"><a href="#cb6-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-163"><a href="#cb6-163" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Predicting outside the data's range.** <span class="in">`predict()`</span> will happily extrapolate a fitted line far beyond where</span>
-<span id="cb6-164"><a href="#cb6-164" aria-hidden="true" tabindex="-1"></a>  any data supported it; the interval widens but the model's *form* was never tested out there.</span>
-<span id="cb6-165"><a href="#cb6-165" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-166"><a href="#cb6-166" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using a literal `` ```{r} `` chunk here.** This is a Quarto note, not an R gotcha: in *this* encyclopedia</span>
-<span id="cb6-167"><a href="#cb6-167" aria-hidden="true" tabindex="-1"></a>  the R is shown for reading, not executed (there is no R engine wired in), so R appears in plain `<span class="in">``` ```</span>r ````</span>
-<span id="cb6-168"><a href="#cb6-168" aria-hidden="true" tabindex="-1"></a>  blocks. The one executable figure per entry is Python.</span>
-<span id="cb6-169"><a href="#cb6-169" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-170"><a href="#cb6-170" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb6-171"><a href="#cb6-171" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-172"><a href="#cb6-172" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb6-173"><a href="#cb6-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-174"><a href="#cb6-174" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb6-175"><a href="#cb6-175" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**McNulty, *Explanatory Statistical Modeling in R*** — the `lm()` → `summary()` → **broom** (<span class="in">`tidy`</span>/<span class="in">`glance`</span>/</span>
-<span id="cb6-176"><a href="#cb6-176" aria-hidden="true" tabindex="-1"></a>  <span class="in">`augment`</span>) workflow; decoding the coefficient table (estimate, SE, $t$, $p$, residual SE, $R^2$, $F$); the</span>
-<span id="cb6-177"><a href="#cb6-177" aria-hidden="true" tabindex="-1"></a>  base <span class="in">`plot(m)`</span> diagnostics; and the "explanatory, not predictive" framing of reading a fitted model.</span>
-<span id="cb6-178"><a href="#cb6-178" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**James, Witten, Hastie &amp; Tibshirani, *ISLR* (the R labs)** — the formula interface, factor/dummy handling</span>
-<span id="cb6-179"><a href="#cb6-179" aria-hidden="true" tabindex="-1"></a>  and the reference level, interactions and <span class="in">`poly()`</span>, and adjusted $R^2$.</span>
-<span id="cb6-180"><a href="#cb6-180" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — the *interpretation* of each coefficient as a ceteris-paribus</span>
-<span id="cb6-181"><a href="#cb6-181" aria-hidden="true" tabindex="-1"></a>  effect, the standard error as $\sqrt{\hat\sigma^2<span class="co">[</span><span class="ot">(X^\top X)^{-1}</span><span class="co">]</span>_{jj}}$, and the heteroskedasticity caveat</span>
-<span id="cb6-182"><a href="#cb6-182" aria-hidden="true" tabindex="-1"></a>  on default SEs.</span>
-<span id="cb6-183"><a href="#cb6-183" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Kaplan, *Lessons in Statistical Thinking*** — the case for showing effects with confidence intervals</span>
-<span id="cb6-184"><a href="#cb6-184" aria-hidden="true" tabindex="-1"></a>  (the coefficient plot) rather than significance stars.</span>
-<span id="cb6-185"><a href="#cb6-185" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb6-186"><a href="#cb6-186" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-187"><a href="#cb6-187" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb6-188"><a href="#cb6-188" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-189"><a href="#cb6-189" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** the <span class="co">[</span><span class="ot">tidyverse data-science workflow</span><span class="co">](../../content/dataframes/index.qmd)</span> (get the data into a</span>
-<span id="cb6-190"><a href="#cb6-190" aria-hidden="true" tabindex="-1"></a>  tidy data frame first) and <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](../../content/03-regression/multiple-regression.qmd)</span> (what the</span>
-<span id="cb6-191"><a href="#cb6-191" aria-hidden="true" tabindex="-1"></a>  numbers mean).</span>
-<span id="cb6-192"><a href="#cb6-192" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The math underneath:** <span class="co">[</span><span class="ot">OLS in matrix form</span><span class="co">](../math/ols-in-matrix-form.qmd)</span> — <span class="in">`lm()`</span> solves the normal</span>
-<span id="cb6-193"><a href="#cb6-193" aria-hidden="true" tabindex="-1"></a>  equations, and the reported SEs are the diagonal of $\hat\sigma^2(X^\top X)^{-1}$.</span>
-<span id="cb6-194"><a href="#cb6-194" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reads with:** <span class="co">[</span><span class="ot">inference for regression</span><span class="co">](../../content/03-regression/inference-for-regression.qmd)</span> ($t$- and</span>
-<span id="cb6-195"><a href="#cb6-195" aria-hidden="true" tabindex="-1"></a>  $F$-tests), <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](../../content/03-regression/regression-diagnostics.qmd)</span> (<span class="in">`plot(m)`</span>,</span>
-<span id="cb6-196"><a href="#cb6-196" aria-hidden="true" tabindex="-1"></a>  leverage, Cook's distance), and <span class="co">[</span><span class="ot">heteroskedasticity &amp; robust errors</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span>.</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Reading &amp; Running Regressions in R"</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Fitting a regression in R takes one line. Reading what comes back takes practice: which numbers are the estimates, which measure their uncertainty, and which ones people misread."</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>R fits a regression with a single command and prints a table. Most of the skill is in reading that table:</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>each row is one predictor, the first number is its estimated effect, the second is how uncertain that</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>estimate is, and the rest are ways of asking whether the effect could plausibly be zero. This page decodes</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>the table, then shows how to turn it into a picture that tells the truth.</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Where you probably came from — and what you need"}</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>**You likely arrived from** <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](../../content/03-regression/multiple-regression.qmd)</span> or</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">inference for regression</span><span class="co">](../../content/03-regression/inference-for-regression.qmd)</span>, wanting to see those</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>ideas as software output, or from <span class="co">[</span><span class="ot">getting started in R</span><span class="co">](getting-started-in-r.qmd)</span>. The question you came</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>with is probably "I ran <span class="in">`lm()`</span> and got a wall of numbers. Which ones matter?"</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>**You need:** the idea of a fitted line (an intercept and a slope) and of a standard error, from</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Part III</span><span class="co">](../../content/03-regression/index.qmd)</span>; enough R to read <span class="in">`name &lt;- value`</span> and <span class="in">`f(x)`</span>, from</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">getting started in R</span><span class="co">](getting-started-in-r.qmd)</span>. **You don't need** the matrix algebra. It lives in</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">OLS in matrix form</span><span class="co">](../math/ols-in-matrix-form.qmd)</span>, and this page only points to it.</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>**Jump to what you came for:** <span class="co">[</span><span class="ot">the idea in words</span><span class="co">](#sec-idea)</span> · <span class="co">[</span><span class="ot">a five-row regression, by hand</span><span class="co">](#sec-by-hand)</span> ·</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the model formula</span><span class="co">](#sec-formula)</span> · <span class="co">[</span><span class="ot">reading `summary()`</span><span class="co">](#sec-summary)</span> · [tidy output and the coefficient</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>plot](#sec-tidy) · <span class="co">[</span><span class="ot">predictions and diagnostics</span><span class="co">](#sec-predict)</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>Almost every quantitative paper in the social sciences reports a regression table, and almost every one was</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>produced by software like this. Misreading it is easy and common. People treat significance stars as a</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>measure of importance, forget which category a dummy variable is being compared against, or trust standard</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>errors that rest on an assumption the data break. Each of those mistakes is a misreading of one column</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@reinhart_swrong; @wooldridge_intro</span><span class="co">]</span>. Reading the output correctly is the step between knowing regression</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>theory and using it.</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="fu">## The idea in words {#sec-idea}</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>Think of <span class="in">`summary()`</span> as a report card with one row per predictor.</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The estimate** is the grade: the fitted slope. It says how much the outcome changes, on average, when</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>  that predictor goes up by one unit and the other predictors stay where they are <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span>.</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The standard error** is how much that grade would wobble if you collected a fresh sample and fitted the</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>  model again. Small means the estimate is pinned down; large means it is loose.</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The t value and p-value** both ask one question: is the estimate far enough from zero, measured in</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>  standard errors, that "no effect at all" looks implausible?</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The lines at the bottom** grade the model as a whole: how big a typical miss is, what share of the</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>  outcome's variation the predictors account for, and whether the model beats having no predictors at all.</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>R produces the table in three steps. <span class="in">`lm()`</span> fits the model and stores it as an object, <span class="in">`summary()`</span> prints</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>the table, and the **broom** package turns the same information into a data frame you can compute with or</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>plot <span class="co">[</span><span class="ot">@wickham_r4ds</span><span class="co">]</span>.</span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a><span class="fu">## A five-row regression, by hand {#sec-by-hand}</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>Before reading a real table, build a tiny one where every number can be checked with a calculator. Five</span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>students report hours studied and a quiz score out of 10 (this encyclopedia's own toy data). Lines starting</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>with <span class="in">`#&gt;`</span> show what R prints; the output is abridged, and every number in it was checked by hand.</span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">hours =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>                <span class="at">score =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">5</span>))</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lm</span>(score <span class="sc">~</span> hours, <span class="at">data =</span> d)</span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m)</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)</span></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)   2.2000     0.9381   2.345    0.101</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; hours         0.6000     0.2828   2.121    0.124</span></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 0.8944 on 3 degrees of freedom</span></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:    0.6,  Adjusted R-squared:  0.4667</span></span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic:   4.5 on 1 and 3 DF,  p-value: 0.124</span></span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a>Where each number comes from:</span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Estimate, `hours` = 0.6.** The average of the hours is 3 and of the scores is 4. Multiply each</span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a>   student's distance from those averages and add up: $(-2)(-2) + (-1)(0) + (0)(1) + (1)(0) + (2)(1) = 6$.</span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a>   Divide by the sum of squared hour-distances, $4+1+0+1+4 = 10$. The slope is $6/10 = 0.6$: one more hour,</span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a>   0.6 more points on average.</span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Estimate, intercept = 2.2.** The line passes through the two averages, so $4 - 0.6\times 3 = 2.2$. That</span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a>   is the predicted score at zero hours.</span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Residuals.** The line predicts 2.8, 3.4, 4.0, 4.6, 5.2. The misses are $-0.8, 0.6, 1.0, -0.6, -0.2$, and</span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a>   their squares add up to 2.4.</span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Residual standard error = 0.894.** Divide 2.4 by the **degrees of freedom**: 5 data points minus 2</span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a>   estimated numbers = 3. That gives 0.8, and $\sqrt{0.8} = 0.894$. A typical miss is just under one point.</span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>**Std. Error, `hours` = 0.283.** $\sqrt{0.8 / 10}$. More spread in hours (a bigger 10) would shrink it.</span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>**t value = 2.121.** $0.6 / 0.283$: the slope is a bit over two standard errors from zero.</span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>**Pr(&gt;|t|) = 0.124.** With only 3 degrees of freedom, a t value that large happens about 12% of the time</span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a>   even when the true slope is zero, so the slope is not significant at the 5% level. A 95% interval for it</span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a>   runs from about $-0.30$ to $1.50$. Five students cannot pin down the effect of an hour of study.</span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>**R-squared = 0.6.** The scores vary by 6 in total (squared distances from 4: $4+0+1+0+1$). The line</span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a>   leaves 2.4 of that unexplained, so it explains $1 - 2.4/6 = 0.6$.</span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>**F = 4.5.** With a single predictor, the F-test asks the same question as the slope's t-test, and</span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a>   $F = t^2 = 2.121^2 = 4.5$, with the same p-value.</span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a>Every regression table, however large, is built from these same pieces.</span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Jargon key — open if a term is unfamiliar"}</span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Model object** — what <span class="in">`lm()`</span> returns and you store under a name (<span class="in">`m`</span>). It holds the estimates,</span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a>  residuals, fitted values and more; other functions (<span class="in">`summary()`</span>, <span class="in">`predict()`</span>, <span class="in">`tidy()`</span>) read from it.</span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Formula** — the <span class="in">`y ~ x1 + x2`</span> argument: outcome on the left of the <span class="in">`~`</span> ("is explained by"), predictors on</span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a>  the right.</span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Coefficient / estimate** — a fitted number in the model: the intercept or a slope, written $\hat\beta_j$.</span>
+<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Residual** — an observed outcome minus the model's fitted value for it: the miss.</span>
+<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Degrees of freedom** — the number of observations minus the number of estimated coefficients.</span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Standard error** — the estimated standard deviation of an estimate across repeated samples.</span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**t value** — estimate divided by its standard error.</span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**p-value** — the probability of a t value at least this far from zero if the true coefficient were zero.</span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**$R^2$** — the share of the outcome's variation the model accounts for, between 0 and 1.</span>
+<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**F-statistic** — a test that all the slopes are zero at once.</span>
+<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reference level** — for a categorical predictor, the category left out and absorbed into the intercept.</span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Tidy data frame** — a table with one row per thing (per coefficient, per model, per observation) and</span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a>  one column per measurement; what broom produces.</span>
+<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a><span class="fu">## The model formula {#sec-formula}</span></span>
+<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-120"><a href="#cb7-120" aria-hidden="true" tabindex="-1"></a>R's modelling verbs share one interface: the **formula**. <span class="in">`y ~ x1 + x2`</span> reads "<span class="in">`y`</span> explained by <span class="in">`x1`</span> and</span>
+<span id="cb7-121"><a href="#cb7-121" aria-hidden="true" tabindex="-1"></a><span class="in">`x2`</span>"; the intercept is included automatically. To estimate any model you need, at a minimum, a model</span>
+<span id="cb7-122"><a href="#cb7-122" aria-hidden="true" tabindex="-1"></a>function, some data and a formula <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span>. A few idioms cover most needs: <span class="co">[</span><span class="ot">@mcnulty_rmodeling; @islr</span><span class="co">]</span></span>
+<span id="cb7-123"><a href="#cb7-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-124"><a href="#cb7-124" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb7-125"><a href="#cb7-125" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb7-126"><a href="#cb7-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-127"><a href="#cb7-127" aria-hidden="true" tabindex="-1"></a><span class="co"># fit: outcome ~ predictors, from a data frame</span></span>
+<span id="cb7-128"><a href="#cb7-128" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lm</span>(wage <span class="sc">~</span> educ <span class="sc">+</span> exper <span class="sc">+</span> female, <span class="at">data =</span> survey)</span>
+<span id="cb7-129"><a href="#cb7-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-130"><a href="#cb7-130" aria-hidden="true" tabindex="-1"></a><span class="co"># formula idioms</span></span>
+<span id="cb7-131"><a href="#cb7-131" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2,      <span class="at">data =</span> d)   <span class="co"># additive</span></span>
+<span id="cb7-132"><a href="#cb7-132" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">*</span> x2,      <span class="at">data =</span> d)   <span class="co"># x1, x2, and their interaction (x1:x2)</span></span>
+<span id="cb7-133"><a href="#cb7-133" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="fu">poly</span>(x, <span class="dv">2</span>),   <span class="at">data =</span> d)   <span class="co"># quadratic in x</span></span>
+<span id="cb7-134"><a href="#cb7-134" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> <span class="fu">factor</span>(grp),  <span class="at">data =</span> d)   <span class="co"># categorical -&gt; dummies, first level = baseline</span></span>
+<span id="cb7-135"><a href="#cb7-135" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y <span class="sc">~</span> . <span class="sc">-</span> id,       <span class="at">data =</span> d)   <span class="co"># every column except id</span></span>
+<span id="cb7-136"><a href="#cb7-136" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-137"><a href="#cb7-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-138"><a href="#cb7-138" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** the formula is a sentence. </span><span class="in">`~`</span><span class="at"> means "is explained by", </span><span class="in">`+`</span><span class="at"> means "and", </span><span class="in">`*`</span><span class="at"> means</span></span>
+<span id="cb7-139"><a href="#cb7-139" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; "and how they combine", and </span><span class="in">`.`</span><span class="at"> means "everything else in the data".</span></span>
+<span id="cb7-140"><a href="#cb7-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-141"><a href="#cb7-141" aria-hidden="true" tabindex="-1"></a>A **categorical** predictor becomes a set of indicator columns automatically; R holds one level out as the</span>
+<span id="cb7-142"><a href="#cb7-142" aria-hidden="true" tabindex="-1"></a>**reference**, and every other level's coefficient is a contrast *against that baseline* — the single most</span>
+<span id="cb7-143"><a href="#cb7-143" aria-hidden="true" tabindex="-1"></a>common source of "why is my category missing?" confusion. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb7-144"><a href="#cb7-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-145"><a href="#cb7-145" aria-hidden="true" tabindex="-1"></a>McNulty's income example shows it in numbers. Regressing annual income on months of education and gender,</span>
+<span id="cb7-146"><a href="#cb7-146" aria-hidden="true" tabindex="-1"></a>with women (<span class="in">`F`</span>) as the reference, gives an intercept of 15,513 and a <span class="in">`genderM`</span> coefficient of 16,762. After</span>
+<span id="cb7-147"><a href="#cb7-147" aria-hidden="true" tabindex="-1"></a><span class="in">`relevel(ref = "M")`</span>, the intercept becomes 32,276 (that is, 15,513 + 16,762) and the coefficient becomes</span>
+<span id="cb7-148"><a href="#cb7-148" aria-hidden="true" tabindex="-1"></a><span class="in">`genderF`</span> = −16,762. The education slope (269.8) does not move. Nothing about the data or the fit changed,</span>
+<span id="cb7-149"><a href="#cb7-149" aria-hidden="true" tabindex="-1"></a>only which group the intercept describes <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span>.</span>
+<span id="cb7-150"><a href="#cb7-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-151"><a href="#cb7-151" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reading `summary()` {#sec-summary}</span></span>
+<span id="cb7-152"><a href="#cb7-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-153"><a href="#cb7-153" aria-hidden="true" tabindex="-1"></a><span class="in">`summary(m)`</span> prints the table everyone stares at. Here is a real one: McNulty's model of students' final-year</span>
+<span id="cb7-154"><a href="#cb7-154" aria-hidden="true" tabindex="-1"></a>exam scores on their scores in years 1, 2 and 3, fitted to 975 students <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span>.</span>
+<span id="cb7-155"><a href="#cb7-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-156"><a href="#cb7-156" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb7-157"><a href="#cb7-157" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(full_model)</span>
+<span id="cb7-158"><a href="#cb7-158" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm(formula = Final ~ Yr1 + Yr2 + Yr3, data = ugtests)</span></span>
+<span id="cb7-159"><a href="#cb7-159" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb7-160"><a href="#cb7-160" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)</span></span>
+<span id="cb7-161"><a href="#cb7-161" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept) 14.14599    5.48006   2.581  0.00999 **</span></span>
+<span id="cb7-162"><a href="#cb7-162" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Yr1          0.07603    0.06538   1.163  0.24519</span></span>
+<span id="cb7-163"><a href="#cb7-163" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Yr2          0.43129    0.03251  13.267  &lt; 2e-16 ***</span></span>
+<span id="cb7-164"><a href="#cb7-164" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Yr3          0.86568    0.02914  29.710  &lt; 2e-16 ***</span></span>
+<span id="cb7-165"><a href="#cb7-165" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 30.43 on 971 degrees of freedom</span></span>
+<span id="cb7-166"><a href="#cb7-166" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.5303,  Adjusted R-squared:  0.5289</span></span>
+<span id="cb7-167"><a href="#cb7-167" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 365.5 on 3 and 971 DF,  p-value: &lt; 2.2e-16</span></span>
+<span id="cb7-168"><a href="#cb7-168" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-169"><a href="#cb7-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-170"><a href="#cb7-170" aria-hidden="true" tabindex="-1"></a>The columns, decoded: <span class="co">[</span><span class="ot">@mcnulty_rmodeling; @wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb7-171"><a href="#cb7-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-172"><a href="#cb7-172" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Estimate** — the fitted coefficient $\hat\beta_j$: the change in the outcome for a one-unit change in that</span>
+<span id="cb7-173"><a href="#cb7-173" aria-hidden="true" tabindex="-1"></a>  predictor, *holding the others fixed*. The intercept is the fitted outcome when every predictor is zero.</span>
+<span id="cb7-174"><a href="#cb7-174" aria-hidden="true" tabindex="-1"></a>  Here: among students with the same year-1 and year-2 scores, one more point in year 3 goes with about 0.87</span>
+<span id="cb7-175"><a href="#cb7-175" aria-hidden="true" tabindex="-1"></a>  more points in the final year.</span>
+<span id="cb7-176"><a href="#cb7-176" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Std. Error** — the estimated standard deviation of that coefficient across hypothetical repeated samples;</span>
+<span id="cb7-177"><a href="#cb7-177" aria-hidden="true" tabindex="-1"></a>  the ruler for how precisely it is pinned down. It is $\sqrt{\hat\sigma^2\,<span class="co">[</span><span class="ot">(X^\top X)^{-1}</span><span class="co">]</span>_{jj}}$ from the</span>
+<span id="cb7-178"><a href="#cb7-178" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">matrix formula</span><span class="co">](../math/ols-in-matrix-form.qmd)</span>. <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb7-179"><a href="#cb7-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-180"><a href="#cb7-180" aria-hidden="true" tabindex="-1"></a><span class="at">  &gt; **In plain words:** the typical size of a miss ($\hat\sigma$), scaled by how much independent spread</span></span>
+<span id="cb7-181"><a href="#cb7-181" aria-hidden="true" tabindex="-1"></a><span class="at">  &gt; that predictor has. In the five-row example this was $\sqrt{0.8/10}$.</span></span>
+<span id="cb7-182"><a href="#cb7-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-183"><a href="#cb7-183" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**t value** = Estimate / Std. Error — how many standard errors the estimate sits from zero. Check one:</span>
+<span id="cb7-184"><a href="#cb7-184" aria-hidden="true" tabindex="-1"></a>  $0.86568 / 0.02914 = 29.7$.</span>
+<span id="cb7-185"><a href="#cb7-185" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pr(&gt;|t|)** — the two-sided $p$-value for $H_0:\beta_j=0$. The stars are a significance shorthand, **not** an</span>
+<span id="cb7-186"><a href="#cb7-186" aria-hidden="true" tabindex="-1"></a>  importance ranking. <span class="in">`Yr1`</span> has $p = 0.245$: with years 2 and 3 already in the model, year 1 adds no detectable</span>
+<span id="cb7-187"><a href="#cb7-187" aria-hidden="true" tabindex="-1"></a>  association. McNulty's 95% interval for it, from <span class="in">`confint()`</span>, runs from −0.05 to 0.20 and crosses zero.</span>
+<span id="cb7-188"><a href="#cb7-188" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Residual standard error** — $\hat\sigma$, the typical size of a residual, in the outcome's units: about 30</span>
+<span id="cb7-189"><a href="#cb7-189" aria-hidden="true" tabindex="-1"></a>  exam points here.</span>
+<span id="cb7-190"><a href="#cb7-190" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**R-squared / Adjusted** — the share of outcome variance the model explains; *adjusted* penalises extra</span>
+<span id="cb7-191"><a href="#cb7-191" aria-hidden="true" tabindex="-1"></a>  regressors so it can fall when you add a useless one. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span> Dropping <span class="in">`Yr1`</span> moves $R^2$ only from 0.5303 to</span>
+<span id="cb7-192"><a href="#cb7-192" aria-hidden="true" tabindex="-1"></a>  0.5297 <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span>.</span>
+<span id="cb7-193"><a href="#cb7-193" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**F-statistic** — the joint test that *all* slopes are zero at once (the model-vs-intercept comparison). A</span>
+<span id="cb7-194"><a href="#cb7-194" aria-hidden="true" tabindex="-1"></a>  high $R^2$ on a handful of observations can still fail it, and a low $R^2$ on a large dataset can pass</span>
+<span id="cb7-195"><a href="#cb7-195" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span>.</span>
+<span id="cb7-196"><a href="#cb7-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-197"><a href="#cb7-197" aria-hidden="true" tabindex="-1"></a><span class="fu">## Tidy output you can compute with {#sec-tidy}</span></span>
+<span id="cb7-198"><a href="#cb7-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-199"><a href="#cb7-199" aria-hidden="true" tabindex="-1"></a><span class="in">`summary()`</span> prints; it does not return something you can plot. **broom** turns model objects into tidy data</span>
+<span id="cb7-200"><a href="#cb7-200" aria-hidden="true" tabindex="-1"></a>frames — the bridge from a fitted model back into the <span class="co">[</span><span class="ot">tidyverse workflow</span><span class="co">](../../content/dataframes/index.qmd)</span>.</span>
+<span id="cb7-201"><a href="#cb7-201" aria-hidden="true" tabindex="-1"></a>It has three general tools: <span class="in">`glance()`</span> gives one row per model, <span class="in">`tidy()`</span> one row per coefficient, and</span>
+<span id="cb7-202"><a href="#cb7-202" aria-hidden="true" tabindex="-1"></a><span class="in">`augment()`</span> one row per observation of the data, with residuals and influence statistics added</span>
+<span id="cb7-203"><a href="#cb7-203" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wickham_r4ds</span><span class="co">]</span>. Dayal uses <span class="in">`tidy()`</span> the same way, to turn a table of robust-standard-error results into a</span>
+<span id="cb7-204"><a href="#cb7-204" aria-hidden="true" tabindex="-1"></a>formatted table for a report <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span>.</span>
+<span id="cb7-205"><a href="#cb7-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-206"><a href="#cb7-206" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb7-207"><a href="#cb7-207" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(m, <span class="at">conf.int =</span> <span class="cn">TRUE</span>)   <span class="co"># one row per coefficient: estimate, std.error, statistic, p.value, conf.low/high</span></span>
+<span id="cb7-208"><a href="#cb7-208" aria-hidden="true" tabindex="-1"></a><span class="fu">glance</span>(m)                  <span class="co"># one row for the whole model: r.squared, adj.r.squared, sigma, statistic, AIC, BIC, nobs</span></span>
+<span id="cb7-209"><a href="#cb7-209" aria-hidden="true" tabindex="-1"></a><span class="fu">augment</span>(m)                 <span class="co"># original data + .fitted, .resid, .hat (leverage), .cooksd</span></span>
+<span id="cb7-210"><a href="#cb7-210" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-211"><a href="#cb7-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-212"><a href="#cb7-212" aria-hidden="true" tabindex="-1"></a><span class="in">`tidy(..., conf.int = TRUE)`</span> is the one to remember: a coefficient plus its 95% interval, ready to plot. A</span>
+<span id="cb7-213"><a href="#cb7-213" aria-hidden="true" tabindex="-1"></a>**coefficient plot** — each estimate as a dot with its confidence interval as a whisker — communicates a model</span>
+<span id="cb7-214"><a href="#cb7-214" aria-hidden="true" tabindex="-1"></a>far better than a wall of stars, because it shows *effect size and uncertainty together* and lets a reader see</span>
+<span id="cb7-215"><a href="#cb7-215" aria-hidden="true" tabindex="-1"></a>at a glance which intervals clear zero. <span class="co">[</span><span class="ot">@kaplan_lessons</span><span class="co">]</span> A $p$-value says nothing about how big an effect is;</span>
+<span id="cb7-216"><a href="#cb7-216" aria-hidden="true" tabindex="-1"></a>a confidence interval carries far more information <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span>.</span>
+<span id="cb7-217"><a href="#cb7-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-220"><a href="#cb7-220" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb7-221"><a href="#cb7-221" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-coef-plot</span></span>
+<span id="cb7-222"><a href="#cb7-222" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "A coefficient plot — the honest way to show a regression. Each dot is an estimate; each whisker its 95% confidence interval; the dashed line is zero (no effect). An interval that crosses zero is 'not significant' — but the plot shows the whole story a p-value hides: the effect's size, its sign, and how precisely it is pinned down. Here the estimates and standard errors are computed by hand from the normal equations (the same numbers lm()/broom::tidy() would return); only the drawing is Python. This is the shape broom::tidy(m, conf.int = TRUE) |&gt; ggplot(aes(estimate, term)) + geom_pointrange() produces in R."</span></span>
+<span id="cb7-223"><a href="#cb7-223" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb7-224"><a href="#cb7-224" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb7-225"><a href="#cb7-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-226"><a href="#cb7-226" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-227"><a href="#cb7-227" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-228"><a href="#cb7-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-229"><a href="#cb7-229" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">5</span>)</span>
+<span id="cb7-230"><a href="#cb7-230" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">600</span></span>
+<span id="cb7-231"><a href="#cb7-231" aria-hidden="true" tabindex="-1"></a>educ   <span class="op">=</span> rng.normal(<span class="dv">13</span>, <span class="fl">2.5</span>, n)</span>
+<span id="cb7-232"><a href="#cb7-232" aria-hidden="true" tabindex="-1"></a>exper  <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.0</span>, n)              <span class="co"># a near-null control: no real effect</span></span>
+<span id="cb7-233"><a href="#cb7-233" aria-hidden="true" tabindex="-1"></a>female <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, n).astype(<span class="bu">float</span>)</span>
+<span id="cb7-234"><a href="#cb7-234" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.column_stack([np.ones(n), educ, exper, female])</span>
+<span id="cb7-235"><a href="#cb7-235" aria-hidden="true" tabindex="-1"></a>beta_true <span class="op">=</span> np.array([<span class="fl">2.0</span>, <span class="fl">0.40</span>, <span class="fl">0.00</span>, <span class="op">-</span><span class="fl">0.33</span>])  <span class="co"># exper's true coefficient is zero</span></span>
+<span id="cb7-236"><a href="#cb7-236" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> X <span class="op">@</span> beta_true <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.4</span>, n)</span>
+<span id="cb7-237"><a href="#cb7-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-238"><a href="#cb7-238" aria-hidden="true" tabindex="-1"></a><span class="co"># OLS by the normal equations = exactly what lm() computes</span></span>
+<span id="cb7-239"><a href="#cb7-239" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)</span>
+<span id="cb7-240"><a href="#cb7-240" aria-hidden="true" tabindex="-1"></a>resid <span class="op">=</span> y <span class="op">-</span> X <span class="op">@</span> beta</span>
+<span id="cb7-241"><a href="#cb7-241" aria-hidden="true" tabindex="-1"></a>sigma2 <span class="op">=</span> resid <span class="op">@</span> resid <span class="op">/</span> (n <span class="op">-</span> X.shape[<span class="dv">1</span>])</span>
+<span id="cb7-242"><a href="#cb7-242" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> sigma2 <span class="op">*</span> np.linalg.inv(X.T <span class="op">@</span> X)</span>
+<span id="cb7-243"><a href="#cb7-243" aria-hidden="true" tabindex="-1"></a>se <span class="op">=</span> np.sqrt(np.diag(cov))</span>
+<span id="cb7-244"><a href="#cb7-244" aria-hidden="true" tabindex="-1"></a>lo, hi <span class="op">=</span> beta <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> se, beta <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> se</span>
+<span id="cb7-245"><a href="#cb7-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-246"><a href="#cb7-246" aria-hidden="true" tabindex="-1"></a>terms <span class="op">=</span> [<span class="st">"(Intercept)"</span>, <span class="st">"educ"</span>, <span class="st">"exper"</span>, <span class="st">"female"</span>]</span>
+<span id="cb7-247"><a href="#cb7-247" aria-hidden="true" tabindex="-1"></a>ypos <span class="op">=</span> np.arange(<span class="bu">len</span>(terms))[::<span class="op">-</span><span class="dv">1</span>]                 <span class="co"># intercept on top</span></span>
+<span id="cb7-248"><a href="#cb7-248" aria-hidden="true" tabindex="-1"></a><span class="co"># highlight the coefficients whose 95% interval clears zero</span></span>
+<span id="cb7-249"><a href="#cb7-249" aria-hidden="true" tabindex="-1"></a>clears0 <span class="op">=</span> (lo <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">|</span> (hi <span class="op">&lt;</span> <span class="dv">0</span>)</span>
+<span id="cb7-250"><a href="#cb7-250" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#e8531d"</span> <span class="cf">if</span> c <span class="cf">else</span> <span class="st">"#8a8a7e"</span> <span class="cf">for</span> c <span class="kw">in</span> clears0]</span>
+<span id="cb7-251"><a href="#cb7-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-252"><a href="#cb7-252" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.4</span>, <span class="fl">3.8</span>))</span>
+<span id="cb7-253"><a href="#cb7-253" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, lw<span class="op">=</span><span class="fl">1.2</span>, ls<span class="op">=</span>(<span class="dv">0</span>, (<span class="dv">4</span>, <span class="dv">3</span>)))</span>
+<span id="cb7-254"><a href="#cb7-254" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> yi, b, l, h, c <span class="kw">in</span> <span class="bu">zip</span>(ypos, beta, lo, hi, colors):</span>
+<span id="cb7-255"><a href="#cb7-255" aria-hidden="true" tabindex="-1"></a>    ax.plot([l, h], [yi, yi], color<span class="op">=</span>c, lw<span class="op">=</span><span class="fl">2.4</span>, solid_capstyle<span class="op">=</span><span class="st">"round"</span>)</span>
+<span id="cb7-256"><a href="#cb7-256" aria-hidden="true" tabindex="-1"></a>    ax.plot(b, yi, <span class="st">"o"</span>, color<span class="op">=</span>c, ms<span class="op">=</span><span class="dv">7</span>, markeredgecolor<span class="op">=</span><span class="st">"#161613"</span>, markeredgewidth<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb7-257"><a href="#cb7-257" aria-hidden="true" tabindex="-1"></a>ax.set_yticks(ypos)<span class="op">;</span> ax.set_yticklabels(terms)</span>
+<span id="cb7-258"><a href="#cb7-258" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"coefficient estimate  (95% CI)"</span>)</span>
+<span id="cb7-259"><a href="#cb7-259" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Show the interval, not the stars"</span>)</span>
+<span id="cb7-260"><a href="#cb7-260" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="op">-</span><span class="fl">0.6</span>, <span class="bu">len</span>(terms) <span class="op">-</span> <span class="fl">0.4</span>)</span>
+<span id="cb7-261"><a href="#cb7-261" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb7-262"><a href="#cb7-262" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb7-263"><a href="#cb7-263" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-264"><a href="#cb7-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-265"><a href="#cb7-265" aria-hidden="true" tabindex="-1"></a><span class="fu">## Predictions and a first diagnostic look {#sec-predict}</span></span>
+<span id="cb7-266"><a href="#cb7-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-267"><a href="#cb7-267" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb7-268"><a href="#cb7-268" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">educ =</span> <span class="dv">16</span>, <span class="at">exper =</span> <span class="dv">10</span>, <span class="at">female =</span> <span class="dv">0</span>),</span>
+<span id="cb7-269"><a href="#cb7-269" aria-hidden="true" tabindex="-1"></a>        <span class="at">interval =</span> <span class="st">"confidence"</span>)     <span class="co"># fitted value + CI for the mean</span></span>
+<span id="cb7-270"><a href="#cb7-270" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(m, <span class="at">newdata =</span> nd, <span class="at">interval =</span> <span class="st">"prediction"</span>)   <span class="co"># wider: CI for a new individual</span></span>
+<span id="cb7-271"><a href="#cb7-271" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(m)                              <span class="co"># 4 base diagnostic plots: residuals-vs-fitted, QQ, scale-location, leverage</span></span>
+<span id="cb7-272"><a href="#cb7-272" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-273"><a href="#cb7-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-274"><a href="#cb7-274" aria-hidden="true" tabindex="-1"></a>The two intervals answer different questions. ISLR's lab shows the gap: predicting median house value at</span>
+<span id="cb7-275"><a href="#cb7-275" aria-hidden="true" tabindex="-1"></a><span class="in">`lstat = 10`</span>, the confidence interval for the *average* is (24.47, 25.63) and the prediction interval for a</span>
+<span id="cb7-276"><a href="#cb7-276" aria-hidden="true" tabindex="-1"></a>*single* new neighbourhood is (12.83, 37.28). Both are centred on the same fitted value, 25.05, but the second</span>
+<span id="cb7-277"><a href="#cb7-277" aria-hidden="true" tabindex="-1"></a>also has to allow for one observation's own scatter <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span>.</span>
+<span id="cb7-278"><a href="#cb7-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-279"><a href="#cb7-279" aria-hidden="true" tabindex="-1"></a>The <span class="in">`plot(m)`</span> panel is the quickest read on the <span class="co">[</span><span class="ot">assumptions</span><span class="co">](../../content/03-regression/gauss-markov-assumptions.qmd)</span></span>
+<span id="cb7-280"><a href="#cb7-280" aria-hidden="true" tabindex="-1"></a>(ISLR's lab draws all four at once with <span class="in">`par(mfrow = c(2, 2))`</span>) <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span>:</span>
+<span id="cb7-281"><a href="#cb7-281" aria-hidden="true" tabindex="-1"></a>a curved residuals-vs-fitted plot flags <span class="co">[</span><span class="ot">functional-form</span><span class="co">](../../content/03-regression/functional-form.qmd)</span></span>
+<span id="cb7-282"><a href="#cb7-282" aria-hidden="true" tabindex="-1"></a>problems; a fanning shape flags <span class="co">[</span><span class="ot">heteroskedasticity</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span>;</span>
+<span id="cb7-283"><a href="#cb7-283" aria-hidden="true" tabindex="-1"></a>the QQ plot checks residual normality; the leverage panel flags influential points (the <span class="in">`.hat`</span> and <span class="in">`.cooksd`</span></span>
+<span id="cb7-284"><a href="#cb7-284" aria-hidden="true" tabindex="-1"></a>from <span class="in">`augment()`</span>). McNulty's list of things to check before trusting the coefficients is the same:</span>
+<span id="cb7-285"><a href="#cb7-285" aria-hidden="true" tabindex="-1"></a>highly correlated predictors, non-linear relationships the residuals reveal, and unusual observations</span>
+<span id="cb7-286"><a href="#cb7-286" aria-hidden="true" tabindex="-1"></a>(outliers in the outcome, high-leverage points in the inputs) <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span>.</span>
+<span id="cb7-287"><a href="#cb7-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-288"><a href="#cb7-288" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb7-289"><a href="#cb7-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-290"><a href="#cb7-290" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where R regression output gets misread"}</span>
+<span id="cb7-291"><a href="#cb7-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-292"><a href="#cb7-292" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading stars as importance.** `***` means "precisely estimated as non-zero," not "big" or "matters most."</span>
+<span id="cb7-293"><a href="#cb7-293" aria-hidden="true" tabindex="-1"></a>  A tiny, useless coefficient can be <span class="in">`***`</span> in a huge sample; a large, decision-relevant one can be <span class="in">`n.s.`</span> in a</span>
+<span id="cb7-294"><a href="#cb7-294" aria-hidden="true" tabindex="-1"></a>  small one, as the five-row example's slope was. Report the **estimate and its interval**, not the star</span>
+<span id="cb7-295"><a href="#cb7-295" aria-hidden="true" tabindex="-1"></a>  count. <span class="co">[</span><span class="ot">@reinhart_swrong</span><span class="co">]</span></span>
+<span id="cb7-296"><a href="#cb7-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-297"><a href="#cb7-297" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dropping every non-significant predictor.** McNulty advises removing non-significant variables for a</span>
+<span id="cb7-298"><a href="#cb7-298" aria-hidden="true" tabindex="-1"></a>  simpler model <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span>, and for description that is reasonable. When the goal is a causal</span>
+<span id="cb7-299"><a href="#cb7-299" aria-hidden="true" tabindex="-1"></a>  estimate, a control belongs in the model because of what it blocks, not because of its own p-value. See</span>
+<span id="cb7-300"><a href="#cb7-300" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">what regression can and can't tell you</span><span class="co">](../../content/03-regression/regression-and-causality.qmd)</span>.</span>
+<span id="cb7-301"><a href="#cb7-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-302"><a href="#cb7-302" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting the reference category.** With <span class="in">`factor(grp)`</span>, the omitted level is folded into the intercept and</span>
+<span id="cb7-303"><a href="#cb7-303" aria-hidden="true" tabindex="-1"></a>  every shown coefficient is a contrast against it. "Region B = 2.1" means *relative to region A*, not in</span>
+<span id="cb7-304"><a href="#cb7-304" aria-hidden="true" tabindex="-1"></a>  absolute terms. Change the baseline with <span class="in">`relevel()`</span> when a different comparison reads better. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb7-305"><a href="#cb7-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-306"><a href="#cb7-306" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Default standard errors under heteroskedasticity.** <span class="in">`lm()`</span>/<span class="in">`summary()`</span> report classical SEs that assume</span>
+<span id="cb7-307"><a href="#cb7-307" aria-hidden="true" tabindex="-1"></a>  constant error variance. When that fails, the estimates are still fine but the SEs (and $p$-values) are</span>
+<span id="cb7-308"><a href="#cb7-308" aria-hidden="true" tabindex="-1"></a>  wrong — use <span class="in">`lmtest::coeftest(m, vcov = sandwich::vcovHC(m))`</span> for</span>
+<span id="cb7-309"><a href="#cb7-309" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">robust errors</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span>. R will not warn you.</span>
+<span id="cb7-310"><a href="#cb7-310" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span> Dayal's worked examples do exactly this before tabulating with <span class="in">`tidy()`</span></span>
+<span id="cb7-311"><a href="#cb7-311" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span>.</span>
+<span id="cb7-312"><a href="#cb7-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-313"><a href="#cb7-313" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Predicting outside the data's range.** <span class="in">`predict()`</span> will happily extrapolate a fitted line far beyond where</span>
+<span id="cb7-314"><a href="#cb7-314" aria-hidden="true" tabindex="-1"></a>  any data supported it; the interval widens but the model's *form* was never tested out there.</span>
+<span id="cb7-315"><a href="#cb7-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-316"><a href="#cb7-316" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using a literal `` ```{r} `` chunk here.** This is a Quarto note, not an R gotcha: in *this* encyclopedia</span>
+<span id="cb7-317"><a href="#cb7-317" aria-hidden="true" tabindex="-1"></a>  the R is shown for reading, not executed (there is no R engine wired in), so R appears in plain `<span class="in">``` ```</span>r ````</span>
+<span id="cb7-318"><a href="#cb7-318" aria-hidden="true" tabindex="-1"></a>  blocks. The one executable figure per entry is Python.</span>
+<span id="cb7-319"><a href="#cb7-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-320"><a href="#cb7-320" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-321"><a href="#cb7-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-322"><a href="#cb7-322" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb7-323"><a href="#cb7-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-324"><a href="#cb7-324" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb7-325"><a href="#cb7-325" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**McNulty, *Explanatory Statistical Modeling in R*** — the minimum recipe (model function + data +</span>
+<span id="cb7-326"><a href="#cb7-326" aria-hidden="true" tabindex="-1"></a>  formula); the <span class="in">`ugtests`</span> exam-score model and its full <span class="in">`summary()`</span> output, interpreted coefficient by</span>
+<span id="cb7-327"><a href="#cb7-327" aria-hidden="true" tabindex="-1"></a>  coefficient with <span class="in">`confint()`</span>; the gender <span class="in">`relevel()`</span> example; $R^2$ and the F-test as "better than</span>
+<span id="cb7-328"><a href="#cb7-328" aria-hidden="true" tabindex="-1"></a>  nothing?"; model simplification; and the checklist of collinearity, non-linearity and unusual observations.</span>
+<span id="cb7-329"><a href="#cb7-329" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wickham &amp; Grolemund, *R for Data Science*** — the broom package's three tools (<span class="in">`glance`</span>, <span class="in">`tidy`</span>,</span>
+<span id="cb7-330"><a href="#cb7-330" aria-hidden="true" tabindex="-1"></a>  <span class="in">`augment`</span>) for turning models into tidy data frames.</span>
+<span id="cb7-331"><a href="#cb7-331" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dayal, *Quantitative Economics with R*** — <span class="in">`tidy()`</span> applied to a robust-standard-error result</span>
+<span id="cb7-332"><a href="#cb7-332" aria-hidden="true" tabindex="-1"></a>  (<span class="in">`coeftest(..., vcov = vcovHC(...))`</span>) to produce a report table.</span>
+<span id="cb7-333"><a href="#cb7-333" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**James, Witten, Hastie &amp; Tibshirani, *ISLR* (the R labs)** — the formula interface, factor/dummy handling</span>
+<span id="cb7-334"><a href="#cb7-334" aria-hidden="true" tabindex="-1"></a>  and the reference level, interactions and <span class="in">`poly()`</span>, adjusted $R^2$, <span class="in">`confint()`</span> and <span class="in">`predict()`</span> with</span>
+<span id="cb7-335"><a href="#cb7-335" aria-hidden="true" tabindex="-1"></a>  confidence vs prediction intervals (the <span class="in">`lstat = 10`</span> example), and the four <span class="in">`plot()`</span> diagnostics.</span>
+<span id="cb7-336"><a href="#cb7-336" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*** — the *interpretation* of each coefficient as a ceteris-paribus</span>
+<span id="cb7-337"><a href="#cb7-337" aria-hidden="true" tabindex="-1"></a>  effect, the standard error as $\sqrt{\hat\sigma^2<span class="co">[</span><span class="ot">(X^\top X)^{-1}</span><span class="co">]</span>_{jj}}$, and the heteroskedasticity caveat</span>
+<span id="cb7-338"><a href="#cb7-338" aria-hidden="true" tabindex="-1"></a>  on default SEs.</span>
+<span id="cb7-339"><a href="#cb7-339" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reinhart, *Statistics Done Wrong*** — a $p$-value says nothing about effect size; confidence intervals</span>
+<span id="cb7-340"><a href="#cb7-340" aria-hidden="true" tabindex="-1"></a>  carry far more information.</span>
+<span id="cb7-341"><a href="#cb7-341" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Kaplan, *Lessons in Statistical Thinking*** — the case for showing effects with confidence intervals</span>
+<span id="cb7-342"><a href="#cb7-342" aria-hidden="true" tabindex="-1"></a>  (the coefficient plot) rather than significance stars.</span>
+<span id="cb7-343"><a href="#cb7-343" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*The five-student hours-and-scores example and the report-card picture are this encyclopedia's own.*</span>
+<span id="cb7-344"><a href="#cb7-344" aria-hidden="true" tabindex="-1"></a>  An earlier version of this page showed an invented wage table and credited the broom workflow to McNulty;</span>
+<span id="cb7-345"><a href="#cb7-345" aria-hidden="true" tabindex="-1"></a>  the table is now McNulty's real output and broom is credited to *R for Data Science*.</span>
+<span id="cb7-346"><a href="#cb7-346" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-347"><a href="#cb7-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-348"><a href="#cb7-348" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb7-349"><a href="#cb7-349" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-350"><a href="#cb7-350" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** the <span class="co">[</span><span class="ot">tidyverse data-science workflow</span><span class="co">](../../content/dataframes/index.qmd)</span> (get the data into a</span>
+<span id="cb7-351"><a href="#cb7-351" aria-hidden="true" tabindex="-1"></a>  tidy data frame first), <span class="co">[</span><span class="ot">getting started in R</span><span class="co">](getting-started-in-r.qmd)</span>, and</span>
+<span id="cb7-352"><a href="#cb7-352" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](../../content/03-regression/multiple-regression.qmd)</span> (what the numbers mean).</span>
+<span id="cb7-353"><a href="#cb7-353" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The math underneath:** <span class="co">[</span><span class="ot">OLS in matrix form</span><span class="co">](../math/ols-in-matrix-form.qmd)</span> — <span class="in">`lm()`</span> solves the normal</span>
+<span id="cb7-354"><a href="#cb7-354" aria-hidden="true" tabindex="-1"></a>  equations, and the reported SEs are the diagonal of $\hat\sigma^2(X^\top X)^{-1}$.</span>
+<span id="cb7-355"><a href="#cb7-355" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reads with:** <span class="co">[</span><span class="ot">inference for regression</span><span class="co">](../../content/03-regression/inference-for-regression.qmd)</span> ($t$- and</span>
+<span id="cb7-356"><a href="#cb7-356" aria-hidden="true" tabindex="-1"></a>  $F$-tests), <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](../../content/03-regression/regression-diagnostics.qmd)</span> (<span class="in">`plot(m)`</span>,</span>
+<span id="cb7-357"><a href="#cb7-357" aria-hidden="true" tabindex="-1"></a>  leverage, Cook's distance), and <span class="co">[</span><span class="ot">heteroskedasticity &amp; robust errors</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span>.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
