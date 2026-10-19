@@ -1942,9 +1942,12 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#counting-processes" id="toc-counting-processes" class="nav-link active" data-scroll-target="#counting-processes">Counting processes</a></li>
-  <li><a href="#interarrival-times-are-exponential-and-thats-no-accident" id="toc-interarrival-times-are-exponential-and-thats-no-accident" class="nav-link" data-scroll-target="#interarrival-times-are-exponential-and-thats-no-accident">Interarrival times are exponential — and that’s no accident</a></li>
-  <li><a href="#superposition-and-thinning" id="toc-superposition-and-thinning" class="nav-link" data-scroll-target="#superposition-and-thinning">Superposition and thinning</a></li>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#sec-idea" id="toc-sec-idea" class="nav-link" data-scroll-target="#sec-idea">The idea in words</a></li>
+  <li><a href="#sec-by-hand" id="toc-sec-by-hand" class="nav-link" data-scroll-target="#sec-by-hand">A help desk, by hand</a></li>
+  <li><a href="#sec-counting" id="toc-sec-counting" class="nav-link" data-scroll-target="#sec-counting">Counting processes</a></li>
+  <li><a href="#sec-gaps" id="toc-sec-gaps" class="nav-link" data-scroll-target="#sec-gaps">Interarrival times are exponential — and that’s no accident</a></li>
+  <li><a href="#sec-closure" id="toc-sec-closure" class="nav-link" data-scroll-target="#sec-closure">Superposition and thinning</a></li>
   <li><a href="#where-it-shows-up" id="toc-where-it-shows-up" class="nav-link" data-scroll-target="#where-it-shows-up">Where it shows up</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
@@ -1976,22 +1979,121 @@ window.Quarto = {
 
 
 <div class="lead-kernel">
-<p>Customers entering a bank, radioactive atoms decaying, earthquakes striking: events that pop up <em>at random</em> in continuous time. The <strong>Poisson process</strong> is the canonical model — a process that, at every instant, <em>“probabilistically restarts itself.”</em> Count its events in any window and you get a <a href="../../content/01-foundations/common-distributions.html">Poisson distribution</a>; measure the gaps <em>between</em> events and you get the <a href="../../content/03-regression/survival-analysis.html">exponential</a> — the unique memoryless waiting time. One process ties those two distributions together.</p>
+<p>Calls to a help desk, people arriving at a clinic, conflicts breaking out: events that turn up at random moments. The Poisson process is the standard model for them. Its key feature is that at every instant it starts afresh, with no memory of what came before. Two familiar distributions follow from that one idea: the number of events in a window, and the waiting time between events.</p>
 </div>
-<section id="counting-processes" class="level2">
-<h2 class="anchored" data-anchor-id="counting-processes">Counting processes</h2>
+<div class="callout callout-style-default callout-tip callout-titled" title="Where you probably came from — and what you need">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Where you probably came from — and what you need
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>You likely arrived from</strong> <a href="../../content/03-regression/count-data-models.html">count-data models</a> (“a Poisson regression models the rate”), <a href="../../content/03-regression/survival-analysis.html">survival analysis</a> (“the exponential is the constant-hazard baseline”), the Poisson and exponential entries in <a href="../../content/01-foundations/common-distributions.html">common distributions</a>, or a neighbouring entry such as <a href="../../appendices/advanced-probability/queueing.html">queueing</a> or <a href="../../appendices/advanced-probability/renewal-theory.html">renewal theory</a>.</p>
+<p><strong>You need:</strong> what a probability distribution is, and the idea of an <em>expected value</em> (a long-run average). <strong>You don’t need</strong> calculus for the main ideas. The worked example uses only the number <span class="math inline">e\approx2.718</span> and a calculator.</p>
+<p><strong>Jump to what you came for:</strong> <a href="#sec-idea">the idea in words</a> · <a href="#sec-by-hand">a help desk by hand</a> · <a href="#sec-counting">counts are Poisson</a> · <a href="#sec-gaps">gaps are exponential</a> · <a href="#sec-closure">merging and splitting streams</a></p>
+</div>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p>Social scientists count things that happen over time: arrests per month, protests per year, visits per patient, citations per paper. The Poisson process is the baseline story of how such counts arise. It is the model <em>behind</em> the Poisson regression in <a href="../../content/03-regression/count-data-models.html">count-data models</a>, where the regression explains the <strong>rate</strong>. It is also behind the constant-hazard model in <a href="../../content/03-regression/survival-analysis.html">survival analysis</a>, where the quantity of interest is the <strong>waiting time</strong>. Knowing what the process assumes tells you when those models will fail. The usual failure is events that cluster, which shows up as overdispersion <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span>.</p>
+</section>
+<section id="sec-idea" class="level2">
+<h2 class="anchored" data-anchor-id="sec-idea">The idea in words</h2>
+<p>Picture a very long ribbon of time cut into tiny slices, say one per second. In each slice, a biased coin is tossed. Heads (rare) means an event happens in that slice. Every toss is independent of every other, and the coin is the same in every slice. That is, in effect, a Poisson process.</p>
+<p>Three things follow from this picture:</p>
+<ol type="1">
+<li><strong>Counts.</strong> The number of heads in an hour is a count of many rare, independent successes. That is exactly the situation in which counts follow a Poisson distribution, whose average is (rate) × (length of window).</li>
+<li><strong>Gaps.</strong> Because each toss ignores the past, the wait until the next head does not depend on how long you have already waited. A distribution with that “no memory” property, in continuous time, must be the <strong>exponential</strong>.</li>
+<li><strong>Merging and splitting.</strong> Two independent ribbons laid on top of each other still look like one ribbon with a more likely coin. Sorting each head at random into “type A” or “type B” gives two ribbons that each still look like coin-tossing.</li>
+</ol>
+</section>
+<section id="sec-by-hand" class="level2">
+<h2 class="anchored" data-anchor-id="sec-by-hand">A help desk, by hand</h2>
+<p>A help desk receives calls at random at an average <strong>rate of 3 per hour</strong>.</p>
+<p><strong>Step 1 — counts in an hour.</strong> The number of calls in one hour is Poisson with mean 3:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">calls in the hour</th>
+<th style="text-align: center;">0</th>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+<th style="text-align: center;">6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">probability</td>
+<td style="text-align: center;">0.050</td>
+<td style="text-align: center;">0.149</td>
+<td style="text-align: center;">0.224</td>
+<td style="text-align: center;">0.224</td>
+<td style="text-align: center;">0.168</td>
+<td style="text-align: center;">0.101</td>
+<td style="text-align: center;">0.050</td>
+</tr>
+</tbody>
+</table>
+<p>Each entry is <span class="math inline">e^{-3}\,3^n/n!</span>. For example, the chance of no calls at all is <span class="math inline">e^{-3}\approx0.050</span>.</p>
+<p><strong>Step 2 — a shorter window.</strong> In 20 minutes (one third of an hour) the mean is <span class="math inline">3\times\tfrac13=1</span>. The chance of a quiet 20 minutes is <span class="math inline">e^{-1}\approx0.368</span>, so the chance of at least one call is about 0.632. The window length enters through the mean, which is why rate and window must be in the same units.</p>
+<p><strong>Step 3 — the gaps.</strong> The average gap between calls is <span class="math inline">1/3</span> of an hour, or 20 minutes. The chance that a gap exceeds 40 minutes is <span class="math inline">e^{-3\times(2/3)}=e^{-2}\approx0.135</span>.</p>
+<p><strong>Step 4 — no memory.</strong> Suppose the line has been quiet for 30 minutes. The chance of a call in the next 20 minutes is still <span class="math inline">1-e^{-1}\approx0.632</span>. The quiet half-hour tells you nothing. This is the memoryless property, and it is the point most often got wrong in practice.</p>
+<p>Ross has the same calculation with a different story <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span>. Immigrants arrive at rate 1 per day, so the expected wait for the tenth is 10 days, and the chance that the gap between the tenth and eleventh exceeds two days is <span class="math inline">e^{-2}\approx0.135</span> (Example 5.9).</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Notation key — open if a symbol is unfamiliar">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Notation key — open if a symbol is unfamiliar
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><span class="math inline">t</span> — time elapsed since the start; <span class="math inline">N(t)</span> — the number of events up to time <span class="math inline">t</span>.</li>
+<li><span class="math inline">\lambda</span> — the <strong>rate</strong>: expected events per unit of time (3 per hour above).</li>
+<li><span class="math inline">n!</span> — <span class="math inline">n</span> factorial, <span class="math inline">n\times(n-1)\times\dots\times1</span>, with <span class="math inline">0!=1</span>.</li>
+<li><span class="math inline">e^{-x}</span> — the exponential function; <span class="math inline">e\approx2.718</span>.</li>
+<li><span class="math inline">T_1, T_2,\dots</span> — the gaps (<em>interarrival times</em>) between successive events; <span class="math inline">S_n</span> — the time of the <span class="math inline">n</span>th event.</li>
+<li><em>i.i.d.</em> — independent and identically distributed: every gap is drawn the same way, unaffected by the others.</li>
+<li><span class="math inline">\Pr\{\cdot\}</span> — probability.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-counting" class="level2">
+<h2 class="anchored" data-anchor-id="sec-counting">Counting processes</h2>
 <p>A <strong>counting process</strong> <span class="math inline">\{N(t),\,t\ge 0\}</span> records the total number of events that have occurred up to time <span class="math inline">t</span>. <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> The <strong>Poisson process</strong> of rate <span class="math inline">\lambda&gt;0</span> is the most important one, pinned down by two intuitive properties: <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span></p>
 <ul>
 <li><strong>Independent increments</strong> — counts in <em>disjoint</em> intervals are independent. What happens between 2:00 and 3:00 tells you nothing about 5:00–6:00.</li>
 <li><strong>Stationary increments</strong> — the distribution of the count in an interval depends only on its <strong>length</strong>, not <em>when</em> it sits. A one-hour window is statistically the same at noon or midnight.</li>
 </ul>
-<p>From these, the number of events in an interval of length <span class="math inline">t</span> is <strong>Poisson with mean <span class="math inline">\lambda t</span></strong>: <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> <span class="math display">
+<p>(An <em>increment</em> is the number of events in a window, <span class="math inline">N(t+s)-N(t)</span>.) From these, the number of events in an interval of length <span class="math inline">t</span> is <strong>Poisson with mean <span class="math inline">\lambda t</span></strong>: <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> <span class="math display">
 \Pr\{N(t)=n\} = e^{-\lambda t}\,\frac{(\lambda t)^n}{n!}, \qquad n=0,1,2,\dots
-</span> The rate <span class="math inline">\lambda</span> is events per unit time; over a window of length <span class="math inline">t</span> you expect <span class="math inline">\lambda t</span> of them.</p>
+</span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> the count in a window is Poisson, and its average is the rate times the window length. The help-desk table is this formula with <span class="math inline">\lambda t=3</span>.</p>
+</blockquote>
+<p>The rate <span class="math inline">\lambda</span> is events per unit time; over a window of length <span class="math inline">t</span> you expect <span class="math inline">\lambda t</span> of them.</p>
 </section>
-<section id="interarrival-times-are-exponential-and-thats-no-accident" class="level2">
-<h2 class="anchored" data-anchor-id="interarrival-times-are-exponential-and-thats-no-accident">Interarrival times are exponential — and that’s no accident</h2>
-<p>Look at the <strong>gaps</strong> between successive events — the <strong>interarrival times</strong> <span class="math inline">T_1, T_2, \dots</span>. Ross’s result: they are <strong>independent and identically distributed Exponential(<span class="math inline">\lambda</span>)</strong>, each with mean <span class="math inline">1/\lambda</span>. <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> This is the process’s deepest fact, and it follows from a single idea: stationary + independent increments mean that <em>“at any point in time, the process probabilistically restarts itself.”</em> <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> Since the <strong>exponential is the <em>unique</em> memoryless continuous distribution</strong>, it is the <em>only</em> law a restart-anywhere process can have — the time to the next event cannot depend on how long you’ve already waited. <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> (This is exactly the constant-hazard, <a href="../../content/03-regression/survival-analysis.html">exponential-survival</a> baseline, seen from the other side.)</p>
+<section id="sec-gaps" class="level2">
+<h2 class="anchored" data-anchor-id="sec-gaps">Interarrival times are exponential — and that’s no accident</h2>
+<p>Look at the <strong>gaps</strong> between successive events — the <strong>interarrival times</strong> <span class="math inline">T_1, T_2, \dots</span>. Ross’s result: they are <strong>independent and identically distributed Exponential(<span class="math inline">\lambda</span>)</strong>, each with mean <span class="math inline">1/\lambda</span>. <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> That is, <span class="math display">
+\Pr\{T_k &gt; s\} = e^{-\lambda s}.
+</span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> the chance of waiting longer than <span class="math inline">s</span> shrinks by the same factor for every extra unit of time waited. That constant shrinking is what “no memory” means.</p>
+</blockquote>
+<p>This is the process’s deepest fact, and it follows from a single idea: stationary + independent increments mean that <em>“at any point in time, the process probabilistically restarts itself.”</em> <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> Since the <strong>exponential is the <em>unique</em> memoryless continuous distribution</strong>, it is the <em>only</em> law a restart-anywhere process can have — the time to the next event cannot depend on how long you’ve already waited. <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> (This is exactly the constant-hazard, <a href="../../content/03-regression/survival-analysis.html">exponential-survival</a> baseline, seen from the other side.) The time of the <span class="math inline">n</span>th event, <span class="math inline">S_n=T_1+\dots+T_n</span>, has mean <span class="math inline">n/\lambda</span>: ten arrivals at one a day take ten days on average.</p>
 <div id="cell-fig-poisson-process" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show the figure code</summary>
@@ -2012,7 +2114,7 @@ window.Quarto = {
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>axT.step(np.concatenate([[<span class="dv">0</span>], times]), np.arange(<span class="bu">len</span>(times)<span class="op">+</span><span class="dv">1</span>), where<span class="op">=</span><span class="st">"post"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">1.6</span>)</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>axT.plot(times, np.zeros_like(times), <span class="st">"|"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, markersize<span class="op">=</span><span class="dv">12</span>, markeredgewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>axT.set_xlim(<span class="dv">0</span>, T)<span class="op">;</span> axT.set_xlabel(<span class="st">"time  t"</span>)<span class="op">;</span> axT.set_ylabel(<span class="st">"N(t)"</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>axT.set_title(<span class="ss">f"Counting process N(t), rate λ=</span><span class="sc">{</span>lam<span class="sc">}</span><span class="ss">  (red ticks = events)"</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>axT.set_title(<span class="ss">f"Counting process N(t), rate λ=</span><span class="sc">{</span>lam<span class="sc">}</span><span class="ss">  (orange ticks = events)"</span>)</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Counts in fixed windows of width w</span></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="fl">1.0</span></span>
@@ -2033,23 +2135,27 @@ window.Quarto = {
 <div id="fig-poisson-process" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-poisson-process-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="poisson-process_files/figure-html/fig-poisson-process-output-1.png" width="712" height="471" class="figure-img">
+<img src="poisson-process_files/figure-html/fig-poisson-process-output-1.png" width="713" height="468" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-poisson-process-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: A Poisson process of rate λ. Top: event times (ticks) scatter at random; the step function N(t) counts them. The gaps between ticks are i.i.d. Exponential(λ). Bottom: counting events in fixed windows produces a Poisson(λ·width) distribution — here a histogram of per-window counts against the Poisson pmf (red). Same process, two faces: exponential gaps, Poisson counts.
+Figure&nbsp;1: A Poisson process of rate λ. Top: event times (ticks) scatter at random; the step function N(t) counts them. The gaps between ticks are i.i.d. Exponential(λ). Bottom: counting events in fixed windows produces a Poisson(λ·width) distribution — here a histogram of per-window counts against the Poisson pmf (orange). Same process, two faces: exponential gaps, Poisson counts.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="superposition-and-thinning" class="level2">
-<h2 class="anchored" data-anchor-id="superposition-and-thinning">Superposition and thinning</h2>
+<section id="sec-closure" class="level2">
+<h2 class="anchored" data-anchor-id="sec-closure">Superposition and thinning</h2>
 <p>Two operations make the Poisson process beautifully closed: <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span></p>
 <ul>
 <li><strong>Superposition.</strong> Merge two <em>independent</em> Poisson processes with rates <span class="math inline">\lambda_1</span> and <span class="math inline">\lambda_2</span> and the combined stream is <strong>Poisson with rate <span class="math inline">\lambda_1+\lambda_2</span>.</strong> (All the arrivals from two doors into one shop.)</li>
 <li><strong>Thinning.</strong> Independently tag each event “Type I” with probability <span class="math inline">p</span> or “Type II” with <span class="math inline">1-p</span>; the two sub-streams are <strong>independent Poisson processes</strong> with rates <span class="math inline">\lambda p</span> and <span class="math inline">\lambda(1-p)</span>. <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> (Split arrivals into “web” vs “phone” and each is still Poisson.)</li>
 </ul>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> rates add when streams merge, and rates scale by <span class="math inline">p</span> when a stream is split at random. If the help desk gets 3 calls an hour and a third are about billing, billing calls arrive as their own Poisson stream at 1 an hour.</p>
+</blockquote>
+<p>Ross’s version of thinning <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span>: immigrants arrive at 10 per week, and each is of English descent with probability <span class="math inline">1/12</span>. Over a four-week February the English-descent arrivals are Poisson with mean <span class="math inline">4\times10\times\tfrac1{12}=\tfrac{10}{3}</span>, so the chance of none at all is <span class="math inline">e^{-10/3}\approx0.036</span> (Example 5.10).</p>
 <p>These closure rules are why the Poisson process is the default model whenever independent streams combine or split.</p>
 </section>
 <section id="where-it-shows-up" class="level2">
@@ -2070,7 +2176,7 @@ Figure&nbsp;1: A Poisson process of rate λ. Top: event times (ticks) scatter at
 <div class="callout-body-container callout-body">
 <ul>
 <li><p><strong>Assuming Poisson when events clump.</strong> Independent increments fail if one event makes the next more likely (“contagion”) — that’s <a href="../../content/03-regression/count-data-models.html">overdispersion</a>; use a different process / negative binomial. <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span></p></li>
-<li><p><strong>Forgetting the memoryless catch.</strong> “It’s been quiet, so an arrival is overdue” is the <a href="../../content/01-foundations/law-of-large-numbers.html">gambler’s fallacy</a> in continuous time — the exponential has no memory. <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span></p></li>
+<li><p><strong>Forgetting the memoryless catch.</strong> “It’s been quiet, so an arrival is overdue” is the <a href="../../content/01-foundations/law-of-large-numbers.html">gambler’s fallacy</a> in continuous time — the exponential has no memory. <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> Step 4 of the help-desk example shows the numbers.</p></li>
 <li><p><strong>Mismatching rate and window.</strong> The count is Poisson(<span class="math inline">\lambda t</span>), not Poisson(<span class="math inline">\lambda</span>); keep the time units straight (the <a href="../../content/03-regression/count-data-models.html">offset</a> issue). <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span></p></li>
 </ul>
 </div>
@@ -2079,7 +2185,7 @@ Figure&nbsp;1: A Poisson process of rate λ. Top: event times (ticks) scatter at
 <section id="from-the-sources" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
 <div class="callout callout-style-default callout-note callout-titled" title="Who says what">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2088,10 +2194,11 @@ Figure&nbsp;1: A Poisson process of rate λ. Top: event times (ticks) scatter at
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Ross, <em>Introduction to Probability Models</em></strong> — the <strong>counting process</strong> <span class="math inline">N(t)</span> and the <strong>Poisson process</strong> of rate <span class="math inline">\lambda</span> (<strong>independent</strong> &amp; <strong>stationary increments</strong>; <span class="math inline">N(t)\sim\text{Poisson}(\lambda t)</span>); <strong>interarrival times</strong> i.i.d. <strong>Exponential(<span class="math inline">\lambda</span>)</strong> and the <em>“probabilistically restarts itself”</em> / memoryless link; <strong>superposition</strong> (<span class="math inline">\lambda_1+\lambda_2</span>) and <strong>thinning</strong> (<span class="math inline">\lambda p</span>); and the rare-event examples (radioactive decay, earthquakes, wars, arrivals).</li>
+<li><strong>Ross, <em>Introduction to Probability Models</em></strong> — the <strong>counting process</strong> <span class="math inline">N(t)</span> and the <strong>Poisson process</strong> of rate <span class="math inline">\lambda</span> (<strong>independent</strong> &amp; <strong>stationary increments</strong>; <span class="math inline">N(t)\sim\text{Poisson}(\lambda t)</span>); <strong>interarrival times</strong> i.i.d. <strong>Exponential(<span class="math inline">\lambda</span>)</strong> and the <em>“probabilistically restarts itself”</em> / memoryless link (Proposition 5.1 and the remark after it); the arrival time <span class="math inline">S_n</span> as a sum of gaps; <strong>superposition</strong> (<span class="math inline">\lambda_1+\lambda_2</span>) and <strong>thinning</strong> (<span class="math inline">\lambda p</span>); the immigration examples (Examples 5.9 and 5.10) quoted in the worked sections; and the rare-event examples (radioactive decay, earthquakes, wars, arrivals).</li>
+<li><em>The coin-toss ribbon picture and the help-desk numbers are this encyclopedia’s own illustrations of Ross’s results. Ross prints the answer to Example 5.9(b) as 0.133; <span class="math inline">e^{-2}</span> is 0.1353, which is the value used here.</em></li>
 </ul>
 </div>
 </div>
@@ -2102,7 +2209,7 @@ Figure&nbsp;1: A Poisson process of rate λ. Top: event times (ticks) scatter at
 <ul>
 <li><strong>Builds on:</strong> <a href="../../content/01-foundations/common-distributions.html">the Poisson &amp; exponential distributions</a> and <a href="../../content/03-regression/survival-analysis.html">memorylessness</a>.</li>
 <li><strong>Powers:</strong> <a href="../../content/03-regression/count-data-models.html">count-data / Poisson regression</a> (modelling the rate) and the constant-hazard core of <a href="../../content/03-regression/survival-analysis.html">survival analysis</a>.</li>
-<li><strong>Generalises to:</strong> non-homogeneous and compound Poisson processes, and the continuous-time <a href="../../appendices/advanced-probability/markov-chains.html">Markov chains</a> of the next entry.</li>
+<li><strong>Generalises to:</strong> non-homogeneous and compound Poisson processes, <a href="../../appendices/advanced-probability/renewal-theory.html">renewal theory</a> (any gap distribution, not only exponential), and the continuous-time <a href="../../appendices/advanced-probability/markov-chains.html">Markov chains</a> behind <a href="../../appendices/advanced-probability/queueing.html">queueing</a>.</li>
 </ul>
 
 
@@ -2590,142 +2697,249 @@ Ross, Sheldon M. 2014. <em>Introduction to Probability Models</em>. 11th ed. Aca
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Customers entering a bank, radioactive atoms decaying, earthquakes striking: events that pop up *at random*</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>in continuous time. The **Poisson process** is the canonical model — a process that, at every instant,</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>*"probabilistically restarts itself."* Count its events in any window and you get a [Poisson</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>distribution](../../content/01-foundations/common-distributions.qmd); measure the gaps *between* events and</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>you get the <span class="co">[</span><span class="ot">exponential</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span> — the unique memoryless waiting</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>time. One process ties those two distributions together.</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## Counting processes</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>A **counting process** $<span class="sc">\{</span>N(t),\,t\ge 0<span class="sc">\}</span>$ records the total number of events that have occurred up to time</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>$t$. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> The **Poisson process** of rate $\lambda&gt;0$ is the most important one, pinned down by</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>two intuitive properties: <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Independent increments** — counts in *disjoint* intervals are independent. What happens between 2:00 and</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  3:00 tells you nothing about 5:00–6:00.</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Stationary increments** — the distribution of the count in an interval depends only on its **length**, not</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  *when* it sits. A one-hour window is statistically the same at noon or midnight.</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>From these, the number of events in an interval of length $t$ is **Poisson with mean $\lambda t$**:</span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>\Pr<span class="sc">\{</span>N(t)=n<span class="sc">\}</span> = e^{-\lambda t}\,\frac{(\lambda t)^n}{n!}, \qquad n=0,1,2,\dots</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>The rate $\lambda$ is events per unit time; over a window of length $t$ you expect $\lambda t$ of them.</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## Interarrival times are exponential — and that's no accident</span></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>Look at the **gaps** between successive events — the **interarrival times** $T_1, T_2, \dots$. Ross's result:</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>they are **independent and identically distributed Exponential($\lambda$)**, each with mean $1/\lambda$.</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> This is the process's deepest fact, and it follows from a single idea: stationary +</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>independent increments mean that *"at any point in time, the process probabilistically restarts itself."*</span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> Since the **exponential is the *unique* memoryless continuous distribution**, it is the</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>*only* law a restart-anywhere process can have — the time to the next event cannot depend on how long you've</span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>already waited. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> (This is exactly the constant-hazard,</span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">exponential-survival</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span> baseline, seen from the other side.)</span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-poisson-process</span></span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "A Poisson process of rate λ. Top: event times (ticks) scatter at random; the step function N(t) counts them. The gaps between ticks are i.i.d. Exponential(λ). Bottom: counting events in fixed windows produces a Poisson(λ·width) distribution — here a histogram of per-window counts against the Poisson pmf (red). Same process, two faces: exponential gaps, Poisson counts."</span></span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> factorial</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Calls to a help desk, people arriving at a clinic, conflicts breaking out: events that turn up at random</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>moments. The Poisson process is the standard model for them. Its key feature is that at every instant it</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>starts afresh, with no memory of what came before. Two familiar distributions follow from that one idea: the</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>number of events in a window, and the waiting time between events.</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Where you probably came from — and what you need"}</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>**You likely arrived from** <span class="co">[</span><span class="ot">count-data models</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span> ("a</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>Poisson regression models the rate"), <span class="co">[</span><span class="ot">survival analysis</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>("the exponential is the constant-hazard baseline"), the Poisson and exponential entries in</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">common distributions</span><span class="co">](../../content/01-foundations/common-distributions.qmd)</span>, or a neighbouring entry such as</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">queueing</span><span class="co">](queueing.qmd)</span> or <span class="co">[</span><span class="ot">renewal theory</span><span class="co">](renewal-theory.qmd)</span>.</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>**You need:** what a probability distribution is, and the idea of an *expected value* (a long-run average).</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>**You don't need** calculus for the main ideas. The worked example uses only the number $e\approx2.718$ and a</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>calculator.</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>**Jump to what you came for:** <span class="co">[</span><span class="ot">the idea in words</span><span class="co">](#sec-idea)</span> · <span class="co">[</span><span class="ot">a help desk by hand</span><span class="co">](#sec-by-hand)</span> ·</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">counts are Poisson</span><span class="co">](#sec-counting)</span> · <span class="co">[</span><span class="ot">gaps are exponential</span><span class="co">](#sec-gaps)</span> ·</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">merging and splitting streams</span><span class="co">](#sec-closure)</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>Social scientists count things that happen over time: arrests per month, protests per year, visits per</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>patient, citations per paper. The Poisson process is the baseline story of how such counts arise. It is the</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>model *behind* the Poisson regression in <span class="co">[</span><span class="ot">count-data models</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span>,</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>where the regression explains the **rate**. It is also behind the constant-hazard model in</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">survival analysis</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span>, where the quantity of interest is the</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>**waiting time**. Knowing what the process assumes tells you when those models will fail. The usual failure is</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>events that cluster, which shows up as overdispersion <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span>.</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="fu">## The idea in words {#sec-idea}</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>Picture a very long ribbon of time cut into tiny slices, say one per second. In each slice, a biased coin is</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>tossed. Heads (rare) means an event happens in that slice. Every toss is independent of every other, and the</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>coin is the same in every slice. That is, in effect, a Poisson process.</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>Three things follow from this picture:</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Counts.** The number of heads in an hour is a count of many rare, independent successes. That is exactly</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>   the situation in which counts follow a Poisson distribution, whose average is (rate) × (length of window).</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Gaps.** Because each toss ignores the past, the wait until the next head does not depend on how long you</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>   have already waited. A distribution with that "no memory" property, in continuous time, must be the</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>   **exponential**.</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Merging and splitting.** Two independent ribbons laid on top of each other still look like one ribbon</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>   with a more likely coin. Sorting each head at random into "type A" or "type B" gives two ribbons that each</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>   still look like coin-tossing.</span>
 <span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">2</span>)</span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>lam <span class="op">=</span> <span class="fl">3.0</span></span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> <span class="fl">20.0</span></span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate arrivals by summing Exponential interarrival times</span></span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>gaps <span class="op">=</span> rng.exponential(<span class="dv">1</span><span class="op">/</span>lam, size<span class="op">=</span><span class="bu">int</span>(lam<span class="op">*</span>T<span class="op">*</span><span class="fl">1.5</span>))</span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>times <span class="op">=</span> np.cumsum(gaps)</span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>times <span class="op">=</span> times[times <span class="op">&lt;</span> T]</span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>fig, (axT, axB) <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="fl">7.6</span>, <span class="fl">5.0</span>))</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="fu">## A help desk, by hand {#sec-by-hand}</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>A help desk receives calls at random at an average **rate of 3 per hour**.</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>**Step 1 — counts in an hour.** The number of calls in one hour is Poisson with mean 3:</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> calls in the hour <span class="pp">|</span> 0 <span class="pp">|</span> 1 <span class="pp">|</span> 2 <span class="pp">|</span> 3 <span class="pp">|</span> 4 <span class="pp">|</span> 5 <span class="pp">|</span> 6 <span class="pp">|</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> probability <span class="pp">|</span> 0.050 <span class="pp">|</span> 0.149 <span class="pp">|</span> 0.224 <span class="pp">|</span> 0.224 <span class="pp">|</span> 0.168 <span class="pp">|</span> 0.101 <span class="pp">|</span> 0.050 <span class="pp">|</span></span>
 <span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>axT.step(np.concatenate([[<span class="dv">0</span>], times]), np.arange(<span class="bu">len</span>(times)<span class="op">+</span><span class="dv">1</span>), where<span class="op">=</span><span class="st">"post"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">1.6</span>)</span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>axT.plot(times, np.zeros_like(times), <span class="st">"|"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, markersize<span class="op">=</span><span class="dv">12</span>, markeredgewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>axT.set_xlim(<span class="dv">0</span>, T)<span class="op">;</span> axT.set_xlabel(<span class="st">"time  t"</span>)<span class="op">;</span> axT.set_ylabel(<span class="st">"N(t)"</span>)</span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>axT.set_title(<span class="ss">f"Counting process N(t), rate λ=</span><span class="sc">{</span>lam<span class="sc">}</span><span class="ss">  (red ticks = events)"</span>)</span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="co"># Counts in fixed windows of width w</span></span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="fl">1.0</span></span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>edges <span class="op">=</span> np.arange(<span class="dv">0</span>, T<span class="op">+</span>w, w)</span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> np.histogram(times, bins<span class="op">=</span>edges)[<span class="dv">0</span>]</span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>ks <span class="op">=</span> np.arange(<span class="dv">0</span>, counts.<span class="bu">max</span>()<span class="op">+</span><span class="dv">2</span>)</span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>pmf <span class="op">=</span> np.exp(<span class="op">-</span>lam<span class="op">*</span>w) <span class="op">*</span> (lam<span class="op">*</span>w)<span class="op">**</span>ks <span class="op">/</span> np.array([factorial(k) <span class="cf">for</span> k <span class="kw">in</span> ks])</span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>axB.hist(counts, bins<span class="op">=</span>np.arange(<span class="op">-</span><span class="fl">0.5</span>, counts.<span class="bu">max</span>()<span class="op">+</span><span class="fl">1.5</span>), density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>,</span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>         alpha<span class="op">=</span><span class="fl">0.85</span>, label<span class="op">=</span><span class="st">"observed per-window counts"</span>)</span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>axB.plot(ks, pmf, <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">1.8</span>, label<span class="op">=</span><span class="ss">f"Poisson(λw=</span><span class="sc">{</span>lam<span class="op">*</span>w<span class="sc">:g}</span><span class="ss">) pmf"</span>)</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>axB.set_xlabel(<span class="st">"events per window"</span>)<span class="op">;</span> axB.set_ylabel(<span class="st">"proportion"</span>)</span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>axB.set_title(<span class="st">"Counts per fixed window are Poisson"</span>)</span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>axB.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="fu">## Superposition and thinning</span></span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>Two operations make the Poisson process beautifully closed: <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Superposition.** Merge two *independent* Poisson processes with rates $\lambda_1$ and $\lambda_2$ and the</span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>  combined stream is **Poisson with rate $\lambda_1+\lambda_2$.** (All the arrivals from two doors into one</span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>  shop.)</span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Thinning.** Independently tag each event "Type I" with probability $p$ or "Type II" with $1-p$; the two</span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>  sub-streams are **independent Poisson processes** with rates $\lambda p$ and $\lambda(1-p)$.</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> (Split arrivals into "web" vs "phone" and each is still Poisson.)</span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>These closure rules are why the Poisson process is the default model whenever independent streams combine or</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>split.</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a><span class="fu">## Where it shows up</span></span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>Ross names the Poisson process the standard model for **"rare events"** and arrivals: radioactive</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>$\alpha$-particle emissions, earthquakes, the outbreak of wars, and customers entering a bank or post office.</span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> In *this* book it is the continuous-time engine beneath</span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">count-data models</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span> (a Poisson regression models the *rate*</span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>$\lambda$) and <span class="co">[</span><span class="ot">survival analysis</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span> (the exponential</span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>interarrival time is the constant-hazard duration).</span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>Each entry is $e^{-3}\,3^n/n!$. For example, the chance of no calls at all is $e^{-3}\approx0.050$.</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>**Step 2 — a shorter window.** In 20 minutes (one third of an hour) the mean is $3\times\tfrac13=1$. The</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>chance of a quiet 20 minutes is $e^{-1}\approx0.368$, so the chance of at least one call is about 0.632.</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>The window length enters through the mean, which is why rate and window must be in the same units.</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>**Step 3 — the gaps.** The average gap between calls is $1/3$ of an hour, or 20 minutes. The chance that a gap</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>exceeds 40 minutes is $e^{-3\times(2/3)}=e^{-2}\approx0.135$.</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>**Step 4 — no memory.** Suppose the line has been quiet for 30 minutes. The chance of a call in the next 20</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>minutes is still $1-e^{-1}\approx0.632$. The quiet half-hour tells you nothing. This is the memoryless</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>property, and it is the point most often got wrong in practice.</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>Ross has the same calculation with a different story <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span>. Immigrants arrive at rate 1 per day,</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>so the expected wait for the tenth is 10 days, and the chance that the gap between the tenth and eleventh</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>exceeds two days is $e^{-2}\approx0.135$ (Example 5.9).</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Notation key — open if a symbol is unfamiliar"}</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$t$ — time elapsed since the start; $N(t)$ — the number of events up to time $t$.</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\lambda$ — the **rate**: expected events per unit of time (3 per hour above).</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$n!$ — $n$ factorial, $n\times(n-1)\times\dots\times1$, with $0!=1$.</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$e^{-x}$ — the exponential function; $e\approx2.718$.</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$T_1, T_2,\dots$ — the gaps (*interarrival times*) between successive events; $S_n$ — the time of the</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>  $n$th event.</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*i.i.d.* — independent and identically distributed: every gap is drawn the same way, unaffected by the others.</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\Pr<span class="sc">\{</span>\cdot<span class="sc">\}</span>$ — probability.</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="fu">## Counting processes {#sec-counting}</span></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>A **counting process** $<span class="sc">\{</span>N(t),\,t\ge 0<span class="sc">\}</span>$ records the total number of events that have occurred up to time</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>$t$. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> The **Poisson process** of rate $\lambda&gt;0$ is the most important one, pinned down by</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>two intuitive properties: <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Independent increments** — counts in *disjoint* intervals are independent. What happens between 2:00 and</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>  3:00 tells you nothing about 5:00–6:00.</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Stationary increments** — the distribution of the count in an interval depends only on its **length**, not</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>  *when* it sits. A one-hour window is statistically the same at noon or midnight.</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>(An *increment* is the number of events in a window, $N(t+s)-N(t)$.) From these, the number of events in an</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>interval of length $t$ is **Poisson with mean $\lambda t$**: <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>\Pr<span class="sc">\{</span>N(t)=n<span class="sc">\}</span> = e^{-\lambda t}\,\frac{(\lambda t)^n}{n!}, \qquad n=0,1,2,\dots</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** the count in a window is Poisson, and its average is the rate times the window length.</span></span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; The help-desk table is this formula with $\lambda t=3$.</span></span>
 <span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Assuming Poisson when events clump.** Independent increments fail if one event makes the next more likely</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>  ("contagion") — that's <span class="co">[</span><span class="ot">overdispersion</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span>; use a different</span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>  process / negative binomial. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>The rate $\lambda$ is events per unit time; over a window of length $t$ you expect $\lambda t$ of them.</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="fu">## Interarrival times are exponential — and that's no accident {#sec-gaps}</span></span>
 <span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting the memoryless catch.** "It's been quiet, so an arrival is overdue" is the</span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">gambler's fallacy</span><span class="co">](../../content/01-foundations/law-of-large-numbers.qmd)</span> in continuous time — the</span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>  exponential has no memory. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Mismatching rate and window.** The count is Poisson($\lambda t$), not Poisson($\lambda$); keep the time</span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>  units straight (the <span class="co">[</span><span class="ot">offset</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span> issue). <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>Look at the **gaps** between successive events — the **interarrival times** $T_1, T_2, \dots$. Ross's result:</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>they are **independent and identically distributed Exponential($\lambda$)**, each with mean $1/\lambda$.</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> That is,</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>\Pr<span class="sc">\{</span>T_k &gt; s<span class="sc">\}</span> = e^{-\lambda s}.</span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ross, *Introduction to Probability Models*** — the **counting process** $N(t)$ and the **Poisson process**</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>  of rate $\lambda$ (**independent** &amp; **stationary increments**; $N(t)\sim\text{Poisson}(\lambda t)$);</span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>  **interarrival times** i.i.d. **Exponential($\lambda$)** and the *"probabilistically restarts itself"* /</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>  memoryless link; **superposition** ($\lambda_1+\lambda_2$) and **thinning** ($\lambda p$); and the</span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>  rare-event examples (radioactive decay, earthquakes, wars, arrivals).</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** the chance of waiting longer than $s$ shrinks by the same factor for every extra unit of</span></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; time waited. That constant shrinking is what "no memory" means.</span></span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>This is the process's deepest fact, and it follows from a single idea: stationary +</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>independent increments mean that *"at any point in time, the process probabilistically restarts itself."*</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> Since the **exponential is the *unique* memoryless continuous distribution**, it is the</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>*only* law a restart-anywhere process can have — the time to the next event cannot depend on how long you've</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>already waited. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> (This is exactly the constant-hazard,</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">exponential-survival</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span> baseline, seen from the other side.)</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>The time of the $n$th event, $S_n=T_1+\dots+T_n$, has mean $n/\lambda$: ten arrivals at one a day take ten days</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>on average.</span>
 <span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Poisson &amp; exponential distributions</span><span class="co">](../../content/01-foundations/common-distributions.qmd)</span></span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>  and <span class="co">[</span><span class="ot">memorylessness</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span>.</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Powers:** <span class="co">[</span><span class="ot">count-data / Poisson regression</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span> (modelling</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>  the rate) and the constant-hazard core of <span class="co">[</span><span class="ot">survival analysis</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span>.</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Generalises to:** non-homogeneous and compound Poisson processes, and the continuous-time</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Markov chains</span><span class="co">](markov-chains.qmd)</span> of the next entry.</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-poisson-process</span></span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "A Poisson process of rate λ. Top: event times (ticks) scatter at random; the step function N(t) counts them. The gaps between ticks are i.i.d. Exponential(λ). Bottom: counting events in fixed windows produces a Poisson(λ·width) distribution — here a histogram of per-window counts against the Poisson pmf (orange). Same process, two faces: exponential gaps, Poisson counts."</span></span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> factorial</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">2</span>)</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>lam <span class="op">=</span> <span class="fl">3.0</span></span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> <span class="fl">20.0</span></span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate arrivals by summing Exponential interarrival times</span></span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>gaps <span class="op">=</span> rng.exponential(<span class="dv">1</span><span class="op">/</span>lam, size<span class="op">=</span><span class="bu">int</span>(lam<span class="op">*</span>T<span class="op">*</span><span class="fl">1.5</span>))</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>times <span class="op">=</span> np.cumsum(gaps)</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>times <span class="op">=</span> times[times <span class="op">&lt;</span> T]</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>fig, (axT, axB) <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="fl">7.6</span>, <span class="fl">5.0</span>))</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>axT.step(np.concatenate([[<span class="dv">0</span>], times]), np.arange(<span class="bu">len</span>(times)<span class="op">+</span><span class="dv">1</span>), where<span class="op">=</span><span class="st">"post"</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">1.6</span>)</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>axT.plot(times, np.zeros_like(times), <span class="st">"|"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, markersize<span class="op">=</span><span class="dv">12</span>, markeredgewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>axT.set_xlim(<span class="dv">0</span>, T)<span class="op">;</span> axT.set_xlabel(<span class="st">"time  t"</span>)<span class="op">;</span> axT.set_ylabel(<span class="st">"N(t)"</span>)</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>axT.set_title(<span class="ss">f"Counting process N(t), rate λ=</span><span class="sc">{</span>lam<span class="sc">}</span><span class="ss">  (orange ticks = events)"</span>)</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="co"># Counts in fixed windows of width w</span></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>edges <span class="op">=</span> np.arange(<span class="dv">0</span>, T<span class="op">+</span>w, w)</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> np.histogram(times, bins<span class="op">=</span>edges)[<span class="dv">0</span>]</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>ks <span class="op">=</span> np.arange(<span class="dv">0</span>, counts.<span class="bu">max</span>()<span class="op">+</span><span class="dv">2</span>)</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>pmf <span class="op">=</span> np.exp(<span class="op">-</span>lam<span class="op">*</span>w) <span class="op">*</span> (lam<span class="op">*</span>w)<span class="op">**</span>ks <span class="op">/</span> np.array([factorial(k) <span class="cf">for</span> k <span class="kw">in</span> ks])</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>axB.hist(counts, bins<span class="op">=</span>np.arange(<span class="op">-</span><span class="fl">0.5</span>, counts.<span class="bu">max</span>()<span class="op">+</span><span class="fl">1.5</span>), density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>,</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>         alpha<span class="op">=</span><span class="fl">0.85</span>, label<span class="op">=</span><span class="st">"observed per-window counts"</span>)</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>axB.plot(ks, pmf, <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">1.8</span>, label<span class="op">=</span><span class="ss">f"Poisson(λw=</span><span class="sc">{</span>lam<span class="op">*</span>w<span class="sc">:g}</span><span class="ss">) pmf"</span>)</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>axB.set_xlabel(<span class="st">"events per window"</span>)<span class="op">;</span> axB.set_ylabel(<span class="st">"proportion"</span>)</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>axB.set_title(<span class="st">"Counts per fixed window are Poisson"</span>)</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>axB.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="fu">## Superposition and thinning {#sec-closure}</span></span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>Two operations make the Poisson process beautifully closed: <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Superposition.** Merge two *independent* Poisson processes with rates $\lambda_1$ and $\lambda_2$ and the</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>  combined stream is **Poisson with rate $\lambda_1+\lambda_2$.** (All the arrivals from two doors into one</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>  shop.)</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Thinning.** Independently tag each event "Type I" with probability $p$ or "Type II" with $1-p$; the two</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>  sub-streams are **independent Poisson processes** with rates $\lambda p$ and $\lambda(1-p)$.</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> (Split arrivals into "web" vs "phone" and each is still Poisson.)</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** rates add when streams merge, and rates scale by $p$ when a stream is split at random.</span></span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; If the help desk gets 3 calls an hour and a third are about billing, billing calls arrive as their own</span></span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; Poisson stream at 1 an hour.</span></span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>Ross's version of thinning <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span>: immigrants arrive at 10 per week, and each is of English descent</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>with probability $1/12$. Over a four-week February the English-descent arrivals are Poisson with mean</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>$4\times10\times\tfrac1{12}=\tfrac{10}{3}$, so the chance of none at all is $e^{-10/3}\approx0.036$</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>(Example 5.10).</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>These closure rules are why the Poisson process is the default model whenever independent streams combine or</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>split.</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a><span class="fu">## Where it shows up</span></span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>Ross names the Poisson process the standard model for **"rare events"** and arrivals: radioactive</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>$\alpha$-particle emissions, earthquakes, the outbreak of wars, and customers entering a bank or post office.</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> In *this* book it is the continuous-time engine beneath</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">count-data models</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span> (a Poisson regression models the *rate*</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>$\lambda$) and <span class="co">[</span><span class="ot">survival analysis</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span> (the exponential</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>interarrival time is the constant-hazard duration).</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Assuming Poisson when events clump.** Independent increments fail if one event makes the next more likely</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>  ("contagion") — that's <span class="co">[</span><span class="ot">overdispersion</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span>; use a different</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  process / negative binomial. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting the memoryless catch.** "It's been quiet, so an arrival is overdue" is the</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">gambler's fallacy</span><span class="co">](../../content/01-foundations/law-of-large-numbers.qmd)</span> in continuous time — the</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>  exponential has no memory. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> Step 4 of the help-desk example shows the numbers.</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Mismatching rate and window.** The count is Poisson($\lambda t$), not Poisson($\lambda$); keep the time</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>  units straight (the <span class="co">[</span><span class="ot">offset</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span> issue). <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ross, *Introduction to Probability Models*** — the **counting process** $N(t)$ and the **Poisson process**</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>  of rate $\lambda$ (**independent** &amp; **stationary increments**; $N(t)\sim\text{Poisson}(\lambda t)$);</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>  **interarrival times** i.i.d. **Exponential($\lambda$)** and the *"probabilistically restarts itself"* /</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>  memoryless link (Proposition 5.1 and the remark after it); the arrival time $S_n$ as a sum of gaps;</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>  **superposition** ($\lambda_1+\lambda_2$) and **thinning** ($\lambda p$); the immigration examples</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>  (Examples 5.9 and 5.10) quoted in the worked sections; and the rare-event examples (radioactive decay,</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>  earthquakes, wars, arrivals).</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*The coin-toss ribbon picture and the help-desk numbers are this encyclopedia's own illustrations of Ross's</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>  results. Ross prints the answer to Example 5.9(b) as 0.133; $e^{-2}$ is 0.1353, which is the value used here.*</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Poisson &amp; exponential distributions</span><span class="co">](../../content/01-foundations/common-distributions.qmd)</span></span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  and <span class="co">[</span><span class="ot">memorylessness</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span>.</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Powers:** <span class="co">[</span><span class="ot">count-data / Poisson regression</span><span class="co">](../../content/03-regression/count-data-models.qmd)</span> (modelling</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>  the rate) and the constant-hazard core of <span class="co">[</span><span class="ot">survival analysis</span><span class="co">](../../content/03-regression/survival-analysis.qmd)</span>.</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Generalises to:** non-homogeneous and compound Poisson processes, <span class="co">[</span><span class="ot">renewal theory</span><span class="co">](renewal-theory.qmd)</span></span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>  (any gap distribution, not only exponential), and the continuous-time <span class="co">[</span><span class="ot">Markov chains</span><span class="co">](markov-chains.qmd)</span></span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>  behind <span class="co">[</span><span class="ot">queueing</span><span class="co">](queueing.qmd)</span>.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

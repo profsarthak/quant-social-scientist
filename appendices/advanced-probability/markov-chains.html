@@ -1942,10 +1942,13 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-markov-property" id="toc-the-markov-property" class="nav-link active" data-scroll-target="#the-markov-property">The Markov property</a></li>
-  <li><a href="#the-transition-matrix" id="toc-the-transition-matrix" class="nav-link" data-scroll-target="#the-transition-matrix">The transition matrix</a></li>
-  <li><a href="#classifying-states" id="toc-classifying-states" class="nav-link" data-scroll-target="#classifying-states">Classifying states</a></li>
-  <li><a href="#the-stationary-distribution" id="toc-the-stationary-distribution" class="nav-link" data-scroll-target="#the-stationary-distribution">The stationary distribution</a></li>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#sec-idea" id="toc-sec-idea" class="nav-link" data-scroll-target="#sec-idea">The idea in words</a></li>
+  <li><a href="#sec-by-hand" id="toc-sec-by-hand" class="nav-link" data-scroll-target="#sec-by-hand">A two-state chain by hand</a></li>
+  <li><a href="#the-markov-property" id="toc-the-markov-property" class="nav-link" data-scroll-target="#the-markov-property">The Markov property</a></li>
+  <li><a href="#sec-matrix" id="toc-sec-matrix" class="nav-link" data-scroll-target="#sec-matrix">The transition matrix</a></li>
+  <li><a href="#sec-classify" id="toc-sec-classify" class="nav-link" data-scroll-target="#sec-classify">Classifying states</a></li>
+  <li><a href="#sec-stationary" id="toc-sec-stationary" class="nav-link" data-scroll-target="#sec-stationary">The stationary distribution</a></li>
   <li><a href="#signature-examples" id="toc-signature-examples" class="nav-link" data-scroll-target="#signature-examples">Signature examples</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
@@ -1977,35 +1980,178 @@ window.Quarto = {
 
 
 <div class="lead-kernel">
-<p>A <strong>Markov chain</strong> is a system that moves between states where <em>“the future depends on the present, but not the past.”</em> Knowing where you are now is enough; the route that got you here is irrelevant. That one assumption — the <strong>Markov property</strong> — makes the whole future computable from a single <strong>transition matrix</strong>, and leads to a beautiful result: run many chains long enough and they converge to the <em>same</em> <strong>stationary distribution</strong>, no matter where they started. That convergence is the engine under <a href="../../content/02-inference/credible-intervals-and-computation.html">MCMC</a>.</p>
+<p>Some systems move from state to state where only <em>today</em> matters for tomorrow: the weather, a person’s employment status, a sampler’s position. Write down the chance of each move once, and you can predict any number of steps ahead. The striking result is that many such systems, run long enough, settle into the <em>same</em> long-run pattern wherever they started. That forgetting is what makes Bayesian simulation (MCMC) work.</p>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Where you probably came from — and what you need">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Where you probably came from — and what you need
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>You likely arrived from</strong> <a href="../../content/02-inference/credible-intervals-and-computation.html">Bayesian computation</a> (“MCMC is a guided random walk whose long-run distribution is the posterior”), a neighbouring entry such as <a href="../../appendices/advanced-probability/queueing.html">queueing</a> or <a href="../../appendices/advanced-probability/branching-processes.html">branching processes</a>, or the state-space view of <a href="../../content/04-predictive/time-series-fundamentals.html">time series</a>.</p>
+<p><strong>You need:</strong> <a href="../../content/01-foundations/conditional-probability.html">conditional probability</a> (“the chance of B given A”) and comfort with a small table of numbers. <strong>You don’t need</strong> linear algebra beyond multiplying a row of numbers by a table, which the worked example shows step by step. The <a href="../../appendices/math/linear-algebra.html">linear algebra appendix</a> has the rest.</p>
+<p><strong>Jump to what you came for:</strong> <a href="#sec-idea">the idea in words</a> · <a href="#sec-by-hand">a two-state chain by hand</a> · <a href="#sec-matrix">the transition matrix</a> · <a href="#sec-classify">classifying states</a> · <a href="#sec-stationary">the stationary distribution</a></p>
+</div>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p>Plenty of social-science quantities move between a few states over time. People move between employed, unemployed and out of the labour force. Firms move between credit ratings. Voters move between parties. A Markov chain is the simplest honest model of such movement. It also does a quieter job in this book. Every <a href="../../content/02-inference/credible-intervals-and-computation.html">MCMC</a> sampler that fits a Bayesian model is a Markov chain, built so that its long-run pattern is the posterior distribution. Whether you can trust its output (“has the chain converged?”) is a question about the results on this page <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span>.</p>
+</section>
+<section id="sec-idea" class="level2">
+<h2 class="anchored" data-anchor-id="sec-idea">The idea in words</h2>
+<p>Think of a board game where your next move depends only on the square you are on now, not on how you reached it. Each square has a fixed spinner telling you where you might go next and with what chance. That is a Markov chain. The squares are the <strong>states</strong>, and the spinners are the <strong>transition probabilities</strong>.</p>
+<p>Two consequences follow:</p>
+<ol type="1">
+<li><strong>Prediction is repeated spinning.</strong> To know where you might be in two moves, consider every square you could land on after one move and spin again from each. To get further ahead, repeat.</li>
+<li><strong>Many chains forget where they started.</strong> Start two players on opposite sides of the board. After many moves, the chance that each is on a given square becomes the same for both. The starting square has been washed out. The pattern they converge to is the <strong>stationary distribution</strong>. It is “stationary” because one more round of spinning leaves it unchanged.</li>
+</ol>
+<p>The “only the current square matters” rule is the <strong>Markov property</strong>. It is a strong assumption, but it is what makes the whole future computable from one table of spinners.</p>
+</section>
+<section id="sec-by-hand" class="level2">
+<h2 class="anchored" data-anchor-id="sec-by-hand">A two-state chain by hand</h2>
+<p>Ross’s first example is the weather <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span>. Each day is either <strong>rain</strong> (state 0) or <strong>dry</strong> (state 1). If it rains today, it rains tomorrow with probability 0.7. If it is dry today, it rains tomorrow with probability 0.4. Older history does not matter.</p>
+<p><strong>Step 1 — the table of moves.</strong> Rows are <em>today</em>, columns are <em>tomorrow</em>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">today ↓ / tomorrow →</th>
+<th style="text-align: center;">rain</th>
+<th style="text-align: center;">dry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>rain</strong></td>
+<td style="text-align: center;">0.7</td>
+<td style="text-align: center;">0.3</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>dry</strong></td>
+<td style="text-align: center;">0.4</td>
+<td style="text-align: center;">0.6</td>
+</tr>
+</tbody>
+</table>
+<p>Each row adds to 1, because tomorrow must be <em>something</em>.</p>
+<p><strong>Step 2 — two days ahead.</strong> It rains today. Rain the day after tomorrow can happen two ways: rain–rain (<span class="math inline">0.7\times0.7=0.49</span>) or dry–rain (<span class="math inline">0.3\times0.4=0.12</span>). The total is <span class="math inline">0.61</span>. Adding over every route through the middle day is all that “multiplying the table by itself” means.</p>
+<p><strong>Step 3 — keep going.</strong> Starting from rain, the chance of rain on each following day is</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">day</th>
+<th style="text-align: center;">0</th>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+<th style="text-align: center;">6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">P(rain), start <strong>rain</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.70</td>
+<td style="text-align: center;">0.61</td>
+<td style="text-align: center;">0.583</td>
+<td style="text-align: center;">0.5749</td>
+<td style="text-align: center;">0.5725</td>
+<td style="text-align: center;">0.5717</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">P(rain), start <strong>dry</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0.40</td>
+<td style="text-align: center;">0.52</td>
+<td style="text-align: center;">0.556</td>
+<td style="text-align: center;">0.5668</td>
+<td style="text-align: center;">0.5700</td>
+<td style="text-align: center;">0.5710</td>
+</tr>
+</tbody>
+</table>
+<p>The day-4 figure in the top row, 0.5749, is the answer to Ross’s Example 4.7. The gap between the rows shrinks by a factor of 0.3 each day: 1, 0.3, 0.09, 0.027, …</p>
+<p><strong>Step 4 — the long run.</strong> The two rows are converging on the same number. Call it <span class="math inline">\pi_0</span>, the long-run chance of rain. If the chain has settled, then today’s chance of rain gives the same chance tomorrow: <span class="math inline">\pi_0 = 0.7\,\pi_0 + 0.4\,(1-\pi_0)</span>. Solving gives <span class="math inline">0.7\,\pi_0=0.4</span>, so <span class="math inline">\pi_0=4/7\approx0.571</span>, which is Ross’s Example 4.15. In the long run it rains on about 57% of days, whatever the weather was on day 0.</p>
+<p>Everything below is these four steps for any number of states.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Notation key — open if a symbol is unfamiliar">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Notation key — open if a symbol is unfamiliar
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><span class="math inline">X_n</span> — the state at step <span class="math inline">n</span> (day <span class="math inline">n</span>, iteration <span class="math inline">n</span>). <span class="math inline">X_0</span> is the starting state.</li>
+<li><span class="math inline">i, j, k</span> — labels for states.</li>
+<li><span class="math inline">P_{ij}</span> — the probability of moving to <span class="math inline">j</span> next, given you are in <span class="math inline">i</span> now. <span class="math inline">\mathbf P</span> — the table (matrix) of all of them, rows = <em>from</em>, columns = <em>to</em>.</li>
+<li><span class="math inline">P^{n}_{ij}</span> — the probability of being in <span class="math inline">j</span> exactly <span class="math inline">n</span> steps after being in <span class="math inline">i</span>.</li>
+<li><span class="math inline">\Pr\{A\mid B\}</span> — the probability of <span class="math inline">A</span> given <span class="math inline">B</span>.</li>
+<li><span class="math inline">\pi_j</span> — the long-run (stationary) probability of state <span class="math inline">j</span>; <span class="math inline">\pi</span> — the whole row of them.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
 <section id="the-markov-property" class="level2">
 <h2 class="anchored" data-anchor-id="the-markov-property">The Markov property</h2>
 <p>A Markov chain <span class="math inline">\{X_n\}</span> takes values in a set of <strong>states</strong>, and obeys: <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> <span class="math display">
 \Pr\{X_{n+1}=j \mid X_n=i, X_{n-1}=i_{n-1},\dots,X_0=i_0\} = \Pr\{X_{n+1}=j\mid X_n=i\} = P_{ij}.
-</span> In words — <em>“the future depends on the present, not the past.”</em> <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> The entire history collapses to the <strong>current state</strong>. That’s a strong assumption, but a stunning number of systems satisfy it (or can be made to by enlarging the state), and it’s what makes the chain tractable.</p>
+</span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> given today, the rest of the past adds nothing to the forecast for tomorrow.</p>
+</blockquote>
+<p>In words — <em>“the future depends on the present, not the past.”</em> <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> The entire history collapses to the <strong>current state</strong>. That’s a strong assumption, but a stunning number of systems satisfy it (or can be made to by enlarging the state), and it’s what makes the chain tractable. (Enlarging the state means, for example, letting the state be “the weather today <em>and</em> yesterday” so that two days of memory become one step of Markov memory. Ross does exactly this with his rain example.)</p>
 </section>
-<section id="the-transition-matrix" class="level2">
-<h2 class="anchored" data-anchor-id="the-transition-matrix">The transition matrix</h2>
+<section id="sec-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="sec-matrix">The transition matrix</h2>
 <p>All the dynamics live in the <strong>transition probability matrix</strong> <span class="math inline">\mathbf P</span>, whose entry <span class="math inline">P_{ij}</span> is the probability of moving from state <span class="math inline">i</span> to state <span class="math inline">j</span> in one step. <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> Each <strong>row is a probability distribution</strong>: <span class="math inline">P_{ij}\ge 0</span> and <span class="math inline">\sum_j P_{ij}=1</span> (from any state you must go <em>somewhere</em>). <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span></p>
 <p><strong>Multi-step transitions</strong> are just matrix powers. The <strong>Chapman–Kolmogorov equations</strong>, <span class="math inline">P^{n+m}_{ij}=\sum_k P^{n}_{ik}P^{m}_{kj}</span>, say that to get from <span class="math inline">i</span> to <span class="math inline">j</span> in <span class="math inline">n+m</span> steps you pass through <em>some</em> intermediate state <span class="math inline">k</span> — and they imply the clean rule <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> <span class="math display">
 \mathbf P^{(n)} = \mathbf P^{\,n}.
-</span> The <span class="math inline">n</span>-step transition matrix is the one-step matrix raised to the <span class="math inline">n</span>-th power. Want the state distribution after <span class="math inline">n</span> steps? Multiply your starting distribution by <span class="math inline">\mathbf P^n</span>.</p>
+</span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> the <span class="math inline">n</span>-step table is the one-step table multiplied by itself <span class="math inline">n</span> times. Step 2 of the worked example was one such multiplication: the “rain → rain in two days” entry of <span class="math inline">\mathbf P^2</span> is 0.61.</p>
+</blockquote>
+<p>The <span class="math inline">n</span>-step transition matrix is the one-step matrix raised to the <span class="math inline">n</span>-th power. Want the state distribution after <span class="math inline">n</span> steps? Multiply your starting distribution by <span class="math inline">\mathbf P^n</span>.</p>
 </section>
-<section id="classifying-states" class="level2">
-<h2 class="anchored" data-anchor-id="classifying-states">Classifying states</h2>
+<section id="sec-classify" class="level2">
+<h2 class="anchored" data-anchor-id="sec-classify">Classifying states</h2>
 <p>Not all states behave alike: <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span></p>
 <ul>
 <li><strong>Recurrent vs transient.</strong> A state is <strong>recurrent</strong> if, starting there, you return to it with probability 1; <strong>transient</strong> if there’s positive probability you <em>never</em> come back. In a finite chain, at least one state must be recurrent. <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span></li>
-<li><strong>Periodicity.</strong> A state has <strong>period <span class="math inline">d</span></strong> if returns are only possible at multiples of <span class="math inline">d</span>; period 1 is <strong>aperiodic.</strong> <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span></li>
+<li><strong>Periodicity.</strong> A state has <strong>period <span class="math inline">d</span></strong> if returns are only possible at multiples of <span class="math inline">d</span>; period 1 is <strong>aperiodic.</strong> <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> A chain that strictly alternates between two states has period 2. It never settles, because where it is depends on whether the step number is odd or even.</li>
+<li><strong>Absorbing.</strong> A state you can enter but never leave (<span class="math inline">P_{ii}=1</span>), such as “bankrupt” in gambler’s ruin.</li>
 </ul>
 <p>These distinctions decide whether the chain settles down.</p>
 </section>
-<section id="the-stationary-distribution" class="level2">
-<h2 class="anchored" data-anchor-id="the-stationary-distribution">The stationary distribution</h2>
+<section id="sec-stationary" class="level2">
+<h2 class="anchored" data-anchor-id="sec-stationary">The stationary distribution</h2>
 <p>The payoff. For well-behaved chains, the probability of being in state <span class="math inline">j</span> after many steps converges to a limit <span class="math inline">\pi_j</span> that <strong>does not depend on where you started.</strong> <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> If the chain is <strong>irreducible</strong> (you can get from any state to any other) and <strong>ergodic</strong> (aperiodic and positive recurrent), it converges to a <em>unique</em> <strong>stationary distribution</strong> <span class="math inline">\pi</span>, the solution of <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span> <span class="math display">
 \pi_j = \sum_i \pi_i\,P_{ij}, \qquad \sum_j \pi_j = 1.
-</span> <span class="math inline">\pi</span> is the distribution that <strong>reproduces itself</strong> under one more step (<span class="math inline">\pi\mathbf P=\pi</span>) — an equilibrium the chain forgets its way toward.</p>
+</span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> the long-run share of time in state <span class="math inline">j</span> equals the share flowing into <span class="math inline">j</span> from every state, weighted by how often the chain is in each. In the weather example: <span class="math inline">\pi_0=0.7\pi_0+0.4\pi_1</span>.</p>
+</blockquote>
+<p><span class="math inline">\pi</span> is the distribution that <strong>reproduces itself</strong> under one more step (<span class="math inline">\pi\mathbf P=\pi</span>) — an equilibrium the chain forgets its way toward. (<em>Positive recurrent</em> means the chain not only returns to each state but does so in a finite expected time. In a finite irreducible chain this holds automatically.)</p>
 <div id="cell-fig-markov-stationary" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show the figure code</summary>
@@ -2048,7 +2194,7 @@ window.Quarto = {
 <div id="fig-markov-stationary" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-markov-stationary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="markov-chains_files/figure-html/fig-markov-stationary-output-1.png" width="700" height="375" class="figure-img">
+<img src="markov-chains_files/figure-html/fig-markov-stationary-output-1.png" width="701" height="372" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-markov-stationary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Forgetting the start. A 3-state weather chain run from two very different initial distributions (one starts certain of state 0, the other certain of state 2). Both distributions evolve under repeated multiplication by P and converge to the SAME stationary distribution π (dashed) within a handful of steps. Irreducible + aperiodic chains lose all memory of where they began — the fact MCMC exploits.
@@ -2060,9 +2206,9 @@ Figure&nbsp;1: Forgetting the start. A 3-state weather chain run from two very d
 </section>
 <section id="signature-examples" class="level2">
 <h2 class="anchored" data-anchor-id="signature-examples">Signature examples</h2>
-<p>Ross’s classics: <span class="citation" data-cites="ross_prob_models">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>)</span></p>
+<p>The classics: <span class="citation" data-cites="ross_prob_models grinstead_snell">(<a href="#ref-ross_prob_models" role="doc-biblioref">Ross 2014</a>; <a href="#ref-grinstead_snell" role="doc-biblioref">Grinstead and Snell 1997</a>)</span></p>
 <ul>
-<li><strong>Weather in the “Land of Oz”</strong> — a chain over {rain, nice, snow}, predicting tomorrow from today.</li>
+<li><strong>Weather in the “Land of Oz”</strong> (Grinstead &amp; Snell) — a chain over {rain, nice, snow}, predicting tomorrow from today.</li>
 <li><strong>Random walks</strong> — a particle stepping <span class="math inline">\pm 1</span> on a line; the symmetric walk (<span class="math inline">p=0.5</span>) is <strong>recurrent</strong> (returns to the origin with probability 1), a surprisingly delicate fact.</li>
 <li><strong>Gambler’s ruin</strong> — bet $1 repeatedly until you hit $0 (broke) or $N (goal): a chain with <strong>two absorbing states</strong>, and the question is the probability of each fate.</li>
 </ul>
@@ -2091,7 +2237,7 @@ Figure&nbsp;1: Forgetting the start. A 3-state weather chain run from two very d
 <section id="from-the-sources" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
 <div class="callout callout-style-default callout-note callout-titled" title="Who says what">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2100,10 +2246,12 @@ Figure&nbsp;1: Forgetting the start. A 3-state weather chain run from two very d
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Ross, <em>Introduction to Probability Models</em></strong> — the <strong>Markov property</strong> (“future depends on the present, not the past”); the <strong>transition matrix</strong> <span class="math inline">P_{ij}</span> (rows sum to 1); <strong>Chapman–Kolmogorov</strong> and <span class="math inline">\mathbf P^{(n)}=\mathbf P^n</span>; <strong>recurrent vs transient</strong> states and <strong>periodicity</strong>; the <strong>stationary / limiting distribution</strong> <span class="math inline">\pi=\pi\mathbf P</span> under <strong>irreducibility + ergodicity</strong>; and the <strong>Land of Oz</strong> weather, <strong>random walk</strong> (symmetric → recurrent), and <strong>gambler’s ruin</strong> examples.</li>
+<li><strong>Ross, <em>Introduction to Probability Models</em></strong> — the <strong>Markov property</strong> (“future depends on the present, not the past”); the <strong>transition matrix</strong> <span class="math inline">P_{ij}</span> (rows sum to 1); <strong>Chapman–Kolmogorov</strong> and <span class="math inline">\mathbf P^{(n)}=\mathbf P^n</span>; <strong>recurrent vs transient</strong> states and <strong>periodicity</strong>; the <strong>stationary / limiting distribution</strong> <span class="math inline">\pi=\pi\mathbf P</span> under <strong>irreducibility + ergodicity</strong>; the <strong>random walk</strong> (symmetric → recurrent) and <strong>gambler’s ruin</strong> examples; and the two-state rain chain used in the worked example (Examples 4.1, 4.7 and 4.15: <span class="math inline">\alpha=0.7</span>, <span class="math inline">\beta=0.4</span>, four-day rain probability 0.5749, long-run rain probability <span class="math inline">4/7</span>).</li>
+<li><strong>Grinstead &amp; Snell, <em>Introduction to Probability</em></strong> — the <strong>Land of Oz</strong> weather chain (Example 11.1), their opening example of a Markov chain.</li>
+<li><em>The board-game picture and the day-by-day table are this encyclopedia’s own illustrations of Ross’s results.</em></li>
 </ul>
 </div>
 </div>
@@ -2124,6 +2272,9 @@ Figure&nbsp;1: Forgetting the start. A 3-state weather chain run from two very d
 </section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-grinstead_snell" class="csl-entry" role="listitem">
+Grinstead, Charles M., and J. Laurie Snell. 1997. <em>Introduction to Probability</em>. American Mathematical Society.
+</div>
 <div id="ref-ross_prob_models" class="csl-entry" role="listitem">
 Ross, Sheldon M. 2014. <em>Introduction to Probability Models</em>. 11th ed. Academic Press.
 </div>
@@ -2602,153 +2753,262 @@ Ross, Sheldon M. 2014. <em>Introduction to Probability Models</em>. 11th ed. Aca
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>A **Markov chain** is a system that moves between states where *"the future depends on the present, but not</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>the past."* Knowing where you are now is enough; the route that got you here is irrelevant. That one</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>assumption — the **Markov property** — makes the whole future computable from a single **transition matrix**,</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>and leads to a beautiful result: run many chains long enough and they converge to the *same* **stationary</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>distribution**, no matter where they started. That convergence is the engine under</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">MCMC</span><span class="co">](../../content/02-inference/credible-intervals-and-computation.qmd)</span>.</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Markov property</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>A Markov chain $<span class="sc">\{</span>X_n<span class="sc">\}</span>$ takes values in a set of **states**, and obeys: <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>\Pr<span class="sc">\{</span>X_{n+1}=j \mid X_n=i, X_{n-1}=i_{n-1},\dots,X_0=i_0<span class="sc">\}</span> = \Pr<span class="sc">\{</span>X_{n+1}=j\mid X_n=i<span class="sc">\}</span> = P_{ij}.</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>In words — *"the future depends on the present, not the past."* <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> The entire history</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>collapses to the **current state**. That's a strong assumption, but a stunning number of systems satisfy it</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>(or can be made to by enlarging the state), and it's what makes the chain tractable.</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="fu">## The transition matrix</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>All the dynamics live in the **transition probability matrix** $\mathbf P$, whose entry $P_{ij}$ is the</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>probability of moving from state $i$ to state $j$ in one step. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> Each **row is a</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>probability distribution**: $P_{ij}\ge 0$ and $\sum_j P_{ij}=1$ (from any state you must go *somewhere*).</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>**Multi-step transitions** are just matrix powers. The **Chapman–Kolmogorov equations**,</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>$P^{n+m}_{ij}=\sum_k P^{n}_{ik}P^{m}_{kj}$, say that to get from $i$ to $j$ in $n+m$ steps you pass through</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>*some* intermediate state $k$ — and they imply the clean rule <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>\mathbf P^{(n)} = \mathbf P^{\,n}.</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>The $n$-step transition matrix is the one-step matrix raised to the $n$-th power. Want the state distribution</span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>after $n$ steps? Multiply your starting distribution by $\mathbf P^n$.</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="fu">## Classifying states</span></span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>Not all states behave alike: <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Recurrent vs transient.** A state is **recurrent** if, starting there, you return to it with probability</span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  1; **transient** if there's positive probability you *never* come back. In a finite chain, at least one</span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>  state must be recurrent. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Periodicity.** A state has **period $d$** if returns are only possible at multiples of $d$; period 1 is</span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>  **aperiodic.** <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>These distinctions decide whether the chain settles down.</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Some systems move from state to state where only *today* matters for tomorrow: the weather, a person's</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>employment status, a sampler's position. Write down the chance of each move once, and you can predict any</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>number of steps ahead. The striking result is that many such systems, run long enough, settle into the *same*</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>long-run pattern wherever they started. That forgetting is what makes Bayesian simulation (MCMC) work.</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Where you probably came from — and what you need"}</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>**You likely arrived from** <span class="co">[</span><span class="ot">Bayesian computation</span><span class="co">](../../content/02-inference/credible-intervals-and-computation.qmd)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>("MCMC is a guided random walk whose long-run distribution is the posterior"), a neighbouring entry such as</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">queueing</span><span class="co">](queueing.qmd)</span> or <span class="co">[</span><span class="ot">branching processes</span><span class="co">](branching-processes.qmd)</span>, or the state-space view of</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">time series</span><span class="co">](../../content/04-predictive/time-series-fundamentals.qmd)</span>.</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>**You need:** <span class="co">[</span><span class="ot">conditional probability</span><span class="co">](../../content/01-foundations/conditional-probability.qmd)</span> ("the chance</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>of B given A") and comfort with a small table of numbers. **You don't need** linear algebra beyond multiplying</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>a row of numbers by a table, which the worked example shows step by step. The</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">linear algebra appendix</span><span class="co">](../math/linear-algebra.qmd)</span> has the rest.</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>**Jump to what you came for:** <span class="co">[</span><span class="ot">the idea in words</span><span class="co">](#sec-idea)</span> · <span class="co">[</span><span class="ot">a two-state chain by hand</span><span class="co">](#sec-by-hand)</span> ·</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the transition matrix</span><span class="co">](#sec-matrix)</span> · <span class="co">[</span><span class="ot">classifying states</span><span class="co">](#sec-classify)</span> ·</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the stationary distribution</span><span class="co">](#sec-stationary)</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>Plenty of social-science quantities move between a few states over time. People move between employed,</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>unemployed and out of the labour force. Firms move between credit ratings. Voters move between parties.</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>A Markov chain is the simplest honest model of such movement. It also does a quieter job in this book.</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>Every <span class="co">[</span><span class="ot">MCMC</span><span class="co">](../../content/02-inference/credible-intervals-and-computation.qmd)</span> sampler that fits a Bayesian</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>model is a Markov chain, built so that its long-run pattern is the posterior distribution. Whether you can</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>trust its output ("has the chain converged?") is a question about the results on this page <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span>.</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="fu">## The idea in words {#sec-idea}</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>Think of a board game where your next move depends only on the square you are on now, not on how you reached</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>it. Each square has a fixed spinner telling you where you might go next and with what chance. That is a Markov</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>chain. The squares are the **states**, and the spinners are the **transition probabilities**.</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>Two consequences follow:</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Prediction is repeated spinning.** To know where you might be in two moves, consider every square you</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>   could land on after one move and spin again from each. To get further ahead, repeat.</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Many chains forget where they started.** Start two players on opposite sides of the board. After many</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>   moves, the chance that each is on a given square becomes the same for both. The starting square has been</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>   washed out. The pattern they converge to is the **stationary distribution**. It is "stationary" because</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>   one more round of spinning leaves it unchanged.</span>
 <span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="fu">## The stationary distribution</span></span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>The payoff. For well-behaved chains, the probability of being in state $j$ after many steps converges to a</span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>limit $\pi_j$ that **does not depend on where you started.** <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> If the chain is</span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>**irreducible** (you can get from any state to any other) and **ergodic** (aperiodic and positive</span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>recurrent), it converges to a *unique* **stationary distribution** $\pi$, the solution of <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>\pi_j = \sum_i \pi_i\,P_{ij}, \qquad \sum_j \pi_j = 1.</span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>$\pi$ is the distribution that **reproduces itself** under one more step ($\pi\mathbf P=\pi$) — an</span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>equilibrium the chain forgets its way toward.</span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-markov-stationary</span></span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Forgetting the start. A 3-state weather chain run from two very different initial distributions (one starts certain of state 0, the other certain of state 2). Both distributions evolve under repeated multiplication by P and converge to the SAME stationary distribution π (dashed) within a handful of steps. Irreducible + aperiodic chains lose all memory of where they began — the fact MCMC exploits."</span></span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="co"># A 3-state transition matrix (e.g. sunny/cloudy/rainy)</span></span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> np.array([[<span class="fl">0.7</span>, <span class="fl">0.2</span>, <span class="fl">0.1</span>],</span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>              [<span class="fl">0.3</span>, <span class="fl">0.4</span>, <span class="fl">0.3</span>],</span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>              [<span class="fl">0.2</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>]])</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="co"># Stationary distribution: left eigenvector with eigenvalue 1</span></span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>vals, vecs <span class="op">=</span> np.linalg.eig(P.T)</span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>pi <span class="op">=</span> np.real(vecs[:, np.argmin(np.<span class="bu">abs</span>(vals <span class="op">-</span> <span class="dv">1</span>))])<span class="op">;</span> pi <span class="op">=</span> pi <span class="op">/</span> pi.<span class="bu">sum</span>()</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>The "only the current square matters" rule is the **Markov property**. It is a strong assumption, but it is</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>what makes the whole future computable from one table of spinners.</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="fu">## A two-state chain by hand {#sec-by-hand}</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>Ross's first example is the weather <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span>. Each day is either **rain** (state 0) or **dry**</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>(state 1). If it rains today, it rains tomorrow with probability 0.7. If it is dry today, it rains tomorrow</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>with probability 0.4. Older history does not matter.</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>**Step 1 — the table of moves.** Rows are *today*, columns are *tomorrow*:</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> today ↓ / tomorrow → <span class="pp">|</span> rain <span class="pp">|</span> dry <span class="pp">|</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **rain** <span class="pp">|</span> 0.7 <span class="pp">|</span> 0.3 <span class="pp">|</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **dry** <span class="pp">|</span> 0.4 <span class="pp">|</span> 0.6 <span class="pp">|</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>Each row adds to 1, because tomorrow must be *something*.</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>**Step 2 — two days ahead.** It rains today. Rain the day after tomorrow can happen two ways: rain–rain</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>($0.7\times0.7=0.49$) or dry–rain ($0.3\times0.4=0.12$). The total is $0.61$. Adding over every route through</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>the middle day is all that "multiplying the table by itself" means.</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>**Step 3 — keep going.** Starting from rain, the chance of rain on each following day is</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> day <span class="pp">|</span> 0 <span class="pp">|</span> 1 <span class="pp">|</span> 2 <span class="pp">|</span> 3 <span class="pp">|</span> 4 <span class="pp">|</span> 5 <span class="pp">|</span> 6 <span class="pp">|</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> P(rain), start **rain** <span class="pp">|</span> 1 <span class="pp">|</span> 0.70 <span class="pp">|</span> 0.61 <span class="pp">|</span> 0.583 <span class="pp">|</span> 0.5749 <span class="pp">|</span> 0.5725 <span class="pp">|</span> 0.5717 <span class="pp">|</span></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> P(rain), start **dry** <span class="pp">|</span> 0 <span class="pp">|</span> 0.40 <span class="pp">|</span> 0.52 <span class="pp">|</span> 0.556 <span class="pp">|</span> 0.5668 <span class="pp">|</span> 0.5700 <span class="pp">|</span> 0.5710 <span class="pp">|</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>The day-4 figure in the top row, 0.5749, is the answer to Ross's Example 4.7. The gap between the rows shrinks</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>by a factor of 0.3 each day: 1, 0.3, 0.09, 0.027, …</span>
 <span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>steps <span class="op">=</span> <span class="dv">12</span></span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>start_a <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>])</span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>start_b <span class="op">=</span> np.array([<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>])</span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evolve(d):</span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> [d]</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(steps):</span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>        d <span class="op">=</span> d <span class="op">@</span> P<span class="op">;</span> out.append(d)</span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(out)</span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>A, B <span class="op">=</span> evolve(start_a), evolve(start_b)</span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.4</span>, <span class="fl">4.0</span>))</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#161613"</span>, <span class="st">"#5e5e54"</span>, <span class="st">"#8a8a7e"</span>]</span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>    ax.plot(A[:, s], <span class="st">"-o"</span>, color<span class="op">=</span>colors[s], ms<span class="op">=</span><span class="dv">3</span>, lw<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="ss">f"state </span><span class="sc">{</span>s<span class="sc">}</span><span class="ss"> (start A)"</span>)</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>    ax.plot(B[:, s], <span class="st">"--s"</span>, color<span class="op">=</span>colors[s], ms<span class="op">=</span><span class="dv">3</span>, lw<span class="op">=</span><span class="fl">1.2</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>    ax.axhline(pi[s], color<span class="op">=</span>colors[s], ls<span class="op">=</span><span class="st">":"</span>, lw<span class="op">=</span><span class="fl">1.0</span>)</span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"step n"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"probability of each state"</span>)</span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Two different starts → the same stationary distribution"</span>)</span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="fl">7.5</span>, frameon<span class="op">=</span><span class="va">False</span>, ncol<span class="op">=</span><span class="dv">3</span>, loc<span class="op">=</span><span class="st">"upper center"</span>)</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>**Step 4 — the long run.** The two rows are converging on the same number. Call it $\pi_0$, the long-run chance</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>of rain. If the chain has settled, then today's chance of rain gives the same chance tomorrow:</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>$\pi_0 = 0.7\,\pi_0 + 0.4\,(1-\pi_0)$. Solving gives $0.7\,\pi_0=0.4$, so $\pi_0=4/7\approx0.571$, which is</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>Ross's Example 4.15. In the long run it rains on about 57% of days, whatever the weather was on day 0.</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>Everything below is these four steps for any number of states.</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Notation key — open if a symbol is unfamiliar"}</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$X_n$ — the state at step $n$ (day $n$, iteration $n$). $X_0$ is the starting state.</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$i, j, k$ — labels for states.</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$P_{ij}$ — the probability of moving to $j$ next, given you are in $i$ now. $\mathbf P$ — the table</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>  (matrix) of all of them, rows = *from*, columns = *to*.</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$P^{n}_{ij}$ — the probability of being in $j$ exactly $n$ steps after being in $i$.</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\Pr<span class="sc">\{</span>A\mid B<span class="sc">\}</span>$ — the probability of $A$ given $B$.</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\pi_j$ — the long-run (stationary) probability of state $j$; $\pi$ — the whole row of them.</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Markov property</span></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>A Markov chain $<span class="sc">\{</span>X_n<span class="sc">\}</span>$ takes values in a set of **states**, and obeys: <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>\Pr<span class="sc">\{</span>X_{n+1}=j \mid X_n=i, X_{n-1}=i_{n-1},\dots,X_0=i_0<span class="sc">\}</span> = \Pr<span class="sc">\{</span>X_{n+1}=j\mid X_n=i<span class="sc">\}</span> = P_{ij}.</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="fu">## Signature examples</span></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** given today, the rest of the past adds nothing to the forecast for tomorrow.</span></span>
 <span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>Ross's classics: <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Weather in the "Land of Oz"** — a chain over {rain, nice, snow}, predicting tomorrow from today.</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Random walks** — a particle stepping $\pm 1$ on a line; the symmetric walk ($p=0.5$) is **recurrent**</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>  (returns to the origin with probability 1), a surprisingly delicate fact.</span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Gambler's ruin** — bet \$1 repeatedly until you hit \$0 (broke) or \$N (goal): a chain with **two</span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>  absorbing states**, and the question is the probability of each fate.</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>In words — *"the future depends on the present, not the past."* <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> The entire history</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>collapses to the **current state**. That's a strong assumption, but a stunning number of systems satisfy it</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>(or can be made to by enlarging the state), and it's what makes the chain tractable. (Enlarging the state</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>means, for example, letting the state be "the weather today *and* yesterday" so that two days of memory become</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>one step of Markov memory. Ross does exactly this with his rain example.)</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a><span class="fu">## The transition matrix {#sec-matrix}</span></span>
 <span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Assuming the Markov property holds.** If the future genuinely depends on more than the present, enlarge</span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>  the state (e.g. include yesterday) — or it isn't a Markov chain. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Expecting convergence without the conditions.** A **periodic** or **reducible** chain may never settle to</span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>  a unique $\pi$; check irreducibility and aperiodicity. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing a stationary distribution with an absorbing state.** Gambler's ruin *absorbs*; it doesn't mix</span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>  to an interior equilibrium. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading $\pi$ as "where the chain is."** $\pi$ is the long-run *distribution* over states, not a single</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>  destination — the chain keeps moving, visiting state $j$ a fraction $\pi_j$ of the time.</span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>All the dynamics live in the **transition probability matrix** $\mathbf P$, whose entry $P_{ij}$ is the</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>probability of moving from state $i$ to state $j$ in one step. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> Each **row is a</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>probability distribution**: $P_{ij}\ge 0$ and $\sum_j P_{ij}=1$ (from any state you must go *somewhere*).</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>**Multi-step transitions** are just matrix powers. The **Chapman–Kolmogorov equations**,</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>$P^{n+m}_{ij}=\sum_k P^{n}_{ik}P^{m}_{kj}$, say that to get from $i$ to $j$ in $n+m$ steps you pass through</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>*some* intermediate state $k$ — and they imply the clean rule <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>\mathbf P^{(n)} = \mathbf P^{\,n}.</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** the $n$-step table is the one-step table multiplied by itself $n$ times. Step 2 of the</span></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; worked example was one such multiplication: the "rain → rain in two days" entry of $\mathbf P^2$ is 0.61.</span></span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>The $n$-step transition matrix is the one-step matrix raised to the $n$-th power. Want the state distribution</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>after $n$ steps? Multiply your starting distribution by $\mathbf P^n$.</span>
 <span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="fu">## Classifying states {#sec-classify}</span></span>
 <span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ross, *Introduction to Probability Models*** — the **Markov property** ("future depends on the present,</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>  not the past"); the **transition matrix** $P_{ij}$ (rows sum to 1); **Chapman–Kolmogorov** and</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>  $\mathbf P^{(n)}=\mathbf P^n$; **recurrent vs transient** states and **periodicity**; the **stationary /</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>  limiting distribution** $\pi=\pi\mathbf P$ under **irreducibility + ergodicity**; and the **Land of Oz**</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>  weather, **random walk** (symmetric → recurrent), and **gambler's ruin** examples.</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>Not all states behave alike: <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Recurrent vs transient.** A state is **recurrent** if, starting there, you return to it with probability</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>  1; **transient** if there's positive probability you *never* come back. In a finite chain, at least one</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>  state must be recurrent. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Periodicity.** A state has **period $d$** if returns are only possible at multiples of $d$; period 1 is</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>  **aperiodic.** <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> A chain that strictly alternates between two states has period 2. It</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>  never settles, because where it is depends on whether the step number is odd or even.</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Absorbing.** A state you can enter but never leave ($P_{ii}=1$), such as "bankrupt" in gambler's ruin.</span>
 <span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">conditional probability</span><span class="co">](../../content/01-foundations/conditional-probability.qmd)</span> (the</span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>  transition probabilities) and matrix algebra.</span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Powers:** <span class="co">[</span><span class="ot">MCMC</span><span class="co">](../../content/02-inference/credible-intervals-and-computation.qmd)</span> — Markov chain Monte</span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>  Carlo *constructs* a chain whose stationary distribution **is** the Bayesian posterior, then samples by</span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>  running it.</span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cousin of:** <span class="co">[</span><span class="ot">the Poisson process</span><span class="co">](poisson-process.qmd)</span> (its continuous-time relative) and the</span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>  state-space view of <span class="co">[</span><span class="ot">time series</span><span class="co">](../../content/04-predictive/time-series-fundamentals.qmd)</span>.</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>These distinctions decide whether the chain settles down.</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="fu">## The stationary distribution {#sec-stationary}</span></span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>The payoff. For well-behaved chains, the probability of being in state $j$ after many steps converges to a</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>limit $\pi_j$ that **does not depend on where you started.** <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span> If the chain is</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>**irreducible** (you can get from any state to any other) and **ergodic** (aperiodic and positive</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>recurrent), it converges to a *unique* **stationary distribution** $\pi$, the solution of <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>\pi_j = \sum_i \pi_i\,P_{ij}, \qquad \sum_j \pi_j = 1.</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** the long-run share of time in state $j$ equals the share flowing into $j$ from every</span></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; state, weighted by how often the chain is in each. In the weather example: $\pi_0=0.7\pi_0+0.4\pi_1$.</span></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>$\pi$ is the distribution that **reproduces itself** under one more step ($\pi\mathbf P=\pi$) — an</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>equilibrium the chain forgets its way toward. (*Positive recurrent* means the chain not only returns to each</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>state but does so in a finite expected time. In a finite irreducible chain this holds automatically.)</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-markov-stationary</span></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Forgetting the start. A 3-state weather chain run from two very different initial distributions (one starts certain of state 0, the other certain of state 2). Both distributions evolve under repeated multiplication by P and converge to the SAME stationary distribution π (dashed) within a handful of steps. Irreducible + aperiodic chains lose all memory of where they began — the fact MCMC exploits."</span></span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a><span class="co"># A 3-state transition matrix (e.g. sunny/cloudy/rainy)</span></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> np.array([[<span class="fl">0.7</span>, <span class="fl">0.2</span>, <span class="fl">0.1</span>],</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>              [<span class="fl">0.3</span>, <span class="fl">0.4</span>, <span class="fl">0.3</span>],</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>              [<span class="fl">0.2</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>]])</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="co"># Stationary distribution: left eigenvector with eigenvalue 1</span></span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>vals, vecs <span class="op">=</span> np.linalg.eig(P.T)</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>pi <span class="op">=</span> np.real(vecs[:, np.argmin(np.<span class="bu">abs</span>(vals <span class="op">-</span> <span class="dv">1</span>))])<span class="op">;</span> pi <span class="op">=</span> pi <span class="op">/</span> pi.<span class="bu">sum</span>()</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>steps <span class="op">=</span> <span class="dv">12</span></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>start_a <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>])</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>start_b <span class="op">=</span> np.array([<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>])</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evolve(d):</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> [d]</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(steps):</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>        d <span class="op">=</span> d <span class="op">@</span> P<span class="op">;</span> out.append(d)</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(out)</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>A, B <span class="op">=</span> evolve(start_a), evolve(start_b)</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.4</span>, <span class="fl">4.0</span>))</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#161613"</span>, <span class="st">"#5e5e54"</span>, <span class="st">"#8a8a7e"</span>]</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>    ax.plot(A[:, s], <span class="st">"-o"</span>, color<span class="op">=</span>colors[s], ms<span class="op">=</span><span class="dv">3</span>, lw<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="ss">f"state </span><span class="sc">{</span>s<span class="sc">}</span><span class="ss"> (start A)"</span>)</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>    ax.plot(B[:, s], <span class="st">"--s"</span>, color<span class="op">=</span>colors[s], ms<span class="op">=</span><span class="dv">3</span>, lw<span class="op">=</span><span class="fl">1.2</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>    ax.axhline(pi[s], color<span class="op">=</span>colors[s], ls<span class="op">=</span><span class="st">":"</span>, lw<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"step n"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"probability of each state"</span>)</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Two different starts → the same stationary distribution"</span>)</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="fl">7.5</span>, frameon<span class="op">=</span><span class="va">False</span>, ncol<span class="op">=</span><span class="dv">3</span>, loc<span class="op">=</span><span class="st">"upper center"</span>)</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="fu">## Signature examples</span></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>The classics: <span class="co">[</span><span class="ot">@ross_prob_models; @grinstead_snell</span><span class="co">]</span></span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Weather in the "Land of Oz"** (Grinstead &amp; Snell) — a chain over {rain, nice, snow}, predicting tomorrow from today.</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Random walks** — a particle stepping $\pm 1$ on a line; the symmetric walk ($p=0.5$) is **recurrent**</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  (returns to the origin with probability 1), a surprisingly delicate fact.</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Gambler's ruin** — bet \$1 repeatedly until you hit \$0 (broke) or \$N (goal): a chain with **two</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>  absorbing states**, and the question is the probability of each fate.</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Assuming the Markov property holds.** If the future genuinely depends on more than the present, enlarge</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>  the state (e.g. include yesterday) — or it isn't a Markov chain. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Expecting convergence without the conditions.** A **periodic** or **reducible** chain may never settle to</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>  a unique $\pi$; check irreducibility and aperiodicity. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing a stationary distribution with an absorbing state.** Gambler's ruin *absorbs*; it doesn't mix</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>  to an interior equilibrium. <span class="co">[</span><span class="ot">@ross_prob_models</span><span class="co">]</span></span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading $\pi$ as "where the chain is."** $\pi$ is the long-run *distribution* over states, not a single</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>  destination — the chain keeps moving, visiting state $j$ a fraction $\pi_j$ of the time.</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ross, *Introduction to Probability Models*** — the **Markov property** ("future depends on the present,</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>  not the past"); the **transition matrix** $P_{ij}$ (rows sum to 1); **Chapman–Kolmogorov** and</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>  $\mathbf P^{(n)}=\mathbf P^n$; **recurrent vs transient** states and **periodicity**; the **stationary /</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  limiting distribution** $\pi=\pi\mathbf P$ under **irreducibility + ergodicity**; the **random walk**</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  (symmetric → recurrent) and **gambler's ruin** examples; and the two-state rain chain used in the worked</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>  example (Examples 4.1, 4.7 and 4.15: $\alpha=0.7$, $\beta=0.4$, four-day rain probability 0.5749, long-run</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>  rain probability $4/7$).</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Grinstead &amp; Snell, *Introduction to Probability*** — the **Land of Oz** weather chain (Example 11.1),</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>  their opening example of a Markov chain.</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*The board-game picture and the day-by-day table are this encyclopedia's own illustrations of Ross's</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>  results.*</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">conditional probability</span><span class="co">](../../content/01-foundations/conditional-probability.qmd)</span> (the</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>  transition probabilities) and matrix algebra.</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Powers:** <span class="co">[</span><span class="ot">MCMC</span><span class="co">](../../content/02-inference/credible-intervals-and-computation.qmd)</span> — Markov chain Monte</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>  Carlo *constructs* a chain whose stationary distribution **is** the Bayesian posterior, then samples by</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>  running it.</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cousin of:** <span class="co">[</span><span class="ot">the Poisson process</span><span class="co">](poisson-process.qmd)</span> (its continuous-time relative) and the</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>  state-space view of <span class="co">[</span><span class="ot">time series</span><span class="co">](../../content/04-predictive/time-series-fundamentals.qmd)</span>.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
