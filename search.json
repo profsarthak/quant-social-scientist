@@ -13537,7 +13537,7 @@
     "href": "appendices/computing/getting-started-in-r.html",
     "title": "Getting Started in R",
     "section": "",
-    "text": "R rewards a small amount of the right knowledge. You do not need the whole language; you need to think in vectors, keep your data in a data frame, chain steps with the pipe, and wrap anything you repeat in a function. Those four ideas carry most applied work. This is the on-ramp — the language itself; the tidyverse wrangling verbs and reading a regression build on top of it.",
+    "text": "You do not need to learn all of R before it becomes useful. Four habits carry most applied work: do arithmetic on whole columns of numbers at once, keep each dataset in one table, write a sequence of steps so it reads top to bottom, and turn any block you keep copying into a reusable command. This page is the on-ramp to the language itself.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13546,11 +13546,50 @@
     ]
   },
   {
-    "objectID": "appendices/computing/getting-started-in-r.html#r-thinks-in-vectors",
-    "href": "appendices/computing/getting-started-in-r.html#r-thinks-in-vectors",
+    "objectID": "appendices/computing/getting-started-in-r.html#why-it-matters",
+    "href": "appendices/computing/getting-started-in-r.html#why-it-matters",
+    "title": "Getting Started in R",
+    "section": "Why it matters",
+    "text": "Why it matters\nThe source library behind this encyclopedia is mostly written in R, and so is much of applied social science. The dataframe track, the regression appendix and most textbook code examples assume you can read a few lines of it. People learning R often get stuck on its basic way of working (whole-vector arithmetic, missing values, categories stored as factors) rather than on any statistics. A small amount of the right knowledge removes most of that friction (Dayal 2015; Wickham et al. 2023).",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Getting Started in R"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/getting-started-in-r.html#sec-idea",
+    "href": "appendices/computing/getting-started-in-r.html#sec-idea",
+    "title": "Getting Started in R",
+    "section": "The idea in words",
+    "text": "The idea in words\nThink of R as a calculator with a memory and a vocabulary.\n\nThe memory is a set of named boxes called objects. You put something in a box with &lt;-, read as “gets”: price &lt;- 10 means “the box called price gets 10”. The name is case-sensitive, so Price and price are different boxes (Dayal 2015).\nThe vocabulary is a set of functions: commands that take inputs in round brackets and give back a result, like sum(price) or mean(age). An input to a function is called an argument.\nThe working unit is a list of values, not one value. A vector is an ordered set of values of one type, made with c() (“combine”). Arithmetic on a vector applies to every element at once, so you rarely need to loop.\nA dataset is a table of vectors. A data frame is several vectors of the same length side by side, one per variable, with one row per observation.\n\nEverything below builds those four ideas up, one at a time.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Getting Started in R"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/getting-started-in-r.html#sec-by-hand",
+    "href": "appendices/computing/getting-started-in-r.html#sec-by-hand",
+    "title": "Getting Started in R",
+    "section": "A first session, line by line",
+    "text": "A first session, line by line\nThis is the first example in Dayal’s Introduction to R for Quantitative Economics (Dayal 2015): three goods, their prices, the quantities bought, and the total spent. Lines starting with #&gt; show what R prints.\nPrice    &lt;- c(10, 3, 15)\nQuantity &lt;- c(25, 3, 20)\nExpenditure &lt;- Price * Quantity\nExpenditure\n#&gt; [1] 250   9 300\nsum(Expenditure)\n#&gt; [1] 559\nReading it line by line:\n\nPrice &lt;- c(10, 3, 15) makes a vector of three prices and stores it under the name Price. Nothing is printed. R just remembers it.\nQuantity &lt;- c(25, 3, 20) does the same for quantities.\nPrice * Quantity multiplies element by element: 10\\times25, 3\\times3, 15\\times20. There is no loop. That is what vectorised means.\nTyping a name on its own prints it. The [1] is not part of the data. It tells you the line starts with element number 1.\nsum() is a function that takes the whole vector and returns one number, the total: 559.\n\nTwo follow-ups from the same chapter show what goes wrong. Typing price (lower case) gives Error: object 'price' not found. Adding vectors of different lengths makes R recycle the shorter one: c(3, 3, 3) + c(2, 9) gives 5 12 5, with a warning, because R went back to the start of the shorter vector for the third element (Dayal 2015).\n\n\n\n\n\n\nNoteJargon key — open if a term is unfamiliar\n\n\n\n\n\n\nObject — anything stored under a name: a number, a vector, a data frame, a fitted model.\n&lt;- — assignment: put the value on the right into the name on the left.\nFunction — a named command, used as name(arguments); it takes inputs and returns a result.\nArgument — an input to a function. Arguments can be named, as in mean(x, na.rm = TRUE).\nVector — an ordered set of values of one type, made with c().\nVectorised — applied to every element of a vector at once.\nData frame / tibble — a table: named columns (vectors) of equal length. A tibble is the tidyverse’s version.\nFactor — a categorical variable with a fixed set of levels.\nNA — R’s code for a missing value (“not available”).\nPipe (|&gt;) — passes the result on its left into the function on its right.\nPackage — an add-on bundle of functions, installed once and loaded with library().",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Computing",
+      "Getting Started in R"
+    ]
+  },
+  {
+    "objectID": "appendices/computing/getting-started-in-r.html#sec-vectors",
+    "href": "appendices/computing/getting-started-in-r.html#sec-vectors",
     "title": "Getting Started in R",
     "section": "R thinks in vectors",
-    "text": "R thinks in vectors\nThe single most important habit: R operates on whole vectors at once, not element by element. A vector is made with c(), and arithmetic is vectorised — it applies to every element without a loop. (Kaplan 2024)\nx &lt;- c(4, 8, 15, 16, 23, 42)   # a numeric vector;  &lt;- is assignment\nx * 2                          # 8 16 30 32 46 84   — no loop needed\nmean(x); sd(x); length(x)      # summaries take the whole vector\nx[x &gt; 15]                      # 16 23 42            — logical subsetting\nWriting a for loop where a vectorised expression would do is the most common beginner’s tell; R is faster and clearer when you let the vector operation speak. The main atomic types are numeric, character (\"text\"), logical (TRUE/FALSE), and factor (categorical — a character with a fixed set of levels, which is how R encodes groups for models). (McNulty 2021)",
+    "text": "R thinks in vectors\nThe single most important habit: R operates on whole vectors at once, not element by element. A vector is made with c(), and arithmetic is vectorised — it applies to every element without a loop. (Kaplan 2024)\nx &lt;- c(4, 8, 15, 16, 23, 42)   # a numeric vector;  &lt;- is assignment\nx * 2                          # 8 16 30 32 46 84   — no loop needed\nmean(x); sd(x); length(x)      # 18, 13.49, 6 — summaries take the whole vector\nx[x &gt; 15]                      # 16 23 42            — logical subsetting\nThe last line is worth reading slowly. x &gt; 15 produces a vector of TRUE/FALSE values, one per element. Putting it inside square brackets keeps only the elements where it is TRUE. Square brackets pick elements and round brackets call functions; mixing them up is a common early error (Dayal 2015).\nWriting a for loop where a vectorised expression would do is the most common beginner’s tell; R is faster and clearer when you let the vector operation speak. The main atomic types are numeric, character (\"text\"), logical (TRUE/FALSE), and factor (categorical — a character with a fixed set of levels, which is how R encodes groups for models). (McNulty 2021)",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13559,11 +13598,11 @@
     ]
   },
   {
-    "objectID": "appendices/computing/getting-started-in-r.html#keep-your-data-in-a-data-frame",
-    "href": "appendices/computing/getting-started-in-r.html#keep-your-data-in-a-data-frame",
+    "objectID": "appendices/computing/getting-started-in-r.html#sec-dataframes",
+    "href": "appendices/computing/getting-started-in-r.html#sec-dataframes",
     "title": "Getting Started in R",
     "section": "Keep your data in a data frame",
-    "text": "Keep your data in a data frame\nA data frame (or its modern form, the tibble) is R’s table: named columns that can hold different types, all the same length — one row per observation, one column per variable. It is the object every modelling and plotting verb expects. (Dayal 2020)\nd &lt;- data.frame(\n  name = c(\"Ann\", \"Ben\", \"Cy\"),\n  age  = c(31, 25, 40),\n  group = factor(c(\"T\", \"C\", \"T\"))\n)\nd$age            # a column, by name ($)\nd[d$group == \"T\", ]   # rows where group is T, all columns\nnrow(d); names(d)     # dimensions and column names\nLoad real data with the readr package (read_csv(\"file.csv\")); everything downstream assumes it arrived as a tidy data frame. (Llaudet and Imai 2022)",
+    "text": "Keep your data in a data frame\nA data frame (or its modern form, the tibble) is R’s table: named columns that can hold different types, all the same length — one row per observation, one column per variable. It is the object every modelling and plotting verb expects. (Dayal 2020)\nd &lt;- data.frame(\n  name = c(\"Ann\", \"Ben\", \"Cy\"),\n  age  = c(31, 25, 40),\n  group = factor(c(\"T\", \"C\", \"T\"))\n)\nd$age            # a column, by name ($)\nd[d$group == \"T\", ]   # rows where group is T, all columns\nnrow(d); names(d)     # dimensions and column names\nIn plain words: d$age pulls out one column as a vector. Inside d[rows, columns], the part before the comma picks rows and the part after picks columns. Leaving the column part blank means “all columns”. Dayal builds his first data frame the same way, from the Price and Quantity vectors: data.frame(Price, Quantity) (Dayal 2015).\nLoad real data with the readr package (read_csv(\"file.csv\")); everything downstream assumes it arrived as a tidy data frame. (Llaudet and Imai 2022)",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13572,11 +13611,11 @@
     ]
   },
   {
-    "objectID": "appendices/computing/getting-started-in-r.html#the-pipe-and-writing-functions",
-    "href": "appendices/computing/getting-started-in-r.html#the-pipe-and-writing-functions",
+    "objectID": "appendices/computing/getting-started-in-r.html#sec-pipe",
+    "href": "appendices/computing/getting-started-in-r.html#sec-pipe",
     "title": "Getting Started in R",
     "section": "The pipe, and writing functions",
-    "text": "The pipe, and writing functions\nThe pipe |&gt; passes the thing on its left as the first argument of the function on its right, so a sequence of steps reads top-to-bottom instead of inside-out: (Kaplan 2024)\n# nested (hard to read)           # piped (reads as steps)\nround(mean(x, na.rm = TRUE), 2)   x |&gt; mean(na.rm = TRUE) |&gt; round(2)\nAnd when you find yourself copying a block of code with one thing changed, make it a function:\nz_score &lt;- function(v) {          # v is the argument\n  (v - mean(v)) / sd(v)           # last expression is returned\n}\nz_score(x)\nFunctions plus vectorisation are the whole game: express the operation once, apply it to any vector.",
+    "text": "The pipe, and writing functions\nThe pipe |&gt; passes the thing on its left as the first argument of the function on its right, so a sequence of steps reads top-to-bottom instead of inside-out: (Kaplan 2024)\n# nested (hard to read)           # piped (reads as steps)\nround(mean(x, na.rm = TRUE), 2)   x |&gt; mean(na.rm = TRUE) |&gt; round(2)\nR for Data Science suggests reading the pipe aloud as “then”: take x, then take the mean, then round it (Wickham et al. 2023). (That book’s first edition writes the pipe as %&gt;%, from the magrittr package; |&gt; is the version built into R. For simple chains like this one they behave the same.)\nAnd when you find yourself copying a block of code with one thing changed, make it a function:\nz_score &lt;- function(v) {          # v is the argument\n  (v - mean(v)) / sd(v)           # last expression is returned\n}\nz_score(x)                        # -1.04 -0.74 -0.22 -0.15 0.37 1.78 (rounded)\nWickham’s rule of thumb is to write a function once you have copied and pasted a block more than twice. His example is a copied rescaling line in which one a was never changed to b, a silent bug that a function would have prevented (Wickham et al. 2023). A function has three parts: a name (z_score), its arguments inside function(), and a body in curly braces. The value of the last line of the body is what the function returns (Wickham et al. 2023).\nFunctions plus vectorisation are the whole game: express the operation once, apply it to any vector.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13585,8 +13624,8 @@
     ]
   },
   {
-    "objectID": "appendices/computing/getting-started-in-r.html#compute-then-look-always",
-    "href": "appendices/computing/getting-started-in-r.html#compute-then-look-always",
+    "objectID": "appendices/computing/getting-started-in-r.html#sec-look",
+    "href": "appendices/computing/getting-started-in-r.html#sec-look",
     "title": "Getting Started in R",
     "section": "Compute, then look — always",
     "text": "Compute, then look — always\nThe reason social scientists learn to simulate and plot, not just compute summaries, is that summaries hide shape. Anscombe’s quartet is the classic demonstration, and it is a one-line lesson worth internalising before any modelling. (Dayal 2015)\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nx123 = np.array([10, 8, 13, 9, 11, 14, 6, 4, 12, 7, 5])\ndata = {\n    \"I\":   (x123, np.array([8.04,6.95,7.58,8.81,8.33,9.96,7.24,4.26,10.84,4.82,5.68])),\n    \"II\":  (x123, np.array([9.14,8.14,8.74,8.77,9.26,8.10,6.13,3.10,9.13,7.26,4.74])),\n    \"III\": (x123, np.array([7.46,6.77,12.74,7.11,7.81,8.84,6.08,5.39,8.15,6.42,5.73])),\n    \"IV\":  (np.array([8,8,8,8,8,8,8,19,8,8,8]),\n            np.array([6.58,5.76,7.71,8.84,8.47,7.04,5.25,12.50,5.56,7.91,6.89])),\n}\nxs = np.linspace(3, 20, 50)\n\nfig, axes = plt.subplots(2, 2, figsize=(7.8, 5.4), sharex=True, sharey=True)\nfor ax, (name, (x, y)) in zip(axes.flat, data.items()):\n    b1 = np.cov(x, y, bias=True)[0, 1] / np.var(x)     # slope, by hand\n    b0 = y.mean() - b1 * x.mean()\n    r = np.corrcoef(x, y)[0, 1]\n    ax.plot(xs, b0 + b1 * xs, color=\"#e8531d\", lw=2.0, zorder=1)\n    ax.scatter(x, y, s=28, color=\"#161613\", zorder=2, edgecolor=\"#f4f3ec\", linewidth=0.6)\n    ax.set_title(f\"Set {name}:  r = {r:.2f},  ŷ = {b0:.1f} + {b1:.2f}x\", fontsize=9)\n    ax.set_xlim(2, 20); ax.set_ylim(2, 14)\nfig.suptitle(\"Same statistics, four different realities — so plot the data\", fontsize=11)\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Anscombe’s quartet: four datasets with near-identical summary statistics — same mean of x and y, same variance, same correlation (r ≈ 0.82), and the same fitted line ŷ = 3 + 0.5x (orange) — yet four completely different stories. Only the scatter reveals the curve, the outlier, and the leverage point. This is why every figure in this encyclopedia is a plot, not a table of moments: the number can be identical while the reality is not. Compute, then look.",
@@ -13602,7 +13641,7 @@
     "href": "appendices/computing/getting-started-in-r.html#common-pitfalls",
     "title": "Getting Started in R",
     "section": "Common pitfalls",
-    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere new R users trip\n\n\n\n\nLooping instead of vectorising. for (i in 1:length(x)) x[i] &lt;- x[i]*2 is slow and un-R; write x * 2. Reach for a loop only when each step truly depends on the last. (Kaplan 2024)\nConfusing &lt;-, =, and ==. &lt;- assigns, == tests equality, and a single = assigns inside a function call (an argument). Mixing them up produces silent surprises, not errors.\nNA propagates. Any arithmetic touching a missing value returns NA. mean(x) on a vector with one NA is NA — you must ask for mean(x, na.rm = TRUE). R makes you acknowledge missingness on purpose.\nRecycling. Operating on vectors of different lengths silently recycles the shorter one. c(1,2,3,4) + c(0,10) gives 1 12 3 14, not an error — occasionally handy, often a bug.\nFactor surprises. A grouping variable read as text may need factor(); and a factor’s reference level (the one folded into the intercept) is the first alphabetically unless you set it — the source of “why is my category missing from the regression?” (McNulty 2021)",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere new R users trip\n\n\n\n\nLooping instead of vectorising. for (i in 1:length(x)) x[i] &lt;- x[i]*2 is slow and un-R; write x * 2. Reach for a loop only when each step truly depends on the last. (Kaplan 2024)\nConfusing &lt;-, =, and ==. &lt;- assigns, == tests equality, and a single = assigns inside a function call (an argument). Mixing them up produces silent surprises, not errors.\nNA propagates. Missing values are “contagious”: almost any operation involving an unknown value gives an unknown result (Wickham et al. 2023). mean(x) on a vector with one NA is NA — you must ask for mean(x, na.rm = TRUE). R makes you acknowledge missingness on purpose.\nRecycling. Operating on vectors of different lengths silently recycles the shorter one. c(1,2,3,4) + c(0,10) gives 1 12 3 14, not an error — occasionally handy, often a bug. R warns only when the longer length is not a multiple of the shorter, as in Dayal’s 5 12 5 example. (Dayal 2015)\nCase and bracket slips. Price and price are different objects, and c[10, 3, 15] (square brackets) is an error where c(10, 3, 15) was meant. (Dayal 2015)\nFactor surprises. A grouping variable read as text may need factor(); and a factor’s reference level (the one folded into the intercept) is the first alphabetically unless you set it — the source of “why is my category missing from the regression?” (McNulty 2021)",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13615,7 +13654,7 @@
     "href": "appendices/computing/getting-started-in-r.html#from-the-sources",
     "title": "Getting Started in R",
     "section": "From the sources",
-    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nKaplan, Lessons in Statistical Thinking — R as a vector language for statistics: vectorised operations, the pipe, and writing small functions, taught with the mosaic idiom.\nDayal, An Introduction to R for Quantitative Economics and Quantitative Economics with R — the learn-by-simulation ethos (Anscombe’s quartet, spurious regression) and the data-frame-centred workflow for economics.\nMcNulty, Explanatory Statistical Modeling in R — atomic types and factors, and how the reference level of a factor enters a model.\nLlaudet & Imai, Data Analysis for Social Science — the friendly first-contact path: load a data frame, subset it, summarise it, and plot it.",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nKaplan, Lessons in Statistical Thinking — R as a vector language for statistics: vectorised operations, the pipe, and writing small functions, taught with the mosaic idiom.\nDayal, An Introduction to R for Quantitative Economics and Quantitative Economics with R — the learn-by-simulation ethos (Anscombe’s quartet, spurious regression) and the data-frame-centred workflow for economics. The 2015 book’s Chapter 2 supplies the first-session example (price × quantity = expenditure, total 559), the case-sensitivity and bracket errors, and the recycling warning (5 12 5).\nWickham, Çetinkaya-Rundel & Grolemund, R for Data Science — reading the pipe as “then”; missing values as “contagious”; the copy-and-paste-more-than-twice rule, the rescale01 example, and the three parts of a function.\nMcNulty, Explanatory Statistical Modeling in R — atomic types and factors, and how the reference level of a factor enters a model.\nLlaudet & Imai, Data Analysis for Social Science — the friendly first-contact path: load a data frame, subset it, summarise it, and plot it.\nThe “calculator with a memory and a vocabulary” picture is this encyclopedia’s own.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13641,7 +13680,46 @@
     "href": "appendices/advanced-probability/queueing.html",
     "title": "Queueing: The M/M/1 Queue",
     "section": "",
-    "text": "A queue is arrivals, a server, and a line. The M/M/1 queue — Markovian (Poisson) arrivals at rate \\lambda, Markovian (exponential) service at rate \\mu, one server — is the “hello world” of the subject, and it already teaches the counterintuitive rule that governs call centres, servers, and clinics alike: the average line length is \\rho/(1-\\rho) where \\rho=\\lambda/\\mu is utilisation, so as you push utilisation toward 1 the wait does not rise gently — it blows up. Run a system at 90% busy and you have already lost.",
+    "text": "A queue is arrivals, a server, and a line. When the server is idle half the time, the line is short. When the server is busy nine-tenths of the time, the average line is nine people long, and a little more demand makes it far longer. Waiting grows slowly at first and then very fast as the server approaches full use. That one fact governs call centres, clinics, courts and computer servers alike.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Queueing: The M/M/1 Queue"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/queueing.html#why-it-matters",
+    "href": "appendices/advanced-probability/queueing.html#why-it-matters",
+    "title": "Queueing: The M/M/1 Queue",
+    "section": "Why it matters",
+    "text": "Why it matters\nPublic services are queues: emergency departments, benefits offices, court dockets, visa processing. So are many of the systems researchers study, such as call-centre staffing and hospital bed occupancy. Managers are often rewarded for keeping staff “fully utilised”. Queueing theory shows why that target makes waits very long, and it gives the arithmetic for how much slack a service needs. The simplest model, the M/M/1 queue, is enough to see the shape of the problem (Ross 2014).",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Queueing: The M/M/1 Queue"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/queueing.html#sec-idea",
+    "href": "appendices/advanced-probability/queueing.html#sec-idea",
+    "title": "Queueing: The M/M/1 Queue",
+    "section": "The idea in words",
+    "text": "The idea in words\nThink of a single clerk at a desk. People turn up at random. Each takes a random amount of time to serve. Sometimes several arrive close together and a line builds. The clerk then needs idle time to clear it.\nIf the clerk is busy, say, half the time, there is plenty of spare time to clear the occasional burst, so lines stay short. If the clerk is busy 95% of the time, a burst takes a very long time to clear, because there is almost no spare capacity. Before it clears, the next burst often arrives. Lines then pile up on top of lines. That is why waiting rises steeply as the clerk approaches full use. It also explains why “busy 100% of the time” is not efficiency but collapse: there is no spare time at all to recover from bad luck.\nA second idea links the length of the line to the wait. If 6 people arrive per hour and each spends 20 minutes in the system, then on average 6\\times\\frac13=2 people are in the system at any moment. That is Little’s law, and it holds for almost any queue.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Queueing: The M/M/1 Queue"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/queueing.html#sec-by-hand",
+    "href": "appendices/advanced-probability/queueing.html#sec-by-hand",
+    "title": "Queueing: The M/M/1 Queue",
+    "section": "A service desk, by hand",
+    "text": "A service desk, by hand\nThis is Ross’s Example 8.2 (Ross 2014). Customers arrive at random, on average one every 12 minutes. Service times are random, averaging 8 minutes.\nStep 1 — how busy is the server? The utilisation is (average service time) ÷ (average gap between arrivals) =8/12=2/3. The server is busy two-thirds of the time and idle one-third of the time.\nStep 2 — how many are in the system? The M/M/1 formula below gives the chance of finding n people present:\n\n\n\npeople in the system\n0\n1\n2\n3\n…\n\n\n\n\nproportion of time\n0.333\n0.222\n0.148\n0.099\n…\n\n\n\nEach entry is two-thirds of the one before. The average works out to 2 people.\nStep 3 — how long does a customer spend? By Little’s law, (average number present) = (arrival rate) × (average time in system). So the time in system is 2\\div\\frac1{12}= 24 minutes: 8 in service and 16 waiting in line.\nStep 4 — add 20% more customers. Now they arrive every 10 minutes. Utilisation rises from 2/3 to 0.8. The average number present doubles from 2 to 4, and the time in system rises from 24 to 40 minutes. The wait in line doubles from 16 to 32 minutes. A 20% rise in demand doubled the line (Ross 2014).\n\n\n\n\n\n\nNoteNotation key — open if a symbol is unfamiliar\n\n\n\n\n\n\nM/M/1 — a shorthand: Markovian (memoryless, i.e. Poisson) arrivals / Markovian (exponential) service times / 1 server.\n\\lambda — the arrival rate (customers per unit time; 1/12 per minute above).\n\\mu — the service rate (customers one busy server can finish per unit time; 1/8 per minute above), so 1/\\mu is the mean service time.\n\\rho=\\lambda/\\mu — the utilisation, or traffic intensity: the fraction of time the server is busy.\nP_n — the long-run proportion of time with exactly n customers in the system.\nL, W — the average number in the system and the average time a customer spends in it (waiting plus service). L_Q, W_Q — the same, counting only the line, not the person being served.\n\\mathrm{E}[S], \\mathrm{E}[S^2] — the mean of the service time and the mean of its square.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13654,7 +13732,7 @@
     "href": "appendices/advanced-probability/queueing.html#the-model-and-its-utilisation",
     "title": "Queueing: The M/M/1 Queue",
     "section": "The model and its utilisation",
-    "text": "The model and its utilisation\nCustomers arrive as a Poisson process at rate \\lambda (interarrivals exponential, mean 1/\\lambda); each takes an exponential service time with rate \\mu (mean 1/\\mu); there is one server and an unbounded waiting room served first-come-first-served. (Ross 2014) The single most important quantity is the traffic intensity or utilisation: \n\\rho = \\frac{\\lambda}{\\mu} = \\frac{\\text{arrival rate}}{\\text{service rate}},\n the fraction of time the server is busy. Because both processes are memoryless, the number in the system is a continuous-time Markov chain — a birth–death chain that goes up by one on an arrival and down by one on a service completion.",
+    "text": "The model and its utilisation\nCustomers arrive as a Poisson process at rate \\lambda (interarrivals exponential, mean 1/\\lambda); each takes an exponential service time with rate \\mu (mean 1/\\mu); there is one server and an unbounded waiting room served first-come-first-served. (Ross 2014) The single most important quantity is the traffic intensity or utilisation: \n\\rho = \\frac{\\lambda}{\\mu} = \\frac{\\text{arrival rate}}{\\text{service rate}},\n the fraction of time the server is busy.\n\nIn plain words: utilisation is the share of the clock the server spends working. In the worked example it is 8/12=2/3.\n\nBecause both processes are memoryless, the number in the system is a continuous-time Markov chain — a birth–death chain, meaning it can only move one step at a time: up by one on an arrival and down by one on a service completion.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13663,11 +13741,11 @@
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/queueing.html#stability-the-line-is-stable-only-if-rho-1",
-    "href": "appendices/advanced-probability/queueing.html#stability-the-line-is-stable-only-if-rho-1",
+    "objectID": "appendices/advanced-probability/queueing.html#sec-stability",
+    "href": "appendices/advanced-probability/queueing.html#sec-stability",
     "title": "Queueing: The M/M/1 Queue",
     "section": "Stability: the line is stable only if \\rho < 1",
-    "text": "Stability: the line is stable only if \\rho &lt; 1\nIf customers arrive faster than they can be served (\\lambda \\ge \\mu, i.e. \\rho \\ge 1), the queue grows without bound — there is no equilibrium. (Ross 2014) A stable queue requires \\rho &lt; 1: the server must, on average, have spare capacity. This is already the first surprise for newcomers — a server that is busy exactly 100% of the time is not maximally efficient, it is unstable.",
+    "text": "Stability: the line is stable only if \\rho &lt; 1\nIf customers arrive faster than they can be served (\\lambda \\ge \\mu, i.e. \\rho \\ge 1), the queue grows without bound — there is no equilibrium. (Ross 2014) A stable queue requires \\rho &lt; 1: the server must, on average, have spare capacity. Ross’s way of putting it is that the mean service time must be less than the mean time between arrivals (Ross 2014). This is already the first surprise for newcomers — a server that is busy exactly 100% of the time is not maximally efficient, it is unstable.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13676,11 +13754,11 @@
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/queueing.html#the-stationary-distribution-and-the-queue-length",
-    "href": "appendices/advanced-probability/queueing.html#the-stationary-distribution-and-the-queue-length",
+    "objectID": "appendices/advanced-probability/queueing.html#sec-length",
+    "href": "appendices/advanced-probability/queueing.html#sec-length",
     "title": "Queueing: The M/M/1 Queue",
     "section": "The stationary distribution and the queue length",
-    "text": "The stationary distribution and the queue length\nWhen \\rho &lt; 1 the chain settles to a geometric stationary distribution — the probability of finding n customers in the system is (Ross 2014) \nP_n = (1-\\rho)\\,\\rho^{\\,n}, \\qquad n = 0, 1, 2, \\dots\n From it, the expected number in the system is \nL = \\frac{\\rho}{1-\\rho}.\n This is the formula that matters. At \\rho = 0.5, L = 1; at \\rho = 0.9, L = 9; at \\rho = 0.99, L = 99. Halving the idle capacity from 10% to 1% multiplies the line by more than ten. The relationship is not linear — it is a wall, plotted below.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# analytic curve\nrho = np.linspace(0.01, 0.97, 300)\nL = rho / (1 - rho)\n\n# a quick event-driven M/M/1 simulation to confirm L = rho/(1-rho)\ndef simulate_L(rho, mu=1.0, n_events=200_000, seed=0):\n    rng = np.random.default_rng(seed)\n    lam = rho * mu\n    t = 0.0; n = 0; area = 0.0; last = 0.0\n    # next arrival / next departure times\n    t_arr = rng.exponential(1/lam)\n    t_dep = np.inf\n    for _ in range(n_events):\n        t_next = min(t_arr, t_dep)\n        area += n * (t_next - last); last = t_next; t = t_next\n        if t_arr &lt;= t_dep:                      # arrival\n            n += 1\n            t_arr = t + rng.exponential(1/lam)\n            if n == 1: t_dep = t + rng.exponential(1/mu)\n        else:                                   # departure\n            n -= 1\n            t_dep = t + rng.exponential(1/mu) if n &gt; 0 else np.inf\n    return area / t\n\nsim_rhos = np.array([0.3, 0.5, 0.7, 0.85, 0.92])\nsim_L = [simulate_L(r, seed=i) for i, r in enumerate(sim_rhos)]\n\nfig, ax = plt.subplots(figsize=(7.4, 4.4))\nax.plot(rho, L, color=\"#161613\", lw=2.4, label=r\"$L = \\rho/(1-\\rho)$\")\nax.scatter(sim_rhos, sim_L, color=\"#e8531d\", s=55, zorder=5, edgecolor=\"#161613\",\n           linewidth=1.0, label=\"simulation\")\nax.axvline(1.0, color=\"#8a8a7e\", lw=1.0, ls=(0, (3, 3)))\nax.set_xlim(0, 1.02); ax.set_ylim(0, 30)\nax.set_xlabel(r\"utilisation  $\\rho = \\lambda/\\mu$\")\nax.set_ylabel(\"expected number in system  L\")\nax.set_title(\"Waiting explodes as the server approaches full utilisation\")\nax.legend(fontsize=9, frameon=False, loc=\"upper left\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The congestion catastrophe. The expected number in an M/M/1 system, L = ρ/(1−ρ), against utilisation ρ. Below ~70% the line is short and grows slowly; past 90% it turns near-vertical — small increases in load produce huge increases in waiting. The orange markers are averages from a direct event-driven simulation of the queue, confirming the formula. The lesson every capacity plan needs: the cost of the last few percent of utilisation is not a few percent of waiting — it is unbounded.",
+    "text": "The stationary distribution and the queue length\nRoss finds the long-run probabilities with a picture. Imagine a person who walks into “room n” whenever there are n customers in the system. Over a long time, they must enter each room as often as they leave it. Writing “rate in = rate out” for every room gives the balance equations (Ross 2014). For room 0, the process leaves only by an arrival and enters only by a service completion from room 1, so \\lambda P_0=\\mu P_1.\nWhen \\rho &lt; 1 the chain settles to a geometric stationary distribution (stationary means the proportions no longer change over time). The probability of finding n customers in the system is (Ross 2014) \nP_n = (1-\\rho)\\,\\rho^{\\,n}, \\qquad n = 0, 1, 2, \\dots\n\n\nIn plain words: the server is idle a fraction 1-\\rho of the time, and each extra person in the system is \\rho times as likely as the one before. The table in the worked example is this with \\rho=2/3.\n\nFrom it, the expected number in the system is \nL = \\frac{\\rho}{1-\\rho}.\n\n\nIn plain words: the line length depends only on how busy the server is, and the denominator 1-\\rho is the spare capacity. As spare capacity shrinks toward zero, the line grows without limit.\n\nThis is the formula that matters. At \\rho = 0.5, L = 1; at \\rho = 0.9, L = 9; at \\rho = 0.99, L = 99. Halving the idle capacity from 10% to 1% multiplies the line by more than ten. The relationship is not linear — it is a wall, plotted below.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# analytic curve\nrho = np.linspace(0.01, 0.97, 300)\nL = rho / (1 - rho)\n\n# a quick event-driven M/M/1 simulation to confirm L = rho/(1-rho)\ndef simulate_L(rho, mu=1.0, n_events=200_000, seed=0):\n    rng = np.random.default_rng(seed)\n    lam = rho * mu\n    t = 0.0; n = 0; area = 0.0; last = 0.0\n    # next arrival / next departure times\n    t_arr = rng.exponential(1/lam)\n    t_dep = np.inf\n    for _ in range(n_events):\n        t_next = min(t_arr, t_dep)\n        area += n * (t_next - last); last = t_next; t = t_next\n        if t_arr &lt;= t_dep:                      # arrival\n            n += 1\n            t_arr = t + rng.exponential(1/lam)\n            if n == 1: t_dep = t + rng.exponential(1/mu)\n        else:                                   # departure\n            n -= 1\n            t_dep = t + rng.exponential(1/mu) if n &gt; 0 else np.inf\n    return area / t\n\nsim_rhos = np.array([0.3, 0.5, 0.7, 0.85, 0.92])\nsim_L = [simulate_L(r, seed=i) for i, r in enumerate(sim_rhos)]\n\nfig, ax = plt.subplots(figsize=(7.4, 4.4))\nax.plot(rho, L, color=\"#161613\", lw=2.4, label=r\"$L = \\rho/(1-\\rho)$\")\nax.scatter(sim_rhos, sim_L, color=\"#e8531d\", s=55, zorder=5, edgecolor=\"#161613\",\n           linewidth=1.0, label=\"simulation\")\nax.axvline(1.0, color=\"#8a8a7e\", lw=1.0, ls=(0, (3, 3)))\nax.set_xlim(0, 1.02); ax.set_ylim(0, 30)\nax.set_xlabel(r\"utilisation  $\\rho = \\lambda/\\mu$\")\nax.set_ylabel(\"expected number in system  L\")\nax.set_title(\"Waiting explodes as the server approaches full utilisation\")\nax.legend(fontsize=9, frameon=False, loc=\"upper left\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The congestion catastrophe. The expected number in an M/M/1 system, L = ρ/(1−ρ), against utilisation ρ. Below ~70% the line is short and grows slowly; past 90% it turns near-vertical — small increases in load produce huge increases in waiting. The orange markers are averages from a direct event-driven simulation of the queue, confirming the formula. The lesson every capacity plan needs: the cost of the last few percent of utilisation is not a few percent of waiting — it is unbounded.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13689,11 +13767,24 @@
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/queueing.html#littles-law-a-bridge-that-needs-no-assumptions",
-    "href": "appendices/advanced-probability/queueing.html#littles-law-a-bridge-that-needs-no-assumptions",
+    "objectID": "appendices/advanced-probability/queueing.html#sec-little",
+    "href": "appendices/advanced-probability/queueing.html#sec-little",
     "title": "Queueing: The M/M/1 Queue",
     "section": "Little’s law: a bridge that needs no assumptions",
-    "text": "Little’s law: a bridge that needs no assumptions\nThe expected number in the system L, the arrival rate \\lambda, and the expected time a customer spends W are tied by Little’s law: (Ross 2014) \nL = \\lambda W.\n Its power is its generality — it holds for essentially any stable queue, not just M/M/1, because it is a renewal-reward identity in disguise (reward = time-in-system). So once you know L, you know the average wait W = L/\\lambda, and vice versa. For M/M/1, W = \\frac{1}{\\mu - \\lambda} — which, like L, diverges as \\lambda \\to \\mu.",
+    "text": "Little’s law: a bridge that needs no assumptions\nThe expected number in the system L, the arrival rate \\lambda, and the expected time a customer spends W are tied by Little’s law: (Ross 2014) \nL = \\lambda W.\n\n\nIn plain words: the average crowd equals the arrival rate times how long each person stays. Two people present on average, with one arrival every 12 minutes, means each stays 24 minutes.\n\nIts power is its generality — it holds for essentially any stable queue, not just M/M/1. Ross’s argument is a cost identity: make every customer pay $1 per minute while in the system. The system then earns L per minute, and each customer pays W, so L=\\lambda W (Ross 2014). The argument is made rigorous through the regenerative-process version of renewal-reward. Charge only for time in the line and the same argument gives L_Q=\\lambda W_Q. So once you know L, you know the average wait W = L/\\lambda, and vice versa. For M/M/1, W = \\frac{1}{\\mu - \\lambda} — which, like L, diverges as \\lambda \\to \\mu.\nOne more general fact makes these formulas usable. Because Poisson arrivals come at moments that carry no information about the past, the state an arriving customer finds has the same distribution as the state at a random moment. Ross’s phrase is that Poisson arrivals see time averages (Ross 2014). With scheduled, evenly spaced arrivals this fails, and what customers experience can differ from the time average.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Queueing: The M/M/1 Queue"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/queueing.html#sec-variability",
+    "href": "appendices/advanced-probability/queueing.html#sec-variability",
+    "title": "Queueing: The M/M/1 Queue",
+    "section": "Why variability matters",
+    "text": "Why variability matters\nM/M/1 assumes exponential service times, which vary a lot. Ross’s M/G/1 model allows any service-time distribution (the G is for “general”) and gives the average wait in line, the Pollaczek–Khintchine formula (Ross 2014): \nW_Q = \\frac{\\lambda\\,\\mathrm{E}[S^2]}{2\\,(1-\\lambda\\,\\mathrm{E}[S])}.\n\n\nIn plain words: waiting depends on how busy the server is (the denominator again) and on the mean square of the service time, which grows with its variance. Keep the mean fixed and make service more variable, and everyone waits longer.\n\nSince \\mathrm{E}[S^2]=\\mathrm{Var}(S)+(\\mathrm{E}[S])^2, Ross notes that for a fixed mean, all of L, L_Q, W and W_Q increase with the variance of service times (Ross 2014). On the worked example’s numbers (arrivals every 12 minutes, 8-minute mean service): exponential service has \\mathrm{E}[S^2]=128 and gives W_Q=16 minutes, as before. Service that always takes exactly 8 minutes has \\mathrm{E}[S^2]=64 and gives W_Q= 8 minutes, half the wait at the same utilisation.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13706,7 +13797,7 @@
     "href": "appendices/advanced-probability/queueing.html#common-pitfalls",
     "title": "Queueing: The M/M/1 Queue",
     "section": "Common pitfalls",
-    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere queue intuition fails\n\n\n\n\nAiming for 100% utilisation. Maximal throughput is not maximal efficiency. At \\rho = 1 the queue is unstable; the sweet spot leaves slack, and how much depends on how much delay you can tolerate. (Ross 2014)\nAssuming waiting scales linearly with load. L = \\rho/(1-\\rho) is convex and explodes near 1 — the last 10% of utilisation costs far more than the first 10%. Planning capacity on an average load ignores the wall.\nForgetting variability is baked in. M/M/1’s exponential service is highly variable; the same utilisation with steadier service (shorter-tailed) queues less. Real systems with bursty arrivals or variable service queue more than M/M/1 predicts — treat it as an optimistic baseline.\nMisapplying Little’s law across an unstable or non-stationary system. L=\\lambda W needs a stable, long-run-average regime; it is not a snapshot identity for a queue that is still filling up.",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere queue intuition fails\n\n\n\n\nAiming for 100% utilisation. Maximal throughput is not maximal efficiency. At \\rho = 1 the queue is unstable; the sweet spot leaves slack, and how much depends on how much delay you can tolerate. (Ross 2014)\nAssuming waiting scales linearly with load. L = \\rho/(1-\\rho) is convex and explodes near 1 — the last 10% of utilisation costs far more than the first 10%. Planning capacity on an average load ignores the wall. The worked example shows it: 20% more customers doubled the line.\nForgetting variability is baked in. M/M/1’s exponential service is highly variable; the same utilisation with steadier service queues less (half the wait for fixed-length service, by the Pollaczek–Khintchine formula). Bursty arrivals or more variable service than exponential mean more queueing than M/M/1 predicts. (Ross 2014)\nMisapplying Little’s law across an unstable or non-stationary system. L=\\lambda W needs a stable, long-run-average regime; it is not a snapshot identity for a queue that is still filling up.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13719,7 +13810,7 @@
     "href": "appendices/advanced-probability/queueing.html#from-the-sources",
     "title": "Queueing: The M/M/1 Queue",
     "section": "From the sources",
-    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nRoss, Introduction to Probability Models (Queueing Theory chapter) — the M/M/1 queue as a birth–death Markov chain; traffic intensity \\rho=\\lambda/\\mu and the stability condition \\rho&lt;1; the geometric stationary distribution P_n=(1-\\rho)\\rho^n and L=\\rho/(1-\\rho) (and W=1/(\\mu-\\lambda)); and Little’s law L=\\lambda W as a general (renewal-reward) result.",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nRoss, Introduction to Probability Models (Queueing Theory chapter) — the cost identity and Little’s law L=\\lambda W (and L_Q=\\lambda W_Q) as general results, rigorous for regenerative queues (§8.2.1); Poisson arrivals see time averages (Proposition 8.2); the M/M/1 queue, its “rooms” argument and balance equations, the stability condition \\rho&lt;1, the geometric stationary distribution P_n=(1-\\rho)\\rho^n, L=\\rho/(1-\\rho) and W=1/(\\mu-\\lambda) (§8.3.1); Example 8.2, the worked example used here (L = 2 and W = 24 minutes, then L = 4 and W = 40 after a 20% rise in arrivals); and the M/G/1 Pollaczek–Khintchine formula with the remark that waits increase with service-time variance (§8.5).\nThe single-clerk picture and the fixed-length-service comparison (16 versus 8 minutes) are this encyclopedia’s own illustrations of Ross’s results.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13901,7 +13992,20 @@
     "href": "appendices/advanced-probability/index.html",
     "title": "Appendix · Advanced Probability",
     "section": "",
-    "text": "◆ QSS · APPENDIX / ADVANCED PROBABILITY · 7 LIVE\nThe Foundations probability sub-chapter covers everything the inference, regression, and causal parts actually require. This appendix goes one level deeper, into the stochastic-process and order-statistic material from Sheldon Ross’s Introduction to Probability Models and A First Course in Probability — optional for the main arc, but foundational for queueing, reliability, time-series theory, and the mathematics of extremes.",
+    "text": "◆ QSS · APPENDIX / ADVANCED PROBABILITY · 7 LIVE\nThe Foundations probability sub-chapter covers everything the inference, regression, and causal parts actually require. This appendix goes one level deeper, into the stochastic-process and order-statistic material from Sheldon Ross’s Introduction to Probability Models and A First Course in Probability, and from Grinstead & Snell — optional for the main arc, but foundational for queueing, reliability, time-series theory, and the mathematics of extremes.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Appendix · Advanced Probability"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/index.html#what-this-appendix-is-for-and-when-to-open-it",
+    "href": "appendices/advanced-probability/index.html#what-this-appendix-is-for-and-when-to-open-it",
+    "title": "Appendix · Advanced Probability",
+    "section": "What this appendix is for — and when to open it",
+    "text": "What this appendix is for — and when to open it\nA stochastic process is a quantity that changes at random over time: the number of calls so far today, the length of a line, the size of a family tree, a price. Open an entry here when a main entry leans on one of these and you want to see how it works. Typical moments: a count model “assumes a Poisson process”; a survival model has a “constant hazard”; MCMC “runs a Markov chain”; an epidemic “dies out or takes off”; a unit-root series “wanders like a random walk”. You do not need to read the entries in order, and you do not need them to follow the rest of the site.\nEvery entry is built to be climbable. Each one opens with the entries that link to it and what you need to know first, then gives the idea in plain words and a small worked example with real numbers (a help desk, a rainy-day chain, a bus stop, a service counter). The general notation comes after that, with a collapsible key and an “in plain words” line under each key equation. The full rigour follows.\n\n\n\n\n\n\nTipWhere to start\n\n\n\nStart with The Poisson Process: random arrivals in time, and the base for most of the rest. From there, Renewal Theory (gaps of any shape) and Queueing (arrivals meet a server) follow naturally. Markov Chains stand on their own and lead to Branching Processes. Brownian Motion is the continuous limit of a random walk. Order Statistics is separate from the processes: the probability of sorted data (minimum, maximum, median).\ngraduate / optional. Assumes the probability foundations (random variables, expectation, the common distributions).",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13914,7 +14018,7 @@
     "href": "appendices/advanced-probability/index.html#entries",
     "title": "Appendix · Advanced Probability",
     "section": "Entries",
-    "text": "Entries\n\n\n The Poisson Process Events in continuous time: interarrival times, the memoryless property, superposition — the engine behind count and survival models. \n\n\n Markov Chains Memoryless state-to-state dynamics: transition matrices and stationary distributions — the theory under MCMC. \n\n\n Branching Processes One ancestor, random offspring each generation: whether a line, a rumour, or an epidemic dies out or explodes — the fixed point of a generating function. \n\n\n Order Statistics The probability of sorted data: min, max, median, range — the basis of quantiles, extremes, and rank tests. \n\n\n Renewal Theory The Poisson process with any gap distribution: the long-run rate 1/μ and the renewal-reward theorem. \n\n\n Queueing (M/M/1) Arrivals meet a server: utilisation, why waiting explodes near full load, and Little’s law. \n\n\n Brownian Motion The continuous-time limit of a random walk: √t spreading, and the scaffolding of diffusion and finance.",
+    "text": "Entries\n\n\n The Poisson Process Events in continuous time: interarrival times, the memoryless property, superposition — the engine behind count and survival models. \n\n\n Markov Chains Memoryless state-to-state dynamics: transition matrices and stationary distributions — the theory under MCMC. \n\n\n Branching Processes One ancestor, random offspring each generation: whether a line, a rumour, or an epidemic dies out or explodes — the fixed point of a generating function. \n\n\n Order Statistics The probability of sorted data: min, max, median, range — the basis of quantiles, extremes, and rank tests. \n\n\n Renewal Theory Events that repeat at gaps of any shape: why only the average gap sets the long-run rate, reward per cycle, and the inspection paradox. \n\n\n Queueing (M/M/1) Arrivals meet a server: utilisation, why waiting explodes near full load, and Little’s law. \n\n\n Brownian Motion The continuous-time limit of a random walk: √t spreading, and the scaffolding of diffusion and finance.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -13927,7 +14031,7 @@
     "href": "appendices/advanced-probability/index.html#where-this-connects",
     "title": "Appendix · Advanced Probability",
     "section": "Where this connects",
-    "text": "Where this connects\n\nThe Poisson process is the continuous-time engine behind count data and survival/hazard models — its interarrival times are the exponential durations of survival analysis.\nMarkov chains are the theory under MCMC (the “MC” is Markov chain) and many time-series models.\nOrder statistics underpin the median, quantiles, extremes, and the rank-based nonparametric tests.\nBranching processes are the probability behind epidemic thresholds (R_0), the giant-component transition in random graphs, and network cascades — extinction-or-explosion decided by one mean offspring number.",
+    "text": "Where this connects\n\nThe Poisson process is the continuous-time engine behind count data and survival/hazard models — its interarrival times are the exponential durations of survival analysis.\nMarkov chains are the theory under MCMC (the “MC” is Markov chain) and many time-series models.\nOrder statistics underpin the median, quantiles, extremes, and the rank-based nonparametric tests.\nBranching processes are the probability behind epidemic thresholds (R_0), the giant-component transition in random graphs, and network cascades — extinction-or-explosion decided by one mean offspring number.\nRenewal theory generalises the Poisson process to waiting times that age, and its inspection paradox is the time-based twin of the friendship paradox.\nQueueing turns the Poisson process into capacity arithmetic: why services run near full load have long waits.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -14623,7 +14727,46 @@
     "href": "appendices/advanced-probability/renewal-theory.html",
     "title": "Renewal Theory",
     "section": "",
-    "text": "A Poisson process has exponential gaps between events. Drop that one assumption — let the gaps be i.i.d. from any distribution — and you have a renewal process. Almost everything you care about in the long run then depends only on the mean gap \\mu: events accumulate at rate 1/\\mu, and any reward earned per cycle accumulates at rate (mean reward)/(mean cycle). That robustness — answers that ignore the whole shape of the distribution — is what makes renewal-reward one of applied probability’s most reused tools.",
+    "text": "Something happens, then the clock restarts and you wait a random time for it to happen again. Whatever pattern the waits follow, the long-run rate of events depends on just one number: the average wait. Attach a cost or a reward to each cycle, and the long-run rate of reward is the average reward per cycle divided by the average cycle length. There is one famous trap: the gap you happen to land in is longer than a typical gap.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Renewal Theory"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/renewal-theory.html#why-it-matters",
+    "href": "appendices/advanced-probability/renewal-theory.html#why-it-matters",
+    "title": "Renewal Theory",
+    "section": "Why it matters",
+    "text": "Why it matters\nPlenty of social and operational processes repeat: a patient returns to a clinic, a tenant moves, a government falls and a new one forms, a machine breaks and is repaired. The gaps are rarely exponential. People age, schedules exist, and wear accumulates. So the Poisson process, with its memoryless gaps, is often the wrong model. Renewal theory says you can still answer the long-run questions (how often, at what cost, what fraction of the time) without knowing the shape of the gaps. It also warns about a sampling trap that turns up well beyond probability: whenever you sample “whatever is going on right now”, long episodes are over-represented (Ross 2014).",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Renewal Theory"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/renewal-theory.html#sec-idea",
+    "href": "appendices/advanced-probability/renewal-theory.html#sec-idea",
+    "title": "Renewal Theory",
+    "section": "The idea in words",
+    "text": "The idea in words\nPicture a lamp with one bulb. When the bulb dies you replace it at once, and the new one lasts a random time. Over ten years, how many bulbs do you buy? If bulbs last 1,000 hours on average, you buy about one per 1,000 hours. It does not matter whether every bulb lasts almost exactly 1,000 hours, or some die in a week and others last for years. Over a long horizon the lifetimes add up to (number of bulbs) × (average life), so the count is roughly the horizon divided by the average life.\nNow give each cycle a price, for example the cost of the bulb plus a penalty if it dies in the dark. The long-run cost per hour is the average cost of one cycle divided by the average length of one cycle. You only ever need to think about one cycle.\nThe trap: walk into the room at a random moment and ask how long the current bulb will last in total. Long-lived bulbs occupy more of the timeline, so a random moment is more likely to fall inside one. The bulb you inspect is, on average, a long one.",
+    "crumbs": [
+      "Home",
+      "Appendices",
+      "Advanced Probability",
+      "Renewal Theory"
+    ]
+  },
+  {
+    "objectID": "appendices/advanced-probability/renewal-theory.html#sec-by-hand",
+    "href": "appendices/advanced-probability/renewal-theory.html#sec-by-hand",
+    "title": "Renewal Theory",
+    "section": "Batteries, trains and buses, by hand",
+    "text": "Batteries, trains and buses, by hand\nRoss’s batteries (Examples 7.5–7.6). Beverly’s radio runs on one battery. Its life is uniform between 30 and 60 hours, so the mean life is 45 hours. In the long run she changes batteries at a rate of 1 per 45 hours (Ross 2014). The answer uses only the mean. A battery that always lasted exactly 45 hours would give the same rate.\nNow suppose she keeps no spares, and each trip to buy one takes a uniform time between 0 and 1 hour, so half an hour on average. A cycle is now “battery life + trip”, with mean 45+0.5=45.5 hours. The rate becomes 1 per 45.5 hours, or 2 batteries every 91 hours (Ross 2014).\nRoss’s train depot (Example 7.12), a renewal-reward calculation. Passengers arrive on average one per unit of time. A train leaves as soon as N are waiting. Each departure costs 6, and each waiting passenger costs 2 per unit of time. A cycle runs from one departure to the next, so it lasts N units on average. The expected waiting cost in a cycle is 2\\times(1+2+\\dots+(N-1))=N(N-1): one passenger waits through the second gap, two through the third, and so on. Divide cost per cycle by cycle length:\n\n\n\n\n\n\n\n\n\n\n\ntrain leaves when N =\n1\n2\n3\n4\n5\n\n\n\n\ncost per unit time, \\frac{6}{N}+(N-1)\n6\n4\n4\n4.5\n5.2\n\n\n\nEither N=2 or N=3 is best, which is Ross’s answer (Ross 2014). The arithmetic of one cycle settles the long-run policy.\nBuses and the inspection paradox (our numbers). Buses come at gaps that alternate between 5 and 25 minutes, so the average gap is 15 minutes. Arrive at a random moment. The 25-minute gaps cover 25 of every 30 minutes, so you land in a long gap with probability 5/6. The average length of the gap you land in is \\frac{5\\cdot5+25\\cdot25}{30}\\approx21.7 minutes, not 15. Your average wait is about 10.8 minutes, not the 7.5 that “half the average gap” suggests. (A simulation of 200,000 random arrivals gives 10.8.)\n\n\n\n\n\n\nNoteNotation key — open if a symbol is unfamiliar\n\n\n\n\n\n\nX_1, X_2,\\dots — the gaps (interarrival times) between successive events. i.i.d. means independent and all drawn from the same distribution.\n\\mu=\\mathrm{E}[X] — the mean gap (45 hours for Beverly’s batteries).\nS_n=X_1+\\dots+X_n — the time of the nth event.\nN(t) — the number of events by time t; m(t)=\\mathrm{E}[N(t)] — its expected value, the renewal function.\nR_n — the reward (or cost) earned in cycle n.\n\\xrightarrow[t\\to\\infty]{} — “gets closer and closer to, as t grows without limit”.\n“with probability 1” — happens on essentially every run of the process, not just on average.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -14636,7 +14779,7 @@
     "href": "appendices/advanced-probability/renewal-theory.html#from-poisson-to-renewal",
     "title": "Renewal Theory",
     "section": "From Poisson to renewal",
-    "text": "From Poisson to renewal\nLet X_1, X_2, \\dots be i.i.d. positive interarrival times with mean \\mu = \\mathrm{E}[X] &lt; \\infty, and let S_n = X_1 + \\dots + X_n be the time of the n-th event. The renewal counting process is \nN(t) = \\max\\{n : S_n \\le t\\},\n the number of events by time t. (Ross 2014) When the X_i are exponential this is exactly the Poisson process; renewal theory keeps the i.i.d. gaps but frees their distribution — light bulbs replaced when they fail, a machine repaired on each breakdown, a bus arriving on an irregular schedule.",
+    "text": "From Poisson to renewal\nLet X_1, X_2, \\dots be i.i.d. positive interarrival times with mean \\mu = \\mathrm{E}[X] &lt; \\infty, and let S_n = X_1 + \\dots + X_n be the time of the n-th event. The renewal counting process is \nN(t) = \\max\\{n : S_n \\le t\\},\n the number of events by time t. (Ross 2014)\n\nIn plain words: N(t) is the largest number of gaps that fit, end to end, before time t.\n\nWhen the X_i are exponential this is exactly the Poisson process. Renewal theory keeps the i.i.d. gaps but frees their distribution: light bulbs replaced when they fail, a machine repaired on each breakdown, a bus arriving on an irregular schedule.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -14645,11 +14788,11 @@
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/renewal-theory.html#the-elementary-renewal-theorem-only-the-mean-survives",
-    "href": "appendices/advanced-probability/renewal-theory.html#the-elementary-renewal-theorem-only-the-mean-survives",
+    "objectID": "appendices/advanced-probability/renewal-theory.html#sec-rate",
+    "href": "appendices/advanced-probability/renewal-theory.html#sec-rate",
     "title": "Renewal Theory",
     "section": "The elementary renewal theorem: only the mean survives",
-    "text": "The elementary renewal theorem: only the mean survives\nThe central fact is that the long-run rate of events is 1/\\mu, whatever the gap distribution: (Ross 2014) \n\\frac{N(t)}{t} \\xrightarrow[t\\to\\infty]{} \\frac{1}{\\mu} \\quad\\text{(with probability 1)},\n\\qquad\n\\frac{\\mathrm{E}[N(t)]}{t} \\xrightarrow[t\\to\\infty]{} \\frac{1}{\\mu}.\n The first is the strong law for renewals; the second is the elementary renewal theorem, about the expected count m(t)=\\mathrm{E}[N(t)] (the renewal function). Both say the same intuitive thing: if the average gap is \\mu, then over a long horizon you fit about t/\\mu of them. The variance, skewness, everything else about the gap distribution washes out of the rate. The figure shows three very different gap laws with the same mean converging to the identical rate.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(4)\nT = 400\ndef running_rate(gaps):\n    S = np.cumsum(gaps)\n    t = np.arange(1, int(S[-1]))\n    N = np.searchsorted(S, t, side=\"right\")\n    return t, N / t\n\n# three interarrival laws, all with mean 1\ngens = {\n    \"exponential (var 1)\":  lambda m: rng.exponential(1.0, m),\n    \"gamma (var 0.2)\":      lambda m: rng.gamma(5.0, 1/5.0, m),\n    \"lognormal (heavy)\":    lambda m: rng.lognormal(mean=-0.5*np.log(2), sigma=np.sqrt(np.log(2)), size=m),\n}\ncolors = {\"exponential (var 1)\": \"#161613\", \"gamma (var 0.2)\": \"#5e5e54\", \"lognormal (heavy)\": \"#e8531d\"}\n\nfig, ax = plt.subplots(figsize=(7.6, 4.3))\nfor name, gen in gens.items():\n    gaps = gen(2 * T)\n    t, r = running_rate(gaps)\n    ax.plot(t, r, color=colors[name], lw=1.7, label=name)\nax.axhline(1.0, color=\"#8a8a7e\", lw=1.2, ls=(0, (4, 3)))\nax.text(T, 1.0, r\"  $1/\\mu = 1$\", color=\"#3a3a33\", fontsize=9, va=\"bottom\", ha=\"right\")\nax.set_xlim(0, T); ax.set_ylim(0.6, 1.5)\nax.set_xlabel(\"time  t\"); ax.set_ylabel(\"running event rate  N(t)/t\")\nax.set_title(\"Same mean gap → same long-run rate, whatever the distribution\")\nax.legend(fontsize=8.5, frameon=False, title=\"interarrival law\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The elementary renewal theorem: the long-run event rate is 1/μ, whatever the gap distribution. Three renewal processes, each with mean gap μ = 1 but wildly different interarrival laws — exponential (high variance), a tight gamma (low variance), and a heavy-tailed lognormal — have their running rate N(t)/t all converge to the same 1/μ = 1 (dashed). The shape of the gaps controls the early wobble, not the destination. This distribution-free rate is what renewal-reward arguments exploit.",
+    "text": "The elementary renewal theorem: only the mean survives\nThe central fact is that the long-run rate of events is 1/\\mu, whatever the gap distribution: (Ross 2014) \n\\frac{N(t)}{t} \\xrightarrow[t\\to\\infty]{} \\frac{1}{\\mu} \\quad\\text{(with probability 1)},\n\\qquad\n\\frac{\\mathrm{E}[N(t)]}{t} \\xrightarrow[t\\to\\infty]{} \\frac{1}{\\mu}.\n\n\nIn plain words: in the long run you get one event per average gap. Beverly’s 1-per-45-hours is this formula with \\mu=45.\n\nThe first is the strong law for renewals; the second is the elementary renewal theorem, about the expected count m(t)=\\mathrm{E}[N(t)] (the renewal function). Both say the same intuitive thing: if the average gap is \\mu, then over a long horizon you fit about t/\\mu of them. The variance, skewness, everything else about the gap distribution washes out of the rate. (Ross notes that the second does not follow automatically from the first. A sequence can converge to 0 on every run while its expected value stays at 1, which is his Example 7.4 (Ross 2014).) The figure shows three very different gap laws with the same mean converging to the identical rate.\n\n\nShow the figure code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(4)\nT = 400\ndef running_rate(gaps):\n    S = np.cumsum(gaps)\n    t = np.arange(1, int(S[-1]))\n    N = np.searchsorted(S, t, side=\"right\")\n    return t, N / t\n\n# three interarrival laws, all with mean 1\ngens = {\n    \"exponential (var 1)\":  lambda m: rng.exponential(1.0, m),\n    \"gamma (var 0.2)\":      lambda m: rng.gamma(5.0, 1/5.0, m),\n    \"lognormal (heavy)\":    lambda m: rng.lognormal(mean=-0.5*np.log(2), sigma=np.sqrt(np.log(2)), size=m),\n}\ncolors = {\"exponential (var 1)\": \"#161613\", \"gamma (var 0.2)\": \"#5e5e54\", \"lognormal (heavy)\": \"#e8531d\"}\n\nfig, ax = plt.subplots(figsize=(7.6, 4.3))\nfor name, gen in gens.items():\n    gaps = gen(2 * T)\n    t, r = running_rate(gaps)\n    ax.plot(t, r, color=colors[name], lw=1.7, label=name)\nax.axhline(1.0, color=\"#8a8a7e\", lw=1.2, ls=(0, (4, 3)))\nax.text(T, 1.0, r\"  $1/\\mu = 1$\", color=\"#5e5e54\", fontsize=9, va=\"bottom\", ha=\"right\")\nax.set_xlim(0, T); ax.set_ylim(0.6, 1.5)\nax.set_xlabel(\"time  t\"); ax.set_ylabel(\"running event rate  N(t)/t\")\nax.set_title(\"Same mean gap → same long-run rate, whatever the distribution\")\nax.legend(fontsize=8.5, frameon=False, title=\"interarrival law\")\nfig.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The elementary renewal theorem: the long-run event rate is 1/μ, whatever the gap distribution. Three renewal processes, each with mean gap μ = 1 but wildly different interarrival laws — exponential (high variance), a tight gamma (low variance), and a heavy-tailed lognormal — have their running rate N(t)/t all converge to the same 1/μ = 1 (dashed). The shape of the gaps controls the early wobble, not the destination. This distribution-free rate is what renewal-reward arguments exploit.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -14658,11 +14801,11 @@
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/renewal-theory.html#the-renewal-reward-theorem",
-    "href": "appendices/advanced-probability/renewal-theory.html#the-renewal-reward-theorem",
+    "objectID": "appendices/advanced-probability/renewal-theory.html#sec-reward",
+    "href": "appendices/advanced-probability/renewal-theory.html#sec-reward",
     "title": "Renewal Theory",
     "section": "The renewal-reward theorem",
-    "text": "The renewal-reward theorem\nThe real workhorse attaches a reward to each cycle. If cycle n earns R_n (i.i.d., possibly correlated with its own length X_n), the long-run reward rate is (Ross 2014) \n\\frac{\\text{total reward by }t}{t} \\xrightarrow[t\\to\\infty]{} \\frac{\\mathrm{E}[R]}{\\mathrm{E}[X]}\n= \\frac{\\text{expected reward per cycle}}{\\text{expected cycle length}}.\n This one identity answers a startling range of questions by defining a “cycle” and a “reward”: the long-run cost rate of a replacement policy (reward = −cost), the long-run fraction of time a machine is broken (reward = downtime per cycle), the average inventory held, the utilisation of a server. You compute one cycle’s expectations and divide — no need to track the whole process. It is also the engine behind queueing results like Little’s law.",
+    "text": "The renewal-reward theorem\nThe real workhorse attaches a reward to each cycle. If cycle n earns R_n (i.i.d., possibly correlated with its own length X_n), the long-run reward rate is (Ross 2014) \n\\frac{\\text{total reward by }t}{t} \\xrightarrow[t\\to\\infty]{} \\frac{\\mathrm{E}[R]}{\\mathrm{E}[X]}\n= \\frac{\\text{expected reward per cycle}}{\\text{expected cycle length}}.\n\n\nIn plain words: work out what one cycle earns and how long it lasts, on average, and divide. The train table above is exactly this, with costs in place of rewards.\n\nThis one identity answers a startling range of questions by defining a “cycle” and a “reward”: the long-run cost rate of a replacement policy (reward = −cost), the long-run fraction of time a machine is broken (reward = downtime per cycle), the average inventory held, the utilisation of a server. You compute one cycle’s expectations and divide — no need to track the whole process. It is also the engine behind queueing results like Little’s law.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -14671,11 +14814,11 @@
     ]
   },
   {
-    "objectID": "appendices/advanced-probability/renewal-theory.html#the-inspection-paradox",
-    "href": "appendices/advanced-probability/renewal-theory.html#the-inspection-paradox",
+    "objectID": "appendices/advanced-probability/renewal-theory.html#sec-inspection",
+    "href": "appendices/advanced-probability/renewal-theory.html#sec-inspection",
     "title": "Renewal Theory",
     "section": "The inspection paradox",
-    "text": "The inspection paradox\nA famous renewal surprise: the gap that happens to contain a fixed inspection time is longer on average than a typical gap. (Ross 2014) Long intervals cover more of the timeline, so a randomly chosen instant is more likely to fall inside one — length-biased sampling. It is why the wait for the next bus can average more than half the mean headway, and a caution whenever you sample “the interval you happen to be in.”",
+    "text": "The inspection paradox\nA famous renewal surprise: the gap that happens to contain a fixed inspection time is longer on average than a typical gap. (Ross 2014) Ross’s setting is a battery in use at a fixed time t. If you try to learn how long batteries last by checking the one in use at time t, you will over-estimate their lifetimes. Long intervals cover more of the timeline, so a randomly chosen instant is more likely to fall inside one. This is length-biased sampling: each interval is caught with probability proportional to its length. It is why the wait for the next bus can average more than half the mean headway (10.8 versus 7.5 minutes in the bus example), and a caution whenever you sample “the interval you happen to be in.”\nFor a Poisson process the effect is exact and large. For large t, the interval containing t is made of two independent exponential pieces, the time back to the last event and the time forward to the next, so its expected length is about twice an ordinary gap (Ross 2014). The same logic is behind the friendship paradox: following a link samples people in proportion to how many friends they have.\n\nIn plain words: if you sample “whatever is happening right now”, long things are over-represented in proportion to their length. Correct for it, or ask about a typical cycle instead.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -14688,7 +14831,7 @@
     "href": "appendices/advanced-probability/renewal-theory.html#common-pitfalls",
     "title": "Renewal Theory",
     "section": "Common pitfalls",
-    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere renewal reasoning misleads\n\n\n\n\nAssuming the rate needs the exponential. It does not — N(t)/t \\to 1/\\mu holds for any gap distribution with finite mean. The memoryless property is special to Poisson; the long-run rate is universal. (Ross 2014)\nForgetting finite mean. If \\mathrm{E}[X]=\\infty (very heavy-tailed gaps), the rate degenerates to zero and the clean theorems fail — the same finite-moment caveat as the law of large numbers.\nReading the reward rate as an instantaneous rate. \\mathrm{E}[R]/\\mathrm{E}[X] is a long-run average, not what happens in any single cycle; short horizons can look nothing like it.\nIgnoring the inspection/length bias. The interval covering a fixed time is length-biased and longer than average; sampling “the current gap” over-weights long gaps. (Ross 2014)",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere renewal reasoning misleads\n\n\n\n\nAssuming the rate needs the exponential. It does not — N(t)/t \\to 1/\\mu holds for any gap distribution with finite mean. The memoryless property is special to Poisson; the long-run rate is universal. (Ross 2014)\nForgetting finite mean. If \\mathrm{E}[X]=\\infty (very heavy-tailed gaps), the rate degenerates to zero and the clean theorems fail — the same finite-moment caveat as the law of large numbers.\nReading the reward rate as an instantaneous rate. \\mathrm{E}[R]/\\mathrm{E}[X] is a long-run average, not what happens in any single cycle; short horizons can look nothing like it.\nIgnoring the inspection/length bias. The interval covering a fixed time is length-biased and longer than average; sampling “the current gap” over-weights long gaps. (Ross 2014) The bus example shows a 44% longer wait than the naive guess.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -14701,7 +14844,7 @@
     "href": "appendices/advanced-probability/renewal-theory.html#from-the-sources",
     "title": "Renewal Theory",
     "section": "From the sources",
-    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nRoss, Introduction to Probability Models (Renewal Theory chapter) — the renewal counting process N(t) and renewal function m(t); the strong law N(t)/t \\to 1/\\mu and the elementary renewal theorem m(t)/t \\to 1/\\mu; the renewal-reward theorem \\mathrm{E}[R]/\\mathrm{E}[X] with its replacement-policy and utilisation applications; and the inspection paradox (length-biased sampling).",
+    "text": "From the sources\n\n\n\n\n\n\nNoteWho says what\n\n\n\n\n\n\nRoss, Introduction to Probability Models (Renewal Theory chapter) — the renewal counting process N(t) and renewal function m(t); the strong law N(t)/t \\to 1/\\mu (Proposition 7.1) and the elementary renewal theorem m(t)/t \\to 1/\\mu, with Example 7.4 showing why the second is not automatic; the renewal-reward theorem \\mathrm{E}[R]/\\mathrm{E}[X] (Proposition 7.3) with its replacement-policy and utilisation applications; and the inspection paradox (length-biased sampling, §7.7, including the “about twice as long” Poisson result). Worked examples used here: the batteries (Examples 7.5–7.6) and the train depot (Example 7.12).\nThe bulb picture and the 5/25-minute bus example are this encyclopedia’s own illustrations of Ross’s results.",
     "crumbs": [
       "Home",
       "Appendices",
@@ -14714,7 +14857,7 @@
     "href": "appendices/advanced-probability/renewal-theory.html#connections",
     "title": "Renewal Theory",
     "section": "Connections",
-    "text": "Connections\n\nGeneralises: the Poisson process (exponential gaps → any gaps).\nRests on: the law of large numbers (the long-run-average machinery) and finite-mean conditions from asymptotics.\nPowers: queueing (Little’s law and utilisation are renewal-reward), reliability and replacement policies, and any “long-run rate” argument in operations.",
+    "text": "Connections\n\nGeneralises: the Poisson process (exponential gaps → any gaps).\nRests on: the law of large numbers (the long-run-average machinery) and finite-mean conditions from asymptotics.\nPowers: queueing (Little’s law and utilisation are renewal-reward), reliability and replacement policies, and any “long-run rate” argument in operations.\nSame trap elsewhere: the friendship paradox (length-biased sampling on a network).",
     "crumbs": [
       "Home",
       "Appendices",
@@ -16005,7 +16148,7 @@
     "href": "content/01-foundations/common-distributions.html#common-pitfalls",
     "title": "The Common Distributions and What They Model",
     "section": "Common pitfalls",
-    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nAssuming Normality for raw data. Especially for money, counts, and durations, which are skewed or long-tailed. Plot the data first.\nUsing the Normal approximation when np(1-p) is small. For rare events (p tiny), reach for the Poisson, not the Normal — the bell approximation is poor in the tail you care about.\nForgetting the continuity correction. Approximating a discrete Binomial by a continuous Normal without the \\pm 0.5 adjustment biases small-count probabilities.\nMisreading the Poisson’s independence assumption. Events must occur at a constant rate, independently. Clustered events (contagion, bursts) violate it and need richer models.\nTrusting the memoryless property where it doesn’t hold. Human waiting times (a bus on a schedule, a machine that wears out) are often not memoryless — the Exponential assumes no aging, which real systems frequently break.",
+    "text": "Common pitfalls\n\n\n\n\n\n\nWarningWhere this goes wrong\n\n\n\n\nAssuming Normality for raw data. Especially for money, counts, and durations, which are skewed or long-tailed. Plot the data first.\nUsing the Normal approximation when np(1-p) is small. For rare events (p tiny), reach for the Poisson, not the Normal — the bell approximation is poor in the tail you care about.\nForgetting the continuity correction. Approximating a discrete Binomial by a continuous Normal without the \\pm 0.5 adjustment biases small-count probabilities.\nMisreading the Poisson’s independence assumption. Events must occur at a constant rate, independently. Clustered events (contagion, bursts) violate it and need richer models.\nTrusting the memoryless property where it doesn’t hold. Human waiting times (a bus on a schedule, a machine that wears out) are often not memoryless — the Exponential assumes no aging, which real systems frequently break. Renewal theory handles waiting times of any shape.",
     "crumbs": [
       "Home",
       "I · Foundations: Probability & Data",
@@ -16057,7 +16200,7 @@
     "href": "content/01-foundations/common-distributions.html#connections",
     "title": "The Common Distributions and What They Model",
     "section": "Connections",
-    "text": "Connections\n\nBuilds on: Random variables (pmfs and pdfs) and expectation & variance (each distribution’s signature moments).\nLeads to: the Normal as the limit of sums (the CLT), and to proportions, counts, and duration models throughout inference and beyond.\nEchoes: the counting entry — the Binomial’s \\binom{n}{i} is exactly the combination you learned to compute there.\nBeyond the bell curve: power laws & scaling — heavy-tailed, scale-free distributions where the mean is no longer “typical” and the variance can diverge.",
+    "text": "Connections\n\nBuilds on: Random variables (pmfs and pdfs) and expectation & variance (each distribution’s signature moments).\nLeads to: the Normal as the limit of sums (the CLT), and to proportions, counts, and duration models throughout inference and beyond. Poisson arrivals with exponential service times make up the simplest queue.\nEchoes: the counting entry — the Binomial’s \\binom{n}{i} is exactly the combination you learned to compute there.\nBeyond the bell curve: power laws & scaling — heavy-tailed, scale-free distributions where the mean is no longer “typical” and the variance can diverge.",
     "crumbs": [
       "Home",
       "I · Foundations: Probability & Data",
@@ -16499,7 +16642,7 @@
     "href": "content/01-foundations/exploratory-data-analysis.html#connections",
     "title": "Exploratory Data Analysis & Visual Summaries",
     "section": "Connections",
-    "text": "Connections\n\nBuilds on: location, spread & shape (the summaries these plots visualise) and covariance & correlation (now an exploratory tool).\nLeads to: messy real data — EDA is precisely how you find the mess.\nPays off in: inference (EDA checks the assumptions tests rely on) and every modelling chapter, where “look at the data first” never stops being the first step.",
+    "text": "Connections\n\nBuilds on: location, spread & shape (the summaries these plots visualise) and covariance & correlation (now an exploratory tool).\nLeads to: messy real data — EDA is precisely how you find the mess.\nHands-on: new to R? Getting started in R covers the basics, and plots Anscombe’s quartet, the classic case for looking before you model.\nPays off in: inference (EDA checks the assumptions tests rely on) and every modelling chapter, where “look at the data first” never stops being the first step.",
     "crumbs": [
       "Home",
       "I · Foundations: Probability & Data",
@@ -25121,7 +25264,7 @@
     "href": "content/complexity/degree-correlations-and-the-friendship-paradox.html#connections",
     "title": "Degree Correlations & the Friendship Paradox",
     "section": "Connections",
-    "text": "Connections\n\nBuilds on: network structure & metrics (degree, components), random graphs (the neutral baseline and the \\langle k\\rangle=1 giant component threshold) and scale-free networks (hubs and large \\langle\nk^2\\rangle).\nContrasts with: community detection & homophily, where “like links to like” is about attributes and groups rather than degree.\nLeads to: spreading on networks (assortative cores as disease reservoirs), centrality (who the hubs are), and the sampling logic of snowball samples and inclusion-probability weights, where link-traced samples inherit the friendship paradox’s bias.",
+    "text": "Connections\n\nBuilds on: network structure & metrics (degree, components), random graphs (the neutral baseline and the \\langle k\\rangle=1 giant component threshold) and scale-free networks (hubs and large \\langle\nk^2\\rangle).\nContrasts with: community detection & homophily, where “like links to like” is about attributes and groups rather than degree.\nLeads to: spreading on networks (assortative cores as disease reservoirs), centrality (who the hubs are), and the sampling logic of snowball samples and inclusion-probability weights, where link-traced samples inherit the friendship paradox’s bias.\nSame trap in time: the inspection paradox of renewal theory. The gap you happen to land in is longer than a typical gap, for the same size-biased reason.",
     "crumbs": [
       "Home",
       "Complexity Science",

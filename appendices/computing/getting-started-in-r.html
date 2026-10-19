@@ -126,6 +126,49 @@ div.csl-indent {
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -1899,10 +1942,13 @@ div.csl-indent {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#r-thinks-in-vectors" id="toc-r-thinks-in-vectors" class="nav-link active" data-scroll-target="#r-thinks-in-vectors">R thinks in vectors</a></li>
-  <li><a href="#keep-your-data-in-a-data-frame" id="toc-keep-your-data-in-a-data-frame" class="nav-link" data-scroll-target="#keep-your-data-in-a-data-frame">Keep your data in a data frame</a></li>
-  <li><a href="#the-pipe-and-writing-functions" id="toc-the-pipe-and-writing-functions" class="nav-link" data-scroll-target="#the-pipe-and-writing-functions">The pipe, and writing functions</a></li>
-  <li><a href="#compute-then-look-always" id="toc-compute-then-look-always" class="nav-link" data-scroll-target="#compute-then-look-always">Compute, then look — always</a></li>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#sec-idea" id="toc-sec-idea" class="nav-link" data-scroll-target="#sec-idea">The idea in words</a></li>
+  <li><a href="#sec-by-hand" id="toc-sec-by-hand" class="nav-link" data-scroll-target="#sec-by-hand">A first session, line by line</a></li>
+  <li><a href="#sec-vectors" id="toc-sec-vectors" class="nav-link" data-scroll-target="#sec-vectors">R thinks in vectors</a></li>
+  <li><a href="#sec-dataframes" id="toc-sec-dataframes" class="nav-link" data-scroll-target="#sec-dataframes">Keep your data in a data frame</a></li>
+  <li><a href="#sec-pipe" id="toc-sec-pipe" class="nav-link" data-scroll-target="#sec-pipe">The pipe, and writing functions</a></li>
+  <li><a href="#sec-look" id="toc-sec-look" class="nav-link" data-scroll-target="#sec-look">Compute, then look — always</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
   <li><a href="#connections" id="toc-connections" class="nav-link" data-scroll-target="#connections">Connections</a></li>
@@ -1915,7 +1961,7 @@ div.csl-indent {
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Appendices</li><li class="breadcrumb-item"><a href="../../appendices/computing/index.html">Computing</a></li><li class="breadcrumb-item"><a href="../../appendices/computing/getting-started-in-r.html">Getting Started in R</a></li></ol></nav>
 <div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">Getting Started in R</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
-<p class="subtitle lead">The working subset of R for social science — vectors, data frames, the pipe, and functions — enough of the language to be productive fast, without the tutorial detours.</p>
+<p class="subtitle lead">The small part of R you need first: how to store numbers, hold a dataset, chain steps together and package up anything you repeat.</p>
 </div>
 
 
@@ -1933,79 +1979,161 @@ div.csl-indent {
 
 
 <div class="lead-kernel">
-<p>R rewards a small amount of the right knowledge. You do not need the whole language; you need to think in <strong>vectors</strong>, keep your data in a <strong>data frame</strong>, chain steps with the <strong>pipe</strong>, and wrap anything you repeat in a <strong>function.</strong> Those four ideas carry most applied work. This is the on-ramp — the language itself; the <a href="../../content/dataframes/index.html">tidyverse wrangling verbs</a> and <a href="../../appendices/computing/regressions-in-r.html">reading a regression</a> build on top of it.</p>
+<p>You do not need to learn all of R before it becomes useful. Four habits carry most applied work: do arithmetic on whole columns of numbers at once, keep each dataset in one table, write a sequence of steps so it reads top to bottom, and turn any block you keep copying into a reusable command. This page is the on-ramp to the language itself.</p>
 </div>
-<section id="r-thinks-in-vectors" class="level2">
-<h2 class="anchored" data-anchor-id="r-thinks-in-vectors">R thinks in vectors</h2>
+<div class="callout callout-style-default callout-tip callout-titled" title="Where you probably came from — and what you need">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Where you probably came from — and what you need
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>You likely arrived from</strong> the <a href="../../content/dataframes/index.html">Thinking in Dataframes</a> track, whose snippets assume you can read basic R, from <a href="../../content/01-foundations/exploratory-data-analysis.html">exploratory data analysis</a>, or from the <a href="../../appendices/computing/index.html">computing appendix</a> on your way to <a href="../../appendices/computing/regressions-in-r.html">reading a regression in R</a>. The question you came with is probably “what do <code>&lt;-</code>, <code>c()</code> and <code>|&gt;</code> actually mean?”</p>
+<p><strong>You need:</strong> nothing beyond school arithmetic. <strong>You don’t need</strong> to have programmed before, or to know the tidyverse. That comes next, in the dataframes track.</p>
+<p><strong>Jump to what you came for:</strong> <a href="#sec-idea">the idea in words</a> · <a href="#sec-by-hand">a first session, line by line</a> · <a href="#sec-vectors">vectors</a> · <a href="#sec-dataframes">data frames</a> · <a href="#sec-pipe">the pipe and functions</a> · <a href="#sec-look">compute, then look</a></p>
+</div>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p>The source library behind this encyclopedia is mostly written in R, and so is much of applied social science. The dataframe track, the regression appendix and most textbook code examples assume you can read a few lines of it. People learning R often get stuck on its basic way of working (whole-vector arithmetic, missing values, categories stored as factors) rather than on any statistics. A small amount of the right knowledge removes most of that friction <span class="citation" data-cites="dayal_r_econ wickham_r4ds">(<a href="#ref-dayal_r_econ" role="doc-biblioref">Dayal 2015</a>; <a href="#ref-wickham_r4ds" role="doc-biblioref">Wickham et al. 2023</a>)</span>.</p>
+</section>
+<section id="sec-idea" class="level2">
+<h2 class="anchored" data-anchor-id="sec-idea">The idea in words</h2>
+<p>Think of R as a calculator with a memory and a vocabulary.</p>
+<ul>
+<li><strong>The memory</strong> is a set of named boxes called <strong>objects</strong>. You put something in a box with <code>&lt;-</code>, read as “gets”: <code>price &lt;- 10</code> means “the box called <code>price</code> gets 10”. The name is case-sensitive, so <code>Price</code> and <code>price</code> are different boxes <span class="citation" data-cites="dayal_r_econ">(<a href="#ref-dayal_r_econ" role="doc-biblioref">Dayal 2015</a>)</span>.</li>
+<li><strong>The vocabulary</strong> is a set of <strong>functions</strong>: commands that take inputs in round brackets and give back a result, like <code>sum(price)</code> or <code>mean(age)</code>. An input to a function is called an <strong>argument</strong>.</li>
+<li><strong>The working unit is a list of values, not one value.</strong> A <strong>vector</strong> is an ordered set of values of one type, made with <code>c()</code> (“combine”). Arithmetic on a vector applies to every element at once, so you rarely need to loop.</li>
+<li><strong>A dataset is a table of vectors.</strong> A <strong>data frame</strong> is several vectors of the same length side by side, one per variable, with one row per observation.</li>
+</ul>
+<p>Everything below builds those four ideas up, one at a time.</p>
+</section>
+<section id="sec-by-hand" class="level2">
+<h2 class="anchored" data-anchor-id="sec-by-hand">A first session, line by line</h2>
+<p>This is the first example in Dayal’s <em>Introduction to R for Quantitative Economics</em> <span class="citation" data-cites="dayal_r_econ">(<a href="#ref-dayal_r_econ" role="doc-biblioref">Dayal 2015</a>)</span>: three goods, their prices, the quantities bought, and the total spent. Lines starting with <code>#&gt;</code> show what R prints.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Price    <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">3</span>, <span class="dv">15</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>Quantity <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">25</span>, <span class="dv">3</span>, <span class="dv">20</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>Expenditure <span class="ot">&lt;-</span> Price <span class="sc">*</span> Quantity</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>Expenditure</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 250   9 300</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(Expenditure)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 559</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Reading it line by line:</p>
+<ol type="1">
+<li><code>Price &lt;- c(10, 3, 15)</code> makes a vector of three prices and stores it under the name <code>Price</code>. Nothing is printed. R just remembers it.</li>
+<li><code>Quantity &lt;- c(25, 3, 20)</code> does the same for quantities.</li>
+<li><code>Price * Quantity</code> multiplies <strong>element by element</strong>: <span class="math inline">10\times25</span>, <span class="math inline">3\times3</span>, <span class="math inline">15\times20</span>. There is no loop. That is what <em>vectorised</em> means.</li>
+<li>Typing a name on its own prints it. The <code>[1]</code> is not part of the data. It tells you the line starts with element number 1.</li>
+<li><code>sum()</code> is a function that takes the whole vector and returns one number, the total: 559.</li>
+</ol>
+<p>Two follow-ups from the same chapter show what goes wrong. Typing <code>price</code> (lower case) gives <code>Error: object 'price' not found</code>. Adding vectors of different lengths makes R <strong>recycle</strong> the shorter one: <code>c(3, 3, 3) + c(2, 9)</code> gives <code>5 12 5</code>, with a warning, because R went back to the start of the shorter vector for the third element <span class="citation" data-cites="dayal_r_econ">(<a href="#ref-dayal_r_econ" role="doc-biblioref">Dayal 2015</a>)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Jargon key — open if a term is unfamiliar">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Jargon key — open if a term is unfamiliar
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Object</strong> — anything stored under a name: a number, a vector, a data frame, a fitted model.</li>
+<li><strong><code>&lt;-</code></strong> — assignment: put the value on the right into the name on the left.</li>
+<li><strong>Function</strong> — a named command, used as <code>name(arguments)</code>; it takes inputs and returns a result.</li>
+<li><strong>Argument</strong> — an input to a function. Arguments can be named, as in <code>mean(x, na.rm = TRUE)</code>.</li>
+<li><strong>Vector</strong> — an ordered set of values of one type, made with <code>c()</code>.</li>
+<li><strong>Vectorised</strong> — applied to every element of a vector at once.</li>
+<li><strong>Data frame / tibble</strong> — a table: named columns (vectors) of equal length. A tibble is the tidyverse’s version.</li>
+<li><strong>Factor</strong> — a categorical variable with a fixed set of <em>levels</em>.</li>
+<li><strong><code>NA</code></strong> — R’s code for a missing value (“not available”).</li>
+<li><strong>Pipe (<code>|&gt;</code>)</strong> — passes the result on its left into the function on its right.</li>
+<li><strong>Package</strong> — an add-on bundle of functions, installed once and loaded with <code>library()</code>.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-vectors" class="level2">
+<h2 class="anchored" data-anchor-id="sec-vectors">R thinks in vectors</h2>
 <p>The single most important habit: R operates on <strong>whole vectors at once</strong>, not element by element. A vector is made with <code>c()</code>, and arithmetic is <em>vectorised</em> — it applies to every element without a loop. <span class="citation" data-cites="kaplan_lessons">(<a href="#ref-kaplan_lessons" role="doc-biblioref">Kaplan 2024</a>)</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">23</span>, <span class="dv">42</span>)   <span class="co"># a numeric vector;  &lt;- is assignment</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x <span class="sc">*</span> <span class="dv">2</span>                          <span class="co"># 8 16 30 32 46 84   — no loop needed</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x); <span class="fu">sd</span>(x); <span class="fu">length</span>(x)      <span class="co"># summaries take the whole vector</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>x[x <span class="sc">&gt;</span> <span class="dv">15</span>]                      <span class="co"># 16 23 42            — logical subsetting</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">23</span>, <span class="dv">42</span>)   <span class="co"># a numeric vector;  &lt;- is assignment</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>x <span class="sc">*</span> <span class="dv">2</span>                          <span class="co"># 8 16 30 32 46 84   — no loop needed</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x); <span class="fu">sd</span>(x); <span class="fu">length</span>(x)      <span class="co"># 18, 13.49, 6 — summaries take the whole vector</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>x[x <span class="sc">&gt;</span> <span class="dv">15</span>]                      <span class="co"># 16 23 42            — logical subsetting</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The last line is worth reading slowly. <code>x &gt; 15</code> produces a vector of <code>TRUE</code>/<code>FALSE</code> values, one per element. Putting it inside square brackets keeps only the elements where it is <code>TRUE</code>. Square brackets pick elements and round brackets call functions; mixing them up is a common early error <span class="citation" data-cites="dayal_r_econ">(<a href="#ref-dayal_r_econ" role="doc-biblioref">Dayal 2015</a>)</span>.</p>
 <p>Writing a <code>for</code> loop where a vectorised expression would do is the most common beginner’s tell; R is faster and clearer when you let the vector operation speak. The main atomic types are <strong>numeric</strong>, <strong>character</strong> (<code>"text"</code>), <strong>logical</strong> (<code>TRUE</code>/<code>FALSE</code>), and <strong>factor</strong> (categorical — a character with a fixed set of <em>levels</em>, which is how R encodes groups for models). <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span></p>
 </section>
-<section id="keep-your-data-in-a-data-frame" class="level2">
-<h2 class="anchored" data-anchor-id="keep-your-data-in-a-data-frame">Keep your data in a data frame</h2>
+<section id="sec-dataframes" class="level2">
+<h2 class="anchored" data-anchor-id="sec-dataframes">Keep your data in a data frame</h2>
 <p>A <strong>data frame</strong> (or its modern form, the <strong>tibble</strong>) is R’s table: named columns that can hold different types, all the same length — one row per observation, one column per variable. It is the object every modelling and plotting verb expects. <span class="citation" data-cites="dayal_r_datascience">(<a href="#ref-dayal_r_datascience" role="doc-biblioref">Dayal 2020</a>)</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="fu">c</span>(<span class="st">"Ann"</span>, <span class="st">"Ben"</span>, <span class="st">"Cy"</span>),</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">age  =</span> <span class="fu">c</span>(<span class="dv">31</span>, <span class="dv">25</span>, <span class="dv">40</span>),</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"T"</span>, <span class="st">"C"</span>, <span class="st">"T"</span>))</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>age            <span class="co"># a column, by name ($)</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>d[d<span class="sc">$</span>group <span class="sc">==</span> <span class="st">"T"</span>, ]   <span class="co"># rows where group is T, all columns</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(d); <span class="fu">names</span>(d)     <span class="co"># dimensions and column names</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="fu">c</span>(<span class="st">"Ann"</span>, <span class="st">"Ben"</span>, <span class="st">"Cy"</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">age  =</span> <span class="fu">c</span>(<span class="dv">31</span>, <span class="dv">25</span>, <span class="dv">40</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"T"</span>, <span class="st">"C"</span>, <span class="st">"T"</span>))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>age            <span class="co"># a column, by name ($)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>d[d<span class="sc">$</span>group <span class="sc">==</span> <span class="st">"T"</span>, ]   <span class="co"># rows where group is T, all columns</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(d); <span class="fu">names</span>(d)     <span class="co"># dimensions and column names</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In plain words: <code>d$age</code> pulls out one column as a vector. Inside <code>d[rows, columns]</code>, the part before the comma picks rows and the part after picks columns. Leaving the column part blank means “all columns”. Dayal builds his first data frame the same way, from the <code>Price</code> and <code>Quantity</code> vectors: <code>data.frame(Price, Quantity)</code> <span class="citation" data-cites="dayal_r_econ">(<a href="#ref-dayal_r_econ" role="doc-biblioref">Dayal 2015</a>)</span>.</p>
 <p>Load real data with the <strong>readr</strong> package (<code>read_csv("file.csv")</code>); everything downstream assumes it arrived as a tidy data frame. <span class="citation" data-cites="llaudet_imai_dss">(<a href="#ref-llaudet_imai_dss" role="doc-biblioref">Llaudet and Imai 2022</a>)</span></p>
 </section>
-<section id="the-pipe-and-writing-functions" class="level2">
-<h2 class="anchored" data-anchor-id="the-pipe-and-writing-functions">The pipe, and writing functions</h2>
+<section id="sec-pipe" class="level2">
+<h2 class="anchored" data-anchor-id="sec-pipe">The pipe, and writing functions</h2>
 <p>The <strong>pipe</strong> <code>|&gt;</code> passes the thing on its left as the first argument of the function on its right, so a sequence of steps reads top-to-bottom instead of inside-out: <span class="citation" data-cites="kaplan_lessons">(<a href="#ref-kaplan_lessons" role="doc-biblioref">Kaplan 2024</a>)</span></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># nested (hard to read)           # piped (reads as steps)</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>)   x <span class="sc">|&gt;</span> <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># nested (hard to read)           # piped (reads as steps)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>)   x <span class="sc">|&gt;</span> <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>R for Data Science</em> suggests reading the pipe aloud as “then”: take <code>x</code>, <em>then</em> take the mean, <em>then</em> round it <span class="citation" data-cites="wickham_r4ds">(<a href="#ref-wickham_r4ds" role="doc-biblioref">Wickham et al. 2023</a>)</span>. (That book’s first edition writes the pipe as <code>%&gt;%</code>, from the magrittr package; <code>|&gt;</code> is the version built into R. For simple chains like this one they behave the same.)</p>
 <p>And when you find yourself copying a block of code with one thing changed, make it a <strong>function</strong>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>z_score <span class="ot">&lt;-</span> <span class="cf">function</span>(v) {          <span class="co"># v is the argument</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  (v <span class="sc">-</span> <span class="fu">mean</span>(v)) <span class="sc">/</span> <span class="fu">sd</span>(v)           <span class="co"># last expression is returned</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">z_score</span>(x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>z_score <span class="ot">&lt;-</span> <span class="cf">function</span>(v) {          <span class="co"># v is the argument</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  (v <span class="sc">-</span> <span class="fu">mean</span>(v)) <span class="sc">/</span> <span class="fu">sd</span>(v)           <span class="co"># last expression is returned</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">z_score</span>(x)                        <span class="co"># -1.04 -0.74 -0.22 -0.15 0.37 1.78 (rounded)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Wickham’s rule of thumb is to write a function once you have copied and pasted a block more than twice. His example is a copied rescaling line in which one <code>a</code> was never changed to <code>b</code>, a silent bug that a function would have prevented <span class="citation" data-cites="wickham_r4ds">(<a href="#ref-wickham_r4ds" role="doc-biblioref">Wickham et al. 2023</a>)</span>. A function has three parts: a <strong>name</strong> (<code>z_score</code>), its <strong>arguments</strong> inside <code>function()</code>, and a <strong>body</strong> in curly braces. The value of the last line of the body is what the function returns <span class="citation" data-cites="wickham_r4ds">(<a href="#ref-wickham_r4ds" role="doc-biblioref">Wickham et al. 2023</a>)</span>.</p>
 <p>Functions plus vectorisation are the whole game: express the operation once, apply it to any vector.</p>
 </section>
-<section id="compute-then-look-always" class="level2">
-<h2 class="anchored" data-anchor-id="compute-then-look-always">Compute, then look — always</h2>
+<section id="sec-look" class="level2">
+<h2 class="anchored" data-anchor-id="sec-look">Compute, then look — always</h2>
 <p>The reason social scientists learn to <em>simulate and plot</em>, not just compute summaries, is that summaries hide shape. Anscombe’s quartet is the classic demonstration, and it is a one-line lesson worth internalising before any modelling. <span class="citation" data-cites="dayal_r_econ">(<a href="#ref-dayal_r_econ" role="doc-biblioref">Dayal 2015</a>)</span></p>
 <div id="cell-fig-anscombe" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show the figure code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>x123 <span class="op">=</span> np.array([<span class="dv">10</span>, <span class="dv">8</span>, <span class="dv">13</span>, <span class="dv">9</span>, <span class="dv">11</span>, <span class="dv">14</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">12</span>, <span class="dv">7</span>, <span class="dv">5</span>])</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"I"</span>:   (x123, np.array([<span class="fl">8.04</span>,<span class="fl">6.95</span>,<span class="fl">7.58</span>,<span class="fl">8.81</span>,<span class="fl">8.33</span>,<span class="fl">9.96</span>,<span class="fl">7.24</span>,<span class="fl">4.26</span>,<span class="fl">10.84</span>,<span class="fl">4.82</span>,<span class="fl">5.68</span>])),</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"II"</span>:  (x123, np.array([<span class="fl">9.14</span>,<span class="fl">8.14</span>,<span class="fl">8.74</span>,<span class="fl">8.77</span>,<span class="fl">9.26</span>,<span class="fl">8.10</span>,<span class="fl">6.13</span>,<span class="fl">3.10</span>,<span class="fl">9.13</span>,<span class="fl">7.26</span>,<span class="fl">4.74</span>])),</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"III"</span>: (x123, np.array([<span class="fl">7.46</span>,<span class="fl">6.77</span>,<span class="fl">12.74</span>,<span class="fl">7.11</span>,<span class="fl">7.81</span>,<span class="fl">8.84</span>,<span class="fl">6.08</span>,<span class="fl">5.39</span>,<span class="fl">8.15</span>,<span class="fl">6.42</span>,<span class="fl">5.73</span>])),</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IV"</span>:  (np.array([<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">19</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>]),</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            np.array([<span class="fl">6.58</span>,<span class="fl">5.76</span>,<span class="fl">7.71</span>,<span class="fl">8.84</span>,<span class="fl">8.47</span>,<span class="fl">7.04</span>,<span class="fl">5.25</span>,<span class="fl">12.50</span>,<span class="fl">5.56</span>,<span class="fl">7.91</span>,<span class="fl">6.89</span>])),</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="dv">3</span>, <span class="dv">20</span>, <span class="dv">50</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">7.8</span>, <span class="fl">5.4</span>), sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (name, (x, y)) <span class="kw">in</span> <span class="bu">zip</span>(axes.flat, data.items()):</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    b1 <span class="op">=</span> np.cov(x, y, bias<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">/</span> np.var(x)     <span class="co"># slope, by hand</span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    b0 <span class="op">=</span> y.mean() <span class="op">-</span> b1 <span class="op">*</span> x.mean()</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> np.corrcoef(x, y)[<span class="dv">0</span>, <span class="dv">1</span>]</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    ax.plot(xs, b0 <span class="op">+</span> b1 <span class="op">*</span> xs, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">2.0</span>, zorder<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y, s<span class="op">=</span><span class="dv">28</span>, color<span class="op">=</span><span class="st">"#161613"</span>, zorder<span class="op">=</span><span class="dv">2</span>, edgecolor<span class="op">=</span><span class="st">"#f4f3ec"</span>, linewidth<span class="op">=</span><span class="fl">0.6</span>)</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"Set </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">:  r = </span><span class="sc">{</span>r<span class="sc">:.2f}</span><span class="ss">,  ŷ = </span><span class="sc">{</span>b0<span class="sc">:.1f}</span><span class="ss"> + </span><span class="sc">{</span>b1<span class="sc">:.2f}</span><span class="ss">x"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    ax.set_xlim(<span class="dv">2</span>, <span class="dv">20</span>)<span class="op">;</span> ax.set_ylim(<span class="dv">2</span>, <span class="dv">14</span>)</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Same statistics, four different realities — so plot the data"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>x123 <span class="op">=</span> np.array([<span class="dv">10</span>, <span class="dv">8</span>, <span class="dv">13</span>, <span class="dv">9</span>, <span class="dv">11</span>, <span class="dv">14</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">12</span>, <span class="dv">7</span>, <span class="dv">5</span>])</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"I"</span>:   (x123, np.array([<span class="fl">8.04</span>,<span class="fl">6.95</span>,<span class="fl">7.58</span>,<span class="fl">8.81</span>,<span class="fl">8.33</span>,<span class="fl">9.96</span>,<span class="fl">7.24</span>,<span class="fl">4.26</span>,<span class="fl">10.84</span>,<span class="fl">4.82</span>,<span class="fl">5.68</span>])),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"II"</span>:  (x123, np.array([<span class="fl">9.14</span>,<span class="fl">8.14</span>,<span class="fl">8.74</span>,<span class="fl">8.77</span>,<span class="fl">9.26</span>,<span class="fl">8.10</span>,<span class="fl">6.13</span>,<span class="fl">3.10</span>,<span class="fl">9.13</span>,<span class="fl">7.26</span>,<span class="fl">4.74</span>])),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"III"</span>: (x123, np.array([<span class="fl">7.46</span>,<span class="fl">6.77</span>,<span class="fl">12.74</span>,<span class="fl">7.11</span>,<span class="fl">7.81</span>,<span class="fl">8.84</span>,<span class="fl">6.08</span>,<span class="fl">5.39</span>,<span class="fl">8.15</span>,<span class="fl">6.42</span>,<span class="fl">5.73</span>])),</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IV"</span>:  (np.array([<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">19</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>]),</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            np.array([<span class="fl">6.58</span>,<span class="fl">5.76</span>,<span class="fl">7.71</span>,<span class="fl">8.84</span>,<span class="fl">8.47</span>,<span class="fl">7.04</span>,<span class="fl">5.25</span>,<span class="fl">12.50</span>,<span class="fl">5.56</span>,<span class="fl">7.91</span>,<span class="fl">6.89</span>])),</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="dv">3</span>, <span class="dv">20</span>, <span class="dv">50</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">7.8</span>, <span class="fl">5.4</span>), sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (name, (x, y)) <span class="kw">in</span> <span class="bu">zip</span>(axes.flat, data.items()):</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    b1 <span class="op">=</span> np.cov(x, y, bias<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">/</span> np.var(x)     <span class="co"># slope, by hand</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    b0 <span class="op">=</span> y.mean() <span class="op">-</span> b1 <span class="op">*</span> x.mean()</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> np.corrcoef(x, y)[<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    ax.plot(xs, b0 <span class="op">+</span> b1 <span class="op">*</span> xs, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">2.0</span>, zorder<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y, s<span class="op">=</span><span class="dv">28</span>, color<span class="op">=</span><span class="st">"#161613"</span>, zorder<span class="op">=</span><span class="dv">2</span>, edgecolor<span class="op">=</span><span class="st">"#f4f3ec"</span>, linewidth<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"Set </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">:  r = </span><span class="sc">{</span>r<span class="sc">:.2f}</span><span class="ss">,  ŷ = </span><span class="sc">{</span>b0<span class="sc">:.1f}</span><span class="ss"> + </span><span class="sc">{</span>b1<span class="sc">:.2f}</span><span class="ss">x"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    ax.set_xlim(<span class="dv">2</span>, <span class="dv">20</span>)<span class="op">;</span> ax.set_ylim(<span class="dv">2</span>, <span class="dv">14</span>)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Same statistics, four different realities — so plot the data"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-anscombe" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-anscombe-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="getting-started-in-r_files/figure-html/fig-anscombe-output-1.png" width="739" height="514" class="figure-img">
+<img src="getting-started-in-r_files/figure-html/fig-anscombe-output-1.png" width="739" height="512" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-anscombe-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Anscombe’s quartet: four datasets with near-identical summary statistics — same mean of x and y, same variance, same correlation (r ≈ 0.82), and the same fitted line ŷ = 3 + 0.5x (orange) — yet four completely different stories. Only the scatter reveals the curve, the outlier, and the leverage point. This is why every figure in this encyclopedia is a plot, not a table of moments: the number can be identical while the reality is not. Compute, then look.
@@ -2030,8 +2158,9 @@ Figure&nbsp;1: Anscombe’s quartet: four datasets with near-identical summary s
 <ul>
 <li><p><strong>Looping instead of vectorising.</strong> <code>for (i in 1:length(x)) x[i] &lt;- x[i]*2</code> is slow and un-R; write <code>x * 2</code>. Reach for a loop only when each step truly depends on the last. <span class="citation" data-cites="kaplan_lessons">(<a href="#ref-kaplan_lessons" role="doc-biblioref">Kaplan 2024</a>)</span></p></li>
 <li><p><strong>Confusing <code>&lt;-</code>, <code>=</code>, and <code>==</code>.</strong> <code>&lt;-</code> assigns, <code>==</code> tests equality, and a single <code>=</code> assigns <em>inside a function call</em> (an argument). Mixing them up produces silent surprises, not errors.</p></li>
-<li><p><strong><code>NA</code> propagates.</strong> Any arithmetic touching a missing value returns <code>NA</code>. <code>mean(x)</code> on a vector with one <code>NA</code> is <code>NA</code> — you must ask for <code>mean(x, na.rm = TRUE)</code>. R makes you acknowledge missingness on purpose.</p></li>
-<li><p><strong>Recycling.</strong> Operating on vectors of different lengths silently <em>recycles</em> the shorter one. <code>c(1,2,3,4) + c(0,10)</code> gives <code>1 12 3 14</code>, not an error — occasionally handy, often a bug.</p></li>
+<li><p><strong><code>NA</code> propagates.</strong> Missing values are “contagious”: almost any operation involving an unknown value gives an unknown result <span class="citation" data-cites="wickham_r4ds">(<a href="#ref-wickham_r4ds" role="doc-biblioref">Wickham et al. 2023</a>)</span>. <code>mean(x)</code> on a vector with one <code>NA</code> is <code>NA</code> — you must ask for <code>mean(x, na.rm = TRUE)</code>. R makes you acknowledge missingness on purpose.</p></li>
+<li><p><strong>Recycling.</strong> Operating on vectors of different lengths silently <em>recycles</em> the shorter one. <code>c(1,2,3,4) + c(0,10)</code> gives <code>1 12 3 14</code>, not an error — occasionally handy, often a bug. R warns only when the longer length is not a multiple of the shorter, as in Dayal’s <code>5 12 5</code> example. <span class="citation" data-cites="dayal_r_econ">(<a href="#ref-dayal_r_econ" role="doc-biblioref">Dayal 2015</a>)</span></p></li>
+<li><p><strong>Case and bracket slips.</strong> <code>Price</code> and <code>price</code> are different objects, and <code>c[10, 3, 15]</code> (square brackets) is an error where <code>c(10, 3, 15)</code> was meant. <span class="citation" data-cites="dayal_r_econ">(<a href="#ref-dayal_r_econ" role="doc-biblioref">Dayal 2015</a>)</span></p></li>
 <li><p><strong>Factor surprises.</strong> A grouping variable read as text may need <code>factor()</code>; and a factor’s <em>reference level</em> (the one folded into the intercept) is the first alphabetically unless you set it — the source of “why is my category missing from the regression?” <span class="citation" data-cites="mcnulty_rmodeling">(<a href="#ref-mcnulty_rmodeling" role="doc-biblioref">McNulty 2021</a>)</span></p></li>
 </ul>
 </div>
@@ -2040,7 +2169,7 @@ Figure&nbsp;1: Anscombe’s quartet: four datasets with near-identical summary s
 <section id="from-the-sources" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
 <div class="callout callout-style-default callout-note callout-titled" title="Who says what">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2049,13 +2178,15 @@ Figure&nbsp;1: Anscombe’s quartet: four datasets with near-identical summary s
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
 <li><strong>Kaplan, <em>Lessons in Statistical Thinking</em></strong> — R as a vector language for statistics: vectorised operations, the pipe, and writing small functions, taught with the <code>mosaic</code> idiom.</li>
-<li><strong>Dayal, <em>An Introduction to R for Quantitative Economics</em></strong> and <strong><em>Quantitative Economics with R</em></strong> — the learn-by-simulation ethos (Anscombe’s quartet, spurious regression) and the data-frame-centred workflow for economics.</li>
+<li><strong>Dayal, <em>An Introduction to R for Quantitative Economics</em></strong> and <strong><em>Quantitative Economics with R</em></strong> — the learn-by-simulation ethos (Anscombe’s quartet, spurious regression) and the data-frame-centred workflow for economics. The 2015 book’s Chapter 2 supplies the first-session example (price × quantity = expenditure, total 559), the case-sensitivity and bracket errors, and the recycling warning (<code>5 12 5</code>).</li>
+<li><strong>Wickham, Çetinkaya-Rundel &amp; Grolemund, <em>R for Data Science</em></strong> — reading the pipe as “then”; missing values as “contagious”; the copy-and-paste-more-than-twice rule, the <code>rescale01</code> example, and the three parts of a function.</li>
 <li><strong>McNulty, <em>Explanatory Statistical Modeling in R</em></strong> — atomic types and factors, and how the reference level of a factor enters a model.</li>
 <li><strong>Llaudet &amp; Imai, <em>Data Analysis for Social Science</em></strong> — the friendly first-contact path: load a data frame, subset it, summarise it, and plot it.</li>
+<li><em>The “calculator with a memory and a vocabulary” picture is this encyclopedia’s own.</em></li>
 </ul>
 </div>
 </div>
@@ -2090,6 +2221,9 @@ Llaudet, Elena, and Kosuke Imai. 2022. <em>Data Analysis for Social Science: A F
 </div>
 <div id="ref-mcnulty_rmodeling" class="csl-entry" role="listitem">
 McNulty, David. 2021. <em>Explanatory Statistical Modeling in r</em>.
+</div>
+<div id="ref-wickham_r4ds" class="csl-entry" role="listitem">
+Wickham, Hadley, Mine Çetinkaya-Rundel, and Garrett Grolemund. 2023. <em>R for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. 2nd ed. O’Reilly Media. <a href="https://r4ds.hadley.nz/">https://r4ds.hadley.nz/</a>.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -2560,160 +2694,273 @@ McNulty, David. 2021. <em>Explanatory Statistical Modeling in r</em>.
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Getting Started in R"</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "The working subset of R for social science — vectors, data frames, the pipe, and functions — enough of the language to be productive fast, without the tutorial detours."</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>R rewards a small amount of the right knowledge. You do not need the whole language; you need to think in</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>**vectors**, keep your data in a **data frame**, chain steps with the **pipe**, and wrap anything you repeat in</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>a **function.** Those four ideas carry most applied work. This is the on-ramp — the language itself; the</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">tidyverse wrangling verbs</span><span class="co">](../../content/dataframes/index.qmd)</span> and <span class="co">[</span><span class="ot">reading a regression</span><span class="co">](regressions-in-r.qmd)</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>build on top of it.</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## R thinks in vectors</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>The single most important habit: R operates on **whole vectors at once**, not element by element. A vector is</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>made with <span class="in">`c()`</span>, and arithmetic is *vectorised* — it applies to every element without a loop. <span class="co">[</span><span class="ot">@kaplan_lessons</span><span class="co">]</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">23</span>, <span class="dv">42</span>)   <span class="co"># a numeric vector;  &lt;- is assignment</span></span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>x <span class="sc">*</span> <span class="dv">2</span>                          <span class="co"># 8 16 30 32 46 84   — no loop needed</span></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x); <span class="fu">sd</span>(x); <span class="fu">length</span>(x)      <span class="co"># summaries take the whole vector</span></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>x[x <span class="sc">&gt;</span> <span class="dv">15</span>]                      <span class="co"># 16 23 42            — logical subsetting</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>Writing a <span class="in">`for`</span> loop where a vectorised expression would do is the most common beginner's tell; R is faster and</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>clearer when you let the vector operation speak. The main atomic types are **numeric**, **character**</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>(<span class="in">`"text"`</span>), **logical** (`TRUE`/`FALSE`), and **factor** (categorical — a character with a fixed set of</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>*levels*, which is how R encodes groups for models). <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span></span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="fu">## Keep your data in a data frame</span></span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>A **data frame** (or its modern form, the **tibble**) is R's table: named columns that can hold different</span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>types, all the same length — one row per observation, one column per variable. It is the object every</span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>modelling and plotting verb expects. <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span></span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="fu">c</span>(<span class="st">"Ann"</span>, <span class="st">"Ben"</span>, <span class="st">"Cy"</span>),</span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">age  =</span> <span class="fu">c</span>(<span class="dv">31</span>, <span class="dv">25</span>, <span class="dv">40</span>),</span>
-<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"T"</span>, <span class="st">"C"</span>, <span class="st">"T"</span>))</span>
-<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>age            <span class="co"># a column, by name ($)</span></span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>d[d<span class="sc">$</span>group <span class="sc">==</span> <span class="st">"T"</span>, ]   <span class="co"># rows where group is T, all columns</span></span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(d); <span class="fu">names</span>(d)     <span class="co"># dimensions and column names</span></span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>Load real data with the **readr** package (<span class="in">`read_csv("file.csv")`</span>); everything downstream assumes it arrived as</span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>a tidy data frame. <span class="co">[</span><span class="ot">@llaudet_imai_dss</span><span class="co">]</span></span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="fu">## The pipe, and writing functions</span></span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>The **pipe** <span class="in">`|&gt;`</span> passes the thing on its left as the first argument of the function on its right, so a</span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>sequence of steps reads top-to-bottom instead of inside-out: <span class="co">[</span><span class="ot">@kaplan_lessons</span><span class="co">]</span></span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
-<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a><span class="co"># nested (hard to read)           # piped (reads as steps)</span></span>
-<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>)   x <span class="sc">|&gt;</span> <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>)</span>
-<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>And when you find yourself copying a block of code with one thing changed, make it a **function**:</span>
-<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
-<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>z_score <span class="ot">&lt;-</span> <span class="cf">function</span>(v) {          <span class="co"># v is the argument</span></span>
-<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>  (v <span class="sc">-</span> <span class="fu">mean</span>(v)) <span class="sc">/</span> <span class="fu">sd</span>(v)           <span class="co"># last expression is returned</span></span>
-<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="fu">z_score</span>(x)</span>
-<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>Functions plus vectorisation are the whole game: express the operation once, apply it to any vector.</span>
-<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a><span class="fu">## Compute, then look — always</span></span>
-<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>The reason social scientists learn to *simulate and plot*, not just compute summaries, is that summaries hide</span>
-<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>shape. Anscombe's quartet is the classic demonstration, and it is a one-line lesson worth internalising before</span>
-<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>any modelling. <span class="co">[</span><span class="ot">@dayal_r_econ</span><span class="co">]</span></span>
-<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-anscombe</span></span>
-<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Anscombe's quartet: four datasets with near-identical summary statistics — same mean of x and y, same variance, same correlation (r ≈ 0.82), and the same fitted line ŷ = 3 + 0.5x (orange) — yet four completely different stories. Only the scatter reveals the curve, the outlier, and the leverage point. This is why every figure in this encyclopedia is a plot, not a table of moments: the number can be identical while the reality is not. Compute, then look."</span></span>
-<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>x123 <span class="op">=</span> np.array([<span class="dv">10</span>, <span class="dv">8</span>, <span class="dv">13</span>, <span class="dv">9</span>, <span class="dv">11</span>, <span class="dv">14</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">12</span>, <span class="dv">7</span>, <span class="dv">5</span>])</span>
-<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
-<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>    <span class="st">"I"</span>:   (x123, np.array([<span class="fl">8.04</span>,<span class="fl">6.95</span>,<span class="fl">7.58</span>,<span class="fl">8.81</span>,<span class="fl">8.33</span>,<span class="fl">9.96</span>,<span class="fl">7.24</span>,<span class="fl">4.26</span>,<span class="fl">10.84</span>,<span class="fl">4.82</span>,<span class="fl">5.68</span>])),</span>
-<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>    <span class="st">"II"</span>:  (x123, np.array([<span class="fl">9.14</span>,<span class="fl">8.14</span>,<span class="fl">8.74</span>,<span class="fl">8.77</span>,<span class="fl">9.26</span>,<span class="fl">8.10</span>,<span class="fl">6.13</span>,<span class="fl">3.10</span>,<span class="fl">9.13</span>,<span class="fl">7.26</span>,<span class="fl">4.74</span>])),</span>
-<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>    <span class="st">"III"</span>: (x123, np.array([<span class="fl">7.46</span>,<span class="fl">6.77</span>,<span class="fl">12.74</span>,<span class="fl">7.11</span>,<span class="fl">7.81</span>,<span class="fl">8.84</span>,<span class="fl">6.08</span>,<span class="fl">5.39</span>,<span class="fl">8.15</span>,<span class="fl">6.42</span>,<span class="fl">5.73</span>])),</span>
-<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IV"</span>:  (np.array([<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">19</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>]),</span>
-<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>            np.array([<span class="fl">6.58</span>,<span class="fl">5.76</span>,<span class="fl">7.71</span>,<span class="fl">8.84</span>,<span class="fl">8.47</span>,<span class="fl">7.04</span>,<span class="fl">5.25</span>,<span class="fl">12.50</span>,<span class="fl">5.56</span>,<span class="fl">7.91</span>,<span class="fl">6.89</span>])),</span>
-<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="dv">3</span>, <span class="dv">20</span>, <span class="dv">50</span>)</span>
-<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">7.8</span>, <span class="fl">5.4</span>), sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (name, (x, y)) <span class="kw">in</span> <span class="bu">zip</span>(axes.flat, data.items()):</span>
-<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>    b1 <span class="op">=</span> np.cov(x, y, bias<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">/</span> np.var(x)     <span class="co"># slope, by hand</span></span>
-<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>    b0 <span class="op">=</span> y.mean() <span class="op">-</span> b1 <span class="op">*</span> x.mean()</span>
-<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> np.corrcoef(x, y)[<span class="dv">0</span>, <span class="dv">1</span>]</span>
-<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>    ax.plot(xs, b0 <span class="op">+</span> b1 <span class="op">*</span> xs, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">2.0</span>, zorder<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y, s<span class="op">=</span><span class="dv">28</span>, color<span class="op">=</span><span class="st">"#161613"</span>, zorder<span class="op">=</span><span class="dv">2</span>, edgecolor<span class="op">=</span><span class="st">"#f4f3ec"</span>, linewidth<span class="op">=</span><span class="fl">0.6</span>)</span>
-<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"Set </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">:  r = </span><span class="sc">{</span>r<span class="sc">:.2f}</span><span class="ss">,  ŷ = </span><span class="sc">{</span>b0<span class="sc">:.1f}</span><span class="ss"> + </span><span class="sc">{</span>b1<span class="sc">:.2f}</span><span class="ss">x"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
-<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>    ax.set_xlim(<span class="dv">2</span>, <span class="dv">20</span>)<span class="op">;</span> ax.set_ylim(<span class="dv">2</span>, <span class="dv">14</span>)</span>
-<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Same statistics, four different realities — so plot the data"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
-<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where new R users trip"}</span>
-<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Looping instead of vectorising.** <span class="in">`for (i in 1:length(x)) x[i] &lt;- x[i]*2`</span> is slow and un-R; write <span class="in">`x * 2`</span>.</span>
-<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>  Reach for a loop only when each step truly depends on the last. <span class="co">[</span><span class="ot">@kaplan_lessons</span><span class="co">]</span></span>
-<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing `&lt;-`, `=`, and `==`.** <span class="in">`&lt;-`</span> assigns, <span class="in">`==`</span> tests equality, and a single <span class="in">`=`</span> assigns *inside a</span>
-<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>  function call* (an argument). Mixing them up produces silent surprises, not errors.</span>
-<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**`NA` propagates.** Any arithmetic touching a missing value returns <span class="in">`NA`</span>. <span class="in">`mean(x)`</span> on a vector with one</span>
-<span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a>  <span class="in">`NA`</span> is <span class="in">`NA`</span> — you must ask for <span class="in">`mean(x, na.rm = TRUE)`</span>. R makes you acknowledge missingness on purpose.</span>
-<span id="cb6-125"><a href="#cb6-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-126"><a href="#cb6-126" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Recycling.** Operating on vectors of different lengths silently *recycles* the shorter one. `c(1,2,3,4) +</span>
-<span id="cb6-127"><a href="#cb6-127" aria-hidden="true" tabindex="-1"></a>  c(0,10)<span class="in">` gives `</span>1 12 3 14`, not an error — occasionally handy, often a bug.</span>
-<span id="cb6-128"><a href="#cb6-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-129"><a href="#cb6-129" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Factor surprises.** A grouping variable read as text may need <span class="in">`factor()`</span>; and a factor's *reference level*</span>
-<span id="cb6-130"><a href="#cb6-130" aria-hidden="true" tabindex="-1"></a>  (the one folded into the intercept) is the first alphabetically unless you set it — the source of "why is my</span>
-<span id="cb6-131"><a href="#cb6-131" aria-hidden="true" tabindex="-1"></a>  category missing from the regression?" <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span></span>
-<span id="cb6-132"><a href="#cb6-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-133"><a href="#cb6-133" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-135"><a href="#cb6-135" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb6-136"><a href="#cb6-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-137"><a href="#cb6-137" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb6-138"><a href="#cb6-138" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Kaplan, *Lessons in Statistical Thinking*** — R as a vector language for statistics: vectorised operations,</span>
-<span id="cb6-139"><a href="#cb6-139" aria-hidden="true" tabindex="-1"></a>  the pipe, and writing small functions, taught with the <span class="in">`mosaic`</span> idiom.</span>
-<span id="cb6-140"><a href="#cb6-140" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dayal, *An Introduction to R for Quantitative Economics*** and ***Quantitative Economics with R*** — the</span>
-<span id="cb6-141"><a href="#cb6-141" aria-hidden="true" tabindex="-1"></a>  learn-by-simulation ethos (Anscombe's quartet, spurious regression) and the data-frame-centred workflow for</span>
-<span id="cb6-142"><a href="#cb6-142" aria-hidden="true" tabindex="-1"></a>  economics.</span>
-<span id="cb6-143"><a href="#cb6-143" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**McNulty, *Explanatory Statistical Modeling in R*** — atomic types and factors, and how the reference level</span>
-<span id="cb6-144"><a href="#cb6-144" aria-hidden="true" tabindex="-1"></a>  of a factor enters a model.</span>
-<span id="cb6-145"><a href="#cb6-145" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Llaudet &amp; Imai, *Data Analysis for Social Science*** — the friendly first-contact path: load a data frame,</span>
-<span id="cb6-146"><a href="#cb6-146" aria-hidden="true" tabindex="-1"></a>  subset it, summarise it, and plot it.</span>
-<span id="cb6-147"><a href="#cb6-147" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb6-148"><a href="#cb6-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-149"><a href="#cb6-149" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb6-150"><a href="#cb6-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-151"><a href="#cb6-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** the <span class="co">[</span><span class="ot">Thinking in Dataframes</span><span class="co">](../../content/dataframes/index.qmd)</span> track (the tidyverse verbs for</span>
-<span id="cb6-152"><a href="#cb6-152" aria-hidden="true" tabindex="-1"></a>  wrangling), and <span class="co">[</span><span class="ot">reading &amp; running regressions in R</span><span class="co">](regressions-in-r.qmd)</span> (once the data is in a frame).</span>
-<span id="cb6-153"><a href="#cb6-153" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pairs with:** <span class="co">[</span><span class="ot">reproducible analysis with Quarto</span><span class="co">](reproducible-quarto.qmd)</span> (where this R actually runs) and</span>
-<span id="cb6-154"><a href="#cb6-154" aria-hidden="true" tabindex="-1"></a>  the <span class="co">[</span><span class="ot">computing appendix index</span><span class="co">](index.qmd)</span>.</span>
-<span id="cb6-155"><a href="#cb6-155" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Motivates:** <span class="co">[</span><span class="ot">exploratory data analysis</span><span class="co">](../../content/01-foundations/exploratory-data-analysis.qmd)</span> — the</span>
-<span id="cb6-156"><a href="#cb6-156" aria-hidden="true" tabindex="-1"></a>  Anscombe lesson is the whole reason EDA precedes modelling.</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Getting Started in R"</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "The small part of R you need first: how to store numbers, hold a dataset, chain steps together and package up anything you repeat."</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>You do not need to learn all of R before it becomes useful. Four habits carry most applied work: do arithmetic</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>on whole columns of numbers at once, keep each dataset in one table, write a sequence of steps so it reads top</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>to bottom, and turn any block you keep copying into a reusable command. This page is the on-ramp to the</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>language itself.</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Where you probably came from — and what you need"}</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>**You likely arrived from** the <span class="co">[</span><span class="ot">Thinking in Dataframes</span><span class="co">](../../content/dataframes/index.qmd)</span> track, whose</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>snippets assume you can read basic R, from <span class="co">[</span><span class="ot">exploratory data analysis</span><span class="co">](../../content/01-foundations/exploratory-data-analysis.qmd)</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>or from the <span class="co">[</span><span class="ot">computing appendix</span><span class="co">](index.qmd)</span> on your way to <span class="co">[</span><span class="ot">reading a regression in R</span><span class="co">](regressions-in-r.qmd)</span>.</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>The question you came with is probably "what do <span class="in">`&lt;-`</span>, <span class="in">`c()`</span> and <span class="in">`|&gt;`</span> actually mean?"</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>**You need:** nothing beyond school arithmetic. **You don't need** to have programmed before, or to know the</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>tidyverse. That comes next, in the dataframes track.</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>**Jump to what you came for:** <span class="co">[</span><span class="ot">the idea in words</span><span class="co">](#sec-idea)</span> · <span class="co">[</span><span class="ot">a first session, line by line</span><span class="co">](#sec-by-hand)</span> ·</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">vectors</span><span class="co">](#sec-vectors)</span> · <span class="co">[</span><span class="ot">data frames</span><span class="co">](#sec-dataframes)</span> · <span class="co">[</span><span class="ot">the pipe and functions</span><span class="co">](#sec-pipe)</span> ·</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">compute, then look</span><span class="co">](#sec-look)</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>The source library behind this encyclopedia is mostly written in R, and so is much of applied social science.</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>The dataframe track, the regression appendix and most textbook code examples assume you can read a few lines of</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>it. People learning R often get stuck on its basic way of working (whole-vector arithmetic, missing values,</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>categories stored as factors) rather than on any statistics. A small amount of the right knowledge removes most</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>of that friction <span class="co">[</span><span class="ot">@dayal_r_econ; @wickham_r4ds</span><span class="co">]</span>.</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## The idea in words {#sec-idea}</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>Think of R as a calculator with a memory and a vocabulary.</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The memory** is a set of named boxes called **objects**. You put something in a box with <span class="in">`&lt;-`</span>, read as</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>  "gets": <span class="in">`price &lt;- 10`</span> means "the box called <span class="in">`price`</span> gets 10". The name is case-sensitive, so <span class="in">`Price`</span> and</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>  <span class="in">`price`</span> are different boxes <span class="co">[</span><span class="ot">@dayal_r_econ</span><span class="co">]</span>.</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The vocabulary** is a set of **functions**: commands that take inputs in round brackets and give back a</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>  result, like <span class="in">`sum(price)`</span> or <span class="in">`mean(age)`</span>. An input to a function is called an **argument**.</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The working unit is a list of values, not one value.** A **vector** is an ordered set of values of one</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>  type, made with <span class="in">`c()`</span> ("combine"). Arithmetic on a vector applies to every element at once, so you rarely</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>  need to loop.</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A dataset is a table of vectors.** A **data frame** is several vectors of the same length side by side,</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>  one per variable, with one row per observation.</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>Everything below builds those four ideas up, one at a time.</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="fu">## A first session, line by line {#sec-by-hand}</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>This is the first example in Dayal's *Introduction to R for Quantitative Economics* <span class="co">[</span><span class="ot">@dayal_r_econ</span><span class="co">]</span>: three</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>goods, their prices, the quantities bought, and the total spent. Lines starting with <span class="in">`#&gt;`</span> show what R prints.</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>Price    <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">3</span>, <span class="dv">15</span>)</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>Quantity <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">25</span>, <span class="dv">3</span>, <span class="dv">20</span>)</span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>Expenditure <span class="ot">&lt;-</span> Price <span class="sc">*</span> Quantity</span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>Expenditure</span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 250   9 300</span></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(Expenditure)</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 559</span></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>Reading it line by line:</span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span><span class="in">`Price &lt;- c(10, 3, 15)`</span> makes a vector of three prices and stores it under the name <span class="in">`Price`</span>. Nothing is</span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>   printed. R just remembers it.</span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span><span class="in">`Quantity &lt;- c(25, 3, 20)`</span> does the same for quantities.</span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span><span class="in">`Price * Quantity`</span> multiplies **element by element**: $10\times25$, $3\times3$, $15\times20$. There is no</span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>   loop. That is what *vectorised* means.</span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Typing a name on its own prints it. The <span class="in">`[1]`</span> is not part of the data. It tells you the line starts with</span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a>   element number 1.</span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span><span class="in">`sum()`</span> is a function that takes the whole vector and returns one number, the total: 559.</span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a>Two follow-ups from the same chapter show what goes wrong. Typing <span class="in">`price`</span> (lower case) gives</span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a><span class="in">`Error: object 'price' not found`</span>. Adding vectors of different lengths makes R **recycle** the shorter one:</span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a><span class="in">`c(3, 3, 3) + c(2, 9)`</span> gives <span class="in">`5 12 5`</span>, with a warning, because R went back to the start of the shorter vector</span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a>for the third element <span class="co">[</span><span class="ot">@dayal_r_econ</span><span class="co">]</span>.</span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Jargon key — open if a term is unfamiliar"}</span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Object** — anything stored under a name: a number, a vector, a data frame, a fitted model.</span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**`&lt;-`** — assignment: put the value on the right into the name on the left.</span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Function** — a named command, used as <span class="in">`name(arguments)`</span>; it takes inputs and returns a result.</span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Argument** — an input to a function. Arguments can be named, as in <span class="in">`mean(x, na.rm = TRUE)`</span>.</span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Vector** — an ordered set of values of one type, made with <span class="in">`c()`</span>.</span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Vectorised** — applied to every element of a vector at once.</span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Data frame / tibble** — a table: named columns (vectors) of equal length. A tibble is the tidyverse's</span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a>  version.</span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Factor** — a categorical variable with a fixed set of *levels*.</span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**`NA`** — R's code for a missing value ("not available").</span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pipe (`|&gt;`)** — passes the result on its left into the function on its right.</span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Package** — an add-on bundle of functions, installed once and loaded with <span class="in">`library()`</span>.</span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a><span class="fu">## R thinks in vectors {#sec-vectors}</span></span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a>The single most important habit: R operates on **whole vectors at once**, not element by element. A vector is</span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a>made with <span class="in">`c()`</span>, and arithmetic is *vectorised* — it applies to every element without a loop. <span class="co">[</span><span class="ot">@kaplan_lessons</span><span class="co">]</span></span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">23</span>, <span class="dv">42</span>)   <span class="co"># a numeric vector;  &lt;- is assignment</span></span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a>x <span class="sc">*</span> <span class="dv">2</span>                          <span class="co"># 8 16 30 32 46 84   — no loop needed</span></span>
+<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x); <span class="fu">sd</span>(x); <span class="fu">length</span>(x)      <span class="co"># 18, 13.49, 6 — summaries take the whole vector</span></span>
+<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a>x[x <span class="sc">&gt;</span> <span class="dv">15</span>]                      <span class="co"># 16 23 42            — logical subsetting</span></span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a>The last line is worth reading slowly. <span class="in">`x &gt; 15`</span> produces a vector of <span class="in">`TRUE`</span>/<span class="in">`FALSE`</span> values, one per element.</span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a>Putting it inside square brackets keeps only the elements where it is <span class="in">`TRUE`</span>. Square brackets pick elements and</span>
+<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a>round brackets call functions; mixing them up is a common early error <span class="co">[</span><span class="ot">@dayal_r_econ</span><span class="co">]</span>.</span>
+<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a>Writing a <span class="in">`for`</span> loop where a vectorised expression would do is the most common beginner's tell; R is faster and</span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a>clearer when you let the vector operation speak. The main atomic types are **numeric**, **character**</span>
+<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a>(<span class="in">`"text"`</span>), **logical** (`TRUE`/`FALSE`), and **factor** (categorical — a character with a fixed set of</span>
+<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a>*levels*, which is how R encodes groups for models). <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span></span>
+<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a><span class="fu">## Keep your data in a data frame {#sec-dataframes}</span></span>
+<span id="cb7-120"><a href="#cb7-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-121"><a href="#cb7-121" aria-hidden="true" tabindex="-1"></a>A **data frame** (or its modern form, the **tibble**) is R's table: named columns that can hold different</span>
+<span id="cb7-122"><a href="#cb7-122" aria-hidden="true" tabindex="-1"></a>types, all the same length — one row per observation, one column per variable. It is the object every</span>
+<span id="cb7-123"><a href="#cb7-123" aria-hidden="true" tabindex="-1"></a>modelling and plotting verb expects. <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span></span>
+<span id="cb7-124"><a href="#cb7-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-125"><a href="#cb7-125" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb7-126"><a href="#cb7-126" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb7-127"><a href="#cb7-127" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="fu">c</span>(<span class="st">"Ann"</span>, <span class="st">"Ben"</span>, <span class="st">"Cy"</span>),</span>
+<span id="cb7-128"><a href="#cb7-128" aria-hidden="true" tabindex="-1"></a>  <span class="at">age  =</span> <span class="fu">c</span>(<span class="dv">31</span>, <span class="dv">25</span>, <span class="dv">40</span>),</span>
+<span id="cb7-129"><a href="#cb7-129" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"T"</span>, <span class="st">"C"</span>, <span class="st">"T"</span>))</span>
+<span id="cb7-130"><a href="#cb7-130" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-131"><a href="#cb7-131" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>age            <span class="co"># a column, by name ($)</span></span>
+<span id="cb7-132"><a href="#cb7-132" aria-hidden="true" tabindex="-1"></a>d[d<span class="sc">$</span>group <span class="sc">==</span> <span class="st">"T"</span>, ]   <span class="co"># rows where group is T, all columns</span></span>
+<span id="cb7-133"><a href="#cb7-133" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(d); <span class="fu">names</span>(d)     <span class="co"># dimensions and column names</span></span>
+<span id="cb7-134"><a href="#cb7-134" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-135"><a href="#cb7-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-136"><a href="#cb7-136" aria-hidden="true" tabindex="-1"></a>In plain words: <span class="in">`d$age`</span> pulls out one column as a vector. Inside <span class="in">`d[rows, columns]`</span>, the part before the comma</span>
+<span id="cb7-137"><a href="#cb7-137" aria-hidden="true" tabindex="-1"></a>picks rows and the part after picks columns. Leaving the column part blank means "all columns". Dayal builds</span>
+<span id="cb7-138"><a href="#cb7-138" aria-hidden="true" tabindex="-1"></a>his first data frame the same way, from the <span class="in">`Price`</span> and <span class="in">`Quantity`</span> vectors: <span class="in">`data.frame(Price, Quantity)`</span></span>
+<span id="cb7-139"><a href="#cb7-139" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@dayal_r_econ</span><span class="co">]</span>.</span>
+<span id="cb7-140"><a href="#cb7-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-141"><a href="#cb7-141" aria-hidden="true" tabindex="-1"></a>Load real data with the **readr** package (<span class="in">`read_csv("file.csv")`</span>); everything downstream assumes it arrived as</span>
+<span id="cb7-142"><a href="#cb7-142" aria-hidden="true" tabindex="-1"></a>a tidy data frame. <span class="co">[</span><span class="ot">@llaudet_imai_dss</span><span class="co">]</span></span>
+<span id="cb7-143"><a href="#cb7-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-144"><a href="#cb7-144" aria-hidden="true" tabindex="-1"></a><span class="fu">## The pipe, and writing functions {#sec-pipe}</span></span>
+<span id="cb7-145"><a href="#cb7-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-146"><a href="#cb7-146" aria-hidden="true" tabindex="-1"></a>The **pipe** <span class="in">`|&gt;`</span> passes the thing on its left as the first argument of the function on its right, so a</span>
+<span id="cb7-147"><a href="#cb7-147" aria-hidden="true" tabindex="-1"></a>sequence of steps reads top-to-bottom instead of inside-out: <span class="co">[</span><span class="ot">@kaplan_lessons</span><span class="co">]</span></span>
+<span id="cb7-148"><a href="#cb7-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-149"><a href="#cb7-149" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb7-150"><a href="#cb7-150" aria-hidden="true" tabindex="-1"></a><span class="co"># nested (hard to read)           # piped (reads as steps)</span></span>
+<span id="cb7-151"><a href="#cb7-151" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>)   x <span class="sc">|&gt;</span> <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>)</span>
+<span id="cb7-152"><a href="#cb7-152" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-153"><a href="#cb7-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-154"><a href="#cb7-154" aria-hidden="true" tabindex="-1"></a>*R for Data Science* suggests reading the pipe aloud as "then": take `x`, *then* take the mean, *then* round</span>
+<span id="cb7-155"><a href="#cb7-155" aria-hidden="true" tabindex="-1"></a>it <span class="co">[</span><span class="ot">@wickham_r4ds</span><span class="co">]</span>. (That book's first edition writes the pipe as <span class="in">`%&gt;%`</span>, from the magrittr package; <span class="in">`|&gt;`</span> is</span>
+<span id="cb7-156"><a href="#cb7-156" aria-hidden="true" tabindex="-1"></a>the version built into R. For simple chains like this one they behave the same.)</span>
+<span id="cb7-157"><a href="#cb7-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-158"><a href="#cb7-158" aria-hidden="true" tabindex="-1"></a>And when you find yourself copying a block of code with one thing changed, make it a **function**:</span>
+<span id="cb7-159"><a href="#cb7-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-160"><a href="#cb7-160" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb7-161"><a href="#cb7-161" aria-hidden="true" tabindex="-1"></a>z_score <span class="ot">&lt;-</span> <span class="cf">function</span>(v) {          <span class="co"># v is the argument</span></span>
+<span id="cb7-162"><a href="#cb7-162" aria-hidden="true" tabindex="-1"></a>  (v <span class="sc">-</span> <span class="fu">mean</span>(v)) <span class="sc">/</span> <span class="fu">sd</span>(v)           <span class="co"># last expression is returned</span></span>
+<span id="cb7-163"><a href="#cb7-163" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-164"><a href="#cb7-164" aria-hidden="true" tabindex="-1"></a><span class="fu">z_score</span>(x)                        <span class="co"># -1.04 -0.74 -0.22 -0.15 0.37 1.78 (rounded)</span></span>
+<span id="cb7-165"><a href="#cb7-165" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-166"><a href="#cb7-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-167"><a href="#cb7-167" aria-hidden="true" tabindex="-1"></a>Wickham's rule of thumb is to write a function once you have copied and pasted a block more than twice. His</span>
+<span id="cb7-168"><a href="#cb7-168" aria-hidden="true" tabindex="-1"></a>example is a copied rescaling line in which one <span class="in">`a`</span> was never changed to <span class="in">`b`</span>, a silent bug that a function would</span>
+<span id="cb7-169"><a href="#cb7-169" aria-hidden="true" tabindex="-1"></a>have prevented <span class="co">[</span><span class="ot">@wickham_r4ds</span><span class="co">]</span>. A function has three parts: a **name** (`z_score`), its **arguments** inside</span>
+<span id="cb7-170"><a href="#cb7-170" aria-hidden="true" tabindex="-1"></a><span class="in">`function()`</span>, and a **body** in curly braces. The value of the last line of the body is what the function</span>
+<span id="cb7-171"><a href="#cb7-171" aria-hidden="true" tabindex="-1"></a>returns <span class="co">[</span><span class="ot">@wickham_r4ds</span><span class="co">]</span>.</span>
+<span id="cb7-172"><a href="#cb7-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-173"><a href="#cb7-173" aria-hidden="true" tabindex="-1"></a>Functions plus vectorisation are the whole game: express the operation once, apply it to any vector.</span>
+<span id="cb7-174"><a href="#cb7-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-175"><a href="#cb7-175" aria-hidden="true" tabindex="-1"></a><span class="fu">## Compute, then look — always {#sec-look}</span></span>
+<span id="cb7-176"><a href="#cb7-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-177"><a href="#cb7-177" aria-hidden="true" tabindex="-1"></a>The reason social scientists learn to *simulate and plot*, not just compute summaries, is that summaries hide</span>
+<span id="cb7-178"><a href="#cb7-178" aria-hidden="true" tabindex="-1"></a>shape. Anscombe's quartet is the classic demonstration, and it is a one-line lesson worth internalising before</span>
+<span id="cb7-179"><a href="#cb7-179" aria-hidden="true" tabindex="-1"></a>any modelling. <span class="co">[</span><span class="ot">@dayal_r_econ</span><span class="co">]</span></span>
+<span id="cb7-180"><a href="#cb7-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-183"><a href="#cb7-183" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb7-184"><a href="#cb7-184" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-anscombe</span></span>
+<span id="cb7-185"><a href="#cb7-185" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Anscombe's quartet: four datasets with near-identical summary statistics — same mean of x and y, same variance, same correlation (r ≈ 0.82), and the same fitted line ŷ = 3 + 0.5x (orange) — yet four completely different stories. Only the scatter reveals the curve, the outlier, and the leverage point. This is why every figure in this encyclopedia is a plot, not a table of moments: the number can be identical while the reality is not. Compute, then look."</span></span>
+<span id="cb7-186"><a href="#cb7-186" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb7-187"><a href="#cb7-187" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb7-188"><a href="#cb7-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-189"><a href="#cb7-189" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-190"><a href="#cb7-190" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-191"><a href="#cb7-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-192"><a href="#cb7-192" aria-hidden="true" tabindex="-1"></a>x123 <span class="op">=</span> np.array([<span class="dv">10</span>, <span class="dv">8</span>, <span class="dv">13</span>, <span class="dv">9</span>, <span class="dv">11</span>, <span class="dv">14</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">12</span>, <span class="dv">7</span>, <span class="dv">5</span>])</span>
+<span id="cb7-193"><a href="#cb7-193" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
+<span id="cb7-194"><a href="#cb7-194" aria-hidden="true" tabindex="-1"></a>    <span class="st">"I"</span>:   (x123, np.array([<span class="fl">8.04</span>,<span class="fl">6.95</span>,<span class="fl">7.58</span>,<span class="fl">8.81</span>,<span class="fl">8.33</span>,<span class="fl">9.96</span>,<span class="fl">7.24</span>,<span class="fl">4.26</span>,<span class="fl">10.84</span>,<span class="fl">4.82</span>,<span class="fl">5.68</span>])),</span>
+<span id="cb7-195"><a href="#cb7-195" aria-hidden="true" tabindex="-1"></a>    <span class="st">"II"</span>:  (x123, np.array([<span class="fl">9.14</span>,<span class="fl">8.14</span>,<span class="fl">8.74</span>,<span class="fl">8.77</span>,<span class="fl">9.26</span>,<span class="fl">8.10</span>,<span class="fl">6.13</span>,<span class="fl">3.10</span>,<span class="fl">9.13</span>,<span class="fl">7.26</span>,<span class="fl">4.74</span>])),</span>
+<span id="cb7-196"><a href="#cb7-196" aria-hidden="true" tabindex="-1"></a>    <span class="st">"III"</span>: (x123, np.array([<span class="fl">7.46</span>,<span class="fl">6.77</span>,<span class="fl">12.74</span>,<span class="fl">7.11</span>,<span class="fl">7.81</span>,<span class="fl">8.84</span>,<span class="fl">6.08</span>,<span class="fl">5.39</span>,<span class="fl">8.15</span>,<span class="fl">6.42</span>,<span class="fl">5.73</span>])),</span>
+<span id="cb7-197"><a href="#cb7-197" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IV"</span>:  (np.array([<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">19</span>,<span class="dv">8</span>,<span class="dv">8</span>,<span class="dv">8</span>]),</span>
+<span id="cb7-198"><a href="#cb7-198" aria-hidden="true" tabindex="-1"></a>            np.array([<span class="fl">6.58</span>,<span class="fl">5.76</span>,<span class="fl">7.71</span>,<span class="fl">8.84</span>,<span class="fl">8.47</span>,<span class="fl">7.04</span>,<span class="fl">5.25</span>,<span class="fl">12.50</span>,<span class="fl">5.56</span>,<span class="fl">7.91</span>,<span class="fl">6.89</span>])),</span>
+<span id="cb7-199"><a href="#cb7-199" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-200"><a href="#cb7-200" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="dv">3</span>, <span class="dv">20</span>, <span class="dv">50</span>)</span>
+<span id="cb7-201"><a href="#cb7-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-202"><a href="#cb7-202" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">7.8</span>, <span class="fl">5.4</span>), sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-203"><a href="#cb7-203" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (name, (x, y)) <span class="kw">in</span> <span class="bu">zip</span>(axes.flat, data.items()):</span>
+<span id="cb7-204"><a href="#cb7-204" aria-hidden="true" tabindex="-1"></a>    b1 <span class="op">=</span> np.cov(x, y, bias<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">/</span> np.var(x)     <span class="co"># slope, by hand</span></span>
+<span id="cb7-205"><a href="#cb7-205" aria-hidden="true" tabindex="-1"></a>    b0 <span class="op">=</span> y.mean() <span class="op">-</span> b1 <span class="op">*</span> x.mean()</span>
+<span id="cb7-206"><a href="#cb7-206" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> np.corrcoef(x, y)[<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb7-207"><a href="#cb7-207" aria-hidden="true" tabindex="-1"></a>    ax.plot(xs, b0 <span class="op">+</span> b1 <span class="op">*</span> xs, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">2.0</span>, zorder<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-208"><a href="#cb7-208" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y, s<span class="op">=</span><span class="dv">28</span>, color<span class="op">=</span><span class="st">"#161613"</span>, zorder<span class="op">=</span><span class="dv">2</span>, edgecolor<span class="op">=</span><span class="st">"#f4f3ec"</span>, linewidth<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb7-209"><a href="#cb7-209" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"Set </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">:  r = </span><span class="sc">{</span>r<span class="sc">:.2f}</span><span class="ss">,  ŷ = </span><span class="sc">{</span>b0<span class="sc">:.1f}</span><span class="ss"> + </span><span class="sc">{</span>b1<span class="sc">:.2f}</span><span class="ss">x"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb7-210"><a href="#cb7-210" aria-hidden="true" tabindex="-1"></a>    ax.set_xlim(<span class="dv">2</span>, <span class="dv">20</span>)<span class="op">;</span> ax.set_ylim(<span class="dv">2</span>, <span class="dv">14</span>)</span>
+<span id="cb7-211"><a href="#cb7-211" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Same statistics, four different realities — so plot the data"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb7-212"><a href="#cb7-212" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb7-213"><a href="#cb7-213" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb7-214"><a href="#cb7-214" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-215"><a href="#cb7-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-216"><a href="#cb7-216" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb7-217"><a href="#cb7-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-218"><a href="#cb7-218" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where new R users trip"}</span>
+<span id="cb7-219"><a href="#cb7-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-220"><a href="#cb7-220" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Looping instead of vectorising.** <span class="in">`for (i in 1:length(x)) x[i] &lt;- x[i]*2`</span> is slow and un-R; write <span class="in">`x * 2`</span>.</span>
+<span id="cb7-221"><a href="#cb7-221" aria-hidden="true" tabindex="-1"></a>  Reach for a loop only when each step truly depends on the last. <span class="co">[</span><span class="ot">@kaplan_lessons</span><span class="co">]</span></span>
+<span id="cb7-222"><a href="#cb7-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-223"><a href="#cb7-223" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing `&lt;-`, `=`, and `==`.** <span class="in">`&lt;-`</span> assigns, <span class="in">`==`</span> tests equality, and a single <span class="in">`=`</span> assigns *inside a</span>
+<span id="cb7-224"><a href="#cb7-224" aria-hidden="true" tabindex="-1"></a>  function call* (an argument). Mixing them up produces silent surprises, not errors.</span>
+<span id="cb7-225"><a href="#cb7-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-226"><a href="#cb7-226" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**`NA` propagates.** Missing values are "contagious": almost any operation involving an unknown value gives</span>
+<span id="cb7-227"><a href="#cb7-227" aria-hidden="true" tabindex="-1"></a>  an unknown result <span class="co">[</span><span class="ot">@wickham_r4ds</span><span class="co">]</span>. <span class="in">`mean(x)`</span> on a vector with one <span class="in">`NA`</span> is <span class="in">`NA`</span> — you must ask for</span>
+<span id="cb7-228"><a href="#cb7-228" aria-hidden="true" tabindex="-1"></a>  <span class="in">`mean(x, na.rm = TRUE)`</span>. R makes you acknowledge missingness on purpose.</span>
+<span id="cb7-229"><a href="#cb7-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-230"><a href="#cb7-230" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Recycling.** Operating on vectors of different lengths silently *recycles* the shorter one. `c(1,2,3,4) +</span>
+<span id="cb7-231"><a href="#cb7-231" aria-hidden="true" tabindex="-1"></a>  c(0,10)<span class="in">` gives `</span>1 12 3 14`, not an error — occasionally handy, often a bug. R warns only when the longer</span>
+<span id="cb7-232"><a href="#cb7-232" aria-hidden="true" tabindex="-1"></a>  length is not a multiple of the shorter, as in Dayal's <span class="in">`5 12 5`</span> example. <span class="co">[</span><span class="ot">@dayal_r_econ</span><span class="co">]</span></span>
+<span id="cb7-233"><a href="#cb7-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-234"><a href="#cb7-234" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Case and bracket slips.** <span class="in">`Price`</span> and <span class="in">`price`</span> are different objects, and <span class="in">`c[10, 3, 15]`</span> (square brackets)</span>
+<span id="cb7-235"><a href="#cb7-235" aria-hidden="true" tabindex="-1"></a>  is an error where <span class="in">`c(10, 3, 15)`</span> was meant. <span class="co">[</span><span class="ot">@dayal_r_econ</span><span class="co">]</span></span>
+<span id="cb7-236"><a href="#cb7-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-237"><a href="#cb7-237" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Factor surprises.** A grouping variable read as text may need <span class="in">`factor()`</span>; and a factor's *reference level*</span>
+<span id="cb7-238"><a href="#cb7-238" aria-hidden="true" tabindex="-1"></a>  (the one folded into the intercept) is the first alphabetically unless you set it — the source of "why is my</span>
+<span id="cb7-239"><a href="#cb7-239" aria-hidden="true" tabindex="-1"></a>  category missing from the regression?" <span class="co">[</span><span class="ot">@mcnulty_rmodeling</span><span class="co">]</span></span>
+<span id="cb7-240"><a href="#cb7-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-241"><a href="#cb7-241" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-242"><a href="#cb7-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-243"><a href="#cb7-243" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb7-244"><a href="#cb7-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-245"><a href="#cb7-245" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb7-246"><a href="#cb7-246" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Kaplan, *Lessons in Statistical Thinking*** — R as a vector language for statistics: vectorised operations,</span>
+<span id="cb7-247"><a href="#cb7-247" aria-hidden="true" tabindex="-1"></a>  the pipe, and writing small functions, taught with the <span class="in">`mosaic`</span> idiom.</span>
+<span id="cb7-248"><a href="#cb7-248" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dayal, *An Introduction to R for Quantitative Economics*** and ***Quantitative Economics with R*** — the</span>
+<span id="cb7-249"><a href="#cb7-249" aria-hidden="true" tabindex="-1"></a>  learn-by-simulation ethos (Anscombe's quartet, spurious regression) and the data-frame-centred workflow for</span>
+<span id="cb7-250"><a href="#cb7-250" aria-hidden="true" tabindex="-1"></a>  economics. The 2015 book's Chapter 2 supplies the first-session example (price × quantity = expenditure,</span>
+<span id="cb7-251"><a href="#cb7-251" aria-hidden="true" tabindex="-1"></a>  total 559), the case-sensitivity and bracket errors, and the recycling warning (<span class="in">`5 12 5`</span>).</span>
+<span id="cb7-252"><a href="#cb7-252" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wickham, Çetinkaya-Rundel &amp; Grolemund, *R for Data Science*** — reading the pipe as "then"; missing values</span>
+<span id="cb7-253"><a href="#cb7-253" aria-hidden="true" tabindex="-1"></a>  as "contagious"; the copy-and-paste-more-than-twice rule, the <span class="in">`rescale01`</span> example, and the three parts of a</span>
+<span id="cb7-254"><a href="#cb7-254" aria-hidden="true" tabindex="-1"></a>  function.</span>
+<span id="cb7-255"><a href="#cb7-255" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**McNulty, *Explanatory Statistical Modeling in R*** — atomic types and factors, and how the reference level</span>
+<span id="cb7-256"><a href="#cb7-256" aria-hidden="true" tabindex="-1"></a>  of a factor enters a model.</span>
+<span id="cb7-257"><a href="#cb7-257" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Llaudet &amp; Imai, *Data Analysis for Social Science*** — the friendly first-contact path: load a data frame,</span>
+<span id="cb7-258"><a href="#cb7-258" aria-hidden="true" tabindex="-1"></a>  subset it, summarise it, and plot it.</span>
+<span id="cb7-259"><a href="#cb7-259" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*The "calculator with a memory and a vocabulary" picture is this encyclopedia's own.*</span>
+<span id="cb7-260"><a href="#cb7-260" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-261"><a href="#cb7-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-262"><a href="#cb7-262" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb7-263"><a href="#cb7-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-264"><a href="#cb7-264" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** the <span class="co">[</span><span class="ot">Thinking in Dataframes</span><span class="co">](../../content/dataframes/index.qmd)</span> track (the tidyverse verbs for</span>
+<span id="cb7-265"><a href="#cb7-265" aria-hidden="true" tabindex="-1"></a>  wrangling), and <span class="co">[</span><span class="ot">reading &amp; running regressions in R</span><span class="co">](regressions-in-r.qmd)</span> (once the data is in a frame).</span>
+<span id="cb7-266"><a href="#cb7-266" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pairs with:** <span class="co">[</span><span class="ot">reproducible analysis with Quarto</span><span class="co">](reproducible-quarto.qmd)</span> (where this R actually runs) and</span>
+<span id="cb7-267"><a href="#cb7-267" aria-hidden="true" tabindex="-1"></a>  the <span class="co">[</span><span class="ot">computing appendix index</span><span class="co">](index.qmd)</span>.</span>
+<span id="cb7-268"><a href="#cb7-268" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Motivates:** <span class="co">[</span><span class="ot">exploratory data analysis</span><span class="co">](../../content/01-foundations/exploratory-data-analysis.qmd)</span> — the</span>
+<span id="cb7-269"><a href="#cb7-269" aria-hidden="true" tabindex="-1"></a>  Anscombe lesson is the whole reason EDA precedes modelling.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
