@@ -1942,11 +1942,13 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#why-bother-with-matrices" id="toc-why-bother-with-matrices" class="nav-link active" data-scroll-target="#why-bother-with-matrices">Why bother with matrices</a></li>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#sec-idea" id="toc-sec-idea" class="nav-link" data-scroll-target="#sec-idea">The idea in words</a></li>
+  <li><a href="#sec-by-hand" id="toc-sec-by-hand" class="nav-link" data-scroll-target="#sec-by-hand">A whole regression, by hand</a></li>
   <li><a href="#the-setup-one-equation-for-all-n-observations" id="toc-the-setup-one-equation-for-all-n-observations" class="nav-link" data-scroll-target="#the-setup-one-equation-for-all-n-observations">The setup: one equation for all <span class="math inline">n</span> observations</a></li>
   <li><a href="#the-normal-equations-setting-the-gradient-to-zero" id="toc-the-normal-equations-setting-the-gradient-to-zero" class="nav-link" data-scroll-target="#the-normal-equations-setting-the-gradient-to-zero">The normal equations: setting the gradient to zero</a></li>
-  <li><a href="#what-the-formula-says-fitted-values-residuals-and-orthogonality" id="toc-what-the-formula-says-fitted-values-residuals-and-orthogonality" class="nav-link" data-scroll-target="#what-the-formula-says-fitted-values-residuals-and-orthogonality">What the formula <em>says</em>: fitted values, residuals, and orthogonality</a></li>
-  <li><a href="#unbiasedness-the-variance-matrix-and-gaussmarkov-in-three-moves" id="toc-unbiasedness-the-variance-matrix-and-gaussmarkov-in-three-moves" class="nav-link" data-scroll-target="#unbiasedness-the-variance-matrix-and-gaussmarkov-in-three-moves">Unbiasedness, the variance matrix, and Gauss–Markov — in three moves</a></li>
+  <li><a href="#sec-what-it-says" id="toc-sec-what-it-says" class="nav-link" data-scroll-target="#sec-what-it-says">What the formula <em>says</em>: fitted values, residuals, and orthogonality</a></li>
+  <li><a href="#sec-three-moves" id="toc-sec-three-moves" class="nav-link" data-scroll-target="#sec-three-moves">Unbiasedness, the variance matrix, and Gauss–Markov — in three moves</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
   <li><a href="#connections" id="toc-connections" class="nav-link" data-scroll-target="#connections">Connections</a></li>
@@ -1959,7 +1961,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Appendices</li><li class="breadcrumb-item"><a href="../../appendices/math/index.html">Mathematics</a></li><li class="breadcrumb-item"><a href="../../appendices/math/ols-in-matrix-form.html">OLS in Matrix Form</a></li></ol></nav>
 <div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">OLS in Matrix Form</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
-<p class="subtitle lead">One line of linear algebra — <span class="math inline">\hat{\boldsymbol\beta}=(X'X)^{-1}X'y</span> — replaces a page of summation notation and, once you read it, explains everything the scalar formulas only hinted at: what a coefficient <em>is</em>, why collinearity bites, and why OLS is the best you can do among linear estimators.</p>
+<p class="subtitle lead">The formula behind every regression table you have ever read, written so you can see <em>why</em> it works — what a coefficient really is, why overlapping variables break it, and why ordinary least squares is so hard to beat.</p>
 </div>
 
 
@@ -1977,27 +1979,134 @@ window.Quarto = {
 
 
 <div class="lead-kernel">
-<p>Stack the data into a matrix and the whole of least squares collapses to <strong>project <span class="math inline">y</span> onto the columns of <span class="math inline">X</span>.</strong> The estimator, its unbiasedness, its variance, and the Gauss–Markov optimality theorem all fall out of a single formula — and the formula tells you <em>why</em>, not just <em>what</em>.</p>
+<p>A regression with several variables is one question asked of a table of data: <strong>which mix of the columns comes closest to the outcome?</strong> Write the table as a single object — a <em>matrix</em> — and that question becomes one short formula. Every classic result about regression (why it is unbiased, how precise it is, why nothing simpler does better) is that one formula, read in different ways.</p>
 </div>
-<section id="why-bother-with-matrices" class="level2">
-<h2 class="anchored" data-anchor-id="why-bother-with-matrices">Why bother with matrices</h2>
-<p>The scalar formulas for regression — <span class="math inline">\hat\beta_1=\sum(x_i-\bar x)(y_i-\bar y)/\sum(x_i-\bar x)^2</span> and its multivariate cousins — get unwieldy fast. With <span class="math inline">k</span> regressors you are staring at <span class="math inline">k+1</span> coupled normal equations, and every proof (unbiasedness, the variance formula, Gauss–Markov) turns into bookkeeping. Matrix notation is not decoration: it is the language in which the <a href="../../content/03-regression/multiple-regression.html">multiple regression</a> results become <em>short enough to see through</em>. Wooldridge relegates it to an appendix precisely because it “proves some of the results that we either stated without proof, proved only in special cases, or proved through a more cumbersome method” <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>. This is that appendix for this encyclopedia — the canonical home for the <span class="math inline">(X'X)^{-1}</span> fragments that appear inline in <a href="../../content/03-regression/regression-diagnostics.html">regression diagnostics</a> and <a href="../../content/03-regression/heteroskedasticity-and-gls.html">heteroskedasticity &amp; GLS</a>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Where you probably came from — and what you need">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Where you probably came from — and what you need
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>You likely arrived from</strong> <a href="../../content/03-regression/multiple-regression.html">multiple regression</a> (“the full derivation is in the appendix”), <a href="../../content/03-regression/regression-diagnostics.html">regression diagnostics</a> (where <em>leverage</em> comes from), <a href="../../content/03-regression/heteroskedasticity-and-gls.html">robust standard errors</a> (where the “sandwich” comes from), or <a href="../../content/04-predictive/double-lasso.html">double lasso</a> (partialling out).</p>
+<p><strong>You need:</strong> the idea of a regression line, and a picture of data as a table — one row per observation, one column per variable. <strong>You don’t need</strong> prior linear algebra: the handful of operations used here are explained as they appear, and the <a href="../../appendices/math/linear-algebra.html">linear algebra appendix</a> has the rest.</p>
+<p><strong>Jump to what you came for:</strong> <a href="#sec-idea">the idea in words</a> · <a href="#sec-by-hand">a regression by hand</a> · <a href="#sec-what-it-says">leverage and residuals</a> · <a href="#fig-regression-anatomy">what one coefficient means</a> · <a href="#sec-three-moves">unbiasedness, variance, Gauss–Markov</a></p>
+</div>
+</div>
+<section id="why-it-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-it-matters">Why it matters</h2>
+<p>Every regression output you have read — every coefficient, every standard error — comes from the formula on this page (software reaches the same numbers by a numerically safer route, but it is computing <em>this</em>). The textbook versions you meet first, like <span class="math inline">\hat\beta_1=\sum(x_i-\bar x)(y_i-\bar y)/\sum(x_i-\bar x)^2</span>, work for one variable but turn into pages of bookkeeping once you add a second or a third. Matrix notation is not decoration: it is the language in which the <a href="../../content/03-regression/multiple-regression.html">multiple regression</a> results become <em>short enough to see through</em>. Wooldridge keeps it in an appendix precisely because it “proves some of the results that we either stated without proof, proved only in special cases, or proved through a more cumbersome method” <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>. This is that appendix for this encyclopedia — the canonical home for the <span class="math inline">(X'X)^{-1}</span> fragments that appear inline in <a href="../../content/03-regression/regression-diagnostics.html">regression diagnostics</a> and <a href="../../content/03-regression/heteroskedasticity-and-gls.html">heteroskedasticity &amp; GLS</a>.</p>
+</section>
+<section id="sec-idea" class="level2">
+<h2 class="anchored" data-anchor-id="sec-idea">The idea in words</h2>
+<p>Picture your outcome — say, earnings for 500 people — as one long list of numbers. Each explanatory variable (education, experience, …) is another list of the same length. Regression asks: <strong>what weighted mix of the explanatory lists gets closest to the earnings list?</strong> “Closest” means the smallest total of squared misses — that is all <em>least squares</em> means.</p>
+<p>There is a picture that makes the answer obvious. Think of the explanatory variables as defining a flat surface, and the outcome as a point floating somewhere above it. The best mix is the point on the surface <strong>directly beneath</strong> the outcome — its <em>shadow</em>, cast straight down. Statisticians call this a <strong>projection</strong>. Two things follow from the picture, and they turn out to be the two facts everything else rests on:</p>
+<ol type="1">
+<li><strong>The fitted values are the shadow</strong> — the part of the outcome the variables <em>can</em> explain.</li>
+<li><strong>The residuals are the drop from the point to its shadow</strong> — and because the light falls straight down, that drop is at right angles to the surface. In data terms: <strong>the residuals are uncorrelated with every explanatory variable.</strong> If they weren’t, you could tilt the mix to reach closer, and the shadow wouldn’t be the best one.</li>
+</ol>
+<p>The algebra below is this picture, written down so it works for any number of variables.</p>
+</section>
+<section id="sec-by-hand" class="level2">
+<h2 class="anchored" data-anchor-id="sec-by-hand">A whole regression, by hand</h2>
+<p>Before any general notation, here is the entire procedure on the smallest possible dataset — three observations, one explanatory variable — so every symbol later has a concrete meaning.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">observation</th>
+<th style="text-align: center;"><span class="math inline">x</span></th>
+<th style="text-align: center;"><span class="math inline">y</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">4</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 1 — build the table <span class="math inline">X</span>.</strong> One row per observation; a column of ones (for the intercept), then the <span class="math inline">x</span> column. The outcome is the list <span class="math inline">y</span>: <span class="math display">
+X=\begin{pmatrix}1&amp;1\\1&amp;2\\1&amp;3\end{pmatrix},\qquad y=\begin{pmatrix}1\\3\\4\end{pmatrix}.
+</span></p>
+<p><strong>Step 2 — measure how the columns overlap: <span class="math inline">X'X</span>.</strong> (<span class="math inline">X'</span>, read “X transpose”, is <span class="math inline">X</span> turned on its side.) Each entry pairs up two columns and adds the products: <span class="math display">
+X'X=\begin{pmatrix}3&amp;6\\6&amp;14\end{pmatrix}
+\quad\text{— that is: } \begin{pmatrix} n &amp; \sum x\\ \sum x &amp; \sum x^2\end{pmatrix}.
+</span></p>
+<p><strong>Step 3 — measure how each column lines up with the outcome: <span class="math inline">X'y</span></strong> <span class="math display">
+X'y=\begin{pmatrix}8\\19\end{pmatrix}
+\quad\text{— that is: } \begin{pmatrix}\sum y\\ \sum xy\end{pmatrix}.
+</span></p>
+<p><strong>Step 4 — “divide” the second by the first.</strong> Matrices don’t divide; instead you multiply by the <em>inverse</em> <span class="math inline">(X'X)^{-1}</span>, the matrix that undoes <span class="math inline">X'X</span>. For a <span class="math inline">2\times2</span> matrix it is quick — swap the diagonal, flip the signs off it, divide by <span class="math inline">3\cdot14-6\cdot6=6</span>: <span class="math display">
+(X'X)^{-1}=\frac16\begin{pmatrix}14&amp;-6\\-6&amp;3\end{pmatrix},\qquad
+\hat{\boldsymbol\beta}=(X'X)^{-1}X'y=\frac16\begin{pmatrix}14\cdot8-6\cdot19\\-6\cdot8+3\cdot19\end{pmatrix}
+=\begin{pmatrix}-1/3\\ \ 3/2\end{pmatrix}.
+</span> So the fitted line is <span class="math inline">\hat y=-\tfrac13+\tfrac32x</span> — exactly what the one-variable textbook formula gives (slope <span class="math inline">=3/2</span>, intercept <span class="math inline">=\bar y-1.5\,\bar x=8/3-3</span>).</p>
+<p><strong>Step 5 — check the picture.</strong> Fitted values: <span class="math inline">7/6,\ 8/3,\ 25/6</span>. Residuals (actual minus fitted): <span class="math inline">-1/6,\ 1/3,\ -1/6</span>. They <strong>sum to zero</strong>, and paired with <span class="math inline">x</span> they <strong>cancel</strong>: <span class="math inline">1(-\tfrac16)+2(\tfrac13)+3(-\tfrac16)=0</span>. That is the “drop at right angles” from the picture, in arithmetic. Nothing here was special to three rows or one variable — which is the whole point of the general version.</p>
 </section>
 <section id="the-setup-one-equation-for-all-n-observations" class="level2">
 <h2 class="anchored" data-anchor-id="the-setup-one-equation-for-all-n-observations">The setup: one equation for all <span class="math inline">n</span> observations</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Notation key — open if a symbol is unfamiliar">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Notation key — open if a symbol is unfamiliar
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><span class="math inline">n</span> — number of observations (rows); <span class="math inline">k</span> — number of explanatory variables.</li>
+<li><span class="math inline">y</span> — the <span class="math inline">n</span> outcomes stacked in a column. <span class="math inline">X</span> — the data table: a column of ones, then one column per variable, so it is <span class="math inline">n</span> rows by <span class="math inline">k+1</span> columns.</li>
+<li><span class="math inline">\boldsymbol\beta</span> — the true coefficients (intercept first); <span class="math inline">\hat{\boldsymbol\beta}</span> — our estimates of them.</li>
+<li><span class="math inline">u</span> — the true errors; <span class="math inline">\hat u</span> — the residuals we actually observe.</li>
+<li><span class="math inline">X'</span> — <span class="math inline">X</span> transposed (rows become columns). <span class="math inline">(X'X)^{-1}</span> — the inverse of <span class="math inline">X'X</span>, the matrix that undoes it.</li>
+<li><span class="math inline">I_n</span> — the identity matrix: ones on the diagonal, zeros elsewhere; multiplying by it changes nothing.</li>
+<li><span class="math inline">\mathrm{E}(\cdot\mid X)</span>, <span class="math inline">\operatorname{Var}(\cdot\mid X)</span> — average and spread over repeated samples, holding the explanatory data fixed.</li>
+</ul>
+</div>
+</div>
+</div>
 <p>Write the model for observation <span class="math inline">t</span> as <span class="math inline">y_t = \beta_0 + \beta_1 x_{t1} + \dots + \beta_k x_{tk} + u_t</span>. Now stack: let <span class="math inline">y</span> be the <span class="math inline">n\times 1</span> vector of outcomes, <span class="math inline">X</span> the <span class="math inline">n\times(k+1)</span> matrix whose first column is all ones (the intercept) and whose other columns are the regressors, <span class="math inline">\boldsymbol\beta</span> the <span class="math inline">(k+1)\times 1</span> vector of parameters, and <span class="math inline">u</span> the <span class="math inline">n\times 1</span> vector of errors. Then the entire sample is <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span> <span class="math display">
 y = X\boldsymbol\beta + u .
-</span> That one line holds all <span class="math inline">n</span> equations at once. Everything below is what you can <em>do</em> with it.</p>
+</span> That one line holds all <span class="math inline">n</span> equations at once — it is the three-row table above, for any number of rows and columns. Everything below is what you can <em>do</em> with it.</p>
 </section>
 <section id="the-normal-equations-setting-the-gradient-to-zero" class="level2">
 <h2 class="anchored" data-anchor-id="the-normal-equations-setting-the-gradient-to-zero">The normal equations: setting the gradient to zero</h2>
 <p>OLS picks <span class="math inline">\hat{\boldsymbol\beta}</span> to minimise the sum of squared residuals, now a clean quadratic form <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>: <span class="math display">
 \mathrm{SSR}(b) = (y - Xb)'(y - Xb) .
-</span> Differentiate with respect to the vector <span class="math inline">b</span> and set the gradient to zero — the multivariable version of the first-order condition. The derivative of <span class="math inline">(y_t - x_t b)^2</span> is <span class="math inline">-2(y_t - x_t b)x_t'</span>, so summing gives the <strong>first-order condition</strong> <span class="math inline">X'(y - X\hat{\boldsymbol\beta}) = 0</span>, i.e.&nbsp;the <strong>normal equations</strong> <span class="math display">
+</span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> <span class="math inline">y-Xb</span> is the list of misses for a candidate set of coefficients <span class="math inline">b</span>; multiplying a list by its own transpose squares each miss and adds them up. Same “sum of squared misses” as always, written in one stroke.</p>
+</blockquote>
+<p>Differentiate with respect to the vector <span class="math inline">b</span> and set the gradient (the slope in every direction at once) to zero — the multivariable version of “the bottom of a bowl is where it is flat”. The derivative of <span class="math inline">(y_t - x_t b)^2</span> is <span class="math inline">-2(y_t - x_t b)x_t'</span>, so summing gives the <strong>first-order condition</strong> <span class="math inline">X'(y - X\hat{\boldsymbol\beta}) = 0</span>, i.e.&nbsp;the <strong>normal equations</strong> <span class="math display">
 (X'X)\,\hat{\boldsymbol\beta} = X'y .
-</span> If the <span class="math inline">(k+1)\times(k+1)</span> matrix <span class="math inline">X'X</span> is invertible, premultiply by <span class="math inline">(X'X)^{-1}</span> to get the formula that runs every regression on Earth <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>: <span class="math display">
+</span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> “the residuals are at right angles to every column of <span class="math inline">X</span>” — the shadow picture. In the worked example these were the two checks in Step 5.</p>
+</blockquote>
+<p>If the <span class="math inline">(k+1)\times(k+1)</span> matrix <span class="math inline">X'X</span> is invertible, multiply both sides on the left by <span class="math inline">(X'X)^{-1}</span> to get the formula behind every regression you will ever run <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>: <span class="math display">
 \boxed{\;\hat{\boldsymbol\beta} = (X'X)^{-1}X'y\;}
 </span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> (how each variable lines up with the outcome), adjusted for (how the variables overlap with <em>each other</em>). The adjustment is what stops two related variables from both taking credit for the same thing.</p>
+</blockquote>
 <div class="callout callout-style-default callout-warning callout-titled" title="The tempting cancellation that is wrong">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2011,11 +2120,11 @@ y = X\boldsymbol\beta + u .
 <p>It is tempting to write <span class="math inline">(X'X)^{-1}X'y = X^{-1}(X')^{-1}X'y = X^{-1}y</span>. The flaw: <span class="math inline">X</span> is <span class="math inline">n\times(k+1)</span>, almost never square, so it <em>has no inverse</em> — you cannot split <span class="math inline">(X'X)^{-1}</span> into <span class="math inline">X^{-1}(X')^{-1}</span> unless <span class="math inline">n=k+1</span>, which never happens in practice <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>. The whole point of <span class="math inline">(X'X)^{-1}</span> is that it inverts a small square matrix built from a tall rectangular one.</p>
 </div>
 </div>
-<p><strong>Invertibility is the no-collinearity assumption.</strong> <span class="math inline">X'X</span> is invertible exactly when <span class="math inline">X</span> has full column rank <span class="math inline">k+1</span> — when the regressor columns are linearly independent. This is the matrix version of “no perfect collinearity”: if one regressor is an exact linear combination of the others, <span class="math inline">X'X</span> is singular and <span class="math inline">\hat{\boldsymbol\beta}</span> is not unique <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>. Near-collinearity doesn’t break the formula but inflates <span class="math inline">(X'X)^{-1}</span>, which is why standard errors explode.</p>
+<p><strong>Invertibility is the no-collinearity assumption.</strong> <span class="math inline">X'X</span> is invertible exactly when <span class="math inline">X</span> has full column rank <span class="math inline">k+1</span> — when no column can be built out of the others (the regressor columns are linearly independent). This is the matrix version of “no perfect collinearity”: if one regressor is an exact linear combination of the others — say, income in rupees <em>and</em> income in thousands of rupees — <span class="math inline">X'X</span> is singular (it has no inverse, like dividing by zero) and <span class="math inline">\hat{\boldsymbol\beta}</span> is not unique <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>. Near-collinearity doesn’t break the formula but inflates <span class="math inline">(X'X)^{-1}</span>, which is why standard errors explode.</p>
 </section>
-<section id="what-the-formula-says-fitted-values-residuals-and-orthogonality" class="level2">
-<h2 class="anchored" data-anchor-id="what-the-formula-says-fitted-values-residuals-and-orthogonality">What the formula <em>says</em>: fitted values, residuals, and orthogonality</h2>
-<p>The fitted values are <span class="math inline">\hat y = X\hat{\boldsymbol\beta}</span> and the residuals are <span class="math inline">\hat u = y - \hat y</span>. The first-order condition <span class="math inline">X'\hat u = 0</span> carries real content: because the first column of <span class="math inline">X</span> is ones, it forces the residuals to <strong>sum to zero</strong> and to be <strong>uncorrelated with every regressor</strong> in-sample <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>. Substituting <span class="math inline">\hat{\boldsymbol\beta}</span> makes <span class="math inline">\hat y = X(X'X)^{-1}X'y = Hy</span>, where <span class="math inline">H = X(X'X)^{-1}X'</span> is the <strong>hat matrix</strong> — the orthogonal projector onto the column space of <span class="math inline">X</span>. Its complement <span class="math inline">M = I_n - H</span> is the <strong>residual maker</strong>: <span class="math inline">\hat u = My</span>. Both are symmetric and idempotent (<span class="math inline">H^2=H</span>, <span class="math inline">M^2=M</span>), the algebraic signature of a projection. This <span class="math inline">H</span> is the same object whose diagonal entries are the <strong>leverages</strong> <span class="math inline">h_{tt}</span> used in <a href="../../content/03-regression/regression-diagnostics.html">regression diagnostics</a> — a point’s leverage is literally how much weight the projection puts on its own outcome.</p>
+<section id="sec-what-it-says" class="level2">
+<h2 class="anchored" data-anchor-id="sec-what-it-says">What the formula <em>says</em>: fitted values, residuals, and orthogonality</h2>
+<p>The fitted values are <span class="math inline">\hat y = X\hat{\boldsymbol\beta}</span> and the residuals are <span class="math inline">\hat u = y - \hat y</span>. The first-order condition <span class="math inline">X'\hat u = 0</span> carries real content: because the first column of <span class="math inline">X</span> is ones, it forces the residuals to <strong>sum to zero</strong> and to be <strong>uncorrelated with every regressor</strong> in-sample <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>. Substituting <span class="math inline">\hat{\boldsymbol\beta}</span> makes <span class="math inline">\hat y = X(X'X)^{-1}X'y = Hy</span>, where <span class="math inline">H = X(X'X)^{-1}X'</span> is the <strong>hat matrix</strong> — the orthogonal projector onto the column space of <span class="math inline">X</span> (the machine that casts the shadow: it “puts the hat on <span class="math inline">y</span>”). Its complement <span class="math inline">M = I_n - H</span> is the <strong>residual maker</strong>: <span class="math inline">\hat u = My</span>. Both are symmetric and idempotent (<span class="math inline">H^2=H</span>, <span class="math inline">M^2=M</span>) — doing it twice is the same as doing it once, just as the shadow of a shadow is the shadow — the algebraic signature of a projection. This <span class="math inline">H</span> is the same object whose diagonal entries are the <strong>leverages</strong> <span class="math inline">h_{tt}</span> used in <a href="../../content/03-regression/regression-diagnostics.html">regression diagnostics</a> — a point’s leverage is literally how much weight the projection puts on its own outcome. In the worked example the leverages are <span class="math inline">5/6,\ 1/3,\ 5/6</span>: the two end points pull the line far harder than the middle one, which is why outlying <span class="math inline">x</span> values deserve a second look.</p>
 <div class="callout callout-style-default callout-note callout-titled" title="Regression anatomy — what a single coefficient *means*">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2080,7 +2189,7 @@ y = X\boldsymbol\beta + u .
 <div id="fig-regression-anatomy" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-regression-anatomy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="ols-in-matrix-form_files/figure-html/fig-regression-anatomy-output-1.png" width="814" height="381" class="figure-img">
+<img src="ols-in-matrix-form_files/figure-html/fig-regression-anatomy-output-1.png" width="814" height="379" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-regression-anatomy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Regression anatomy (Frisch–Waugh–Lovell), verified numerically. Left: y against x₁ raw — the cloud’s slope is contaminated by x₂, which is correlated with both. Right: after partialling x₂ out of <em>both</em> y and x₁ (taking residuals from a regression on [1, x₂]), the slope of the partialled scatter equals the multiple-regression coefficient β̂₁ from (X’X)⁻¹X’y to machine precision. A coefficient in a multiple regression is a simple slope on the orthogonalised regressor — exactly what the matrix formula computes for all coefficients at once.
@@ -2090,16 +2199,20 @@ Figure&nbsp;1: Regression anatomy (Frisch–Waugh–Lovell), verified numericall
 </div>
 </div>
 </section>
-<section id="unbiasedness-the-variance-matrix-and-gaussmarkov-in-three-moves" class="level2">
-<h2 class="anchored" data-anchor-id="unbiasedness-the-variance-matrix-and-gaussmarkov-in-three-moves">Unbiasedness, the variance matrix, and Gauss–Markov — in three moves</h2>
-<p>With the matrix formula, the three central OLS results are a few lines each <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>.</p>
-<p><strong>Unbiasedness.</strong> Substitute <span class="math inline">y = X\boldsymbol\beta + u</span>: <span class="math display">
+<section id="sec-three-moves" class="level2">
+<h2 class="anchored" data-anchor-id="sec-three-moves">Unbiasedness, the variance matrix, and Gauss–Markov — in three moves</h2>
+<p>With the matrix formula, the three central OLS results are a few lines each <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>. Each comes with what it means before how it is shown.</p>
+<p><strong>Unbiasedness</strong> — <em>on average over repeated samples, the estimate lands on the truth.</em> Substitute <span class="math inline">y = X\boldsymbol\beta + u</span>: <span class="math display">
 \hat{\boldsymbol\beta} = (X'X)^{-1}X'(X\boldsymbol\beta + u) = \boldsymbol\beta + (X'X)^{-1}X'u .
-</span> The estimator equals truth plus a linear function of the errors. Take expectations conditional on <span class="math inline">X</span>; under <span class="math inline">\mathrm{E}(u\mid X)=0</span> the second term vanishes, so <span class="math inline">\mathrm{E}(\hat{\boldsymbol\beta}\mid X)=\boldsymbol\beta</span>.</p>
-<p><strong>The variance–covariance matrix.</strong> From the same <span class="math inline">\hat{\boldsymbol\beta} - \boldsymbol\beta = (X'X)^{-1}X'u</span>, and assuming homoskedastic, serially uncorrelated errors so that <span class="math inline">\operatorname{Var}(u\mid X)=\sigma^2 I_n</span>, <span class="math display">
+</span> The estimator equals truth plus a linear function of the errors. Take expectations conditional on <span class="math inline">X</span>; under <span class="math inline">\mathrm{E}(u\mid X)=0</span> — the errors carry no systematic pattern related to the explanatory variables — the second term vanishes, so <span class="math inline">\mathrm{E}(\hat{\boldsymbol\beta}\mid X)=\boldsymbol\beta</span>.</p>
+<p><strong>The variance–covariance matrix</strong> — <em>how much the estimates would bounce around from sample to sample.</em> From the same <span class="math inline">\hat{\boldsymbol\beta} - \boldsymbol\beta = (X'X)^{-1}X'u</span>, and assuming homoskedastic, serially uncorrelated errors (every error has the same spread, and no error predicts another) so that <span class="math inline">\operatorname{Var}(u\mid X)=\sigma^2 I_n</span>, <span class="math display">
 \operatorname{Var}(\hat{\boldsymbol\beta}\mid X) = (X'X)^{-1}X'(\sigma^2 I_n)X(X'X)^{-1} = \sigma^2 (X'X)^{-1} .
-</span> The <span class="math inline">j</span>th diagonal entry is <span class="math inline">\operatorname{Var}(\hat\beta_j\mid X)</span>; the off-diagonals are the coefficient covariances. When <span class="math inline">\operatorname{Var}(u\mid X)=\Omega\neq\sigma^2 I</span>, the middle collapse fails and you get the <strong>sandwich</strong> <span class="math inline">\left(X'X\right)^{-1}(X'\Omega X)(X'X)^{-1}</span> — the object <a href="../../content/03-regression/heteroskedasticity-and-gls.html">robust/White standard errors</a> estimate.</p>
-<p><strong>Gauss–Markov (OLS is BLUE).</strong> Under the <a href="../../content/03-regression/gauss-markov-assumptions.html">Gauss–Markov assumptions</a>, any linear unbiased estimator is <span class="math inline">\tilde{\boldsymbol\beta}=Ay</span> with <span class="math inline">AX=I</span>. Its variance minus OLS’s works out to <span class="math inline">\sigma^2 A M A'</span> with <span class="math inline">M = I_n - X(X'X)^{-1}X'</span> the residual maker; since <span class="math inline">M</span> is symmetric and idempotent, <span class="math inline">AMA'</span> is positive semi-definite, so <em>no</em> linear unbiased estimator beats OLS on variance <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>. That is the <strong>B</strong>est <strong>L</strong>inear <strong>U</strong>nbiased <strong>E</strong>stimator theorem in three lines — a statement the scalar approach can only gesture at.</p>
+</span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> precision = (noise in the outcome) ÷ (how much independent information the explanatory variables carry). Spread-out, non-overlapping variables make <span class="math inline">X'X</span> “big”, its inverse small, and the standard errors tight; overlapping variables do the opposite.</p>
+</blockquote>
+<p>The <span class="math inline">j</span>th diagonal entry is <span class="math inline">\operatorname{Var}(\hat\beta_j\mid X)</span>; the off-diagonals are the coefficient covariances. When <span class="math inline">\operatorname{Var}(u\mid X)=\Omega\neq\sigma^2 I</span>, the middle collapse fails and you get the <strong>sandwich</strong> <span class="math inline">\left(X'X\right)^{-1}(X'\Omega X)(X'X)^{-1}</span> — two slices of the same bread around a filling that describes the uneven noise — the object <a href="../../content/03-regression/heteroskedasticity-and-gls.html">robust/White standard errors</a> estimate.</p>
+<p><strong>Gauss–Markov (OLS is BLUE)</strong> — <em>among all estimators that are linear in <span class="math inline">y</span> and unbiased, none is more precise than OLS.</em> Under the <a href="../../content/03-regression/gauss-markov-assumptions.html">Gauss–Markov assumptions</a>, any linear unbiased estimator is <span class="math inline">\tilde{\boldsymbol\beta}=Ay</span> with <span class="math inline">AX=I</span>. Its variance minus OLS’s works out to <span class="math inline">\sigma^2 A M A'</span> with <span class="math inline">M = I_n - X(X'X)^{-1}X'</span> the residual maker; since <span class="math inline">M</span> is symmetric and idempotent, <span class="math inline">AMA'</span> is positive semi-definite — it can never be negative in any direction — so <em>no</em> linear unbiased estimator beats OLS on variance <span class="citation" data-cites="wooldridge_intro">(<a href="#ref-wooldridge_intro" role="doc-biblioref">Wooldridge 2019</a>)</span>. That is the <strong>B</strong>est <strong>L</strong>inear <strong>U</strong>nbiased <strong>E</strong>stimator theorem in three lines — a statement the scalar approach can only gesture at.</p>
 </section>
 <section id="common-pitfalls" class="level2">
 <h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
@@ -2125,7 +2238,7 @@ Figure&nbsp;1: Regression anatomy (Frisch–Waugh–Lovell), verified numericall
 <section id="from-the-sources" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="from-the-sources">From the sources</h2>
 <div class="callout callout-style-default callout-note callout-titled" title="Who says what">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2134,13 +2247,14 @@ Figure&nbsp;1: Regression anatomy (Frisch–Waugh–Lovell), verified numericall
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
 <li><strong>Wooldridge, <em>Introductory Econometrics</em>, Appendix E (“The Linear Regression Model in Matrix Form”)</strong> — the stacked model <span class="math inline">y=X\boldsymbol\beta+u</span>; SSR as a quadratic form; the first-order condition <span class="math inline">X'\hat u=0</span>, the normal equations <span class="math inline">(X'X)\hat{\boldsymbol\beta}=X'y</span>, and <span class="math inline">\hat{\boldsymbol\beta}=(X'X)^{-1}X'y</span>; the warning against the <span class="math inline">X^{-1}</span> cancellation; rank / no-collinearity as invertibility of <span class="math inline">X'X</span>; Theorems E.1–E.3 (unbiasedness, <span class="math inline">\operatorname{Var}=\sigma^2(X'X)^{-1}</span>, and the full Gauss–Markov proof via the idempotent residual maker <span class="math inline">M</span>).</li>
 <li><strong>Angrist &amp; Pischke, <em>Mostly Harmless Econometrics</em></strong> — the <strong>regression anatomy</strong> formula <span class="math inline">\hat\beta_k=\operatorname{Cov}(y,\tilde x_k)/\operatorname{Var}(\tilde x_k)</span> (Frisch–Waugh–Lovell): each coefficient is a simple slope on the partialled-out regressor — the reading of <span class="math inline">(X'X)^{-1}X'y</span> used in the figure.</li>
 <li><strong>Angrist &amp; Pischke, <em>Mastering ’Metrics</em></strong> — the plain-language framing that a regression coefficient is a variance-weighted, other-things-held-fixed comparison, motivating why the matrix machinery is worth the trouble.</li>
 <li><strong>Ashley, <em>Fundamentals of Applied Econometrics</em></strong> — the caution that BLUE is conditional on its assumptions, and that efficiency claims fail under heteroskedasticity / non-normal errors.</li>
+<li><em>The three-observation worked example and the shadow picture are this encyclopedia’s own illustrations of Wooldridge’s Appendix E results.</em></li>
 </ul>
 </div>
 </div>
@@ -2149,7 +2263,7 @@ Figure&nbsp;1: Regression anatomy (Frisch–Waugh–Lovell), verified numericall
 <section id="connections" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
 <ul>
-<li><strong>Builds on:</strong> <a href="../../content/03-regression/simple-linear-regression.html">simple</a> and <a href="../../content/03-regression/multiple-regression.html">multiple regression</a> (the scalar formulas this generalises), and the linear-algebra of projections.</li>
+<li><strong>Builds on:</strong> <a href="../../content/03-regression/simple-linear-regression.html">simple</a> and <a href="../../content/03-regression/multiple-regression.html">multiple regression</a> (the scalar formulas this generalises), and the <a href="../../appendices/math/linear-algebra.html">linear algebra of projections</a>.</li>
 <li><strong>Underwrites:</strong> <a href="../../content/03-regression/regression-diagnostics.html">regression diagnostics</a> (the hat matrix <span class="math inline">H</span> and leverage) and <a href="../../content/03-regression/heteroskedasticity-and-gls.html">heteroskedasticity, robust errors &amp; GLS</a> (the sandwich variance is <span class="math inline">\sigma^2(X'X)^{-1}</span> with a non-scalar middle).</li>
 <li><strong>Leads to:</strong> <a href="../../appendices/math/asymptotics.html">asymptotics — consistency &amp; convergence</a>, where the <em>finite-sample</em> <span class="math inline">\mathrm{E}(u\mid X)=0</span> story is replaced by the weaker large-sample condition <span class="math inline">\operatorname{plim}\,n^{-1}X'u=0</span> that identifies OLS when strict exogeneity fails.</li>
 </ul>
@@ -2641,153 +2755,282 @@ Wooldridge, Jeffrey M. 2019. <em>Introductory Econometrics: A Modern Approach</e
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "OLS in Matrix Form"</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "One line of linear algebra — $\\hat{\\boldsymbol\\beta}=(X'X)^{-1}X'y$ — replaces a page of summation notation and, once you read it, explains everything the scalar formulas only hinted at: what a coefficient *is*, why collinearity bites, and why OLS is the best you can do among linear estimators."</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "The formula behind every regression table you have ever read, written so you can see *why* it works — what a coefficient really is, why overlapping variables break it, and why ordinary least squares is so hard to beat."</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.lead-kernel}</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Stack the data into a matrix and the whole of least squares collapses to **project $y$ onto the columns of $X$.** The estimator, its unbiasedness, its variance, and the Gauss–Markov optimality theorem all fall out of a single formula — and the formula tells you *why*, not just *what*.</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why bother with matrices</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>The scalar formulas for regression — $\hat\beta_1=\sum(x_i-\bar x)(y_i-\bar y)/\sum(x_i-\bar x)^2$ and its multivariate cousins — get unwieldy fast. With $k$ regressors you are staring at $k+1$ coupled normal equations, and every proof (unbiasedness, the variance formula, Gauss–Markov) turns into bookkeeping. Matrix notation is not decoration: it is the language in which the <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](../../content/03-regression/multiple-regression.qmd)</span> results become *short enough to see through*. Wooldridge relegates it to an appendix precisely because it "proves some of the results that we either stated without proof, proved only in special cases, or proved through a more cumbersome method" <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>. This is that appendix for this encyclopedia — the canonical home for the $(X'X)^{-1}$ fragments that appear inline in <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](../../content/03-regression/regression-diagnostics.qmd)</span> and <span class="co">[</span><span class="ot">heteroskedasticity &amp; GLS</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span>.</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## The setup: one equation for all $n$ observations</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>Write the model for observation $t$ as $y_t = \beta_0 + \beta_1 x_{t1} + \dots + \beta_k x_{tk} + u_t$. Now stack: let $y$ be the $n\times 1$ vector of outcomes, $X$ the $n\times(k+1)$ matrix whose first column is all ones (the intercept) and whose other columns are the regressors, $\boldsymbol\beta$ the $(k+1)\times 1$ vector of parameters, and $u$ the $n\times 1$ vector of errors. Then the entire sample is <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>y = X\boldsymbol\beta + u .</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>That one line holds all $n$ equations at once. Everything below is what you can *do* with it.</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## The normal equations: setting the gradient to zero</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>OLS picks $\hat{\boldsymbol\beta}$ to minimise the sum of squared residuals, now a clean quadratic form <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>:</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>\mathrm{SSR}(b) = (y - Xb)'(y - Xb) .</span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>Differentiate with respect to the vector $b$ and set the gradient to zero — the multivariable version of the first-order condition. The derivative of $(y_t - x_t b)^2$ is $-2(y_t - x_t b)x_t'$, so summing gives the **first-order condition** $X'(y - X\hat{\boldsymbol\beta}) = 0$, i.e. the **normal equations**</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>(X'X)\,\hat{\boldsymbol\beta} = X'y .</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>If the $(k+1)\times(k+1)$ matrix $X'X$ is invertible, premultiply by $(X'X)^{-1}$ to get the formula that runs every regression on Earth <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>:</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>\boxed{\;\hat{\boldsymbol\beta} = (X'X)^{-1}X'y\;}</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="The tempting cancellation that is wrong"}</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>It is tempting to write $(X'X)^{-1}X'y = X^{-1}(X')^{-1}X'y = X^{-1}y$. The flaw: $X$ is $n\times(k+1)$, almost never square, so it *has no inverse* — you cannot split $(X'X)^{-1}$ into $X^{-1}(X')^{-1}$ unless $n=k+1$, which never happens in practice <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>. The whole point of $(X'X)^{-1}$ is that it inverts a small square matrix built from a tall rectangular one.</span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>**Invertibility is the no-collinearity assumption.** $X'X$ is invertible exactly when $X$ has full column rank $k+1$ — when the regressor columns are linearly independent. This is the matrix version of "no perfect collinearity": if one regressor is an exact linear combination of the others, $X'X$ is singular and $\hat{\boldsymbol\beta}$ is not unique <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>. Near-collinearity doesn't break the formula but inflates $(X'X)^{-1}$, which is why standard errors explode.</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>A regression with several variables is one question asked of a table of data: **which mix of the columns</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>comes closest to the outcome?** Write the table as a single object — a *matrix* — and that question becomes</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>one short formula. Every classic result about regression (why it is unbiased, how precise it is, why nothing</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>simpler does better) is that one formula, read in different ways.</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="Where you probably came from — and what you need"}</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>**You likely arrived from** <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](../../content/03-regression/multiple-regression.qmd)</span> ("the</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>full derivation is in the appendix"), <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](../../content/03-regression/regression-diagnostics.qmd)</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>(where *leverage* comes from), <span class="co">[</span><span class="ot">robust standard errors</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>(where the "sandwich" comes from), or <span class="co">[</span><span class="ot">double lasso</span><span class="co">](../../content/04-predictive/double-lasso.qmd)</span> (partialling out).</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>**You need:** the idea of a regression line, and a picture of data as a table — one row per observation,</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>one column per variable. **You don't need** prior linear algebra: the handful of operations used here are</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>explained as they appear, and the <span class="co">[</span><span class="ot">linear algebra appendix</span><span class="co">](linear-algebra.qmd)</span> has the rest.</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>**Jump to what you came for:** <span class="co">[</span><span class="ot">the idea in words</span><span class="co">](#sec-idea)</span> ·</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">a regression by hand</span><span class="co">](#sec-by-hand)</span> · <span class="co">[</span><span class="ot">leverage and residuals</span><span class="co">](#sec-what-it-says)</span> ·</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">what one coefficient means</span><span class="co">](#fig-regression-anatomy)</span> ·</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">unbiasedness, variance, Gauss–Markov</span><span class="co">](#sec-three-moves)</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why it matters</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>Every regression output you have read — every coefficient, every standard error — comes from the formula on</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>this page (software reaches the same numbers by a numerically safer route, but it is computing *this*). The</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>textbook versions you meet first, like</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>$\hat\beta_1=\sum(x_i-\bar x)(y_i-\bar y)/\sum(x_i-\bar x)^2$, work for one variable but turn into pages of</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>bookkeeping once you add a second or a third. Matrix notation is not decoration: it is the language in which</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>the <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](../../content/03-regression/multiple-regression.qmd)</span> results become *short enough to</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>see through*. Wooldridge keeps it in an appendix precisely because it "proves some of the results that we</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>either stated without proof, proved only in special cases, or proved through a more cumbersome method"</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>. This is that appendix for this encyclopedia — the canonical home for the $(X'X)^{-1}$</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>fragments that appear inline in <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](../../content/03-regression/regression-diagnostics.qmd)</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>and <span class="co">[</span><span class="ot">heteroskedasticity &amp; GLS</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span>.</span>
 <span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="fu">## What the formula *says*: fitted values, residuals, and orthogonality</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="fu">## The idea in words {#sec-idea}</span></span>
 <span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>The fitted values are $\hat y = X\hat{\boldsymbol\beta}$ and the residuals are $\hat u = y - \hat y$. The first-order condition $X'\hat u = 0$ carries real content: because the first column of $X$ is ones, it forces the residuals to **sum to zero** and to be **uncorrelated with every regressor** in-sample [@wooldridge_intro]. Substituting $\hat{\boldsymbol\beta}$ makes $\hat y = X(X'X)^{-1}X'y = Hy$, where $H = X(X'X)^{-1}X'$ is the **hat matrix** — the orthogonal projector onto the column space of $X$. Its complement $M = I_n - H$ is the **residual maker**: $\hat u = My$. Both are symmetric and idempotent ($H^2=H$, $M^2=M$), the algebraic signature of a projection. This $H$ is the same object whose diagonal entries are the **leverages** $h_{tt}$ used in <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](../../content/03-regression/regression-diagnostics.qmd)</span> — a point's leverage is literally how much weight the projection puts on its own outcome.</span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Regression anatomy — what a single coefficient *means*"}</span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>The matrix formula is compact but opaque about individual coefficients. Angrist &amp; Pischke's **regression anatomy** formula reopens it <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span>:</span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>\hat\beta_k = \frac{\operatorname{Cov}(y,\ \tilde x_k)}{\operatorname{Var}(\tilde x_k)},</span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>where $\tilde x_k$ is the residual from regressing $x_k$ on *all the other* regressors. In words: each multiple-regression coefficient is the simple slope on the part of its regressor that is orthogonal to everything else — the variable **after partialling out** the others. This is the Frisch–Waugh–Lovell theorem, and the figure below shows it holding exactly.</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>Picture your outcome — say, earnings for 500 people — as one long list of numbers. Each explanatory variable</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>(education, experience, …) is another list of the same length. Regression asks: **what weighted mix of the</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>explanatory lists gets closest to the earnings list?** "Closest" means the smallest total of squared misses —</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>that is all *least squares* means.</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>There is a picture that makes the answer obvious. Think of the explanatory variables as defining a flat</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>surface, and the outcome as a point floating somewhere above it. The best mix is the point on the surface</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>**directly beneath** the outcome — its *shadow*, cast straight down. Statisticians call this a **projection**.</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>Two things follow from the picture, and they turn out to be the two facts everything else rests on:</span>
 <span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-regression-anatomy</span></span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Regression anatomy (Frisch–Waugh–Lovell), verified numerically. Left: y against x₁ raw — the cloud's slope is contaminated by x₂, which is correlated with both. Right: after partialling x₂ out of *both* y and x₁ (taking residuals from a regression on [1, x₂]), the slope of the partialled scatter equals the multiple-regression coefficient β̂₁ from (X'X)⁻¹X'y to machine precision. A coefficient in a multiple regression is a simple slope on the orthogonalised regressor — exactly what the matrix formula computes for all coefficients at once."</span></span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**The fitted values are the shadow** — the part of the outcome the variables *can* explain.</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**The residuals are the drop from the point to its shadow** — and because the light falls straight down, that</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>   drop is at right angles to the surface. In data terms: **the residuals are uncorrelated with every</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>   explanatory variable.** If they weren't, you could tilt the mix to reach closer, and the shadow wouldn't be</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>   the best one.</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>The algebra below is this picture, written down so it works for any number of variables.</span>
 <span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">7</span>)</span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">120</span></span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="co"># x2 correlated with x1 so that the raw x1-slope is biased for beta1</span></span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>x2 <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n)</span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>x1 <span class="op">=</span> <span class="fl">0.8</span> <span class="op">*</span> x2 <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.7</span>, n)</span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="op">-</span><span class="fl">1.5</span>])          <span class="co"># intercept, beta1, beta2</span></span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> beta[<span class="dv">0</span>] <span class="op">+</span> beta[<span class="dv">1</span>]<span class="op">*</span>x1 <span class="op">+</span> beta[<span class="dv">2</span>]<span class="op">*</span>x2 <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.0</span>, n)</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="fu">## A whole regression, by hand {#sec-by-hand}</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>Before any general notation, here is the entire procedure on the smallest possible dataset — three</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>observations, one explanatory variable — so every symbol later has a concrete meaning.</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> observation <span class="pp">|</span> $x$ <span class="pp">|</span> $y$ <span class="pp">|</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span>:-:<span class="pp">|</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 1 <span class="pp">|</span> 1 <span class="pp">|</span> 1 <span class="pp">|</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2 <span class="pp">|</span> 2 <span class="pp">|</span> 3 <span class="pp">|</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 3 <span class="pp">|</span> 3 <span class="pp">|</span> 4 <span class="pp">|</span></span>
 <span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="co"># Full OLS by the matrix formula</span></span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.column_stack([np.ones(n), x1, x2])</span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>beta_hat <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)</span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="co"># Partial x2 out of y and out of x1 (residual maker for W = [1, x2])</span></span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>W <span class="op">=</span> np.column_stack([np.ones(n), x2])</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resid(v):</span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> v <span class="op">-</span> W <span class="op">@</span> np.linalg.solve(W.T <span class="op">@</span> W, W.T <span class="op">@</span> v)</span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>y_t, x1_t <span class="op">=</span> resid(y), resid(x1)</span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>slope_fwl <span class="op">=</span> (x1_t <span class="op">@</span> y_t) <span class="op">/</span> (x1_t <span class="op">@</span> x1_t)    <span class="co"># regression-anatomy slope</span></span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>fig, (axL, axR) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">8.6</span>, <span class="fl">4.0</span>))</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>**Step 1 — build the table $X$.** One row per observation; a column of ones (for the intercept), then the</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>$x$ column. The outcome is the list $y$:</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>X=\begin{pmatrix}1&amp;1<span class="sc">\\</span>1&amp;2<span class="sc">\\</span>1&amp;3\end{pmatrix},\qquad y=\begin{pmatrix}1<span class="sc">\\</span>3<span class="sc">\\</span>4\end{pmatrix}.</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>**Step 2 — measure how the columns overlap: $X'X$.** ($X'$, read "X transpose", is $X$ turned on its side.)</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>Each entry pairs up two columns and adds the products:</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>X'X=\begin{pmatrix}3&amp;6<span class="sc">\\</span>6&amp;14\end{pmatrix}</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>\quad\text{— that is: } \begin{pmatrix} n &amp; \sum x<span class="sc">\\</span> \sum x &amp; \sum x^2\end{pmatrix}.</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>axL.scatter(x1, y, s<span class="op">=</span><span class="dv">14</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>axL.set_xlabel(<span class="st">"$x_1$ (raw)"</span>)<span class="op">;</span> axL.set_ylabel(<span class="st">"$y$ (raw)"</span>)</span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>axL.set_title(<span class="st">"Raw: slope contaminated by $x_2$"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>axR.scatter(x1_t, y_t, s<span class="op">=</span><span class="dv">14</span>, color<span class="op">=</span><span class="st">"#161613"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(x1_t.<span class="bu">min</span>(), x1_t.<span class="bu">max</span>(), <span class="dv">50</span>)</span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>axR.plot(xs, slope_fwl<span class="op">*</span>xs, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">2.4</span>,</span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>         label<span class="op">=</span><span class="ss">f"partialled slope = </span><span class="sc">{</span>slope_fwl<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>axR.set_xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">ilde x_1 = x_1</span><span class="dv">$</span><span class="vs"> after removing </span><span class="dv">$</span><span class="vs">x_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>axR.set_ylabel(<span class="vs">r"</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">ilde y = y</span><span class="dv">$</span><span class="vs"> after removing </span><span class="dv">$</span><span class="vs">x_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>axR.set_title(<span class="vs">r"Partialled: slope </span><span class="dv">$</span><span class="vs">=</span><span class="er">\</span><span class="vs">hat</span><span class="dv">\b</span><span class="vs">eta_1</span><span class="dv">$</span><span class="vs">"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>axR.legend(fontsize<span class="op">=</span><span class="fl">8.5</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="ss">f"Multiple-regression $</span><span class="ch">\\</span><span class="ss">hat</span><span class="ch">\\</span><span class="ss">beta_1$ from $(X'X)^</span><span class="ch">{{</span><span class="ss">-1</span><span class="ch">}}</span><span class="ss">X'y$ = </span><span class="sc">{</span>beta_hat[<span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss">"</span></span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>             <span class="ss">f"   →   matches partialled slope </span><span class="sc">{</span>slope_fwl<span class="sc">:.4f}</span><span class="ss">"</span>, fontsize<span class="op">=</span><span class="fl">10.5</span>)</span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a><span class="fu">## Unbiasedness, the variance matrix, and Gauss–Markov — in three moves</span></span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>With the matrix formula, the three central OLS results are a few lines each <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>.</span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>**Unbiasedness.** Substitute $y = X\boldsymbol\beta + u$:</span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>\hat{\boldsymbol\beta} = (X'X)^{-1}X'(X\boldsymbol\beta + u) = \boldsymbol\beta + (X'X)^{-1}X'u .</span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>The estimator equals truth plus a linear function of the errors. Take expectations conditional on $X$; under $\mathrm{E}(u\mid X)=0$ the second term vanishes, so $\mathrm{E}(\hat{\boldsymbol\beta}\mid X)=\boldsymbol\beta$.</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>**The variance–covariance matrix.** From the same $\hat{\boldsymbol\beta} - \boldsymbol\beta = (X'X)^{-1}X'u$, and assuming homoskedastic, serially uncorrelated errors so that $\operatorname{Var}(u\mid X)=\sigma^2 I_n$,</span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>\operatorname{Var}(\hat{\boldsymbol\beta}\mid X) = (X'X)^{-1}X'(\sigma^2 I_n)X(X'X)^{-1} = \sigma^2 (X'X)^{-1} .</span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>The $j$th diagonal entry is $\operatorname{Var}(\hat\beta_j\mid X)$; the off-diagonals are the coefficient covariances. When $\operatorname{Var}(u\mid X)=\Omega\neq\sigma^2 I$, the middle collapse fails and you get the **sandwich** $\left(X'X\right)^{-1}(X'\Omega X)(X'X)^{-1}$ — the object <span class="co">[</span><span class="ot">robust/White standard errors</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span> estimate.</span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>**Gauss–Markov (OLS is BLUE).** Under the [Gauss–Markov assumptions](../../content/03-regression/gauss-markov-assumptions.qmd), any linear unbiased estimator is $\tilde{\boldsymbol\beta}=Ay$ with $AX=I$. Its variance minus OLS's works out to $\sigma^2 A M A'$ with $M = I_n - X(X'X)^{-1}X'$ the residual maker; since $M$ is symmetric and idempotent, $AMA'$ is positive semi-definite, so *no* linear unbiased estimator beats OLS on variance [@wooldridge_intro]. That is the **B**est **L**inear **U**nbiased **E**stimator theorem in three lines — a statement the scalar approach can only gesture at.</span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where matrix intuition goes wrong"}</span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading $(X'X)^{-1}$ as $X^{-1}(X')^{-1}$.** $X$ is rectangular; it has no inverse. The compact form exists *only* as the inverse of the square Gram matrix $X'X$ <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>.</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>**Step 3 — measure how each column lines up with the outcome: $X'y$**</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>X'y=\begin{pmatrix}8<span class="sc">\\</span>19\end{pmatrix}</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>\quad\text{— that is: } \begin{pmatrix}\sum y<span class="sc">\\</span> \sum xy\end{pmatrix}.</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>**Step 4 — "divide" the second by the first.** Matrices don't divide; instead you multiply by the *inverse*</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>$(X'X)^{-1}$, the matrix that undoes $X'X$. For a $2\times2$ matrix it is quick — swap the diagonal, flip the</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>signs off it, divide by $3\cdot14-6\cdot6=6$:</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>(X'X)^{-1}=\frac16\begin{pmatrix}14&amp;-6<span class="sc">\\</span>-6&amp;3\end{pmatrix},\qquad</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>\hat{\boldsymbol\beta}=(X'X)^{-1}X'y=\frac16\begin{pmatrix}14\cdot8-6\cdot19<span class="sc">\\</span>-6\cdot8+3\cdot19\end{pmatrix}</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>=\begin{pmatrix}-1/3<span class="sc">\\</span> \ 3/2\end{pmatrix}.</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>So the fitted line is $\hat y=-\tfrac13+\tfrac32x$ — exactly what the one-variable textbook formula gives</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>(slope $=3/2$, intercept $=\bar y-1.5\,\bar x=8/3-3$).</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>**Step 5 — check the picture.** Fitted values: $7/6,\ 8/3,\ 25/6$. Residuals (actual minus fitted):</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>$-1/6,\ 1/3,\ -1/6$. They **sum to zero**, and paired with $x$ they **cancel**: $1(-\tfrac16)+2(\tfrac13)+3(-\tfrac16)=0$.</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>That is the "drop at right angles" from the picture, in arithmetic. Nothing here was special to three rows or</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>one variable — which is the whole point of the general version.</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="fu">## The setup: one equation for all $n$ observations</span></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Notation key — open if a symbol is unfamiliar"}</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$n$ — number of observations (rows); $k$ — number of explanatory variables.</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$y$ — the $n$ outcomes stacked in a column. $X$ — the data table: a column of ones, then one column per</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>  variable, so it is $n$ rows by $k+1$ columns.</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\boldsymbol\beta$ — the true coefficients (intercept first); $\hat{\boldsymbol\beta}$ — our estimates of them.</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$u$ — the true errors; $\hat u$ — the residuals we actually observe.</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$X'$ — $X$ transposed (rows become columns). $(X'X)^{-1}$ — the inverse of $X'X$, the matrix that undoes it.</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$I_n$ — the identity matrix: ones on the diagonal, zeros elsewhere; multiplying by it changes nothing.</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\mathrm{E}(\cdot\mid X)$, $\operatorname{Var}(\cdot\mid X)$ — average and spread over repeated samples,</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>  holding the explanatory data fixed.</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>Write the model for observation $t$ as $y_t = \beta_0 + \beta_1 x_{t1} + \dots + \beta_k x_{tk} + u_t$. Now stack: let $y$ be the $n\times 1$ vector of outcomes, $X$ the $n\times(k+1)$ matrix whose first column is all ones (the intercept) and whose other columns are the regressors, $\boldsymbol\beta$ the $(k+1)\times 1$ vector of parameters, and $u$ the $n\times 1$ vector of errors. Then the entire sample is <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>y = X\boldsymbol\beta + u .</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>That one line holds all $n$ equations at once — it is the three-row table above, for any number of rows and</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>columns. Everything below is what you can *do* with it.</span>
 <span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting the assumptions attach to different results.** Unbiasedness needs only $\mathrm{E}(u\mid X)=0$. The tidy $\sigma^2(X'X)^{-1}$ variance and Gauss–Markov *additionally* need homoskedasticity and no serial correlation — drop those and the estimator is still unbiased but the reported standard errors lie <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>.</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="fu">## The normal equations: setting the gradient to zero</span></span>
 <span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating Gauss–Markov as "OLS is best, full stop."** It is best among *linear, unbiased* estimators under its assumptions. A biased estimator (ridge) or a nonlinear one can have smaller mean-squared error, and under non-normal errors OLS need not be efficient at all <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span>.</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Numerically inverting $X'X$ by hand.** With near-collinear regressors, $X'X$ is ill-conditioned and explicit inversion loses precision; software solves the normal equations by QR or Cholesky, not by forming $(X'X)^{-1}$. The formula is for *understanding*, not for computation.</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*, Appendix E ("The Linear Regression Model in Matrix Form")** — the stacked model $y=X\boldsymbol\beta+u$; SSR as a quadratic form; the first-order condition $X'\hat u=0$, the normal equations $(X'X)\hat{\boldsymbol\beta}=X'y$, and $\hat{\boldsymbol\beta}=(X'X)^{-1}X'y$; the warning against the $X^{-1}$ cancellation; rank / no-collinearity as invertibility of $X'X$; Theorems E.1–E.3 (unbiasedness, $\operatorname{Var}=\sigma^2(X'X)^{-1}$, and the full Gauss–Markov proof via the idempotent residual maker $M$).</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mostly Harmless Econometrics*** — the **regression anatomy** formula $\hat\beta_k=\operatorname{Cov}(y,\tilde x_k)/\operatorname{Var}(\tilde x_k)$ (Frisch–Waugh–Lovell): each coefficient is a simple slope on the partialled-out regressor — the reading of $(X'X)^{-1}X'y$ used in the figure.</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mastering 'Metrics*** — the plain-language framing that a regression coefficient is a variance-weighted, other-things-held-fixed comparison, motivating why the matrix machinery is worth the trouble.</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ashley, *Fundamentals of Applied Econometrics*** — the caution that BLUE is conditional on its assumptions, and that efficiency claims fail under heteroskedasticity / non-normal errors.</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>OLS picks $\hat{\boldsymbol\beta}$ to minimise the sum of squared residuals, now a clean quadratic form <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>:</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>\mathrm{SSR}(b) = (y - Xb)'(y - Xb) .</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** $y-Xb$ is the list of misses for a candidate set of coefficients $b$; multiplying a list</span></span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; by its own transpose squares each miss and adds them up. Same "sum of squared misses" as always, written</span></span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; in one stroke.</span></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>Differentiate with respect to the vector $b$ and set the gradient (the slope in every direction at once) to zero — the multivariable version of "the bottom of a bowl is where it is flat". The derivative of $(y_t - x_t b)^2$ is $-2(y_t - x_t b)x_t'$, so summing gives the **first-order condition** $X'(y - X\hat{\boldsymbol\beta}) = 0$, i.e. the **normal equations**</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>(X'X)\,\hat{\boldsymbol\beta} = X'y .</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** "the residuals are at right angles to every column of $X$" — the shadow picture. In the</span></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; worked example these were the two checks in Step 5.</span></span>
 <span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">simple</span><span class="co">](../../content/03-regression/simple-linear-regression.qmd)</span> and <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](../../content/03-regression/multiple-regression.qmd)</span> (the scalar formulas this generalises), and the linear-algebra of projections.</span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Underwrites:** <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](../../content/03-regression/regression-diagnostics.qmd)</span> (the hat matrix $H$ and leverage) and <span class="co">[</span><span class="ot">heteroskedasticity, robust errors &amp; GLS</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span> (the sandwich variance is $\sigma^2(X'X)^{-1}$ with a non-scalar middle).</span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">asymptotics — consistency &amp; convergence</span><span class="co">](asymptotics.qmd)</span>, where the *finite-sample* $\mathrm{E}(u\mid X)=0$ story is replaced by the weaker large-sample condition $\operatorname{plim}\,n^{-1}X'u=0$ that identifies OLS when strict exogeneity fails.</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>If the $(k+1)\times(k+1)$ matrix $X'X$ is invertible, multiply both sides on the left by $(X'X)^{-1}$ to get the formula behind every regression you will ever run <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>:</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>\boxed{\;\hat{\boldsymbol\beta} = (X'X)^{-1}X'y\;}</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** (how each variable lines up with the outcome), adjusted for (how the variables overlap</span></span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; with *each other*). The adjustment is what stops two related variables from both taking credit for the same</span></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; thing.</span></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="The tempting cancellation that is wrong"}</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>It is tempting to write $(X'X)^{-1}X'y = X^{-1}(X')^{-1}X'y = X^{-1}y$. The flaw: $X$ is $n\times(k+1)$, almost never square, so it *has no inverse* — you cannot split $(X'X)^{-1}$ into $X^{-1}(X')^{-1}$ unless $n=k+1$, which never happens in practice <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>. The whole point of $(X'X)^{-1}$ is that it inverts a small square matrix built from a tall rectangular one.</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>**Invertibility is the no-collinearity assumption.** $X'X$ is invertible exactly when $X$ has full column rank $k+1$ — when no column can be built out of the others (the regressor columns are linearly independent). This is the matrix version of "no perfect collinearity": if one regressor is an exact linear combination of the others — say, income in rupees *and* income in thousands of rupees — $X'X$ is singular (it has no inverse, like dividing by zero) and $\hat{\boldsymbol\beta}$ is not unique <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>. Near-collinearity doesn't break the formula but inflates $(X'X)^{-1}$, which is why standard errors explode.</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="fu">## What the formula *says*: fitted values, residuals, and orthogonality {#sec-what-it-says}</span></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>The fitted values are $\hat y = X\hat{\boldsymbol\beta}$ and the residuals are $\hat u = y - \hat y$. The first-order condition $X'\hat u = 0$ carries real content: because the first column of $X$ is ones, it forces the residuals to **sum to zero** and to be **uncorrelated with every regressor** in-sample [@wooldridge_intro]. Substituting $\hat{\boldsymbol\beta}$ makes $\hat y = X(X'X)^{-1}X'y = Hy$, where $H = X(X'X)^{-1}X'$ is the **hat matrix** — the orthogonal projector onto the column space of $X$ (the machine that casts the shadow: it "puts the hat on $y$"). Its complement $M = I_n - H$ is the **residual maker**: $\hat u = My$. Both are symmetric and idempotent ($H^2=H$, $M^2=M$) — doing it twice is the same as doing it once, just as the shadow of a shadow is the shadow — the algebraic signature of a projection. This $H$ is the same object whose diagonal entries are the **leverages** $h_{tt}$ used in <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](../../content/03-regression/regression-diagnostics.qmd)</span> — a point's leverage is literally how much weight the projection puts on its own outcome. In the worked example the leverages are $5/6,\ 1/3,\ 5/6$: the two end points pull the line far harder than the middle one, which is why outlying $x$ values deserve a second look.</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Regression anatomy — what a single coefficient *means*"}</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>The matrix formula is compact but opaque about individual coefficients. Angrist &amp; Pischke's **regression anatomy** formula reopens it <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span>:</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>\hat\beta_k = \frac{\operatorname{Cov}(y,\ \tilde x_k)}{\operatorname{Var}(\tilde x_k)},</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>where $\tilde x_k$ is the residual from regressing $x_k$ on *all the other* regressors. In words: each multiple-regression coefficient is the simple slope on the part of its regressor that is orthogonal to everything else — the variable **after partialling out** the others. This is the Frisch–Waugh–Lovell theorem, and the figure below shows it holding exactly.</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-regression-anatomy</span></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Regression anatomy (Frisch–Waugh–Lovell), verified numerically. Left: y against x₁ raw — the cloud's slope is contaminated by x₂, which is correlated with both. Right: after partialling x₂ out of *both* y and x₁ (taking residuals from a regression on [1, x₂]), the slope of the partialled scatter equals the multiple-regression coefficient β̂₁ from (X'X)⁻¹X'y to machine precision. A coefficient in a multiple regression is a simple slope on the orthogonalised regressor — exactly what the matrix formula computes for all coefficients at once."</span></span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">7</span>)</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">120</span></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="co"># x2 correlated with x1 so that the raw x1-slope is biased for beta1</span></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>x2 <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, n)</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>x1 <span class="op">=</span> <span class="fl">0.8</span> <span class="op">*</span> x2 <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.7</span>, n)</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="op">-</span><span class="fl">1.5</span>])          <span class="co"># intercept, beta1, beta2</span></span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> beta[<span class="dv">0</span>] <span class="op">+</span> beta[<span class="dv">1</span>]<span class="op">*</span>x1 <span class="op">+</span> beta[<span class="dv">2</span>]<span class="op">*</span>x2 <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.0</span>, n)</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="co"># Full OLS by the matrix formula</span></span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.column_stack([np.ones(n), x1, x2])</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>beta_hat <span class="op">=</span> np.linalg.solve(X.T <span class="op">@</span> X, X.T <span class="op">@</span> y)</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a><span class="co"># Partial x2 out of y and out of x1 (residual maker for W = [1, x2])</span></span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>W <span class="op">=</span> np.column_stack([np.ones(n), x2])</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resid(v):</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> v <span class="op">-</span> W <span class="op">@</span> np.linalg.solve(W.T <span class="op">@</span> W, W.T <span class="op">@</span> v)</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>y_t, x1_t <span class="op">=</span> resid(y), resid(x1)</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>slope_fwl <span class="op">=</span> (x1_t <span class="op">@</span> y_t) <span class="op">/</span> (x1_t <span class="op">@</span> x1_t)    <span class="co"># regression-anatomy slope</span></span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>fig, (axL, axR) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">8.6</span>, <span class="fl">4.0</span>))</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>axL.scatter(x1, y, s<span class="op">=</span><span class="dv">14</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>axL.set_xlabel(<span class="st">"$x_1$ (raw)"</span>)<span class="op">;</span> axL.set_ylabel(<span class="st">"$y$ (raw)"</span>)</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>axL.set_title(<span class="st">"Raw: slope contaminated by $x_2$"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>axR.scatter(x1_t, y_t, s<span class="op">=</span><span class="dv">14</span>, color<span class="op">=</span><span class="st">"#161613"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(x1_t.<span class="bu">min</span>(), x1_t.<span class="bu">max</span>(), <span class="dv">50</span>)</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>axR.plot(xs, slope_fwl<span class="op">*</span>xs, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">2.4</span>,</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>         label<span class="op">=</span><span class="ss">f"partialled slope = </span><span class="sc">{</span>slope_fwl<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>axR.set_xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">ilde x_1 = x_1</span><span class="dv">$</span><span class="vs"> after removing </span><span class="dv">$</span><span class="vs">x_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>axR.set_ylabel(<span class="vs">r"</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">ilde y = y</span><span class="dv">$</span><span class="vs"> after removing </span><span class="dv">$</span><span class="vs">x_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>axR.set_title(<span class="vs">r"Partialled: slope </span><span class="dv">$</span><span class="vs">=</span><span class="er">\</span><span class="vs">hat</span><span class="dv">\b</span><span class="vs">eta_1</span><span class="dv">$</span><span class="vs">"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>axR.legend(fontsize<span class="op">=</span><span class="fl">8.5</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="ss">f"Multiple-regression $</span><span class="ch">\\</span><span class="ss">hat</span><span class="ch">\\</span><span class="ss">beta_1$ from $(X'X)^</span><span class="ch">{{</span><span class="ss">-1</span><span class="ch">}}</span><span class="ss">X'y$ = </span><span class="sc">{</span>beta_hat[<span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss">"</span></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>             <span class="ss">f"   →   matches partialled slope </span><span class="sc">{</span>slope_fwl<span class="sc">:.4f}</span><span class="ss">"</span>, fontsize<span class="op">=</span><span class="fl">10.5</span>)</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a><span class="fu">## Unbiasedness, the variance matrix, and Gauss–Markov — in three moves {#sec-three-moves}</span></span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>With the matrix formula, the three central OLS results are a few lines each <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>. Each comes</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>with what it means before how it is shown.</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>**Unbiasedness** — *on average over repeated samples, the estimate lands on the truth.* Substitute $y = X\boldsymbol\beta + u$:</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>\hat{\boldsymbol\beta} = (X'X)^{-1}X'(X\boldsymbol\beta + u) = \boldsymbol\beta + (X'X)^{-1}X'u .</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>The estimator equals truth plus a linear function of the errors. Take expectations conditional on $X$; under $\mathrm{E}(u\mid X)=0$ — the errors carry no systematic pattern related to the explanatory variables — the second term vanishes, so $\mathrm{E}(\hat{\boldsymbol\beta}\mid X)=\boldsymbol\beta$.</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>**The variance–covariance matrix** — *how much the estimates would bounce around from sample to sample.* From the same $\hat{\boldsymbol\beta} - \boldsymbol\beta = (X'X)^{-1}X'u$, and assuming homoskedastic, serially uncorrelated errors (every error has the same spread, and no error predicts another) so that $\operatorname{Var}(u\mid X)=\sigma^2 I_n$,</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>\operatorname{Var}(\hat{\boldsymbol\beta}\mid X) = (X'X)^{-1}X'(\sigma^2 I_n)X(X'X)^{-1} = \sigma^2 (X'X)^{-1} .</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** precision = (noise in the outcome) ÷ (how much independent information the explanatory</span></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; variables carry). Spread-out, non-overlapping variables make $X'X$ "big", its inverse small, and the</span></span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; standard errors tight; overlapping variables do the opposite.</span></span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>The $j$th diagonal entry is $\operatorname{Var}(\hat\beta_j\mid X)$; the off-diagonals are the coefficient covariances. When $\operatorname{Var}(u\mid X)=\Omega\neq\sigma^2 I$, the middle collapse fails and you get the **sandwich** $\left(X'X\right)^{-1}(X'\Omega X)(X'X)^{-1}$ — two slices of the same bread around a filling that describes the uneven noise — the object <span class="co">[</span><span class="ot">robust/White standard errors</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span> estimate.</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>**Gauss–Markov (OLS is BLUE)** — *among all estimators that are linear in $y$ and unbiased, none is more precise than OLS.* Under the [Gauss–Markov assumptions](../../content/03-regression/gauss-markov-assumptions.qmd), any linear unbiased estimator is $\tilde{\boldsymbol\beta}=Ay$ with $AX=I$. Its variance minus OLS's works out to $\sigma^2 A M A'$ with $M = I_n - X(X'X)^{-1}X'$ the residual maker; since $M$ is symmetric and idempotent, $AMA'$ is positive semi-definite — it can never be negative in any direction — so *no* linear unbiased estimator beats OLS on variance [@wooldridge_intro]. That is the **B**est **L**inear **U**nbiased **E**stimator theorem in three lines — a statement the scalar approach can only gesture at.</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where matrix intuition goes wrong"}</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading $(X'X)^{-1}$ as $X^{-1}(X')^{-1}$.** $X$ is rectangular; it has no inverse. The compact form exists *only* as the inverse of the square Gram matrix $X'X$ <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>.</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting the assumptions attach to different results.** Unbiasedness needs only $\mathrm{E}(u\mid X)=0$. The tidy $\sigma^2(X'X)^{-1}$ variance and Gauss–Markov *additionally* need homoskedasticity and no serial correlation — drop those and the estimator is still unbiased but the reported standard errors lie <span class="co">[</span><span class="ot">@wooldridge_intro</span><span class="co">]</span>.</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating Gauss–Markov as "OLS is best, full stop."** It is best among *linear, unbiased* estimators under its assumptions. A biased estimator (ridge) or a nonlinear one can have smaller mean-squared error, and under non-normal errors OLS need not be efficient at all <span class="co">[</span><span class="ot">@ashley_econometrics</span><span class="co">]</span>.</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Numerically inverting $X'X$ by hand.** With near-collinear regressors, $X'X$ is ill-conditioned and explicit inversion loses precision; software solves the normal equations by QR or Cholesky, not by forming $(X'X)^{-1}$. The formula is for *understanding*, not for computation.</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wooldridge, *Introductory Econometrics*, Appendix E ("The Linear Regression Model in Matrix Form")** — the stacked model $y=X\boldsymbol\beta+u$; SSR as a quadratic form; the first-order condition $X'\hat u=0$, the normal equations $(X'X)\hat{\boldsymbol\beta}=X'y$, and $\hat{\boldsymbol\beta}=(X'X)^{-1}X'y$; the warning against the $X^{-1}$ cancellation; rank / no-collinearity as invertibility of $X'X$; Theorems E.1–E.3 (unbiasedness, $\operatorname{Var}=\sigma^2(X'X)^{-1}$, and the full Gauss–Markov proof via the idempotent residual maker $M$).</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mostly Harmless Econometrics*** — the **regression anatomy** formula $\hat\beta_k=\operatorname{Cov}(y,\tilde x_k)/\operatorname{Var}(\tilde x_k)$ (Frisch–Waugh–Lovell): each coefficient is a simple slope on the partialled-out regressor — the reading of $(X'X)^{-1}X'y$ used in the figure.</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke, *Mastering 'Metrics*** — the plain-language framing that a regression coefficient is a variance-weighted, other-things-held-fixed comparison, motivating why the matrix machinery is worth the trouble.</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ashley, *Fundamentals of Applied Econometrics*** — the caution that BLUE is conditional on its assumptions, and that efficiency claims fail under heteroskedasticity / non-normal errors.</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*The three-observation worked example and the shadow picture are this encyclopedia's own illustrations of</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>  Wooldridge's Appendix E results.*</span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">simple</span><span class="co">](../../content/03-regression/simple-linear-regression.qmd)</span> and <span class="co">[</span><span class="ot">multiple regression</span><span class="co">](../../content/03-regression/multiple-regression.qmd)</span> (the scalar formulas this generalises), and the <span class="co">[</span><span class="ot">linear algebra of projections</span><span class="co">](linear-algebra.qmd)</span>.</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Underwrites:** <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](../../content/03-regression/regression-diagnostics.qmd)</span> (the hat matrix $H$ and leverage) and <span class="co">[</span><span class="ot">heteroskedasticity, robust errors &amp; GLS</span><span class="co">](../../content/03-regression/heteroskedasticity-and-gls.qmd)</span> (the sandwich variance is $\sigma^2(X'X)^{-1}$ with a non-scalar middle).</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">asymptotics — consistency &amp; convergence</span><span class="co">](asymptotics.qmd)</span>, where the *finite-sample* $\mathrm{E}(u\mid X)=0$ story is replaced by the weaker large-sample condition $\operatorname{plim}\,n^{-1}X'u=0$ that identifies OLS when strict exogeneity fails.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

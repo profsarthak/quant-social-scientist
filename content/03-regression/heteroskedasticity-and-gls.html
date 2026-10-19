@@ -2050,7 +2050,7 @@ window.Quarto = {
 <div id="fig-robust-coverage" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-robust-coverage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="heteroskedasticity-and-gls_files/figure-html/fig-robust-coverage-output-1.png" width="854" height="356" class="figure-img">
+<img src="heteroskedasticity-and-gls_files/figure-html/fig-robust-coverage-output-1.png" width="855" height="353" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-robust-coverage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Why robust SEs matter, by Monte Carlo (3000 simulated datasets, n=60, true slope = 1). The errors are heteroskedastic — their spread grows with x (left panel shows one dataset). Right: the actual coverage of nominal 95% confidence intervals for the slope. Classical OLS standard errors are biased, so their intervals cover the truth only ~88% of the time — you’d reject true nulls far too often. White/Huber–Eicker robust SEs (computed here by hand as the sandwich estimator) restore coverage to ~95%. Same point estimate; only the standard error — and therefore every test — differs.
@@ -2147,7 +2147,7 @@ Figure&nbsp;1: Why robust SEs matter, by Monte Carlo (3000 simulated datasets, n
 <section id="appendix-the-mathematics" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="appendix-the-mathematics">Appendix · the mathematics</h2>
 <div class="math-appendix">
-<p><strong>The sandwich (White) estimator.</strong> OLS gives <span class="math inline">\hat\beta=(X'X)^{-1}X'y</span> with <span class="math inline">\operatorname{Var}(\hat\beta\mid X)=(X'X)^{-1}\big(X'\,\Omega\,X\big)(X'X)^{-1}</span>, where <span class="math inline">\Omega=\operatorname{diag}(\sigma_i^2)</span>. Under homoskedasticity <span class="math inline">\Omega=\sigma^2 I</span> and this collapses to <span class="math inline">\sigma^2(X'X)^{-1}</span>. White’s insight: you don’t need each <span class="math inline">\sigma_i^2</span> — replace the unknown “meat” <span class="math inline">X'\Omega X=\sum_i \sigma_i^2 x_i x_i'</span> with <span class="math inline">\sum_i \hat u_i^2\, x_i x_i'</span> (HC0), which is consistent for it. That is exactly the <code>meat = X.T @ (e**2 * X)</code> line in the code; the <strong>bread</strong> is <span class="math inline">(X'X)^{-1}</span> on either side.</p>
+<p><strong>The sandwich (White) estimator.</strong> OLS gives <span class="math inline">\hat\beta=(X'X)^{-1}X'y</span> with <span class="math inline">\operatorname{Var}(\hat\beta\mid X)=(X'X)^{-1}\big(X'\,\Omega\,X\big)(X'X)^{-1}</span>, where <span class="math inline">\Omega=\operatorname{diag}(\sigma_i^2)</span>. Under homoskedasticity <span class="math inline">\Omega=\sigma^2 I</span> and this collapses to <span class="math inline">\sigma^2(X'X)^{-1}</span>. White’s insight: you don’t need each <span class="math inline">\sigma_i^2</span> — replace the unknown “meat” <span class="math inline">X'\Omega X=\sum_i \sigma_i^2 x_i x_i'</span> with <span class="math inline">\sum_i \hat u_i^2\, x_i x_i'</span> (HC0), which is consistent for it. That is exactly the <code>meat = X.T @ (e**2 * X)</code> line in the code; the <strong>bread</strong> is <span class="math inline">(X'X)^{-1}</span> on either side. (Where <span class="math inline">(X'X)^{-1}</span> and the sandwich come from, built up from a three-observation example: <a href="../../appendices/math/ols-in-matrix-form.html#sec-three-moves">OLS in matrix form</a>.)</p>
 <p><strong>Why WLS is BLUE.</strong> Dividing through by <span class="math inline">\sqrt{h_i}</span> gives errors <span class="math inline">u_i/\sqrt{h_i}</span> with variance <span class="math inline">\sigma^2 h_i/h_i=\sigma^2</span> — constant. Gauss–Markov now applies to the transformed model, so WLS is BLUE. Equivalently, GLS is <span class="math inline">\hat\beta_{\text{GLS}}=(X'\Omega^{-1}X)^{-1}X'\Omega^{-1}y</span>, the variance-weighted normal equations.</p>
 <p><strong>Newey–West.</strong> Generalises the sandwich meat to include lagged cross-products <span class="math inline">\sum_{\ell} w_\ell \sum_t \hat u_t \hat u_{t-\ell}(x_t x_{t-\ell}' + x_{t-\ell}x_t')</span> with Bartlett weights <span class="math inline">w_\ell</span> tapering to zero — making the SE robust to serial correlation up to the chosen lag.</p>
 </div>
@@ -2825,28 +2825,30 @@ Wooldridge, Jeffrey M. 2019. <em>Introductory Econometrics: A Modern Approach</e
 <span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>$\sigma^2(X'X)^{-1}$. White's insight: you don't need each $\sigma_i^2$ — replace the unknown "meat"</span>
 <span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>$X'\Omega X=\sum_i \sigma_i^2 x_i x_i'$ with $\sum_i \hat u_i^2\, x_i x_i'$ (HC0), which is consistent for it.</span>
 <span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>That is exactly the <span class="in">`meat = X.T @ (e**2 * X)`</span> line in the code; the **bread** is $(X'X)^{-1}$ on either side.</span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>**Why WLS is BLUE.** Dividing through by $\sqrt{h_i}$ gives errors $u_i/\sqrt{h_i}$ with variance</span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>$\sigma^2 h_i/h_i=\sigma^2$ — constant. Gauss–Markov now applies to the transformed model, so WLS is BLUE.</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>Equivalently, GLS is $\hat\beta_{\text{GLS}}=(X'\Omega^{-1}X)^{-1}X'\Omega^{-1}y$, the variance-weighted</span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>normal equations.</span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>**Newey–West.** Generalises the sandwich meat to include lagged cross-products</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>$\sum_{\ell} w_\ell \sum_t \hat u_t \hat u_{t-\ell}(x_t x_{t-\ell}' + x_{t-\ell}x_t')$ with Bartlett weights</span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>$w_\ell$ tapering to zero — making the SE robust to serial correlation up to the chosen lag.</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>(Where $(X'X)^{-1}$ and the sandwich come from, built up from a three-observation example:</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">OLS in matrix form</span><span class="co">](../../appendices/math/ols-in-matrix-form.qmd#sec-three-moves)</span>.)</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>**Why WLS is BLUE.** Dividing through by $\sqrt{h_i}$ gives errors $u_i/\sqrt{h_i}$ with variance</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>$\sigma^2 h_i/h_i=\sigma^2$ — constant. Gauss–Markov now applies to the transformed model, so WLS is BLUE.</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>Equivalently, GLS is $\hat\beta_{\text{GLS}}=(X'\Omega^{-1}X)^{-1}X'\Omega^{-1}y$, the variance-weighted</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>normal equations.</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>**Newey–West.** Generalises the sandwich meat to include lagged cross-products</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>$\sum_{\ell} w_\ell \sum_t \hat u_t \hat u_{t-\ell}(x_t x_{t-\ell}' + x_{t-\ell}x_t')$ with Bartlett weights</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>$w_\ell$ tapering to zero — making the SE robust to serial correlation up to the chosen lag.</span>
 <span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Gauss–Markov assumptions</span><span class="co">](gauss-markov-assumptions.qmd)</span> (homoskedasticity is the one</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>  that fails here), <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](regression-diagnostics.qmd)</span> (detecting it), and</span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">inference for regression</span><span class="co">](inference-for-regression.qmd)</span> (the tests it invalidates).</span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Relates to:** <span class="co">[</span><span class="ot">quantile regression</span><span class="co">](quantile-regression.qmd)</span> (heteroskedasticity is exactly when quantile</span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  slopes fan out) and <span class="co">[</span><span class="ot">time-series fundamentals</span><span class="co">](../04-predictive/time-series-fundamentals.qmd)</span> (serial</span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>  correlation's home).</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Generalises in:** <span class="co">[</span><span class="ot">mixed-effects models</span><span class="co">](mixed-effects-models.qmd)</span> and clustered standard errors — other</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>  departures from i.i.d. errors handled by modelling or robustifying.</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Gauss–Markov assumptions</span><span class="co">](gauss-markov-assumptions.qmd)</span> (homoskedasticity is the one</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>  that fails here), <span class="co">[</span><span class="ot">regression diagnostics</span><span class="co">](regression-diagnostics.qmd)</span> (detecting it), and</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">inference for regression</span><span class="co">](inference-for-regression.qmd)</span> (the tests it invalidates).</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Relates to:** <span class="co">[</span><span class="ot">quantile regression</span><span class="co">](quantile-regression.qmd)</span> (heteroskedasticity is exactly when quantile</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>  slopes fan out) and <span class="co">[</span><span class="ot">time-series fundamentals</span><span class="co">](../04-predictive/time-series-fundamentals.qmd)</span> (serial</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>  correlation's home).</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Generalises in:** <span class="co">[</span><span class="ot">mixed-effects models</span><span class="co">](mixed-effects-models.qmd)</span> and clustered standard errors — other</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>  departures from i.i.d. errors handled by modelling or robustifying.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
