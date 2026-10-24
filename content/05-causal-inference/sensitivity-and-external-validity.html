@@ -1988,6 +1988,7 @@ window.Quarto = {
   <li><a href="#sate-vs-pate" id="toc-sate-vs-pate" class="nav-link" data-scroll-target="#sate-vs-pate">SATE vs PATE</a></li>
   <li><a href="#the-local-designs-revisited" id="toc-the-local-designs-revisited" class="nav-link" data-scroll-target="#the-local-designs-revisited">The local designs, revisited</a></li>
   <li><a href="#generalising-honestly" id="toc-generalising-honestly" class="nav-link" data-scroll-target="#generalising-honestly">Generalising honestly</a></li>
+  <li><a href="#sec-dose-response" id="toc-sec-dose-response" class="nav-link" data-scroll-target="#sec-dose-response">Extrapolating across doses: the bed-net price experiments</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
   <li><a href="#appendix-the-mathematics" id="toc-appendix-the-mathematics" class="nav-link" data-scroll-target="#appendix-the-mathematics">Appendix · the mathematics</a></li>
@@ -2152,9 +2153,30 @@ Figure&nbsp;1: Partial-R² sensitivity map for the Darfur example in Chernozhuko
 <p>Three routes extend a local or sample estimate toward a target: <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span></p>
 <ul>
 <li><strong>Replication</strong> — re-run the study in <em>new contexts</em> and see whether the effect is stable; the single most convincing evidence of transportability.</li>
-<li><strong>Meta-analysis</strong> — pool many studies (often in a <a href="../../content/02-inference/bayesian-worldview.html">Bayesian</a> frame), weighting by precision and accounting for sampling bias, to triangulate a general effect.</li>
+<li><strong>Meta-analysis</strong> — pool many studies (often in a <a href="../../content/02-inference/bayesian-worldview.html">Bayesian</a> frame), weighting by precision and accounting for sampling bias, to triangulate a general effect. The <a href="../../content/06-field-realities/meta-analysis.html#sec-uncertain-bias">towel-reuse example</a> shows how much the answer depends on the uncertainty you allow for bias.</li>
 <li><strong>Re-weighting</strong> — if the sample’s covariate distribution differs from the target population’s, <strong>re-weight</strong> (e.g.&nbsp;<a href="../../content/05-causal-inference/matching-and-propensity-scores.html">inverse-probability weighting</a> toward the target) so the estimate reflects <em>their</em> composition, not the study’s. Transportability becomes a weighting problem — <em>if</em> you observe the covariates that drive effect heterogeneity.</li>
 </ul>
+</section>
+<section id="sec-dose-response" class="level2">
+<h2 class="anchored" data-anchor-id="sec-dose-response">Extrapolating across doses: the bed-net price experiments</h2>
+<p>Some generalisation questions are about a <em>different treatment</em>, not different people: a higher dose, another price, a third mailing. That needs a <strong>statistical model</strong> that links the intensity of the treatment to the outcome. Gerber &amp; Green set out three facts about such models <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>:</p>
+<ol type="1">
+<li>When correct, <strong>modelling assumptions work like extra data</strong>, making the estimates more precise.</li>
+<li>They can be wrong, and <strong>uncertainty about the model adds to uncertainty about the conclusion</strong>.</li>
+<li>Making the model more flexible relaxes the assumptions, but <strong>every added parameter costs precision</strong>.</li>
+</ol>
+<p><strong>The experiment.</strong> Dupas offered Kenyan households vouchers that lowered the price of insecticide-treated bed nets, with the price randomly assigned. Outcomes were measured by which vouchers were redeemed <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. The design ran in six regions, each with its own range of prices. In Region 2 the prices were 40, 80, 120 and 200 shillings (65 shillings to the dollar), and purchase rates fell from <strong>75.4%</strong> to <strong>57.1%</strong>, <strong>28.1%</strong> and <strong>17.0%</strong>.</p>
+<p><strong>Two ways to see the doses.</strong> One option treats the four prices as four unrelated treatments, each with its own potential outcome. That makes no assumptions, but it also says nothing about a price nobody was offered. It does not even use the fact that 80 lies between 40 and 120. The other option makes purchase a <strong>smooth function of price</strong>. Theory narrows the choice: demand should fall as price rises, and fall continuously. Within that, let the data choose the shape.</p>
+<p><strong>Explore on one region, test on the others.</strong> Gerber &amp; Green use Region 2, which is large and evenly split across prices, as the <strong>exploratory</strong> dataset. They rescale the axes until the points line up. Purchase rates fall more evenly against the <strong>log</strong> of price than against price itself. A line through the 40- and 200-shilling points on that scale predicts 50.4% and 35.6% at 80 and 120. The observed rates were 57.1% and 28.1%: close enough to suggest a well-behaved curve <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p><strong>Then the model breaks at the edges.</strong> A straight line in log price fitted to purchase rates predicts, by Gerber &amp; Green’s fit, a rate <strong>above 100%</strong> at 20 shillings and <strong>below 0%</strong> at 300. Nothing keeps a line inside <span class="math inline">[0, 1]</span>. The fix is the <a href="../../content/03-regression/limited-dependent-variables.html">logistic model</a>, linear in the <strong>log-odds</strong> of purchase, which fits Region 2 about as well and never forecasts an impossible rate. The price of the fix is that a fixed log-odds change means different percentage-point moves at different starting points. One log-odds unit takes 50% to 73%, but 88.1% only to 95.3%. So linear and logistic models extrapolate differently <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p><strong>Does one price effect hold everywhere?</strong> Fitted region by region, the logit slopes on log price are similar (−1.98, −1.79, −1.69, −2.03, −1.92) except Region 4 (−0.91). Region 4 has an odd bump in demand at 150 shillings. A pooled model with region intercepts and <strong>one common slope</strong> estimates <strong>−1.623 (SE 0.149)</strong>. Doubling the price lowers the log-odds by about <span class="math inline">0.693 \times 1.623 \approx 1.125</span>, which would take a 50% buyer to about <strong>24.5%</strong> <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. Three checks support the simpler model:</p>
+<ul>
+<li><strong>Goodness of fit.</strong> A <span class="math inline">\chi^2</span> test compares observed and predicted purchases in each of the 24 priced groups. Neither model is rejected: 14.44 on 12 df (<span class="math inline">p = .27</span>) for separate slopes, and 22.10 on 17 df (<span class="math inline">p = .18</span>) for one slope.</li>
+<li><strong>A nested comparison.</strong> The one-slope model is a special case of the six-slope model. The likelihood-ratio test (appendix) compares their <a href="../../content/02-inference/maximum-likelihood.html">log-likelihoods</a>: <span class="math inline">2 \times |{-585.04} - ({-581.79})| = 6.50</span> on 5 df, <span class="math inline">p = .26</span>. Five extra slopes don’t buy a significant improvement in fit, so parsimony wins.</li>
+<li><strong>Ignoring the anomaly.</strong> Rather than add parameters to fit Region 4’s bump, treat it as a likely sampling fluke. Add parameters only when anomalies <strong>recur across experiments</strong>. This is the <a href="../../content/04-predictive/bias-variance-tradeoff.html">bias–variance</a> trade-off in experimental clothing.</li>
+</ul>
+<p>Gerber &amp; Green stress what this does <em>not</em> show. Not rejecting a model is not proof that it is true. Other models might fit as well, and this one misbehaves when asked about a price of zero. Still, it is a big step up from 24 separate purchase rates. Those reproduce the data exactly but say nothing about regularities across prices or regions <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p><strong>Forecasts get less certain away from the data.</strong> Even when the model is right, the standard error of a predicted outcome is smallest at the <strong>average price tried</strong> and grows with the distance from it (appendix). That formula still leaves out <strong>specification uncertainty</strong>, your doubt about the shape itself <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. Their summary rule applies to every route on this page: <em>the farther you extrapolate from the evidence at hand, the more you depend on assumptions that may be wrong.</em></p>
 </section>
 <section id="common-pitfalls" class="level2">
 <h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
@@ -2175,6 +2197,9 @@ Figure&nbsp;1: Partial-R² sensitivity map for the Darfur example in Chernozhuko
 <li><p><strong>Reading a LATE or RD estimate as a population effect.</strong> They are local — to compliers, to the cutoff. Name the subpopulation. <span class="citation" data-cites="angrist_mostly_harmless">(<a href="#ref-angrist_mostly_harmless" role="doc-biblioref">Angrist and Pischke 2009</a>)</span></p></li>
 <li><p><strong>Generalising from a convenience sample.</strong> A flawless SATE on volunteers need not be the PATE; re-weight or replicate before extrapolating. <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span></p></li>
 <li><p><strong>Extrapolating RD far from the cutoff.</strong> Beyond the boundary you are trusting functional form, not the design. <span class="citation" data-cites="cunningham_mixtape">(<a href="#ref-cunningham_mixtape" role="doc-biblioref">Cunningham 2021</a>)</span></p></li>
+<li><p><strong>Forecasting a dose nobody received.</strong> A dose-response model fitted to prices 40–200 says little about 20 or 300. A linear fit there predicts impossible purchase rates, and even a well-bounded model’s uncertainty grows with distance from the doses tried. <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span></p></li>
+<li><p><strong>Reading a non-rejected fit test as proof.</strong> A <span class="math inline">\chi^2</span> <span class="math inline">p</span> of .27 means the data aren’t at odds with the model, not that the model generated them. <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span></p></li>
+<li><p><strong>Adding parameters to chase one odd group.</strong> Region 4’s bump at 150 shillings is better treated as noise until it recurs. A model with one parameter per group fits perfectly and generalises not at all. <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span></p></li>
 </ul>
 </div>
 </div>
@@ -2200,7 +2225,8 @@ Figure&nbsp;1: Partial-R² sensitivity map for the Darfur example in Chernozhuko
 <li><strong>This entry’s own arithmetic, from Chernozhukov et al.’s formula and numbers:</strong> the zero-crossing frontier, the equal-strength value (≈ 0.14), and the maximum bias at a treatment partial <span class="math inline">R^2</span> of 0.01 (≈ 0.066).</li>
 <li><em>Earlier versions of this entry attributed Rosenbaum bounds to Cunningham and Oster’s δ and the E-value to Chernozhukov et al.&nbsp;Neither text contains them. Rosenbaum is now credited to Dayal; Oster and the E-value are no longer covered.</em></li>
 <li><strong>Angrist &amp; Pischke</strong> — <strong>internal vs external validity</strong>; <strong>LATE</strong> as a local (complier) effect with limited transportability.</li>
-<li><strong>Gerber &amp; Green, <em>Field Experiments</em></strong> — <strong>SATE vs PATE</strong> and the transportability problem from convenience sampling/heterogeneity; <strong>replication, meta-analysis, and re-weighting</strong> as routes to generalisation.</li>
+<li><strong>Gerber &amp; Green, <em>Field Experiments</em></strong> — <strong>SATE vs PATE</strong> and the transportability problem from convenience sampling/heterogeneity; <strong>replication, meta-analysis, and re-weighting</strong> as routes to generalisation. <strong>§11.4, treatments that vary in intensity</strong>: the three facts about modelling assumptions; Dupas’s (2012) Kenyan bed-net voucher experiment as Gerber &amp; Green report it (Table 11.1, six regions; Region 2 at 40/80/120/200 shillings → 75.4/57.1/28.1/17.0%); explore on Region 2, test on the rest; the log-price line’s 50.4%/35.6% predictions; inadmissible linear forecasts at 20 and 300; the logit transform; per-region slopes (Table 11.2) and the pooled −1.623 (0.149); the <span class="math inline">\chi^2</span> fit tests (Table 11.3) and the likelihood-ratio test (6.50 on 5 df, <span class="math inline">p = .26</span>); the extrapolation standard error (eq. 11.12) and the warning about specification uncertainty.</li>
+<li><strong>This entry’s own checks:</strong> a grouped logit refit of Region 2 reproduces Gerber &amp; Green’s 7.873 and −1.791; the doubling arithmetic (<span class="math inline">0.693 \times 1.623 \approx 1.125</span>; 50% → 24.5%) and the three <span class="math inline">\chi^2</span> <span class="math inline">p</span>-values were recomputed.</li>
 </ul>
 </div>
 </div>
@@ -2228,6 +2254,18 @@ Y = \alpha D + \delta A + f_Y(X) + \epsilon_Y,\qquad D = \gamma A + f_D(X) + \ep
 <p><strong>Re-weighting SATE to PATE.</strong> If effects vary as <span class="math inline">\tau(x)</span> and the target population has covariate density <span class="math inline">g(x)</span> while the sample has <span class="math inline">f(x)</span>, <span class="math display">
 \text{PATE}=\mathbb E_{g}[\tau(X)]=\int \tau(x)\,g(x)\,dx=\mathbb E_{f}\!\left[\frac{g(X)}{f(X)}\,\tau(X)\right],
 </span> so weighting sample units by <span class="math inline">g(X)/f(X)</span> transports the estimate — valid only if <span class="math inline">\tau(x)</span> is identified and the reweighting covariates capture the heterogeneity.</p>
+<p><strong>Dose-response models</strong> <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. With <span class="math inline">V_i</span> the price offered to subject <span class="math inline">i</span> and <span class="math inline">V_i' = \ln V_i</span>, the linear model <span class="math inline">Y_i = \beta_0 + \beta_1 V_i' + u_i</span> gives, at a hypothetical log price <span class="math inline">v</span>,</p>
+<p><span class="math display">
+\operatorname{SE}\big(\hat Y \mid V' = v\big) = \hat\sigma_u\sqrt{\frac1N + \frac{(v - \bar V')^2}{\sum_i (V_i' - \bar V')^2}} .
+</span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> the forecast is surest at the average price tried, and its uncertainty grows with the squared distance from it.</p>
+</blockquote>
+<p>The pooled logistic model gives region <span class="math inline">r</span> its own intercept and every region the same price slope:</p>
+<p><span class="math display">
+\Pr[Y_i = 1] = \frac{1}{1 + \exp\!\big(-(\textstyle\sum_r \alpha_r R_{ri} + \beta \ln V_i)\big)} .
+</span></p>
+<p>Here <span class="math inline">\beta = -1.623</span>, so multiplying the price by <span class="math inline">k</span> shifts the log-odds by <span class="math inline">\beta \ln k</span>. For nested models with maximised log-likelihoods <span class="math inline">\ell_0</span> (restricted) and <span class="math inline">\ell_1</span> (general), the <strong>likelihood-ratio statistic</strong> <span class="math inline">2(\ell_1 - \ell_0)</span> is approximately <span class="math inline">\chi^2</span> with degrees of freedom equal to the number of extra parameters: <span class="math inline">2(-581.79 + 585.04) = 6.50</span> on <span class="math inline">6 - 1 = 5</span> df. The goodness-of-fit <span class="math inline">\chi^2</span> sums <span class="math inline">(O - E)^2/E</span> over purchasers and non-purchasers in each priced group, with df equal to the 24 groups minus the parameters fitted (12 or 7).</p>
 </div>
 </section>
 <section id="connections" class="level2 unnumbered">
@@ -2235,6 +2273,7 @@ Y = \alpha D + \delta A + f_Y(X) + \epsilon_Y,\qquad D = \gamma A + f_D(X) + \ep
 <ul>
 <li><strong>Builds on:</strong> <a href="../../content/05-causal-inference/matching-and-propensity-scores.html">matching &amp; propensity scores</a> (the untestable CIA this stress-tests), <a href="../../content/05-causal-inference/instrumental-variables.html">IV/LATE</a> and <a href="../../content/05-causal-inference/regression-discontinuity.html">RD</a> (the local effects whose reach this examines), and <a href="../../content/05-causal-inference/matching-and-propensity-scores.html">IPW</a> (re-weighting to a target).</li>
 <li><strong>Closes:</strong> the summit’s logic — from defining an effect to <strong>estimating</strong> it to <strong>stress-testing and generalising</strong> it.</li>
+<li><strong>Pairs with:</strong> <a href="../../content/06-field-realities/meta-analysis.html">meta-analysis</a> (pooling replications, and the <a href="../../content/06-field-realities/meta-analysis.html#sec-uncertain-bias">price of uncertain bias</a>) and <a href="../../content/03-regression/limited-dependent-variables.html">limited dependent variables</a> (the logit behind the dose-response model).</li>
 <li><strong>Leads to:</strong> <a href="../../content/06-field-realities/index.html">Part VI · doing research in the world</a>, where external validity, replication, and the gap between a clean estimate and a messy decision become the whole game.</li>
 </ul>
 
@@ -2958,134 +2997,248 @@ Gerber, Alan S., and Donald P. Green. 2012. <em>Field Experiments: Design, Analy
 <span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>  most convincing evidence of transportability.</span>
 <span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Meta-analysis** — pool many studies (often in a <span class="co">[</span><span class="ot">Bayesian</span><span class="co">](../02-inference/bayesian-worldview.qmd)</span></span>
 <span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>  frame), weighting by precision and accounting for sampling bias, to triangulate a general effect.</span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Re-weighting** — if the sample's covariate distribution differs from the target population's,</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>  **re-weight** (e.g. <span class="co">[</span><span class="ot">inverse-probability weighting</span><span class="co">](matching-and-propensity-scores.qmd)</span> toward the</span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>  target) so the estimate reflects *their* composition, not the study's. Transportability becomes a</span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>  weighting problem — *if* you observe the covariates that drive effect heterogeneity.</span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>  The <span class="co">[</span><span class="ot">towel-reuse example</span><span class="co">](../06-field-realities/meta-analysis.qmd#sec-uncertain-bias)</span> shows how much</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>  the answer depends on the uncertainty you allow for bias.</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Re-weighting** — if the sample's covariate distribution differs from the target population's,</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>  **re-weight** (e.g. <span class="co">[</span><span class="ot">inverse-probability weighting</span><span class="co">](matching-and-propensity-scores.qmd)</span> toward the</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>  target) so the estimate reflects *their* composition, not the study's. Transportability becomes a</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>  weighting problem — *if* you observe the covariates that drive effect heterogeneity.</span>
 <span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a><span class="fu">## Extrapolating across doses: the bed-net price experiments {#sec-dose-response}</span></span>
 <span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reporting a point estimate with no sensitivity analysis.** If CIA is untestable, show how much</span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>  confounding would break the result (Rosenbaum's Γ for matched designs, partial-$R^2$ bias bounds for</span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>  regressions). Silence is not robustness. <span class="co">[</span><span class="ot">@dayal_r_datascience; @chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>Some generalisation questions are about a *different treatment*, not different people: a higher dose,</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>another price, a third mailing. That needs a **statistical model** that links the intensity of the</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>treatment to the outcome. Gerber &amp; Green set out three facts about such models <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>:</span>
 <span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating the benchmark as a fact.** "No hidden confounder is stronger than my observed controls" is</span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>  an assumption, and a shaky one when the controls were chosen because they were easy to get. Report</span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  the benchmark *and* the frontier where the conclusion flips, so readers can apply their own beliefs.</span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Running a sensitivity analysis on a result that was never significant.** If $p = 0.27$ at</span>
-<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>  $\Gamma = 1$, as in the matched LaLonde example, there is no breaking point to find. Sensitivity</span>
-<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>  analysis grades a finding; it cannot rescue one. <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span></span>
-<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a LATE or RD estimate as a population effect.** They are local — to compliers, to the</span>
-<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>  cutoff. Name the subpopulation. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
-<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Generalising from a convenience sample.** A flawless SATE on volunteers need not be the PATE;</span>
-<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>  re-weight or replicate before extrapolating. <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
-<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Extrapolating RD far from the cutoff.** Beyond the boundary you are trusting functional form, not</span>
-<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>  the design. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>When correct, **modelling assumptions work like extra data**, making the estimates more precise.</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>They can be wrong, and **uncertainty about the model adds to uncertainty about the conclusion**.</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Making the model more flexible relaxes the assumptions, but **every added parameter costs precision**.</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>**The experiment.** Dupas offered Kenyan households vouchers that lowered the price of insecticide-treated</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>bed nets, with the price randomly assigned. Outcomes were measured by which vouchers were redeemed</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>. The design ran in six regions, each with its own range of prices. In Region 2 the prices</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>were 40, 80, 120 and 200 shillings (65 shillings to the dollar), and purchase rates fell from **75.4%**</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>to **57.1%**, **28.1%** and **17.0%**.</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>**Two ways to see the doses.** One option treats the four prices as four unrelated treatments, each with</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>its own potential outcome. That makes no assumptions, but it also says nothing about a price nobody was</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>offered. It does not even use the fact that 80 lies between 40 and 120. The other option makes purchase a</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>**smooth function of price**. Theory narrows the choice: demand should fall as price rises, and fall</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>continuously. Within that, let the data choose the shape.</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>**Explore on one region, test on the others.** Gerber &amp; Green use Region 2, which is large and evenly</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>split across prices, as the **exploratory** dataset. They rescale the axes until the points line up.</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>Purchase rates fall more evenly against the **log** of price than against price itself. A line through</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>the 40- and 200-shilling points on that scale predicts 50.4% and 35.6% at 80 and 120. The observed rates</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>were 57.1% and 28.1%: close enough to suggest a well-behaved curve <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
 <span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *The Mixtape*** — the conditional independence assumption as untestable; RD estimates</span>
-<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>  as **local to the cutoff**.</span>
-<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chernozhukov et al., *Applied Causal Inference Powered by ML and AI*** (Ch 12) — confounded and</span>
-<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>  causal models as **statistically indistinguishable** when the confounder is latent; the partially</span>
-<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>  linear SEM and the omitted-confounder bias $\phi$; **Theorem 12.2.1** (bias in terms of two partial</span>
-<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>  $R^2$s, generalising Cinelli &amp; Hazlett); the **Darfur** example (benchmarks 0.13 / 0.01, residual</span>
-<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>  variances 0.0597 / 0.1402, $\hat\beta = 0.1003 \pm 0.0236$, lower bound 0.0767), the sensitivity</span>
-<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>  contour, and the warning that controls are often chosen for convenience, which weakens the benchmark.</span>
-<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dayal, *Quantitative Economics with R*** (§10.4) — **Rosenbaum's $\Gamma$** as the odds of</span>
-<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>  differential assignment due to unobserved factors; highly sensitive vs insensitive studies; the</span>
-<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>  genetic-matching LaLonde example (estimate ≈ \$766, SE ≈ \$700, $p = 0.27$) and its Wilcoxon</span>
-<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>  sensitivity table.</span>
-<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**This entry's own arithmetic, from Chernozhukov et al.'s formula and numbers:** the zero-crossing</span>
-<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>  frontier, the equal-strength value (≈ 0.14), and the maximum bias at a treatment partial $R^2$ of 0.01</span>
-<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>  (≈ 0.066).</span>
-<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*Earlier versions of this entry attributed Rosenbaum bounds to Cunningham and Oster's δ and the E-value</span>
-<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>  to Chernozhukov et al. Neither text contains them. Rosenbaum is now credited to Dayal; Oster and the</span>
-<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>  E-value are no longer covered.*</span>
-<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke** — **internal vs external validity**; **LATE** as a local (complier) effect with</span>
-<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>  limited transportability.</span>
-<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Gerber &amp; Green, *Field Experiments*** — **SATE vs PATE** and the transportability problem from</span>
-<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>  convenience sampling/heterogeneity; **replication, meta-analysis, and re-weighting** as routes to</span>
-<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>  generalisation.</span>
-<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>**Then the model breaks at the edges.** A straight line in log price fitted to purchase rates predicts,</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>by Gerber &amp; Green's fit, a rate **above 100%** at 20 shillings and **below 0%** at 300. Nothing keeps a line</span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>inside $<span class="co">[</span><span class="ot">0, 1</span><span class="co">]</span>$. The fix is the <span class="co">[</span><span class="ot">logistic model</span><span class="co">](../03-regression/limited-dependent-variables.qmd)</span>, linear</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>in the **log-odds** of purchase, which fits Region 2 about as well and never forecasts an impossible</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>rate. The price of the fix is that a fixed log-odds change means different percentage-point moves at</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>different starting points. One log-odds unit takes 50% to 73%, but 88.1% only to 95.3%. So linear and</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>logistic models extrapolate differently <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>**Does one price effect hold everywhere?** Fitted region by region, the logit slopes on log price are</span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>similar (−1.98, −1.79, −1.69, −2.03, −1.92) except Region 4 (−0.91). Region 4 has an odd bump in demand at</span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>150 shillings. A pooled model with region intercepts and **one common slope** estimates **−1.623</span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>(SE 0.149)**. Doubling the price lowers the log-odds by about $0.693 \times 1.623 \approx 1.125$, which would</span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>take a 50% buyer to about **24.5%** <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>. Three checks support the simpler model:</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Goodness of fit.** A $\chi^2$ test compares observed and predicted purchases in each of the 24</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>  priced groups. Neither model is rejected: 14.44 on 12 df ($p = .27$) for separate slopes, and 22.10 on</span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>  17 df ($p = .18$) for one slope.</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A nested comparison.** The one-slope model is a special case of the six-slope model. The</span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>  likelihood-ratio test (appendix) compares their <span class="co">[</span><span class="ot">log-likelihoods</span><span class="co">](../02-inference/maximum-likelihood.qmd)</span>:</span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>  $2 \times |{-585.04} - ({-581.79})| = 6.50$ on 5 df, $p = .26$. Five extra slopes don't buy a</span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>  significant improvement in fit, so parsimony wins.</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring the anomaly.** Rather than add parameters to fit Region 4's bump, treat it as a likely</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>  sampling fluke. Add parameters only when anomalies **recur across experiments**. This is the</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">bias–variance</span><span class="co">](../04-predictive/bias-variance-tradeoff.qmd)</span> trade-off in experimental clothing.</span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a>Gerber &amp; Green stress what this does *not* show. Not rejecting a model is not proof that it is true.</span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>Other models might fit as well, and this one misbehaves when asked about a price of zero. Still, it is a</span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>big step up from 24 separate purchase rates. Those reproduce the data exactly but say nothing about</span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>regularities across prices or regions <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
 <span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>**Rosenbaum's odds bound.** For two matched units $j,k$ with identical observed $X$ but treatment</span>
-<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>probabilities $\pi_j,\pi_k$, hidden bias is bounded by</span>
-<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>\frac1\Gamma \le \frac{\pi_j(1-\pi_k)}{\pi_k(1-\pi_j)} \le \Gamma .</span>
-<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>$\Gamma=1$ forces $\pi_j=\pi_k$ (no hidden bias). For each $\Gamma&gt;1$ one computes the **worst-case**</span>
-<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>$p$-value over all assignments consistent with the bound; the smallest $\Gamma$ pushing it above $0.05$</span>
-<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>is the study's breaking point.</span>
-<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a>**Omitted-confounder bias in the partially linear model.** Following Chernozhukov et al. (Example</span>
-<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a>12.2.1): <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
-<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>Y = \alpha D + \delta A + f_Y(X) + \epsilon_Y,\qquad D = \gamma A + f_D(X) + \epsilon_D,\qquad A = f_A(X) + \epsilon_A,</span>
-<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>with the $\epsilon$'s mean zero and mutually uncorrelated given $X$, and $\mathbb E<span class="co">[</span><span class="ot">\epsilon_A^2</span><span class="co">]</span>=1$.</span>
-<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>Write $\tilde V = V - \mathbb E<span class="co">[</span><span class="ot">V\mid X</span><span class="co">]</span>$ for partialling out. Then</span>
-<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>$\tilde Y = \alpha\tilde D + \delta\tilde A + \epsilon_Y$ and $\tilde D = \gamma\tilde A + \epsilon_D$, so the</span>
-<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>projection of $\tilde Y$ on $\tilde D$ gives</span>
-<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a>\beta = \frac{\mathbb E<span class="co">[</span><span class="ot">\tilde Y\tilde D</span><span class="co">]</span>}{\mathbb E<span class="co">[</span><span class="ot">\tilde D^2</span><span class="co">]</span>} = \alpha + \phi,\qquad</span>
-<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a>\phi = \frac{\delta\gamma}{\mathbb E<span class="co">[</span><span class="ot">\gamma^2 + \epsilon_D^2</span><span class="co">]</span>} .</span>
-<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>**Forecasts get less certain away from the data.** Even when the model is right, the standard error of a</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>predicted outcome is smallest at the **average price tried** and grows with the distance from it</span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>(appendix). That formula still leaves out **specification uncertainty**, your doubt about the shape</span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>itself <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>. Their summary rule applies to every route on this page: *the farther you</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>extrapolate from the evidence at hand, the more you depend on assumptions that may be wrong.*</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reporting a point estimate with no sensitivity analysis.** If CIA is untestable, show how much</span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>  confounding would break the result (Rosenbaum's Γ for matched designs, partial-$R^2$ bias bounds for</span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>  regressions). Silence is not robustness. <span class="co">[</span><span class="ot">@dayal_r_datascience; @chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating the benchmark as a fact.** "No hidden confounder is stronger than my observed controls" is</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>  an assumption, and a shaky one when the controls were chosen because they were easy to get. Report</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>  the benchmark *and* the frontier where the conclusion flips, so readers can apply their own beliefs.</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Running a sensitivity analysis on a result that was never significant.** If $p = 0.27$ at</span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a>  $\Gamma = 1$, as in the matched LaLonde example, there is no breaking point to find. Sensitivity</span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a>  analysis grades a finding; it cannot rescue one. <span class="co">[</span><span class="ot">@dayal_r_datascience</span><span class="co">]</span></span>
 <span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a>**Theorem 12.2.1 (bias in partial $R^2$s).** <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
-<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a>\phi^2 = \frac{R^2_{\tilde Y\sim\tilde A\mid\tilde D}\;R^2_{\tilde D\sim\tilde A}}{1-R^2_{\tilde D\sim\tilde A}}</span>
-<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>\cdot\frac{\mathbb E\big<span class="co">[</span><span class="ot">(\tilde Y-\beta\tilde D)^2\big</span><span class="co">]</span>}{\mathbb E\big<span class="co">[</span><span class="ot">\tilde D^2\big</span><span class="co">]</span>} .</span>
-<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a>The second factor is estimable: the residual variance of the partialled-out regression over the residual</span>
-<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>variance of the treatment. Bounding the two partial $R^2$s bounds $|\phi|$. Darfur:</span>
-<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>$\sqrt{(0.13 \times 0.01/0.99)(0.0597/0.1402)} \approx 0.0236$.</span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a LATE or RD estimate as a population effect.** They are local — to compliers, to the</span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>  cutoff. Name the subpopulation. <span class="co">[</span><span class="ot">@angrist_mostly_harmless</span><span class="co">]</span></span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Generalising from a convenience sample.** A flawless SATE on volunteers need not be the PATE;</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>  re-weight or replicate before extrapolating. <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Extrapolating RD far from the cutoff.** Beyond the boundary you are trusting functional form, not</span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>  the design. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
 <span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a>**The frontier where the effect could vanish (our arithmetic).** Setting $|\phi| = \hat\beta$ gives the</span>
-<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>curve</span>
-<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a>\frac{R^2_{Y}\,R^2_{D}}{1-R^2_{D}} = \frac{\hat\beta^2\,\mathbb E<span class="co">[</span><span class="ot">\tilde D^2</span><span class="co">]</span>}{\mathbb E<span class="co">[</span><span class="ot">(\tilde Y-\beta\tilde D)^2</span><span class="co">]</span>} \equiv \kappa ,</span>
-<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a>with $\kappa = 0.1003^2/0.4258 \approx 0.0236$ in the example. (That this matches the benchmark bias to</span>
-<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a>three decimals is a coincidence of these particular numbers; the two are different quantities.) With equal strengths $R^2_Y = R^2_D = r$,</span>
-<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a>this is $r^2 + \kappa r - \kappa = 0$, so $r = \big(-\kappa+\sqrt{\kappa^2+4\kappa}\big)/2 \approx 0.142$.</span>
-<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a>Since $R^2_Y \le 1$, the effect can be erased only if $R^2_D \ge \kappa/(1+\kappa) \approx 0.023$.</span>
-<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a>At the benchmark $R^2_D = 0.01$ the bias is at most $\sqrt{(0.01/0.99)(0.4258)} \approx 0.066$.</span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forecasting a dose nobody received.** A dose-response model fitted to prices 40–200 says little</span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>  about 20 or 300. A linear fit there predicts impossible purchase rates, and even a well-bounded model's</span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a>  uncertainty grows with distance from the doses tried. <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a non-rejected fit test as proof.** A $\chi^2$ $p$ of .27 means the data aren't at odds with</span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a>  the model, not that the model generated them. <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Adding parameters to chase one odd group.** Region 4's bump at 150 shillings is better treated as</span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a>  noise until it recurs. A model with one parameter per group fits perfectly and generalises not at all.</span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
 <span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a>**Re-weighting SATE to PATE.** If effects vary as $\tau(x)$ and the target population has covariate</span>
-<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a>density $g(x)$ while the sample has $f(x)$,</span>
-<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a>\text{PATE}=\mathbb E_{g}<span class="co">[</span><span class="ot">\tau(X)</span><span class="co">]</span>=\int \tau(x)\,g(x)\,dx=\mathbb E_{f}<span class="sc">\!</span>\left<span class="co">[</span><span class="ot">\frac{g(X)}{f(X)}\,\tau(X)\right</span><span class="co">]</span>,</span>
-<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a>so weighting sample units by $g(X)/f(X)$ transports the estimate — valid only if $\tau(x)$ is identified</span>
-<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a>and the reweighting covariates capture the heterogeneity.</span>
-<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">matching &amp; propensity scores</span><span class="co">](matching-and-propensity-scores.qmd)</span> (the untestable CIA</span>
-<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a>  this stress-tests), <span class="co">[</span><span class="ot">IV/LATE</span><span class="co">](instrumental-variables.qmd)</span> and <span class="co">[</span><span class="ot">RD</span><span class="co">](regression-discontinuity.qmd)</span> (the</span>
-<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a>  local effects whose reach this examines), and <span class="co">[</span><span class="ot">IPW</span><span class="co">](matching-and-propensity-scores.qmd)</span> (re-weighting</span>
-<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a>  to a target).</span>
-<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Closes:** the summit's logic — from defining an effect to **estimating** it to **stress-testing and</span>
-<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a>  generalising** it.</span>
-<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">Part VI · doing research in the world</span><span class="co">](../06-field-realities/index.qmd)</span>, where external</span>
-<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a>  validity, replication, and the gap between a clean estimate and a messy decision become the whole game.</span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *The Mixtape*** — the conditional independence assumption as untestable; RD estimates</span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a>  as **local to the cutoff**.</span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chernozhukov et al., *Applied Causal Inference Powered by ML and AI*** (Ch 12) — confounded and</span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a>  causal models as **statistically indistinguishable** when the confounder is latent; the partially</span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a>  linear SEM and the omitted-confounder bias $\phi$; **Theorem 12.2.1** (bias in terms of two partial</span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a>  $R^2$s, generalising Cinelli &amp; Hazlett); the **Darfur** example (benchmarks 0.13 / 0.01, residual</span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a>  variances 0.0597 / 0.1402, $\hat\beta = 0.1003 \pm 0.0236$, lower bound 0.0767), the sensitivity</span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a>  contour, and the warning that controls are often chosen for convenience, which weakens the benchmark.</span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Dayal, *Quantitative Economics with R*** (§10.4) — **Rosenbaum's $\Gamma$** as the odds of</span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a>  differential assignment due to unobserved factors; highly sensitive vs insensitive studies; the</span>
+<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a>  genetic-matching LaLonde example (estimate ≈ \$766, SE ≈ \$700, $p = 0.27$) and its Wilcoxon</span>
+<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a>  sensitivity table.</span>
+<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**This entry's own arithmetic, from Chernozhukov et al.'s formula and numbers:** the zero-crossing</span>
+<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a>  frontier, the equal-strength value (≈ 0.14), and the maximum bias at a treatment partial $R^2$ of 0.01</span>
+<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a>  (≈ 0.066).</span>
+<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*Earlier versions of this entry attributed Rosenbaum bounds to Cunningham and Oster's δ and the E-value</span>
+<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a>  to Chernozhukov et al. Neither text contains them. Rosenbaum is now credited to Dayal; Oster and the</span>
+<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a>  E-value are no longer covered.*</span>
+<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Angrist &amp; Pischke** — **internal vs external validity**; **LATE** as a local (complier) effect with</span>
+<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a>  limited transportability.</span>
+<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Gerber &amp; Green, *Field Experiments*** — **SATE vs PATE** and the transportability problem from</span>
+<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a>  convenience sampling/heterogeneity; **replication, meta-analysis, and re-weighting** as routes to</span>
+<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a>  generalisation. **§11.4, treatments that vary in intensity**: the three facts about modelling</span>
+<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a>  assumptions; Dupas's (2012) Kenyan bed-net voucher experiment as Gerber &amp; Green report it (Table 11.1,</span>
+<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a>  six regions; Region 2 at 40/80/120/200 shillings → 75.4/57.1/28.1/17.0%); explore on Region 2, test on</span>
+<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a>  the rest; the log-price line's 50.4%/35.6% predictions; inadmissible linear forecasts at 20 and 300;</span>
+<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a>  the logit transform; per-region slopes (Table 11.2) and the pooled −1.623 (0.149); the $\chi^2$ fit tests</span>
+<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a>  (Table 11.3) and the likelihood-ratio test (6.50 on 5 df, $p = .26$); the extrapolation standard error</span>
+<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a>  (eq. 11.12) and the warning about specification uncertainty.</span>
+<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**This entry's own checks:** a grouped logit refit of Region 2 reproduces Gerber &amp; Green's 7.873 and</span>
+<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a>  −1.791; the doubling arithmetic ($0.693 \times 1.623 \approx 1.125$; 50% → 24.5%) and the three</span>
+<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a>  $\chi^2$ $p$-values were recomputed.</span>
+<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a>**Rosenbaum's odds bound.** For two matched units $j,k$ with identical observed $X$ but treatment</span>
+<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a>probabilities $\pi_j,\pi_k$, hidden bias is bounded by</span>
+<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a>\frac1\Gamma \le \frac{\pi_j(1-\pi_k)}{\pi_k(1-\pi_j)} \le \Gamma .</span>
+<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a>$\Gamma=1$ forces $\pi_j=\pi_k$ (no hidden bias). For each $\Gamma&gt;1$ one computes the **worst-case**</span>
+<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a>$p$-value over all assignments consistent with the bound; the smallest $\Gamma$ pushing it above $0.05$</span>
+<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a>is the study's breaking point.</span>
+<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a>**Omitted-confounder bias in the partially linear model.** Following Chernozhukov et al. (Example</span>
+<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a>12.2.1): <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a>Y = \alpha D + \delta A + f_Y(X) + \epsilon_Y,\qquad D = \gamma A + f_D(X) + \epsilon_D,\qquad A = f_A(X) + \epsilon_A,</span>
+<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a>with the $\epsilon$'s mean zero and mutually uncorrelated given $X$, and $\mathbb E<span class="co">[</span><span class="ot">\epsilon_A^2</span><span class="co">]</span>=1$.</span>
+<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a>Write $\tilde V = V - \mathbb E<span class="co">[</span><span class="ot">V\mid X</span><span class="co">]</span>$ for partialling out. Then</span>
+<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a>$\tilde Y = \alpha\tilde D + \delta\tilde A + \epsilon_Y$ and $\tilde D = \gamma\tilde A + \epsilon_D$, so the</span>
+<span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a>projection of $\tilde Y$ on $\tilde D$ gives</span>
+<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a>\beta = \frac{\mathbb E<span class="co">[</span><span class="ot">\tilde Y\tilde D</span><span class="co">]</span>}{\mathbb E<span class="co">[</span><span class="ot">\tilde D^2</span><span class="co">]</span>} = \alpha + \phi,\qquad</span>
+<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a>\phi = \frac{\delta\gamma}{\mathbb E<span class="co">[</span><span class="ot">\gamma^2 + \epsilon_D^2</span><span class="co">]</span>} .</span>
+<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a>**Theorem 12.2.1 (bias in partial $R^2$s).** <span class="co">[</span><span class="ot">@chernozhukov_causalml</span><span class="co">]</span></span>
+<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a>\phi^2 = \frac{R^2_{\tilde Y\sim\tilde A\mid\tilde D}\;R^2_{\tilde D\sim\tilde A}}{1-R^2_{\tilde D\sim\tilde A}}</span>
+<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a>\cdot\frac{\mathbb E\big<span class="co">[</span><span class="ot">(\tilde Y-\beta\tilde D)^2\big</span><span class="co">]</span>}{\mathbb E\big<span class="co">[</span><span class="ot">\tilde D^2\big</span><span class="co">]</span>} .</span>
+<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a>The second factor is estimable: the residual variance of the partialled-out regression over the residual</span>
+<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a>variance of the treatment. Bounding the two partial $R^2$s bounds $|\phi|$. Darfur:</span>
+<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a>$\sqrt{(0.13 \times 0.01/0.99)(0.0597/0.1402)} \approx 0.0236$.</span>
+<span id="cb2-413"><a href="#cb2-413" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a>**The frontier where the effect could vanish (our arithmetic).** Setting $|\phi| = \hat\beta$ gives the</span>
+<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a>curve</span>
+<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a>\frac{R^2_{Y}\,R^2_{D}}{1-R^2_{D}} = \frac{\hat\beta^2\,\mathbb E<span class="co">[</span><span class="ot">\tilde D^2</span><span class="co">]</span>}{\mathbb E<span class="co">[</span><span class="ot">(\tilde Y-\beta\tilde D)^2</span><span class="co">]</span>} \equiv \kappa ,</span>
+<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a>with $\kappa = 0.1003^2/0.4258 \approx 0.0236$ in the example. (That this matches the benchmark bias to</span>
+<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a>three decimals is a coincidence of these particular numbers; the two are different quantities.) With equal strengths $R^2_Y = R^2_D = r$,</span>
+<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a>this is $r^2 + \kappa r - \kappa = 0$, so $r = \big(-\kappa+\sqrt{\kappa^2+4\kappa}\big)/2 \approx 0.142$.</span>
+<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a>Since $R^2_Y \le 1$, the effect can be erased only if $R^2_D \ge \kappa/(1+\kappa) \approx 0.023$.</span>
+<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a>At the benchmark $R^2_D = 0.01$ the bias is at most $\sqrt{(0.01/0.99)(0.4258)} \approx 0.066$.</span>
+<span id="cb2-424"><a href="#cb2-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a>**Re-weighting SATE to PATE.** If effects vary as $\tau(x)$ and the target population has covariate</span>
+<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a>density $g(x)$ while the sample has $f(x)$,</span>
+<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-428"><a href="#cb2-428" aria-hidden="true" tabindex="-1"></a>\text{PATE}=\mathbb E_{g}<span class="co">[</span><span class="ot">\tau(X)</span><span class="co">]</span>=\int \tau(x)\,g(x)\,dx=\mathbb E_{f}<span class="sc">\!</span>\left<span class="co">[</span><span class="ot">\frac{g(X)}{f(X)}\,\tau(X)\right</span><span class="co">]</span>,</span>
+<span id="cb2-429"><a href="#cb2-429" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a>so weighting sample units by $g(X)/f(X)$ transports the estimate — valid only if $\tau(x)$ is identified</span>
+<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a>and the reweighting covariates capture the heterogeneity.</span>
+<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a>**Dose-response models** <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>. With $V_i$ the price offered to subject $i$ and</span>
+<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a>$V_i' = \ln V_i$, the linear model $Y_i = \beta_0 + \beta_1 V_i' + u_i$ gives, at a hypothetical log price</span>
+<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a>$v$,</span>
+<span id="cb2-436"><a href="#cb2-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-438"><a href="#cb2-438" aria-hidden="true" tabindex="-1"></a>\operatorname{SE}\big(\hat Y \mid V' = v\big) = \hat\sigma_u\sqrt{\frac1N + \frac{(v - \bar V')^2}{\sum_i (V_i' - \bar V')^2}} .</span>
+<span id="cb2-439"><a href="#cb2-439" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-440"><a href="#cb2-440" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-441"><a href="#cb2-441" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** the forecast is surest at the average price tried, and its uncertainty grows with</span></span>
+<span id="cb2-442"><a href="#cb2-442" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; the squared distance from it.</span></span>
+<span id="cb2-443"><a href="#cb2-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-444"><a href="#cb2-444" aria-hidden="true" tabindex="-1"></a>The pooled logistic model gives region $r$ its own intercept and every region the same price slope:</span>
+<span id="cb2-445"><a href="#cb2-445" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-446"><a href="#cb2-446" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-447"><a href="#cb2-447" aria-hidden="true" tabindex="-1"></a>\Pr<span class="co">[</span><span class="ot">Y_i = 1</span><span class="co">]</span> = \frac{1}{1 + \exp<span class="sc">\!</span>\big(-(\textstyle\sum_r \alpha_r R_{ri} + \beta \ln V_i)\big)} .</span>
+<span id="cb2-448"><a href="#cb2-448" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-449"><a href="#cb2-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-450"><a href="#cb2-450" aria-hidden="true" tabindex="-1"></a>Here $\beta = -1.623$, so multiplying the price by $k$ shifts the log-odds by $\beta \ln k$. For nested</span>
+<span id="cb2-451"><a href="#cb2-451" aria-hidden="true" tabindex="-1"></a>models with maximised log-likelihoods $\ell_0$ (restricted) and $\ell_1$ (general), the **likelihood-ratio</span>
+<span id="cb2-452"><a href="#cb2-452" aria-hidden="true" tabindex="-1"></a>statistic** $2(\ell_1 - \ell_0)$ is approximately $\chi^2$ with degrees of freedom equal to the number of</span>
+<span id="cb2-453"><a href="#cb2-453" aria-hidden="true" tabindex="-1"></a>extra parameters: $2(-581.79 + 585.04) = 6.50$ on $6 - 1 = 5$ df. The goodness-of-fit $\chi^2$ sums</span>
+<span id="cb2-454"><a href="#cb2-454" aria-hidden="true" tabindex="-1"></a>$(O - E)^2/E$ over purchasers and non-purchasers in each priced group, with df equal to the 24 groups</span>
+<span id="cb2-455"><a href="#cb2-455" aria-hidden="true" tabindex="-1"></a>minus the parameters fitted (12 or 7).</span>
+<span id="cb2-456"><a href="#cb2-456" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-457"><a href="#cb2-457" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-458"><a href="#cb2-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-459"><a href="#cb2-459" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-460"><a href="#cb2-460" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-461"><a href="#cb2-461" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">matching &amp; propensity scores</span><span class="co">](matching-and-propensity-scores.qmd)</span> (the untestable CIA</span>
+<span id="cb2-462"><a href="#cb2-462" aria-hidden="true" tabindex="-1"></a>  this stress-tests), <span class="co">[</span><span class="ot">IV/LATE</span><span class="co">](instrumental-variables.qmd)</span> and <span class="co">[</span><span class="ot">RD</span><span class="co">](regression-discontinuity.qmd)</span> (the</span>
+<span id="cb2-463"><a href="#cb2-463" aria-hidden="true" tabindex="-1"></a>  local effects whose reach this examines), and <span class="co">[</span><span class="ot">IPW</span><span class="co">](matching-and-propensity-scores.qmd)</span> (re-weighting</span>
+<span id="cb2-464"><a href="#cb2-464" aria-hidden="true" tabindex="-1"></a>  to a target).</span>
+<span id="cb2-465"><a href="#cb2-465" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Closes:** the summit's logic — from defining an effect to **estimating** it to **stress-testing and</span>
+<span id="cb2-466"><a href="#cb2-466" aria-hidden="true" tabindex="-1"></a>  generalising** it.</span>
+<span id="cb2-467"><a href="#cb2-467" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pairs with:** <span class="co">[</span><span class="ot">meta-analysis</span><span class="co">](../06-field-realities/meta-analysis.qmd)</span> (pooling replications, and the</span>
+<span id="cb2-468"><a href="#cb2-468" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">price of uncertain bias</span><span class="co">](../06-field-realities/meta-analysis.qmd#sec-uncertain-bias)</span>) and</span>
+<span id="cb2-469"><a href="#cb2-469" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">limited dependent variables</span><span class="co">](../03-regression/limited-dependent-variables.qmd)</span> (the logit behind the</span>
+<span id="cb2-470"><a href="#cb2-470" aria-hidden="true" tabindex="-1"></a>  dose-response model).</span>
+<span id="cb2-471"><a href="#cb2-471" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">Part VI · doing research in the world</span><span class="co">](../06-field-realities/index.qmd)</span>, where external</span>
+<span id="cb2-472"><a href="#cb2-472" aria-hidden="true" tabindex="-1"></a>  validity, replication, and the gap between a clean estimate and a messy decision become the whole game.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
