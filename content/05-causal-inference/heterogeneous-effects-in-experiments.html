@@ -1807,6 +1807,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../content/complexity/el-farol-and-coordination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">El Farol &amp; Coordination Without a Coordinator</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../content/complexity/cellular-automata.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Cellular Automata &amp; the Edge of Chaos</span></a>
   </div>
@@ -1984,7 +1990,9 @@ window.Quarto = {
    
   <ul>
   <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link active" data-scroll-target="#why-it-matters">Why it matters</a></li>
+  <li><a href="#sec-variance-bounds" id="toc-sec-variance-bounds" class="nav-link" data-scroll-target="#sec-variance-bounds">What one experiment can say about variation</a></li>
   <li><a href="#the-garden-of-forking-paths" id="toc-the-garden-of-forking-paths" class="nav-link" data-scroll-target="#the-garden-of-forking-paths">The garden of forking paths</a></li>
+  <li><a href="#sec-classical-toolkit" id="toc-sec-classical-toolkit" class="nav-link" data-scroll-target="#sec-classical-toolkit">Before the algorithms: subgroups, F-tests and crossed factors</a></li>
   <li><a href="#prediction-rule-ensembles-interpretable-heterogeneity" id="toc-prediction-rule-ensembles-interpretable-heterogeneity" class="nav-link" data-scroll-target="#prediction-rule-ensembles-interpretable-heterogeneity">Prediction rule ensembles: interpretable heterogeneity</a></li>
   <li><a href="#causal-forests-effects-at-the-individual-level" id="toc-causal-forests-effects-at-the-individual-level" class="nav-link" data-scroll-target="#causal-forests-effects-at-the-individual-level">Causal forests: effects at the individual level</a></li>
   <li><a href="#did-we-actually-find-heterogeneity-the-rate-test" id="toc-did-we-actually-find-heterogeneity-the-rate-test" class="nav-link" data-scroll-target="#did-we-actually-find-heterogeneity-the-rate-test">Did we actually find heterogeneity? The RATE test</a></li>
@@ -2026,6 +2034,14 @@ window.Quarto = {
 <p>The first thing most researchers do after a randomized experiment is estimate one number: the <a href="../../content/05-causal-inference/randomized-experiments.html">average treatment effect</a>. It is unbiased and it is often unsatisfying. An ATE is an average over people; a drug that helps the young and harms the old can average to “no effect,” and a get-out-the-vote tactic that moves committed partisans but not independents averages away exactly the contrast a campaign needs. In practice, <em>“when does it work?”</em> and <em>“for whom does it work?”</em> can matter as much as <em>“does it work?”</em> <span class="citation" data-cites="green_white_ml_experiments">(<a href="#ref-green_white_ml_experiments" role="doc-biblioref">Green and White II 2023</a>)</span></p>
 <p>And the effect always varies. Green and White make the point sharply: it is not <em>whether</em> treatment effects differ across people but whether that difference is <strong>systematic, large enough to matter, and statistically identifiable</strong>. Even the granite-solid Stroop effect delays some people more than others in ways demographics explain. Cronbach warned fifty years ago that generalizing a lab effect to the world means changing the context, introducing “hidden moderators”; Gelman and Campbell add that the social world has fewer laws and changes faster than the physical one, so assuming a constant effect “corresponds to a simplified view of the world that can impede research discussion.” <span class="citation" data-cites="green_white_ml_experiments">(<a href="#ref-green_white_ml_experiments" role="doc-biblioref">Green and White II 2023</a>)</span> Treatment-effect heterogeneity is not a nuisance to be averaged out — it is the substance.</p>
 <p>The trouble is that finding <em>real</em> heterogeneity is hard, and finding <em>fake</em> heterogeneity is trivially easy.</p>
+</section>
+<section id="sec-variance-bounds" class="level2">
+<h2 class="anchored" data-anchor-id="sec-variance-bounds">What one experiment can say about variation</h2>
+<p>Before any subgroup or algorithm, Gerber and Green ask a more basic question: <strong>how much do effects vary at all?</strong> Call each subject’s own effect <span class="math inline">\tau_i = Y_i(1)-Y_i(0)</span>. “Heterogeneity” means the spread of those <span class="math inline">\tau_i</span>, their variance. The bad news is that an experiment cannot estimate it <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p>The reason is the <a href="../../content/05-causal-inference/potential-outcomes.html">fundamental problem</a> again, one level up. The control group shows you the <em>distribution</em> of untreated outcomes; the treatment group shows you the distribution of treated outcomes. Neither shows you <strong>which treated outcome belongs with which untreated one</strong>, and the variance of the effect depends entirely on that pairing. Gerber and Green’s six-subject example makes it concrete. Controls score {1, 2, 3}; treated subjects score {4, 5, 6}; the ATE is 3. Pair them (1,4), (2,5), (3,6) and everyone’s effect is exactly 3, so the variance is zero. Pair them (1,6), (2,4), (3,5) and the effects are 5, 2 and 2, a variance of 2. Both pairings fit the data perfectly <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p><strong>Bounds instead of a number.</strong> What you <em>can</em> do is ask how small and how large the variance could be. Sort both groups in ascending order and pair rank with rank: that is the most positively correlated pairing, and the variance of the implied effects is a <strong>lower bound</strong>. Sort one group ascending and the other descending: that is the most negatively correlated pairing, and it gives the <strong>upper bound</strong>. In the six-subject example the bounds run from 0 to 8/3 (our arithmetic from the book’s numbers). With unequal group sizes, pair percentile with percentile. The method is Heckman, Smith and Clements (1997), as Gerber and Green present it. Two practical notes follow. The bounds are themselves estimates with sampling error. And they are tight only when untreated outcomes vary little, so <strong>pre-screening</strong> subjects into a homogeneous pool, or analysing a <strong>change score</strong> against a predictive pre-test, can narrow them sharply <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p><strong>A test that needs no pairing.</strong> If every subject had the same effect, adding a constant would not change the spread, so the treated and control variances would be equal. A clear difference in variances is therefore evidence that effects vary. (Equal variances do not prove the opposite: a negative covariance between <span class="math inline">\tau_i</span> and <span class="math inline">Y_i(0)</span> can offset real variation.) Gerber and Green run the test on Muralidharan and Sundararaman’s teacher-incentives experiment in India: 100 schools paid bonuses for student test gains, 100 not. Average gains were 11.70 versus 8.20 points (ATE 3.50, <span class="math inline">p&lt;0.01</span>), and the variances were 91.20 versus 59.29. To judge the gap of 31.91 by <a href="../../content/05-causal-inference/randomized-experiments.html">randomisation inference</a>, build the full schedule of potential outcomes <em>under a constant effect of 3.50</em>, re-randomise 100,000 times, and count how often the absolute difference in variances is at least 31.91. That happened 8,766 times, so <span class="math inline">p = 0.088</span>: a hint of heterogeneity, not a finding <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p>These minimal-assumption tools have two limits, and Gerber and Green are frank about both. The bounds are usually wide and the variance test usually weak, because the researcher has supplied no idea of <em>where</em> the variation lives. So treat them as a first step that tells you whether a more theory-guided search is worth making. And they suit continuous outcomes. With a <strong>binary</strong> outcome, effects are almost certainly heterogeneous (a 5-point rise in turnout means some people were moved and others were not), but the data hold too little information to bound the variance without an extra assumption such as Manski’s monotone treatment response, which <a href="../../content/05-causal-inference/partial-identification.html">partial identification</a> covers <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
 </section>
 <section id="the-garden-of-forking-paths" class="level2">
 <h2 class="anchored" data-anchor-id="the-garden-of-forking-paths">The garden of forking paths</h2>
@@ -2103,7 +2119,7 @@ window.Quarto = {
 <div id="fig-forking-paths" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-forking-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="heterogeneous-effects-in-experiments_files/figure-html/fig-forking-paths-output-1.png" width="681" height="430" class="figure-img">
+<img src="heterogeneous-effects-in-experiments_files/figure-html/fig-forking-paths-output-1.png" width="681" height="433" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-forking-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: In-sample heterogeneity is cheap; replicated heterogeneity is not. An experiment with 25 candidate moderators, only one of which (dark grey) truly moves the treatment effect. Each point is a moderator’s estimated treatment×covariate interaction, measured on the <em>training</em> half (x-axis) and on a <em>held-out</em> half (y-axis). The 24 noise moderators (grey) scatter along the x-axis — some look sizeable in-sample by pure chance (the circled ‘fishing winner’ most of all) — but collapse toward zero out of sample, falling off the 45° replication line. The real moderator sits on the diagonal: it is the one pattern the held-out fold confirms. The held-out test <em>is</em> the reproducibility filter.
@@ -2112,6 +2128,45 @@ Figure&nbsp;1: In-sample heterogeneity is cheap; replicated heterogeneity is not
 </div>
 </div>
 </div>
+</section>
+<section id="sec-classical-toolkit" class="level2">
+<h2 class="anchored" data-anchor-id="sec-classical-toolkit">Before the algorithms: subgroups, F-tests and crossed factors</h2>
+<p>The machine-learning methods below automate a search that Gerber and Green teach by hand first. The hand version is worth knowing, because it shows exactly which questions an experiment can answer about “for whom”.</p>
+<p><strong>Subgroups give CATEs.</strong> Split the sample on a pre-treatment covariate and you run a small experiment within each piece. The ATE inside a subgroup is a <strong>conditional average treatment effect</strong> (CATE), and an <strong>interaction effect</strong> is the difference between two CATEs. Because the split uses a pre-treatment variable, the difference is an unbiased estimate of how the two CATEs differ <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. In the teacher-incentives data, schools below median parental literacy had a CATE of 11.14 − 7.83 = 3.31; schools above it, 12.26 − 8.57 = 3.69. Is a gap of 0.38 more than chance? Randomisation inference under a constant effect of 3.50 says no (<span class="math inline">p = 0.88</span>) <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p><strong>The same test as a regression.</strong> Write the null model <span class="math inline">Y_i = a + bI_i + cP_i + u_i</span> (one ATE, <span class="math inline">b</span>) and the alternative with an interaction, <span class="math inline">Y_i = a + bI_i + cP_i + dI_iP_i + u_i</span>, where the low-literacy CATE is <span class="math inline">b</span> and the high-literacy CATE is <span class="math inline">b+d</span>. Compare them with the nested-model <a href="../../content/03-regression/inference-for-regression.html">F-statistic</a>: how much the sum of squared residuals falls when you allow two CATEs, scaled by the residual noise. Here SSR barely moves (14,856.1 to 14,854.4), <span class="math inline">F = 0.02</span>, and the randomisation <span class="math inline">p</span>-value is again 0.88. The regression form earns its keep because it extends to many subgroups at once <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. The study’s real moderators were teacher traits, not student traits: effects were larger for teachers with lower pay, less experience, more education and more active teaching styles <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p><strong>Count your tests.</strong> Check 20 uncorrelated covariates when the true effect is zero for everyone and the chance that at least one interaction is “significant” at 0.05 is <span class="math inline">1-0.95^{20} = 0.64</span>. Even at the 0.01 level it is 0.18, roughly one researcher in six <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. The fixes are the familiar <a href="../../content/02-inference/multiple-testing.html">multiple-testing</a> ones: a Bonferroni threshold (<span class="math inline">0.05/20 = 0.0025</span>), a simulation-based threshold that holds the familywise rate at 5%, or a single <strong>joint F-test</strong> of all the interactions at once (are these eight teacher-specialty-by-gender CATEs more spread out than chance?). The joint test can be much more powerful than the agnostic variance test, especially when the covariates come from theory. When nobody knows how many comparisons were tried, Gerber and Green’s advice is to treat the result with scepticism until it replicates <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p><strong>A moderator is not a cause.</strong> Even a rock-solid interaction with a covariate is, in Gerber and Green’s phrase, essentially <em>nonexperimental</em>. The treatment was randomised; the covariate was not. If effects are larger for highly educated teachers, that does not mean retraining teachers would raise the effect, because education may be a marker for something else, such as how much the community values schooling <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. Their own cautionary tale: in the 2006 Michigan social-pressure mailing (Gerber, Green and Larimer, as reported), showing voters their own past turnout raised voting from 29.7% to 34.5%, an ATE of 4.8 points (SE 0.3). The CATE was larger among people who <em>had</em> voted in 2004 (5.9 vs 4.1 points, <span class="math inline">p&lt;.01</span>). Does being reminded that you voted motivate more than being reminded that you didn’t? A 2007 follow-up that <strong>randomly varied</strong> which past election voters were shown found the opposite: being shown an abstention moved people <em>more</em>. The subgroup analysis had mixed up the content of the letter with the kind of person who received it <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. Subgroups are still useful <em>descriptively</em>. If you only want to know where to send an intervention, any variable that predicts responsiveness will do. They are a source of clues, not of causal claims about the covariate.</p>
+<p><strong>To make a moderator causal, randomise it.</strong> The way past that limit is a <strong>factorial design</strong> that crosses the treatment with a randomly assigned <em>context</em> (the <a href="../../content/05-causal-inference/instructive-experimental-designs.html#sec-factorial-audit">instructive-designs</a> entry shows the same move in résumé audits). Gerber and Green’s worked case is Rosen’s (2010) e-mail experiment on state legislators, as they report it. A putative constituent asked about immigration rules, signing as either Colin Smith or Jose Ramirez, in either clean or error-strewn prose, 100 letters per cell:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Colin, good grammar</th>
+<th>Colin, bad grammar</th>
+<th>Jose, good grammar</th>
+<th>Jose, bad grammar</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Replied</td>
+<td>52%</td>
+<td>29%</td>
+<td>37%</td>
+<td>34%</td>
+</tr>
+</tbody>
+</table>
+<p>With good grammar Colin is favoured by 15 points. With bad grammar the gap reverses: Jose 34%, Colin 29%. The regression <span class="math inline">Y = 0.52 - 0.15J - 0.23G + 0.20\,JG</span> reproduces the four cells exactly. The interaction <span class="math inline">d = 0.20</span> gives <span class="math inline">F = 4.34</span> against the no-interaction model, and in 100,000 re-randomisations 3,706 were at least as large (<span class="math inline">p = 0.037</span>) <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. (Rebuilding the 400 binary outcomes from the table, we get the same SSRs, 92.30 and 91.30, and a randomisation <span class="math inline">p</span> of about 0.038 from 20,000 draws.) Because grammar was <em>randomised</em>, the interaction is causal: legislators favour the Anglo name only when the writer signals education. Had every letter been well written, the study would have concluded that Hispanic constituents are categorically disfavoured <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p>Two cautions come with factorial designs. The “average effect” of the name is a weighted average over the grammar conditions you happened to use (here, half the letters had errors). And adding a non-randomised covariate, the legislator’s own ethnicity, splits each cell to 50 letters. The joint test of the three new interactions gives <span class="math inline">F = 0.55</span>, <span class="math inline">p = 0.65</span>, but the three-way interaction’s 95% interval runs from −0.45 to +0.29. The data cannot rule out large effects in either direction. Not rejecting is not the same as finding no interaction <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
+<p><strong>Systematic versus idiosyncratic.</strong> Gerber and Green’s vocabulary ties this together. Variation in <span class="math inline">\tau_i</span> that covariates or crossed treatments predict is <strong>systematic heterogeneity</strong>; what is left over is <strong>idiosyncratic</strong>. Adding interaction terms to the regression moves heterogeneity from the second pile to the first <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. Their closing advice also sets up the rest of this entry. Few experimental literatures have produced even <em>two-way</em> interactions that replicate, so focus on one or two that theory predicts. And when the search must be wide, hand it to an algorithm that reduces the researcher’s discretion, which is where prediction rule ensembles and causal forests come in. Whether automatically found interactions replicate better than researcher-guided ones is, they note, still an open question <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>.</p>
 </section>
 <section id="prediction-rule-ensembles-interpretable-heterogeneity" class="level2">
 <h2 class="anchored" data-anchor-id="prediction-rule-ensembles-interpretable-heterogeneity">Prediction rule ensembles: interpretable heterogeneity</h2>
@@ -2146,6 +2201,9 @@ Figure&nbsp;1: In-sample heterogeneity is cheap; replicated heterogeneity is not
 <li><p><strong>Over-reading variable importance.</strong> Importance is a limited heuristic, not a coefficient. Collinear covariates are forced to <em>share</em> importance, and continuous variables (more split points) get <em>inflated</em> importance relative to binary ones. A high-importance variable need not have an interpretable effect gradient. <span class="citation" data-cites="green_white_ml_experiments">(<a href="#ref-green_white_ml_experiments" role="doc-biblioref">Green and White II 2023</a>)</span></p></li>
 <li><p><strong>Confusing predicted-effect distributions with conditional effects.</strong> Grouping individual predicted effects by some characteristic bundles in every <em>other</em> characteristic correlated with it — it is not the same as the conditional average treatment effect of that one variable, the way a single interaction term would be. <span class="citation" data-cites="green_white_ml_experiments">(<a href="#ref-green_white_ml_experiments" role="doc-biblioref">Green and White II 2023</a>)</span></p></li>
 <li><p><strong>Running these on a few hundred rows.</strong> Holding out data for honest estimation costs sample; Green and White want datasets in the <em>thousands</em>, not hundreds. There is no free lunch — the price of principled exploration is data. <span class="citation" data-cites="green_white_ml_experiments">(<a href="#ref-green_white_ml_experiments" role="doc-biblioref">Green and White II 2023</a>)</span></p></li>
+<li><p><strong>Reading a moderator as a lever.</strong> A treatment-by-covariate interaction is descriptive: the covariate was not randomised, so a bigger effect among educated teachers (or past voters) does not mean changing education (or the letter’s content) would change the effect. Gerber, Green and Larimer’s follow-up experiment reversed the sign their subgroup analysis suggested. To make a moderator causal, cross it as a randomised factor. <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span></p></li>
+<li><p><strong>Taking “no significant interaction” as “no interaction”.</strong> Interactions split the sample, so their intervals are wide. Rosen’s legislator-ethnicity interaction had <span class="math inline">p = 0.65</span> but a three-way interval from −0.45 to +0.29, which leaves room for large effects either way. <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span></p></li>
+<li><p><strong>Reading the variance of <span class="math inline">\tau_i</span> off the data.</strong> Equal treated and control variances do not show a constant effect, and unequal ones show variation only up to sampling error. The variance of individual effects is not identified; report bounds, and expect them to be wide unless untreated outcomes are homogeneous. <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span></p></li>
 <li><p><strong>Believing the search fixed identification.</strong> All of this assumes a <em>valid experiment</em> (or the <a href="../../content/05-causal-inference/causal-machine-learning.html">unconfoundedness and overlap</a> an observational study would need). ML finds <em>for whom</em> an identified effect varies; it cannot manufacture the identification.</p></li>
 </ul>
 </div>
@@ -2167,6 +2225,7 @@ Figure&nbsp;1: In-sample heterogeneity is cheap; replicated heterogeneity is not
 <div class="callout-body-container callout-body">
 <ul>
 <li><strong>Green &amp; White II, <em>Machine Learning for Experiments in the Social Sciences</em></strong> (Cambridge Element) — the whole argument of this entry: <em>all</em> treatment effects vary (Cronbach, Campbell, Gelman); ML’s out-of-sample criterion makes exploratory subgroup analysis <strong>reproducible</strong> by folding a confirmatory (held-out) stage into the analysis, a <em>complement</em> to preregistration rather than a replacement; <strong>prediction rule ensembles</strong> (shallow boosted trees → binary rules → LASSO selection) for interpretable heterogeneity; <strong>causal random forests</strong> (split on the effect, honest estimation, indirect regularization bias per Blackwell &amp; Olson); the <strong>RATE / Qini / AUTOC</strong> validation of discovered heterogeneity; and the cautions — variable-importance limits, predicted-effect-vs-conditional-effect, data hunger, and “an ounce of replication…” (Stieger).</li>
+<li><strong>Gerber &amp; Green, <em>Field Experiments</em>, Ch. 9</strong> — the classical toolkit in <a href="#sec-variance-bounds">what one experiment can say</a> and <a href="#sec-classical-toolkit">before the algorithms</a>: <span class="math inline">\mathrm{Var}(\tau_i)</span> is not identified because the joint distribution of potential outcomes is unobserved (the {1,2,3}/{4,5,6} pairing example); Heckman–Smith–Clements sorting bounds, pre-screening and change scores to tighten them; the equal-variance randomisation test (teacher incentives, Muralidharan &amp; Sundararaman: 91.20 vs 59.29, <span class="math inline">p = 0.088</span>); binary outcomes and monotone treatment response; CATEs and interactions (parental literacy 3.31 vs 3.69, <span class="math inline">F = 0.02</span>, <span class="math inline">p = 0.88</span>); the multiple-comparisons arithmetic (0.642, 0.182), Bonferroni and joint F-tests; subgroup analysis as nonexperimental (Gerber–Green–Larimer 2008/2010, as reported); factorial treatment-by-treatment designs (Rosen 2010, as reported: 52/29/37/34, <span class="math inline">F = 4.34</span>, <span class="math inline">p = 0.037</span>; legislator ethnicity <span class="math inline">F = 0.55</span>, three-way interval −0.451 to 0.290); systematic vs idiosyncratic heterogeneity; automated search as an open question. <em>Own checks:</em> the pairing variances 0, 2 and the upper bound 8/3; <span class="math inline">1-0.95^{20}</span>, <span class="math inline">1-0.99^{20}</span> and <span class="math inline">1-(1-0.01/20)^{20}\approx 0.01</span>; both F-statistics from the printed SSRs; and the Rosen test rebuilt from the cell rates (SSR 92.30 / 91.30, randomisation <span class="math inline">p \approx 0.038</span> from 20,000 draws vs the book’s 0.037).</li>
 <li><strong>Chernozhukov et al., <em>Applied Causal Inference Powered by ML and AI</em></strong> — the deeper machinery of the causal forest, orthogonalization, and honest CATE intervals lives in <a href="../../content/05-causal-inference/causal-machine-learning.html">causal machine learning</a>; this entry defers to it rather than repeating it.</li>
 </ul>
 </div>
@@ -2176,6 +2235,16 @@ Figure&nbsp;1: In-sample heterogeneity is cheap; replicated heterogeneity is not
 <section id="appendix-the-mathematics" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="appendix-the-mathematics">Appendix · the mathematics</h2>
 <div class="math-appendix">
+<p><strong>Why the effect variance is not identified, and how to bound it</strong> <span class="citation" data-cites="gerber_green">(<a href="#ref-gerber_green" role="doc-biblioref">Gerber and Green 2012</a>)</span>. With <span class="math inline">\tau_i = Y_i(1)-Y_i(0)</span>, <span class="math display">
+\mathrm{Var}(\tau_i)=\mathrm{Var}(Y_i(1))+\mathrm{Var}(Y_i(0))-2\,\mathrm{Cov}(Y_i(1),Y_i(0)).
+</span> The two variances are estimable from the two arms; the covariance is not, because no unit reveals both outcomes. The covariance is largest when the two marginal distributions are paired rank-to-rank (the comonotone pairing) and smallest when paired in opposite order. Those two pairings give the lower and upper bounds on <span class="math inline">\mathrm{Var}(\tau_i)</span>. The six-subject example gives effects (3, 3, 3) and (5, 3, 1): bounds 0 and 8/3. If <span class="math inline">\mathrm{Var}(Y_i(0))=0</span> the covariance is zero under every pairing and the bounds collapse to a point.</p>
+<p><strong>The equal-variance test.</strong> Since <span class="math inline">Y_i(1)=Y_i(0)+\tau_i</span>, <span class="math display">
+\mathrm{Var}(Y_i(1))=\mathrm{Var}(Y_i(0))+\mathrm{Var}(\tau_i)+2\,\mathrm{Cov}(Y_i(0),\tau_i).
+</span> Under a constant effect the last two terms are zero, so <span class="math inline">\mathrm{Var}(Y_i(1))=\mathrm{Var}(Y_i(0))</span>; rejecting equality rejects a constant effect. Equality can also hold when <span class="math inline">\mathrm{Var}(\tau_i)=-2\,\mathrm{Cov}(Y_i(0),\tau_i)</span>, so failing to reject does not establish homogeneity.</p>
+<p><strong>Nested-model F for interactions.</strong> <span class="math display">
+F=\frac{(\mathrm{SSR}_{\text{null}}-\mathrm{SSR}_{\text{alt}})/(k_{\text{alt}}-k_{\text{null}})}{\mathrm{SSR}_{\text{alt}}/(N-k_{\text{alt}})}.
+</span> Rosen: <span class="math inline">(92.30-91.30)/1 \div (91.30/396) = 4.34</span>. Teacher incentives: <span class="math inline">(14{,}856.1-14{,}854.4)/1 \div
+(14{,}854.4/196) = 0.02</span>. Under randomisation inference the degrees-of-freedom terms are constant across re-randomisations, so they do not affect the <span class="math inline">p</span>-value; only the ranking of <span class="math inline">F</span> matters. With binary outcomes and a saturated four-cell model, <span class="math inline">\mathrm{SSR}_{\text{alt}}=\sum_c n_c\hat p_c(1-\hat p_c)</span>, which is how 91.30 can be recovered from the table.</p>
 <p><strong>The subgroup interaction (the object being fished).</strong> For a binary moderator <span class="math inline">X_k\in\{0,1\}</span> and treatment <span class="math inline">W</span>, the difference-in-CATE is <span class="math display">
 \Delta_k=\big[\bar Y_{W=1,X_k=1}-\bar Y_{W=0,X_k=1}\big]-\big[\bar Y_{W=1,X_k=0}-\bar Y_{W=0,X_k=0}\big],
 </span> exactly the coefficient on <span class="math inline">W\!\times\!X_k</span> in a saturated regression. With <span class="math inline">K</span> candidate moderators, the maximum <span class="math inline">\max_k|\Delta_k|</span> has an expectation that grows with <span class="math inline">K</span> <strong>even when every true interaction is zero</strong> — the garden of forking paths, made arithmetic. Splitting the sample and re-estimating <span class="math inline">\Delta_k</span> on a held-out fold removes the selection: the noise <span class="math inline">\Delta_k</span> regress toward <span class="math inline">0</span>, the real one does not (the figure).</p>
@@ -2191,6 +2260,8 @@ Figure&nbsp;1: In-sample heterogeneity is cheap; replicated heterogeneity is not
 <h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
 <ul>
 <li><strong>Builds on:</strong> <a href="../../content/05-causal-inference/randomized-experiments.html">randomized experiments</a> (the clean identification these methods explore <em>within</em>), <a href="../../content/04-predictive/trees-and-forests.html">trees &amp; forests</a>, <a href="../../content/04-predictive/regularization.html">regularization / LASSO</a>, and <a href="../../content/04-predictive/cross-validation.html">cross-validation</a> (the held-out discipline, now load-bearing for reproducibility, not just tuning).</li>
+<li><strong>Builds on, classically:</strong> <a href="../../content/05-causal-inference/potential-outcomes.html">potential outcomes</a> (why individual effects stay unobserved), <a href="../../content/02-inference/multiple-testing.html">multiple testing</a> (Bonferroni and the familywise rate), <a href="../../content/03-regression/inference-for-regression.html">inference for regression</a> (the nested F-test) and <a href="../../content/03-regression/factorial-anova-and-ancova.html">factorial ANOVA</a> (interactions in a crossed design).</li>
+<li><strong>Sibling designs:</strong> <a href="../../content/05-causal-inference/instructive-experimental-designs.html#sec-factorial-audit">instructive experimental designs</a> (crossing factors in audit studies) and <a href="../../content/05-causal-inference/counterfactuals-and-mediation.html#sec-experimentalist-mediation">mediation</a> (the Gerber–Green–Larimer mailings again, read for mechanism).</li>
 <li><strong>Complements:</strong> <a href="../../content/05-causal-inference/causal-machine-learning.html">causal machine learning</a> — that entry is the <em>machinery</em> (DML, causal-forest internals, honesty, policy learning); this one is the <em>research design</em> — how to explore an experiment for heterogeneity without p-hacking, and the interpretable PRE alternative.</li>
 <li><strong>Leads to:</strong> <a href="../../content/06-field-realities/open-and-reproducible-science.html">open &amp; reproducible science</a> (including Green &amp; White’s case for what rigid preregistration costs) and <a href="../../content/06-field-realities/questionable-research-practices.html">questionable research practices</a> — where preregistration, the garden of forking paths, and the exploratory/confirmatory divide are the main event.</li>
 </ul>
@@ -2202,6 +2273,9 @@ Figure&nbsp;1: In-sample heterogeneity is cheap; replicated heterogeneity is not
 </section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-gerber_green" class="csl-entry" role="listitem">
+Gerber, Alan S., and Donald P. Green. 2012. <em>Field Experiments: Design, Analysis, and Interpretation</em>. W. W. Norton.
+</div>
 <div id="ref-green_white_ml_experiments" class="csl-entry" role="listitem">
 Green, Jon, and Mark H. White II. 2023. <em>Machine Learning for Experiments in the Social Sciences</em>. Elements in Experimental Political Science. Cambridge University Press. <a href="https://doi.org/10.1017/9781009168236">https://doi.org/10.1017/9781009168236</a>.
 </div>
@@ -2706,249 +2780,438 @@ Green, Jon, and Mark H. White II. 2023. <em>Machine Learning for Experiments in 
 <span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>The trouble is that finding *real* heterogeneity is hard, and finding *fake* heterogeneity is trivially easy.</span>
 <span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## The garden of forking paths</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## What one experiment can say about variation {#sec-variance-bounds}</span></span>
 <span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>Suppose you have twenty covariates and no strong prior. You run the treatment×covariate interaction for the</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>first, it's null; the second, null; the eighth — significant! You write it up. This is the</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">garden of forking paths</span><span class="co">](../06-field-realities/questionable-research-practices.qmd)</span>: with enough candidate</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>moderators, chance alone hands you a "significant" subgroup, and interactions are especially treacherous</span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>because they need large samples or large effects to detect, so the ones that clear $p&lt;0.05$ in a small study</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>are disproportionately noise. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span> The discipline's usual answer —</span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>**preregistration** — helps by forcing you to name the subgroup in advance, but it does so by *forbidding*</span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>exactly the exploratory analysis that generates new theory. The social world is too complex to anticipate</span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>every interesting pattern; we do not want to ban exploration, we want to *civilize* it.</span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>That is the contribution machine learning makes here, and it is worth stating precisely, because it is not the</span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>usual "ML is more flexible" pitch:</span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="The reproducibility criterion, built in"}</span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>A supervised ML workflow evaluates a pattern by whether it **predicts in data that were not used to find it.**</span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>So the workflow contains *both* an exploratory stage (training — search all the interactions you like) *and* a</span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>confirmatory stage (testing — does the discovered pattern hold out of sample?) inside a single analysis. The</span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>reproducibility question is no longer asked *after* publication by someone else; it is asked *during* the</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>analysis, by a held-out fold. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>This reframes exploration as *principled* rather than forbidden. You are not deciding which interactions to</span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>test — the algorithm systematically considers all of them; and you are not the judge of what counts — held-out</span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>error is. It is a different tool for the same problem preregistration attacks, and the two are complements, not</span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>rivals. The figure makes the danger, and the cure, concrete.</span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-forking-paths</span></span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "In-sample heterogeneity is cheap; replicated heterogeneity is not. An experiment with 25 candidate moderators, only one of which (dark grey) truly moves the treatment effect. Each point is a moderator's estimated treatment×covariate interaction, measured on the *training* half (x-axis) and on a *held-out* half (y-axis). The 24 noise moderators (grey) scatter along the x-axis — some look sizeable in-sample by pure chance (the circled 'fishing winner' most of all) — but collapse toward zero out of sample, falling off the 45° replication line. The real moderator sits on the diagonal: it is the one pattern the held-out fold confirms. The held-out test *is* the reproducibility filter."</span></span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">1839</span>)</span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>n, K <span class="op">=</span> <span class="dv">4000</span>, <span class="dv">25</span>                                  <span class="co"># units, candidate binary moderators</span></span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>W <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, n)                        <span class="co"># randomized treatment</span></span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, (n, K))                   <span class="co"># 25 independent Bernoulli(0.5) covariates</span></span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="co"># Truth: only moderator 0 actually moves the effect; the other 24 are pure noise.</span></span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>tau <span class="op">=</span> <span class="fl">0.20</span> <span class="op">+</span> <span class="fl">0.80</span> <span class="op">*</span> X[:, <span class="dv">0</span>]                       <span class="co"># heterogeneous effect via X0 only</span></span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> <span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> X[:, <span class="dv">0</span>] <span class="op">+</span> tau <span class="op">*</span> W <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.0</span>, n)</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="co"># Split into a training half (explore) and a held-out half (confirm).</span></span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> rng.permutation(n)</span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>tr, te <span class="op">=</span> idx[: n <span class="op">//</span> <span class="dv">2</span>], idx[n <span class="op">//</span> <span class="dv">2</span>:]</span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> interaction(rows, k):</span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Difference-in-CATE for moderator k: how much the treatment effect differs</span></span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="co">    between the covariate's two levels — the classic subgroup interaction."""</span></span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>    x, w, y <span class="op">=</span> X[rows, k], W[rows], Y[rows]</span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> cate(mask):</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>        yt, yc <span class="op">=</span> y[mask <span class="op">&amp;</span> (w <span class="op">==</span> <span class="dv">1</span>)], y[mask <span class="op">&amp;</span> (w <span class="op">==</span> <span class="dv">0</span>)]</span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> yt.mean() <span class="op">-</span> yc.mean()</span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cate(x <span class="op">==</span> <span class="dv">1</span>) <span class="op">-</span> cate(x <span class="op">==</span> <span class="dv">0</span>)</span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>train_int <span class="op">=</span> np.array([interaction(tr, k) <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>test_int  <span class="op">=</span> np.array([interaction(te, k) <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a><span class="co"># The "fishing winner": the NOISE moderator with the largest in-sample interaction.</span></span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>noise <span class="op">=</span> np.arange(<span class="dv">1</span>, K)</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>winner <span class="op">=</span> noise[np.argmax(np.<span class="bu">abs</span>(train_int[noise]))]</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.6</span>))</span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>lim <span class="op">=</span> <span class="fl">1.15</span> <span class="op">*</span> np.<span class="bu">abs</span>(np.concatenate([train_int, test_int])).<span class="bu">max</span>()</span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="op">-</span>lim, lim], [<span class="op">-</span>lim, lim], color<span class="op">=</span><span class="st">"#b7b6a8"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.4</span>, label<span class="op">=</span><span class="st">"perfect replication (45°)"</span>)</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#dcdccf"</span>, lw<span class="op">=</span><span class="fl">1.0</span>)</span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>ax.scatter(train_int[noise], test_int[noise], color<span class="op">=</span><span class="st">"#b7b6a8"</span>, s<span class="op">=</span><span class="dv">42</span>, label<span class="op">=</span><span class="st">"noise moderators"</span>)</span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>ax.scatter(train_int[<span class="dv">0</span>], test_int[<span class="dv">0</span>], color<span class="op">=</span><span class="st">"#5e5e54"</span>, s<span class="op">=</span><span class="dv">110</span>, zorder<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">"true moderator"</span>)</span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>ax.scatter(train_int[winner], test_int[winner], facecolors<span class="op">=</span><span class="st">"none"</span>, edgecolors<span class="op">=</span><span class="st">"#e8531d"</span>,</span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>           s<span class="op">=</span><span class="dv">230</span>, lw<span class="op">=</span><span class="fl">2.2</span>, zorder<span class="op">=</span><span class="dv">6</span>, label<span class="op">=</span><span class="st">"in-sample 'fishing winner'"</span>)</span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">"looks big in-sample,</span><span class="ch">\n</span><span class="st">collapses out of sample"</span>,</span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>            xy<span class="op">=</span>(train_int[winner], test_int[winner]),</span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>            xytext<span class="op">=</span>(train_int[winner] <span class="op">-</span> <span class="fl">0.02</span>, <span class="op">-</span><span class="fl">0.72</span>), fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>,</span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">1.2</span>))</span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"in-sample interaction (training half)"</span>)</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"held-out interaction (test half)"</span>)</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Which discovered subgroups actually replicate?"</span>)</span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a><span class="fu">## Prediction rule ensembles: interpretable heterogeneity</span></span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>Green and White's first flagship method is the **prediction rule ensemble** (PRE), and its appeal for social</span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>science is that it keeps the *interpretability* of a regression table while borrowing the *flexibility* of</span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>trees. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span> It works in two steps.</span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>**Rule generation.** Fit a batch of *shallow* <span class="co">[</span><span class="ot">decision trees</span><span class="co">](../04-predictive/trees-and-forests.qmd)</span> — by</span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>default around 500 boosted trees of depth 3. Each terminal node of each tree becomes a binary **rule**: a</span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>respondent either lands in it (1) or does not (0). A tree that splits first on race, then (for White</span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>respondents) on party, yields rules like *"is Black,"* *"is a White Democrat,"* *"is a White Republican."*</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>Because depth is capped at three, the most complex pattern a rule can encode is a *three-way interaction* — a</span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>deliberate limit that keeps the output human-readable. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>**Rule selection.** Those hundreds of rules become predictors in a <span class="co">[</span><span class="ot">LASSO</span><span class="co">](../04-predictive/regularization.qmd)</span></span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>regression, which drops the redundant and trivial ones and keeps the few that carry real, non-overlapping</span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>signal. The result is a table that reads almost like a regression coefficient table — one row per surviving</span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>rule, a coefficient you interpret as the change in predicted outcome when the rule flips from 0 to 1 — except</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>that the "variables" are algorithmically discovered interactions rather than ones you specified in advance.</span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span> You can even *force in* a confirmatory rule (say, your treatment indicator) and</span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>leave it unpenalized, so PRE becomes a way to ask whether systematic exploration *adds* anything beyond your</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>pre-specified hypothesis.</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>The trade is honest: limiting tree depth sacrifices some raw predictive accuracy for interpretability, and for</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>theory-building that is usually a trade worth making. In Green and White's conjoint experiment on candidate</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>gender, PRE surfaces rules like *"prefers the woman more strongly among respondents who both favor the DNC and</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>want warmth in the nominee"* — a concrete, communicable three-way interaction that no one had to guess in</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>advance.</span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="fu">## Causal forests: effects at the individual level</span></span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>The second flagship, the **causal random forest**, deserves a full treatment of its own machinery — which it</span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>gets in **[causal machine learning](causal-machine-learning.qmd)**. The one-paragraph version, in Green and</span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>White's framing: a standard forest splits to predict the *outcome* $Y$; a causal forest splits to maximize the</span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>difference in *treatment effect* between the child groups, so it hunts directly for the covariates along which</span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>the effect varies. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span> This matters because optimizing for the outcome can</span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>*over-regularize away* the very features that moderate the effect — Blackwell and Olson's **indirect</span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>regularization bias**. And because each tree is **honest** — it chooses its splits on one subsample and</span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>estimates the leaf effects on another — the individual-level effect estimates come with valid confidence</span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>intervals. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>The two methods answer slightly different questions. PRE gives you an interpretable rule table you can put in a</span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>paper; the causal forest gives you a predicted effect *for each individual* with an uncertainty band. Green and</span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>White note they often flag *different* "important" variables on the same data — a reason to run more than one</span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>and compare their out-of-sample performance rather than trusting any single method's story.</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>Before any subgroup or algorithm, Gerber and Green ask a more basic question: **how much do effects vary at</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>all?** Call each subject's own effect $\tau_i = Y_i(1)-Y_i(0)$. "Heterogeneity" means the spread of those</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>$\tau_i$, their variance. The bad news is that an experiment cannot estimate it <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>The reason is the <span class="co">[</span><span class="ot">fundamental problem</span><span class="co">](potential-outcomes.qmd)</span> again, one level up. The control group shows</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>you the *distribution* of untreated outcomes; the treatment group shows you the distribution of treated</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>outcomes. Neither shows you **which treated outcome belongs with which untreated one**, and the variance of</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>the effect depends entirely on that pairing. Gerber and Green's six-subject example makes it concrete.</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>Controls score {1, 2, 3}; treated subjects score {4, 5, 6}; the ATE is 3. Pair them (1,4), (2,5), (3,6) and</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>everyone's effect is exactly 3, so the variance is zero. Pair them (1,6), (2,4), (3,5) and the effects are</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>5, 2 and 2, a variance of 2. Both pairings fit the data perfectly <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>**Bounds instead of a number.** What you *can* do is ask how small and how large the variance could be. Sort</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>both groups in ascending order and pair rank with rank: that is the most positively correlated pairing, and</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>the variance of the implied effects is a **lower bound**. Sort one group ascending and the other descending:</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>that is the most negatively correlated pairing, and it gives the **upper bound**. In the six-subject example</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>the bounds run from 0 to 8/3 (our arithmetic from the book's numbers). With unequal group sizes, pair</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>percentile with percentile. The method is Heckman, Smith and Clements (1997), as Gerber and Green present it.</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>Two practical notes follow. The bounds are themselves estimates with sampling error. And they are tight only</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>when untreated outcomes vary little, so **pre-screening** subjects into a homogeneous pool, or analysing a</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>**change score** against a predictive pre-test, can narrow them sharply <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>**A test that needs no pairing.** If every subject had the same effect, adding a constant would not change the</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>spread, so the treated and control variances would be equal. A clear difference in variances is therefore</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>evidence that effects vary. (Equal variances do not prove the opposite: a negative covariance between $\tau_i$</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>and $Y_i(0)$ can offset real variation.) Gerber and Green run the test on Muralidharan and Sundararaman's</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>teacher-incentives experiment in India: 100 schools paid bonuses for student test gains, 100 not. Average</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>gains were 11.70 versus 8.20 points (ATE 3.50, $p&lt;0.01$), and the variances were 91.20 versus 59.29. To judge</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>the gap of 31.91 by <span class="co">[</span><span class="ot">randomisation inference</span><span class="co">](randomized-experiments.qmd)</span>, build the full schedule of</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>potential outcomes *under a constant effect of 3.50*, re-randomise 100,000 times, and count how often the</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>absolute difference in variances is at least 31.91. That happened 8,766 times, so $p = 0.088$: a hint of</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>heterogeneity, not a finding <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>These minimal-assumption tools have two limits, and Gerber and Green are frank about both. The bounds are</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>usually wide and the variance test usually weak, because the researcher has supplied no idea of *where* the</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>variation lives. So treat them as a first step that tells you whether a more theory-guided search is worth</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>making. And they suit continuous outcomes. With a **binary** outcome, effects are almost certainly</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>heterogeneous (a 5-point rise in turnout means some people were moved and others were not), but the data hold</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>too little information to bound the variance without an extra assumption such as Manski's monotone treatment</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>response, which <span class="co">[</span><span class="ot">partial identification</span><span class="co">](partial-identification.qmd)</span> covers <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="fu">## The garden of forking paths</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>Suppose you have twenty covariates and no strong prior. You run the treatment×covariate interaction for the</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>first, it's null; the second, null; the eighth — significant! You write it up. This is the</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">garden of forking paths</span><span class="co">](../06-field-realities/questionable-research-practices.qmd)</span>: with enough candidate</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>moderators, chance alone hands you a "significant" subgroup, and interactions are especially treacherous</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>because they need large samples or large effects to detect, so the ones that clear $p&lt;0.05$ in a small study</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>are disproportionately noise. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span> The discipline's usual answer —</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>**preregistration** — helps by forcing you to name the subgroup in advance, but it does so by *forbidding*</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>exactly the exploratory analysis that generates new theory. The social world is too complex to anticipate</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>every interesting pattern; we do not want to ban exploration, we want to *civilize* it.</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>That is the contribution machine learning makes here, and it is worth stating precisely, because it is not the</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>usual "ML is more flexible" pitch:</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="The reproducibility criterion, built in"}</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>A supervised ML workflow evaluates a pattern by whether it **predicts in data that were not used to find it.**</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>So the workflow contains *both* an exploratory stage (training — search all the interactions you like) *and* a</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>confirmatory stage (testing — does the discovered pattern hold out of sample?) inside a single analysis. The</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>reproducibility question is no longer asked *after* publication by someone else; it is asked *during* the</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>analysis, by a held-out fold. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>This reframes exploration as *principled* rather than forbidden. You are not deciding which interactions to</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>test — the algorithm systematically considers all of them; and you are not the judge of what counts — held-out</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>error is. It is a different tool for the same problem preregistration attacks, and the two are complements, not</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>rivals. The figure makes the danger, and the cure, concrete.</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-forking-paths</span></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "In-sample heterogeneity is cheap; replicated heterogeneity is not. An experiment with 25 candidate moderators, only one of which (dark grey) truly moves the treatment effect. Each point is a moderator's estimated treatment×covariate interaction, measured on the *training* half (x-axis) and on a *held-out* half (y-axis). The 24 noise moderators (grey) scatter along the x-axis — some look sizeable in-sample by pure chance (the circled 'fishing winner' most of all) — but collapse toward zero out of sample, falling off the 45° replication line. The real moderator sits on the diagonal: it is the one pattern the held-out fold confirms. The held-out test *is* the reproducibility filter."</span></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">1839</span>)</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>n, K <span class="op">=</span> <span class="dv">4000</span>, <span class="dv">25</span>                                  <span class="co"># units, candidate binary moderators</span></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>W <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, n)                        <span class="co"># randomized treatment</span></span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> rng.integers(<span class="dv">0</span>, <span class="dv">2</span>, (n, K))                   <span class="co"># 25 independent Bernoulli(0.5) covariates</span></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="co"># Truth: only moderator 0 actually moves the effect; the other 24 are pure noise.</span></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>tau <span class="op">=</span> <span class="fl">0.20</span> <span class="op">+</span> <span class="fl">0.80</span> <span class="op">*</span> X[:, <span class="dv">0</span>]                       <span class="co"># heterogeneous effect via X0 only</span></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> <span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> X[:, <span class="dv">0</span>] <span class="op">+</span> tau <span class="op">*</span> W <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">1.0</span>, n)</span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="co"># Split into a training half (explore) and a held-out half (confirm).</span></span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> rng.permutation(n)</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>tr, te <span class="op">=</span> idx[: n <span class="op">//</span> <span class="dv">2</span>], idx[n <span class="op">//</span> <span class="dv">2</span>:]</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> interaction(rows, k):</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Difference-in-CATE for moderator k: how much the treatment effect differs</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="co">    between the covariate's two levels — the classic subgroup interaction."""</span></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>    x, w, y <span class="op">=</span> X[rows, k], W[rows], Y[rows]</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> cate(mask):</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>        yt, yc <span class="op">=</span> y[mask <span class="op">&amp;</span> (w <span class="op">==</span> <span class="dv">1</span>)], y[mask <span class="op">&amp;</span> (w <span class="op">==</span> <span class="dv">0</span>)]</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> yt.mean() <span class="op">-</span> yc.mean()</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cate(x <span class="op">==</span> <span class="dv">1</span>) <span class="op">-</span> cate(x <span class="op">==</span> <span class="dv">0</span>)</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>train_int <span class="op">=</span> np.array([interaction(tr, k) <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>test_int  <span class="op">=</span> np.array([interaction(te, k) <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="co"># The "fishing winner": the NOISE moderator with the largest in-sample interaction.</span></span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>noise <span class="op">=</span> np.arange(<span class="dv">1</span>, K)</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>winner <span class="op">=</span> noise[np.argmax(np.<span class="bu">abs</span>(train_int[noise]))]</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">4.6</span>))</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>lim <span class="op">=</span> <span class="fl">1.15</span> <span class="op">*</span> np.<span class="bu">abs</span>(np.concatenate([train_int, test_int])).<span class="bu">max</span>()</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="op">-</span>lim, lim], [<span class="op">-</span>lim, lim], color<span class="op">=</span><span class="st">"#b7b6a8"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="fl">1.4</span>, label<span class="op">=</span><span class="st">"perfect replication (45°)"</span>)</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#dcdccf"</span>, lw<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>ax.scatter(train_int[noise], test_int[noise], color<span class="op">=</span><span class="st">"#b7b6a8"</span>, s<span class="op">=</span><span class="dv">42</span>, label<span class="op">=</span><span class="st">"noise moderators"</span>)</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>ax.scatter(train_int[<span class="dv">0</span>], test_int[<span class="dv">0</span>], color<span class="op">=</span><span class="st">"#5e5e54"</span>, s<span class="op">=</span><span class="dv">110</span>, zorder<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">"true moderator"</span>)</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>ax.scatter(train_int[winner], test_int[winner], facecolors<span class="op">=</span><span class="st">"none"</span>, edgecolors<span class="op">=</span><span class="st">"#e8531d"</span>,</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>           s<span class="op">=</span><span class="dv">230</span>, lw<span class="op">=</span><span class="fl">2.2</span>, zorder<span class="op">=</span><span class="dv">6</span>, label<span class="op">=</span><span class="st">"in-sample 'fishing winner'"</span>)</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">"looks big in-sample,</span><span class="ch">\n</span><span class="st">collapses out of sample"</span>,</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>            xy<span class="op">=</span>(train_int[winner], test_int[winner]),</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>            xytext<span class="op">=</span>(train_int[winner] <span class="op">-</span> <span class="fl">0.02</span>, <span class="op">-</span><span class="fl">0.72</span>), fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>,</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, lw<span class="op">=</span><span class="fl">1.2</span>))</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"in-sample interaction (training half)"</span>)</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"held-out interaction (test half)"</span>)</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Which discovered subgroups actually replicate?"</span>)</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, frameon<span class="op">=</span><span class="va">False</span>, loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="fu">## Before the algorithms: subgroups, F-tests and crossed factors {#sec-classical-toolkit}</span></span>
 <span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a><span class="fu">## Did we actually find heterogeneity? The RATE test</span></span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>Discovering variation is not the same as confirming it replicates. Green and White's honest final step is to</span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>ask whether the model's predicted effects *usefully rank* people in held-out data — do the units the model</span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>flags as most responsive actually respond more? The **rank-weighted average treatment effect** (RATE) formalizes</span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>this: refit the forest on a held-out sample, feed in the individual priorities the *original* model predicted,</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>and test whether prioritizing by those predictions beats prioritizing at random.</span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span> Two variants trade off differently — the **AUTOC** upweights the highest-scoring</span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>units (right when you can only afford to treat a few), while the **Qini** coefficient weights the tails</span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>symmetrically (right when the treatment cannot be selectively targeted). Both bootstrap a test of whether the</span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>discovered heterogeneity is distinguishable from zero. It is the quantitative version of the whole entry's</span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>thesis: *let held-out data be the judge.* The <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](causal-machine-learning.qmd)</span></span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>entry gives the full held-out validation toolkit from Chernozhukov et al.: the BLP slope test,</span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>calibration by quartile, and TOC/Qini curves built on doubly robust scores.</span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating ML as a license to skip preregistration.** These methods make exploration *principled*, not</span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>  *infallible* — a LASSO can still miss a real moderator or keep a spurious one. Green and White side with</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>  Stieger: *"an ounce of replication is worth a ton of inferential statistics."* Record your covariate list,</span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>  preprocessing, and tuning choices in advance even when you have no formal hypothesis, and replicate real</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>  findings in a fresh sample. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Over-reading variable importance.** Importance is a limited heuristic, not a coefficient. Collinear</span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>  covariates are forced to *share* importance, and continuous variables (more split points) get *inflated*</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>  importance relative to binary ones. A high-importance variable need not have an interpretable effect</span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>  gradient. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing predicted-effect distributions with conditional effects.** Grouping individual predicted effects</span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>  by some characteristic bundles in every *other* characteristic correlated with it — it is not the same as the</span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>  conditional average treatment effect of that one variable, the way a single interaction term would be.</span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Running these on a few hundred rows.** Holding out data for honest estimation costs sample; Green and White</span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>  want datasets in the *thousands*, not hundreds. There is no free lunch — the price of principled exploration</span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>  is data. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Believing the search fixed identification.** All of this assumes a *valid experiment* (or the</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">unconfoundedness and overlap</span><span class="co">](causal-machine-learning.qmd)</span> an observational study would need). ML finds *for</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>  whom* an identified effect varies; it cannot manufacture the identification.</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>The machine-learning methods below automate a search that Gerber and Green teach by hand first. The hand</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>version is worth knowing, because it shows exactly which questions an experiment can answer about "for whom".</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>**Subgroups give CATEs.** Split the sample on a pre-treatment covariate and you run a small experiment within</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>each piece. The ATE inside a subgroup is a **conditional average treatment effect** (CATE), and an</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>**interaction effect** is the difference between two CATEs. Because the split uses a pre-treatment variable,</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>the difference is an unbiased estimate of how the two CATEs differ <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>. In the teacher-incentives</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>data, schools below median parental literacy had a CATE of 11.14 − 7.83 = 3.31; schools above it,</span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>12.26 − 8.57 = 3.69. Is a gap of 0.38 more than chance? Randomisation inference under a constant effect of</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>3.50 says no ($p = 0.88$) <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>**The same test as a regression.** Write the null model $Y_i = a + bI_i + cP_i + u_i$ (one ATE, $b$) and the</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>alternative with an interaction, $Y_i = a + bI_i + cP_i + dI_iP_i + u_i$, where the low-literacy CATE is $b$</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>and the high-literacy CATE is $b+d$. Compare them with the nested-model</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">F-statistic</span><span class="co">](../03-regression/inference-for-regression.qmd)</span>: how much the sum of squared residuals</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>falls when you allow two CATEs, scaled by the residual noise. Here SSR barely moves (14,856.1 to 14,854.4),</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>$F = 0.02$, and the randomisation $p$-value is again 0.88. The regression form earns its keep because it</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>extends to many subgroups at once <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>. The study's real moderators were teacher traits, not</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>student traits: effects were larger for teachers with lower pay, less experience, more education and more</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>active teaching styles <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>**Count your tests.** Check 20 uncorrelated covariates when the true effect is zero for everyone and the</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>chance that at least one interaction is "significant" at 0.05 is $1-0.95^{20} = 0.64$. Even at the 0.01</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>level it is 0.18, roughly one researcher in six <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>. The fixes are the familiar</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">multiple-testing</span><span class="co">](../02-inference/multiple-testing.qmd)</span> ones: a Bonferroni threshold ($0.05/20 = 0.0025$),</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>a simulation-based threshold that holds the familywise rate at 5%, or a single **joint F-test** of all the</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>interactions at once (are these eight teacher-specialty-by-gender CATEs more spread out than chance?). The</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>joint test can be much more powerful than the agnostic variance test, especially when the covariates come</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>from theory. When nobody knows how many comparisons were tried, Gerber and Green's advice is to treat the</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>result with scepticism until it replicates <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>**A moderator is not a cause.** Even a rock-solid interaction with a covariate is, in Gerber and Green's</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>phrase, essentially *nonexperimental*. The treatment was randomised; the covariate was not. If effects are</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>larger for highly educated teachers, that does not mean retraining teachers would raise the effect, because</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>education may be a marker for something else, such as how much the community values schooling <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>Their own cautionary tale: in the 2006 Michigan social-pressure mailing (Gerber, Green and Larimer, as</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>reported), showing voters their own past turnout raised voting from 29.7% to 34.5%, an ATE of 4.8 points</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>(SE 0.3). The CATE was larger among people who *had* voted in 2004 (5.9 vs 4.1 points, $p&lt;.01$). Does being</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>reminded that you voted motivate more than being reminded that you didn't? A 2007 follow-up that **randomly</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>varied** which past election voters were shown found the opposite: being shown an abstention moved people</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>*more*. The subgroup analysis had mixed up the content of the letter with the kind of person who received</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>it <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>. Subgroups are still useful *descriptively*. If you only want to know where to send an</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>intervention, any variable that predicts responsiveness will do. They are a source of clues, not of causal</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>claims about the covariate.</span>
 <span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Green &amp; White II, *Machine Learning for Experiments in the Social Sciences*** (Cambridge Element) — the</span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>  whole argument of this entry: *all* treatment effects vary (Cronbach, Campbell, Gelman); ML's out-of-sample</span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>  criterion makes exploratory subgroup analysis **reproducible** by folding a confirmatory (held-out) stage</span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>  into the analysis, a *complement* to preregistration rather than a replacement; **prediction rule ensembles**</span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  (shallow boosted trees → binary rules → LASSO selection) for interpretable heterogeneity; **causal random</span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>  forests** (split on the effect, honest estimation, indirect regularization bias per Blackwell &amp; Olson); the</span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>  **RATE / Qini / AUTOC** validation of discovered heterogeneity; and the cautions — variable-importance</span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>  limits, predicted-effect-vs-conditional-effect, data hunger, and "an ounce of replication…" (Stieger).</span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chernozhukov et al., *Applied Causal Inference Powered by ML and AI*** — the deeper machinery of the causal</span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>  forest, orthogonalization, and honest CATE intervals lives in</span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](causal-machine-learning.qmd)</span>; this entry defers to it rather than repeating it.</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>**The subgroup interaction (the object being fished).** For a binary moderator $X_k\in<span class="sc">\{</span>0,1<span class="sc">\}</span>$ and treatment</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>$W$, the difference-in-CATE is</span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>\Delta_k=\big<span class="co">[</span><span class="ot">\bar Y_{W=1,X_k=1}-\bar Y_{W=0,X_k=1}\big</span><span class="co">]</span>-\big<span class="co">[</span><span class="ot">\bar Y_{W=1,X_k=0}-\bar Y_{W=0,X_k=0}\big</span><span class="co">]</span>,</span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>exactly the coefficient on $W<span class="sc">\!</span>\times<span class="sc">\!</span>X_k$ in a saturated regression. With $K$ candidate moderators, the</span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>maximum $\max_k|\Delta_k|$ has an expectation that grows with $K$ **even when every true interaction is zero** —</span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>the garden of forking paths, made arithmetic. Splitting the sample and re-estimating $\Delta_k$ on a held-out</span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>fold removes the selection: the noise $\Delta_k$ regress toward $0$, the real one does not (the figure).</span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>**Prediction rule ensembles.** Grow $M$ shallow trees $<span class="sc">\{</span>T_m<span class="sc">\}</span>$ (depth $\le 3$); each terminal node defines a</span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>rule $r_j(x)\in<span class="sc">\{</span>0,1<span class="sc">\}</span>$. Stack the rules with linear main-effect terms and fit a LASSO:</span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>\hat\beta=\arg\min_{\beta}\ \sum_i\Big(y_i-\beta_0-\textstyle\sum_j \beta_j r_j(x_i)-\sum_\ell \gamma_\ell x_{i\ell}\Big)^2</span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>\;+\;\lambda\Big(\sum_j|\beta_j|+\sum_\ell|\gamma_\ell|\Big).</span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>The $\ell_1$ penalty zeroes out redundant and trivial rules; a rule "matters" if its coefficient survives the</span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>penalty. Confirmatory rules can be entered unpenalized. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>**Honest causal splitting** (deferred; full version in <span class="co">[</span><span class="ot">causal ML</span><span class="co">](causal-machine-learning.qmd)</span>). Partition the</span>
-<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>training data into a splitting subsample $\mathcal S$ and an estimating subsample $\mathcal E$. Grow the tree on</span>
-<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>$\mathcal S$, choosing splits that maximize $\sum_{\text{children}} n_c\,\hat\tau_c^2$ (effect heterogeneity);</span>
-<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>estimate each leaf's effect $\hat\tau(x)=\bar Y_{W=1}-\bar Y_{W=0}$ using only $\mathcal E$. Because the leaf was</span>
-<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>not carved using $\mathcal E$'s outcomes, $\hat\tau(x)$ is asymptotically normal — the basis for valid intervals.</span>
-<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>**RATE.** Given a prioritization score $s(x)$ (e.g. the predicted effect) and its induced Targeting Operator</span>
-<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>Characteristic curve, the rank-weighted average treatment effect integrates the effect among the top-$q$</span>
-<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>prioritized units against $q$; the **AUTOC** weights by $\log$ (favoring the very top), the **Qini** weights</span>
-<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>linearly (symmetric tails). A bootstrap tests $\text{RATE}&gt;0$: the score usefully ranks responders in held-out</span>
-<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>data. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
-<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">randomized experiments</span><span class="co">](randomized-experiments.qmd)</span> (the clean identification these methods</span>
-<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>  explore *within*), <span class="co">[</span><span class="ot">trees &amp; forests</span><span class="co">](../04-predictive/trees-and-forests.qmd)</span>,</span>
-<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">regularization / LASSO</span><span class="co">](../04-predictive/regularization.qmd)</span>, and</span>
-<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](../04-predictive/cross-validation.qmd)</span> (the held-out discipline, now load-bearing for</span>
-<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>  reproducibility, not just tuning).</span>
-<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Complements:** <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](causal-machine-learning.qmd)</span> — that entry is the *machinery* (DML,</span>
-<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>  causal-forest internals, honesty, policy learning); this one is the *research design* — how to explore an</span>
-<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>  experiment for heterogeneity without p-hacking, and the interpretable PRE alternative.</span>
-<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">open &amp; reproducible science</span><span class="co">](../06-field-realities/open-and-reproducible-science.qmd)</span></span>
-<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>  (including Green &amp; White's case for what rigid preregistration costs) and</span>
-<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">questionable research practices</span><span class="co">](../06-field-realities/questionable-research-practices.qmd)</span> — where</span>
-<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>  preregistration, the garden of forking paths, and the exploratory/confirmatory divide are the main event.</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>**To make a moderator causal, randomise it.** The way past that limit is a **factorial design** that crosses</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>the treatment with a randomly assigned *context* (the <span class="co">[</span><span class="ot">instructive-designs</span><span class="co">](instructive-experimental-designs.qmd#sec-factorial-audit)</span></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>entry shows the same move in résumé audits). Gerber and Green's worked case is Rosen's (2010) e-mail</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>experiment on state legislators, as they report it. A putative constituent asked about immigration rules,</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>signing as either Colin Smith or Jose Ramirez, in either clean or error-strewn prose, 100 letters per cell:</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="pp">|</span> Colin, good grammar <span class="pp">|</span> Colin, bad grammar <span class="pp">|</span> Jose, good grammar <span class="pp">|</span> Jose, bad grammar <span class="pp">|</span></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|---|</span></span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Replied <span class="pp">|</span> 52% <span class="pp">|</span> 29% <span class="pp">|</span> 37% <span class="pp">|</span> 34% <span class="pp">|</span></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>With good grammar Colin is favoured by 15 points. With bad grammar the gap reverses: Jose 34%, Colin 29%. The</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>regression $Y = 0.52 - 0.15J - 0.23G + 0.20\,JG$ reproduces the four cells exactly. The interaction $d = 0.20$</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>gives $F = 4.34$ against the no-interaction model, and in 100,000 re-randomisations 3,706 were at least as</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>large ($p = 0.037$) <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>. (Rebuilding the 400 binary outcomes from the table, we get the same SSRs,</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>92.30 and 91.30, and a randomisation $p$ of about 0.038 from 20,000 draws.) Because grammar was *randomised*,</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>the interaction is causal: legislators favour the Anglo name only when the writer signals education. Had</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>every letter been well written, the study would have concluded that Hispanic constituents are categorically</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>disfavoured <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>Two cautions come with factorial designs. The "average effect" of the name is a weighted average over the</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>grammar conditions you happened to use (here, half the letters had errors). And adding a non-randomised</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>covariate, the legislator's own ethnicity, splits each cell to 50 letters. The joint test of the three new</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>interactions gives $F = 0.55$, $p = 0.65$, but the three-way interaction's 95% interval runs from −0.45 to</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>+0.29. The data cannot rule out large effects in either direction. Not rejecting is not the same as finding</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>no interaction <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>**Systematic versus idiosyncratic.** Gerber and Green's vocabulary ties this together. Variation in $\tau_i$</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>that covariates or crossed treatments predict is **systematic heterogeneity**; what is left over is</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>**idiosyncratic**. Adding interaction terms to the regression moves heterogeneity from the second pile to the</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>first <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>. Their closing advice also sets up the rest of this entry. Few experimental literatures</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>have produced even *two-way* interactions that replicate, so focus on one or two that theory predicts. And</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>when the search must be wide, hand it to an algorithm that reduces the researcher's discretion, which is</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>where prediction rule ensembles and causal forests come in. Whether automatically found interactions</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>replicate better than researcher-guided ones is, they note, still an open question <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>.</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a><span class="fu">## Prediction rule ensembles: interpretable heterogeneity</span></span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>Green and White's first flagship method is the **prediction rule ensemble** (PRE), and its appeal for social</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>science is that it keeps the *interpretability* of a regression table while borrowing the *flexibility* of</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>trees. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span> It works in two steps.</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>**Rule generation.** Fit a batch of *shallow* <span class="co">[</span><span class="ot">decision trees</span><span class="co">](../04-predictive/trees-and-forests.qmd)</span> — by</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>default around 500 boosted trees of depth 3. Each terminal node of each tree becomes a binary **rule**: a</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>respondent either lands in it (1) or does not (0). A tree that splits first on race, then (for White</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>respondents) on party, yields rules like *"is Black,"* *"is a White Democrat,"* *"is a White Republican."*</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>Because depth is capped at three, the most complex pattern a rule can encode is a *three-way interaction* — a</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>deliberate limit that keeps the output human-readable. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>**Rule selection.** Those hundreds of rules become predictors in a <span class="co">[</span><span class="ot">LASSO</span><span class="co">](../04-predictive/regularization.qmd)</span></span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>regression, which drops the redundant and trivial ones and keeps the few that carry real, non-overlapping</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>signal. The result is a table that reads almost like a regression coefficient table — one row per surviving</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>rule, a coefficient you interpret as the change in predicted outcome when the rule flips from 0 to 1 — except</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>that the "variables" are algorithmically discovered interactions rather than ones you specified in advance.</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span> You can even *force in* a confirmatory rule (say, your treatment indicator) and</span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>leave it unpenalized, so PRE becomes a way to ask whether systematic exploration *adds* anything beyond your</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>pre-specified hypothesis.</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>The trade is honest: limiting tree depth sacrifices some raw predictive accuracy for interpretability, and for</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>theory-building that is usually a trade worth making. In Green and White's conjoint experiment on candidate</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>gender, PRE surfaces rules like *"prefers the woman more strongly among respondents who both favor the DNC and</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>want warmth in the nominee"* — a concrete, communicable three-way interaction that no one had to guess in</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>advance.</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a><span class="fu">## Causal forests: effects at the individual level</span></span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>The second flagship, the **causal random forest**, deserves a full treatment of its own machinery — which it</span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>gets in **[causal machine learning](causal-machine-learning.qmd)**. The one-paragraph version, in Green and</span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>White's framing: a standard forest splits to predict the *outcome* $Y$; a causal forest splits to maximize the</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>difference in *treatment effect* between the child groups, so it hunts directly for the covariates along which</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>the effect varies. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span> This matters because optimizing for the outcome can</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>*over-regularize away* the very features that moderate the effect — Blackwell and Olson's **indirect</span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>regularization bias**. And because each tree is **honest** — it chooses its splits on one subsample and</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>estimates the leaf effects on another — the individual-level effect estimates come with valid confidence</span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>intervals. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>The two methods answer slightly different questions. PRE gives you an interpretable rule table you can put in a</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>paper; the causal forest gives you a predicted effect *for each individual* with an uncertainty band. Green and</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>White note they often flag *different* "important" variables on the same data — a reason to run more than one</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>and compare their out-of-sample performance rather than trusting any single method's story.</span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a><span class="fu">## Did we actually find heterogeneity? The RATE test</span></span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>Discovering variation is not the same as confirming it replicates. Green and White's honest final step is to</span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>ask whether the model's predicted effects *usefully rank* people in held-out data — do the units the model</span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a>flags as most responsive actually respond more? The **rank-weighted average treatment effect** (RATE) formalizes</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>this: refit the forest on a held-out sample, feed in the individual priorities the *original* model predicted,</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>and test whether prioritizing by those predictions beats prioritizing at random.</span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span> Two variants trade off differently — the **AUTOC** upweights the highest-scoring</span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>units (right when you can only afford to treat a few), while the **Qini** coefficient weights the tails</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>symmetrically (right when the treatment cannot be selectively targeted). Both bootstrap a test of whether the</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>discovered heterogeneity is distinguishable from zero. It is the quantitative version of the whole entry's</span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>thesis: *let held-out data be the judge.* The <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](causal-machine-learning.qmd)</span></span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>entry gives the full held-out validation toolkit from Chernozhukov et al.: the BLP slope test,</span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>calibration by quartile, and TOC/Qini curves built on doubly robust scores.</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating ML as a license to skip preregistration.** These methods make exploration *principled*, not</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>  *infallible* — a LASSO can still miss a real moderator or keep a spurious one. Green and White side with</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>  Stieger: *"an ounce of replication is worth a ton of inferential statistics."* Record your covariate list,</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>  preprocessing, and tuning choices in advance even when you have no formal hypothesis, and replicate real</span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>  findings in a fresh sample. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Over-reading variable importance.** Importance is a limited heuristic, not a coefficient. Collinear</span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a>  covariates are forced to *share* importance, and continuous variables (more split points) get *inflated*</span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a>  importance relative to binary ones. A high-importance variable need not have an interpretable effect</span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a>  gradient. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing predicted-effect distributions with conditional effects.** Grouping individual predicted effects</span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>  by some characteristic bundles in every *other* characteristic correlated with it — it is not the same as the</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>  conditional average treatment effect of that one variable, the way a single interaction term would be.</span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Running these on a few hundred rows.** Holding out data for honest estimation costs sample; Green and White</span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>  want datasets in the *thousands*, not hundreds. There is no free lunch — the price of principled exploration</span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a>  is data. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading a moderator as a lever.** A treatment-by-covariate interaction is descriptive: the covariate was</span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a>  not randomised, so a bigger effect among educated teachers (or past voters) does not mean changing education</span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a>  (or the letter's content) would change the effect. Gerber, Green and Larimer's follow-up experiment reversed</span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a>  the sign their subgroup analysis suggested. To make a moderator causal, cross it as a randomised factor.</span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Taking "no significant interaction" as "no interaction".** Interactions split the sample, so their</span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a>  intervals are wide. Rosen's legislator-ethnicity interaction had $p = 0.65$ but a three-way interval from</span>
+<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a>  −0.45 to +0.29, which leaves room for large effects either way. <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading the variance of $\tau_i$ off the data.** Equal treated and control variances do not show a</span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a>  constant effect, and unequal ones show variation only up to sampling error. The variance of individual</span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a>  effects is not identified; report bounds, and expect them to be wide unless untreated outcomes are</span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>  homogeneous. <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span></span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Believing the search fixed identification.** All of this assumes a *valid experiment* (or the</span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">unconfoundedness and overlap</span><span class="co">](causal-machine-learning.qmd)</span> an observational study would need). ML finds *for</span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a>  whom* an identified effect varies; it cannot manufacture the identification.</span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Green &amp; White II, *Machine Learning for Experiments in the Social Sciences*** (Cambridge Element) — the</span>
+<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a>  whole argument of this entry: *all* treatment effects vary (Cronbach, Campbell, Gelman); ML's out-of-sample</span>
+<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a>  criterion makes exploratory subgroup analysis **reproducible** by folding a confirmatory (held-out) stage</span>
+<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a>  into the analysis, a *complement* to preregistration rather than a replacement; **prediction rule ensembles**</span>
+<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a>  (shallow boosted trees → binary rules → LASSO selection) for interpretable heterogeneity; **causal random</span>
+<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a>  forests** (split on the effect, honest estimation, indirect regularization bias per Blackwell &amp; Olson); the</span>
+<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a>  **RATE / Qini / AUTOC** validation of discovered heterogeneity; and the cautions — variable-importance</span>
+<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a>  limits, predicted-effect-vs-conditional-effect, data hunger, and "an ounce of replication…" (Stieger).</span>
+<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Gerber &amp; Green, *Field Experiments*, Ch. 9** — the classical toolkit in</span>
+<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">what one experiment can say</span><span class="co">](#sec-variance-bounds)</span> and <span class="co">[</span><span class="ot">before the algorithms</span><span class="co">](#sec-classical-toolkit)</span>: $\mathrm{Var}(\tau_i)$ is not identified because the joint</span>
+<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a>  distribution of potential outcomes is unobserved (the {1,2,3}/{4,5,6} pairing example); Heckman–Smith–Clements</span>
+<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a>  sorting bounds, pre-screening and change scores to tighten them; the equal-variance randomisation test</span>
+<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a>  (teacher incentives, Muralidharan &amp; Sundararaman: 91.20 vs 59.29, $p = 0.088$); binary outcomes and monotone</span>
+<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a>  treatment response; CATEs and interactions (parental literacy 3.31 vs 3.69, $F = 0.02$, $p = 0.88$); the</span>
+<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a>  multiple-comparisons arithmetic (0.642, 0.182), Bonferroni and joint F-tests; subgroup analysis as</span>
+<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a>  nonexperimental (Gerber–Green–Larimer 2008/2010, as reported); factorial treatment-by-treatment designs</span>
+<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a>  (Rosen 2010, as reported: 52/29/37/34, $F = 4.34$, $p = 0.037$; legislator ethnicity $F = 0.55$, three-way</span>
+<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a>  interval −0.451 to 0.290); systematic vs idiosyncratic heterogeneity; automated search as an open question.</span>
+<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a>  *Own checks:* the pairing variances 0, 2 and the upper bound 8/3; $1-0.95^{20}$, $1-0.99^{20}$ and</span>
+<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a>  $1-(1-0.01/20)^{20}\approx 0.01$; both F-statistics from the printed SSRs; and the Rosen test rebuilt from</span>
+<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a>  the cell rates (SSR 92.30 / 91.30, randomisation $p \approx 0.038$ from 20,000 draws vs the book's 0.037).</span>
+<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chernozhukov et al., *Applied Causal Inference Powered by ML and AI*** — the deeper machinery of the causal</span>
+<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>  forest, orthogonalization, and honest CATE intervals lives in</span>
+<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](causal-machine-learning.qmd)</span>; this entry defers to it rather than repeating it.</span>
+<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a>**Why the effect variance is not identified, and how to bound it** <span class="co">[</span><span class="ot">@gerber_green</span><span class="co">]</span>. With</span>
+<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a>$\tau_i = Y_i(1)-Y_i(0)$,</span>
+<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a>\mathrm{Var}(\tau_i)=\mathrm{Var}(Y_i(1))+\mathrm{Var}(Y_i(0))-2\,\mathrm{Cov}(Y_i(1),Y_i(0)).</span>
+<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a>The two variances are estimable from the two arms; the covariance is not, because no unit reveals both</span>
+<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a>outcomes. The covariance is largest when the two marginal distributions are paired rank-to-rank (the</span>
+<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a>comonotone pairing) and smallest when paired in opposite order. Those two pairings give the lower and upper</span>
+<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a>bounds on $\mathrm{Var}(\tau_i)$. The six-subject example gives effects (3, 3, 3) and (5, 3, 1): bounds 0 and</span>
+<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a>8/3. If $\mathrm{Var}(Y_i(0))=0$ the covariance is zero under every pairing and the bounds collapse to a point.</span>
+<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a>**The equal-variance test.** Since $Y_i(1)=Y_i(0)+\tau_i$,</span>
+<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a>\mathrm{Var}(Y_i(1))=\mathrm{Var}(Y_i(0))+\mathrm{Var}(\tau_i)+2\,\mathrm{Cov}(Y_i(0),\tau_i).</span>
+<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a>Under a constant effect the last two terms are zero, so $\mathrm{Var}(Y_i(1))=\mathrm{Var}(Y_i(0))$; rejecting</span>
+<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a>equality rejects a constant effect. Equality can also hold when $\mathrm{Var}(\tau_i)=-2\,\mathrm{Cov}(Y_i(0),\tau_i)$,</span>
+<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a>so failing to reject does not establish homogeneity.</span>
+<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a>**Nested-model F for interactions.**</span>
+<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a>F=\frac{(\mathrm{SSR}_{\text{null}}-\mathrm{SSR}_{\text{alt}})/(k_{\text{alt}}-k_{\text{null}})}{\mathrm{SSR}_{\text{alt}}/(N-k_{\text{alt}})}.</span>
+<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a>Rosen: $(92.30-91.30)/1 \div (91.30/396) = 4.34$. Teacher incentives: $(14{,}856.1-14{,}854.4)/1 \div</span>
+<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a>(14{,}854.4/196) = 0.02$. Under randomisation inference the degrees-of-freedom terms are constant across</span>
+<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a>re-randomisations, so they do not affect the $p$-value; only the ranking of $F$ matters. With binary</span>
+<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a>outcomes and a saturated four-cell model, $\mathrm{SSR}_{\text{alt}}=\sum_c n_c\hat p_c(1-\hat p_c)$, which is how</span>
+<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a>91.30 can be recovered from the table.</span>
+<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-413"><a href="#cb2-413" aria-hidden="true" tabindex="-1"></a>**The subgroup interaction (the object being fished).** For a binary moderator $X_k\in<span class="sc">\{</span>0,1<span class="sc">\}</span>$ and treatment</span>
+<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a>$W$, the difference-in-CATE is</span>
+<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a>\Delta_k=\big<span class="co">[</span><span class="ot">\bar Y_{W=1,X_k=1}-\bar Y_{W=0,X_k=1}\big</span><span class="co">]</span>-\big<span class="co">[</span><span class="ot">\bar Y_{W=1,X_k=0}-\bar Y_{W=0,X_k=0}\big</span><span class="co">]</span>,</span>
+<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a>exactly the coefficient on $W<span class="sc">\!</span>\times<span class="sc">\!</span>X_k$ in a saturated regression. With $K$ candidate moderators, the</span>
+<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a>maximum $\max_k|\Delta_k|$ has an expectation that grows with $K$ **even when every true interaction is zero** —</span>
+<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a>the garden of forking paths, made arithmetic. Splitting the sample and re-estimating $\Delta_k$ on a held-out</span>
+<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a>fold removes the selection: the noise $\Delta_k$ regress toward $0$, the real one does not (the figure).</span>
+<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a>**Prediction rule ensembles.** Grow $M$ shallow trees $<span class="sc">\{</span>T_m<span class="sc">\}</span>$ (depth $\le 3$); each terminal node defines a</span>
+<span id="cb2-424"><a href="#cb2-424" aria-hidden="true" tabindex="-1"></a>rule $r_j(x)\in<span class="sc">\{</span>0,1<span class="sc">\}</span>$. Stack the rules with linear main-effect terms and fit a LASSO:</span>
+<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a>\hat\beta=\arg\min_{\beta}\ \sum_i\Big(y_i-\beta_0-\textstyle\sum_j \beta_j r_j(x_i)-\sum_\ell \gamma_\ell x_{i\ell}\Big)^2</span>
+<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a>\;+\;\lambda\Big(\sum_j|\beta_j|+\sum_\ell|\gamma_\ell|\Big).</span>
+<span id="cb2-428"><a href="#cb2-428" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-429"><a href="#cb2-429" aria-hidden="true" tabindex="-1"></a>The $\ell_1$ penalty zeroes out redundant and trivial rules; a rule "matters" if its coefficient survives the</span>
+<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a>penalty. Confirmatory rules can be entered unpenalized. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
+<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a>**Honest causal splitting** (deferred; full version in <span class="co">[</span><span class="ot">causal ML</span><span class="co">](causal-machine-learning.qmd)</span>). Partition the</span>
+<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a>training data into a splitting subsample $\mathcal S$ and an estimating subsample $\mathcal E$. Grow the tree on</span>
+<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a>$\mathcal S$, choosing splits that maximize $\sum_{\text{children}} n_c\,\hat\tau_c^2$ (effect heterogeneity);</span>
+<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a>estimate each leaf's effect $\hat\tau(x)=\bar Y_{W=1}-\bar Y_{W=0}$ using only $\mathcal E$. Because the leaf was</span>
+<span id="cb2-436"><a href="#cb2-436" aria-hidden="true" tabindex="-1"></a>not carved using $\mathcal E$'s outcomes, $\hat\tau(x)$ is asymptotically normal — the basis for valid intervals.</span>
+<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-438"><a href="#cb2-438" aria-hidden="true" tabindex="-1"></a>**RATE.** Given a prioritization score $s(x)$ (e.g. the predicted effect) and its induced Targeting Operator</span>
+<span id="cb2-439"><a href="#cb2-439" aria-hidden="true" tabindex="-1"></a>Characteristic curve, the rank-weighted average treatment effect integrates the effect among the top-$q$</span>
+<span id="cb2-440"><a href="#cb2-440" aria-hidden="true" tabindex="-1"></a>prioritized units against $q$; the **AUTOC** weights by $\log$ (favoring the very top), the **Qini** weights</span>
+<span id="cb2-441"><a href="#cb2-441" aria-hidden="true" tabindex="-1"></a>linearly (symmetric tails). A bootstrap tests $\text{RATE}&gt;0$: the score usefully ranks responders in held-out</span>
+<span id="cb2-442"><a href="#cb2-442" aria-hidden="true" tabindex="-1"></a>data. <span class="co">[</span><span class="ot">@green_white_ml_experiments</span><span class="co">]</span></span>
+<span id="cb2-443"><a href="#cb2-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-444"><a href="#cb2-444" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-445"><a href="#cb2-445" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-446"><a href="#cb2-446" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-447"><a href="#cb2-447" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-448"><a href="#cb2-448" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">randomized experiments</span><span class="co">](randomized-experiments.qmd)</span> (the clean identification these methods</span>
+<span id="cb2-449"><a href="#cb2-449" aria-hidden="true" tabindex="-1"></a>  explore *within*), <span class="co">[</span><span class="ot">trees &amp; forests</span><span class="co">](../04-predictive/trees-and-forests.qmd)</span>,</span>
+<span id="cb2-450"><a href="#cb2-450" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">regularization / LASSO</span><span class="co">](../04-predictive/regularization.qmd)</span>, and</span>
+<span id="cb2-451"><a href="#cb2-451" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](../04-predictive/cross-validation.qmd)</span> (the held-out discipline, now load-bearing for</span>
+<span id="cb2-452"><a href="#cb2-452" aria-hidden="true" tabindex="-1"></a>  reproducibility, not just tuning).</span>
+<span id="cb2-453"><a href="#cb2-453" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on, classically:** <span class="co">[</span><span class="ot">potential outcomes</span><span class="co">](potential-outcomes.qmd)</span> (why individual effects stay</span>
+<span id="cb2-454"><a href="#cb2-454" aria-hidden="true" tabindex="-1"></a>  unobserved), <span class="co">[</span><span class="ot">multiple testing</span><span class="co">](../02-inference/multiple-testing.qmd)</span> (Bonferroni and the familywise rate),</span>
+<span id="cb2-455"><a href="#cb2-455" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">inference for regression</span><span class="co">](../03-regression/inference-for-regression.qmd)</span> (the nested F-test) and</span>
+<span id="cb2-456"><a href="#cb2-456" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">factorial ANOVA</span><span class="co">](../03-regression/factorial-anova-and-ancova.qmd)</span> (interactions in a crossed design).</span>
+<span id="cb2-457"><a href="#cb2-457" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Sibling designs:** <span class="co">[</span><span class="ot">instructive experimental designs</span><span class="co">](instructive-experimental-designs.qmd#sec-factorial-audit)</span></span>
+<span id="cb2-458"><a href="#cb2-458" aria-hidden="true" tabindex="-1"></a>  (crossing factors in audit studies) and <span class="co">[</span><span class="ot">mediation</span><span class="co">](counterfactuals-and-mediation.qmd#sec-experimentalist-mediation)</span></span>
+<span id="cb2-459"><a href="#cb2-459" aria-hidden="true" tabindex="-1"></a>  (the Gerber–Green–Larimer mailings again, read for mechanism).</span>
+<span id="cb2-460"><a href="#cb2-460" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Complements:** <span class="co">[</span><span class="ot">causal machine learning</span><span class="co">](causal-machine-learning.qmd)</span> — that entry is the *machinery* (DML,</span>
+<span id="cb2-461"><a href="#cb2-461" aria-hidden="true" tabindex="-1"></a>  causal-forest internals, honesty, policy learning); this one is the *research design* — how to explore an</span>
+<span id="cb2-462"><a href="#cb2-462" aria-hidden="true" tabindex="-1"></a>  experiment for heterogeneity without p-hacking, and the interpretable PRE alternative.</span>
+<span id="cb2-463"><a href="#cb2-463" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">open &amp; reproducible science</span><span class="co">](../06-field-realities/open-and-reproducible-science.qmd)</span></span>
+<span id="cb2-464"><a href="#cb2-464" aria-hidden="true" tabindex="-1"></a>  (including Green &amp; White's case for what rigid preregistration costs) and</span>
+<span id="cb2-465"><a href="#cb2-465" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">questionable research practices</span><span class="co">](../06-field-realities/questionable-research-practices.qmd)</span> — where</span>
+<span id="cb2-466"><a href="#cb2-466" aria-hidden="true" tabindex="-1"></a>  preregistration, the garden of forking paths, and the exploratory/confirmatory divide are the main event.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
