@@ -174,7 +174,7 @@ window.Quarto = {
 <meta property="og:description" content="Real surveys are never a simple random sample. This is the design-based machinery that turns an unequal, clustered, partially-answered sample back into one honest population number — through the humble sampling weight.">
 <meta property="og:image" content="https://profsarthak.github.io/quant-social-scientist/content/02-inference/complex-survey-estimation_files/figure-html/fig-ht-weights-output-1.png">
 <meta property="og:site_name" content="The Quantitative Social Scientist">
-<meta property="og:image:height" content="711">
+<meta property="og:image:height" content="706">
 <meta property="og:image:width" content="1363">
 </head>
 
@@ -1350,6 +1350,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/markov-random-fields.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Markov Random Fields</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../content/ml-track/variational-inference.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Variational Inference</span></a>
   </div>
@@ -2228,7 +2234,7 @@ window.Quarto = {
 <div id="fig-ht-weights" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ht-weights-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="complex-survey-estimation_files/figure-html/fig-ht-weights-output-1.png" width="682" height="356" class="figure-img">
+<img src="complex-survey-estimation_files/figure-html/fig-ht-weights-output-1.png" width="682" height="353" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ht-weights-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Why weights are not optional, simulated by hand. A population of 5,000 firms is sampled with probability proportional to size, so big firms are deliberately over-represented — and size is correlated with the outcome y (revenue per employee). Over 20,000 such samples: the naïve unweighted sample mean (grey) is badly biased UPWARD, because the oversampled big firms drag it up. The Horvitz–Thompson estimator (blue) — each firm weighted by 1/π, i.e.&nbsp;shrinking the over-sampled big firms back to their true population share — is centred exactly on the truth (dashed line). Same data, same sample; the weights are the entire difference between a biased number and an honest one.
@@ -2263,7 +2269,7 @@ n_h \;\propto\; N_h\,\sigma_h ,
 <p>The same auxiliary-data idea, applied to the <strong>weights</strong> themselves, is the workhorse of real survey production <span class="citation" data-cites="bui_survey_sampling">(<a href="#ref-bui_survey_sampling" role="doc-biblioref">Bui 2026</a>)</span>:</p>
 <ul>
 <li><strong>Post-stratification.</strong> Form groups <em>after</em> sampling and rescale the weights so each group’s weighted count <strong>exactly matches the known population count</strong> <span class="math inline">N_h</span>. This removes the variance from a group being over- or under-represented by chance.</li>
-<li><strong>Raking (iterative proportional fitting).</strong> When you know the <strong>marginal</strong> totals (total men, total in each age band) but not the joint cell counts (men <em>in</em> each age band), raking adjusts the weights iteratively until every margin matches.</li>
+<li><strong>Raking (iterative proportional fitting).</strong> When you know the <strong>marginal</strong> totals (total men, total in each age band) but not the joint cell counts (men <em>in</em> each age band), raking adjusts the weights iteratively until every margin matches. The same algorithm fits tabular <a href="../../content/ml-track/markov-random-fields.html">Markov random fields</a> by matching their marginal tables.</li>
 <li><strong>Calibration</strong> is the general framework: find new weights <strong>as close as possible to the design weights</strong> subject to the constraint that weighted totals of the auxiliary variables hit their known population values. Crucially, this is also a primary <strong>non-response correction</strong> — if a group answers at a lower rate, calibrating its weights up to the known population total compensates <span class="citation" data-cites="bui_survey_sampling">(<a href="#ref-bui_survey_sampling" role="doc-biblioref">Bui 2026</a>)</span>.</li>
 </ul>
 </section>
@@ -2980,113 +2986,114 @@ Bui, Trang. 2026. <em>A Concise Introduction to Survey Sampling</em>. <a href="h
 <span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>  under-represented by chance.</span>
 <span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Raking (iterative proportional fitting).** When you know the **marginal** totals (total men, total in each</span>
 <span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>  age band) but not the joint cell counts (men *in* each age band), raking adjusts the weights iteratively</span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>  until every margin matches.</span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Calibration** is the general framework: find new weights **as close as possible to the design weights**</span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>  subject to the constraint that weighted totals of the auxiliary variables hit their known population values.</span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>  Crucially, this is also a primary **non-response correction** — if a group answers at a lower rate,</span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>  calibrating its weights up to the known population total compensates <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span>.</span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="fu">## Unequal probability on purpose: PPS</span></span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>Unequal selection is not only a nuisance to undo — done deliberately it can *cut* variance. In</span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>**probability-proportional-to-size (PPS)** sampling, you select units with probability proportional to a known</span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>size measure (a hospital's beds, a school's enrolment) <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span>. Pair PPS with the</span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>Horvitz–Thompson estimator and something elegant happens: when size is **correlated with $y$**, the weight</span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>$1/\pi_i$ runs *inversely* to $y_i$, so the products $w_i y_i$ are **nearly constant across units** — and a</span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>sum of near-constant terms has very low variance <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span>. A well-chosen size measure turns</span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>unequal selection from a liability into a precision tool (a "self-weighting" design).</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a><span class="fu">## How precise? Variance and the design effect</span></span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>Weighted, ratio, and GREG estimators are **non-linear** functions of the data, so their variance has no</span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>textbook closed form. Two standard tools <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span>:</span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Linearization (Taylor approximation).** Approximate the non-linear estimator by its first-order Taylor</span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>  expansion — a *linear* statistic whose variance you *can* compute.</span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The survey bootstrap.** Resample the sample (respecting the design) many times and read the variability of</span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>  the estimate off the replicates — the <span class="co">[</span><span class="ot">bootstrap</span><span class="co">](the-bootstrap.qmd)</span>, adapted to complex designs.</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>The headline summary of a design's efficiency is the **design effect**,</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>\text{deff} = \frac{\operatorname{Var}_{\text{design}}(\hat\theta)}{\operatorname{Var}_{\text{SRS}}(\hat\theta)},</span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>the ratio of your design's variance to that of a simple random sample of the same size. Clustering pushes deff</span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>above 1; good stratification pulls it below. The **effective sample size** is $n/\text{deff}$ — the number of</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>*independent* observations your complex sample is really worth <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span>.</span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring the weights.** Running the plain mean or an unweighted regression on data from an unequal design</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>  reproduces exactly the bias in the figure. If the file has a weight column, it is there for a reason.</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span></span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating a complex sample as SRS.** Clustering inflates variance (deff &gt; 1); using textbook SRS standard</span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>  errors understates uncertainty and overstates significance — book the effective sample size $n/\text{deff}$.</span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span></span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wildly variable weights.** A few enormous weights (tiny $\pi_i$) give a handful of respondents huge</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>  leverage and balloon the variance; extreme weights are often trimmed, trading a little bias for stability.</span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Calibrating to wrong control totals.** Post-stratification and raking are only as good as the population</span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>  figures you calibrate to; stale or mismatched census totals bake error straight into the weights.</span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span></span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting the ratio estimator's small-sample bias.** It is consistent, not unbiased — fine at survey $n$,</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>  but don't lean on it for a handful of observations. <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span></span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bui, *A Concise Introduction to Survey Sampling*** — design-based estimation throughout: inclusion</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>  probabilities $\pi_i$ and **sampling weights** $w_i=1/\pi_i$ ("units represented"); the **Horvitz–Thompson**</span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>  estimator of a total/mean and its design-unbiasedness; **Neyman / optimal allocation** ($n_h\propto</span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>  N_h\sigma_h$, cost-weighted version) versus proportional; **ratio**, **regression**, and **GREG** estimators</span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>  using known auxiliary totals; **post-stratification, raking, and calibration** (and calibration as</span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>  non-response adjustment); **PPS** unequal-probability sampling paired with HT; **variance estimation** by</span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  linearization and the bootstrap; and the **design effect** with effective sample size $n/\text{deff}$. (Bui</span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>  notes the book is deliberately concise — it omits a full non-response and small-area treatment.)</span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>**HT unbiasedness.** Write $R_i=\mathbf 1<span class="sc">\{</span>i\in S<span class="sc">\}</span>$ with $\mathbb E<span class="co">[</span><span class="ot">R_i</span><span class="co">]</span>=\pi_i$. Then</span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>$\hat t_{\text{HT}}=\sum_{i=1}^N R_i\,y_i/\pi_i$ and</span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>\mathbb E<span class="co">[</span><span class="ot">\hat t_{\text{HT}}</span><span class="co">]</span>=\sum_{i=1}^N \frac{y_i}{\pi_i}\,\mathbb E<span class="co">[</span><span class="ot">R_i</span><span class="co">]</span>=\sum_{i=1}^N \frac{y_i}{\pi_i}\,\pi_i=\sum_{i=1}^N y_i=t,</span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>unbiased for *any* design with all $\pi_i&gt;0$ — the one indispensable condition.</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>**Neyman allocation.** Minimising the stratified-estimator variance $\sum_h W_h^2\sigma_h^2/n_h$ (with</span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>$W_h=N_h/N$) subject to $\sum_h n_h=n$, a Lagrange multiplier gives $n_h\propto N_h\sigma_h$; adding a cost</span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>constraint $\sum_h c_h n_h=C$ gives $n_h\propto N_h\sigma_h/\sqrt{c_h}$. Proportional allocation</span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>($n_h\propto N_h$) is the special case where all $\sigma_h$ are equal.</span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>**Ratio estimator and linearization.** $\hat R=\hat t_y/\hat t_x$ is a ratio of two HT totals, hence</span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>non-linear. Its first-order Taylor expansion about the true ratio $R$ linearises the residual $y_i-Rx_i$:</span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>\operatorname{Var}(\hat t_{\text{ratio}})\approx \operatorname{Var}<span class="sc">\!</span>\Big(\sum_{i\in S} w_i (y_i-\hat R x_i)\Big),</span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>which is why the ratio estimator is precise exactly when $y_i\approx R x_i$ (small residuals). The same</span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>linearisation trick supplies variances for GREG and other smooth functions of totals.</span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>**Design effect.** For a one-stage cluster sample with equal clusters of size $m$ and intraclass correlation</span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>$\rho$, $\text{deff}=1+(m-1)\rho$, so the effective sample size is $n/<span class="co">[</span><span class="ot">1+(m-1)\rho</span><span class="co">]</span>$ — the precise cost of the</span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>within-cluster resemblance that makes clustering cheap.</span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">Sampling &amp; survey design</span><span class="co">](sampling-and-survey-design.qmd)</span> (the designs whose selection</span>
-<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>  probabilities become these weights) and <span class="co">[</span><span class="ot">estimation</span><span class="co">](estimation.qmd)</span> (design-based vs model-based</span>
-<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>  inference).</span>
-<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Uses:** <span class="co">[</span><span class="ot">the bootstrap</span><span class="co">](the-bootstrap.qmd)</span> for design-consistent variance, and the same</span>
-<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>  **inverse-probability weighting** idea that powers</span>
-<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">propensity-score weighting</span><span class="co">](../05-causal-inference/matching-and-propensity-scores.qmd)</span> in causal inference</span>
-<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>  — a survey weight and an IPW weight are the same trick aimed at different problems.</span>
-<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Repairs:** the <span class="co">[</span><span class="ot">non-response and coverage bias</span><span class="co">](sampling-and-survey-design.qmd)</span> that no increase in sample</span>
-<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>  size can fix, via calibration to known population totals — a design-based cousin of</span>
-<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">multiple imputation</span><span class="co">](multiple-imputation.qmd)</span>.</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>  until every margin matches. The same algorithm fits tabular</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Markov random fields</span><span class="co">](../ml-track/markov-random-fields.qmd)</span> by matching their marginal tables.</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Calibration** is the general framework: find new weights **as close as possible to the design weights**</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>  subject to the constraint that weighted totals of the auxiliary variables hit their known population values.</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>  Crucially, this is also a primary **non-response correction** — if a group answers at a lower rate,</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>  calibrating its weights up to the known population total compensates <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span>.</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="fu">## Unequal probability on purpose: PPS</span></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>Unequal selection is not only a nuisance to undo — done deliberately it can *cut* variance. In</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>**probability-proportional-to-size (PPS)** sampling, you select units with probability proportional to a known</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>size measure (a hospital's beds, a school's enrolment) <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span>. Pair PPS with the</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>Horvitz–Thompson estimator and something elegant happens: when size is **correlated with $y$**, the weight</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>$1/\pi_i$ runs *inversely* to $y_i$, so the products $w_i y_i$ are **nearly constant across units** — and a</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>sum of near-constant terms has very low variance <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span>. A well-chosen size measure turns</span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>unequal selection from a liability into a precision tool (a "self-weighting" design).</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="fu">## How precise? Variance and the design effect</span></span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>Weighted, ratio, and GREG estimators are **non-linear** functions of the data, so their variance has no</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>textbook closed form. Two standard tools <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span>:</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Linearization (Taylor approximation).** Approximate the non-linear estimator by its first-order Taylor</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>  expansion — a *linear* statistic whose variance you *can* compute.</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The survey bootstrap.** Resample the sample (respecting the design) many times and read the variability of</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  the estimate off the replicates — the <span class="co">[</span><span class="ot">bootstrap</span><span class="co">](the-bootstrap.qmd)</span>, adapted to complex designs.</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>The headline summary of a design's efficiency is the **design effect**,</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>\text{deff} = \frac{\operatorname{Var}_{\text{design}}(\hat\theta)}{\operatorname{Var}_{\text{SRS}}(\hat\theta)},</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>the ratio of your design's variance to that of a simple random sample of the same size. Clustering pushes deff</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>above 1; good stratification pulls it below. The **effective sample size** is $n/\text{deff}$ — the number of</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>*independent* observations your complex sample is really worth <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span>.</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignoring the weights.** Running the plain mean or an unweighted regression on data from an unequal design</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>  reproduces exactly the bias in the figure. If the file has a weight column, it is there for a reason.</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating a complex sample as SRS.** Clustering inflates variance (deff &gt; 1); using textbook SRS standard</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>  errors understates uncertainty and overstates significance — book the effective sample size $n/\text{deff}$.</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span></span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Wildly variable weights.** A few enormous weights (tiny $\pi_i$) give a handful of respondents huge</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>  leverage and balloon the variance; extreme weights are often trimmed, trading a little bias for stability.</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Calibrating to wrong control totals.** Post-stratification and raking are only as good as the population</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  figures you calibrate to; stale or mismatched census totals bake error straight into the weights.</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span></span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting the ratio estimator's small-sample bias.** It is consistent, not unbiased — fine at survey $n$,</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>  but don't lean on it for a handful of observations. <span class="co">[</span><span class="ot">@bui_survey_sampling</span><span class="co">]</span></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bui, *A Concise Introduction to Survey Sampling*** — design-based estimation throughout: inclusion</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>  probabilities $\pi_i$ and **sampling weights** $w_i=1/\pi_i$ ("units represented"); the **Horvitz–Thompson**</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>  estimator of a total/mean and its design-unbiasedness; **Neyman / optimal allocation** ($n_h\propto</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>  N_h\sigma_h$, cost-weighted version) versus proportional; **ratio**, **regression**, and **GREG** estimators</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>  using known auxiliary totals; **post-stratification, raking, and calibration** (and calibration as</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  non-response adjustment); **PPS** unequal-probability sampling paired with HT; **variance estimation** by</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>  linearization and the bootstrap; and the **design effect** with effective sample size $n/\text{deff}$. (Bui</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>  notes the book is deliberately concise — it omits a full non-response and small-area treatment.)</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>**HT unbiasedness.** Write $R_i=\mathbf 1<span class="sc">\{</span>i\in S<span class="sc">\}</span>$ with $\mathbb E<span class="co">[</span><span class="ot">R_i</span><span class="co">]</span>=\pi_i$. Then</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>$\hat t_{\text{HT}}=\sum_{i=1}^N R_i\,y_i/\pi_i$ and</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>\mathbb E<span class="co">[</span><span class="ot">\hat t_{\text{HT}}</span><span class="co">]</span>=\sum_{i=1}^N \frac{y_i}{\pi_i}\,\mathbb E<span class="co">[</span><span class="ot">R_i</span><span class="co">]</span>=\sum_{i=1}^N \frac{y_i}{\pi_i}\,\pi_i=\sum_{i=1}^N y_i=t,</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>unbiased for *any* design with all $\pi_i&gt;0$ — the one indispensable condition.</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>**Neyman allocation.** Minimising the stratified-estimator variance $\sum_h W_h^2\sigma_h^2/n_h$ (with</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>$W_h=N_h/N$) subject to $\sum_h n_h=n$, a Lagrange multiplier gives $n_h\propto N_h\sigma_h$; adding a cost</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>constraint $\sum_h c_h n_h=C$ gives $n_h\propto N_h\sigma_h/\sqrt{c_h}$. Proportional allocation</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>($n_h\propto N_h$) is the special case where all $\sigma_h$ are equal.</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>**Ratio estimator and linearization.** $\hat R=\hat t_y/\hat t_x$ is a ratio of two HT totals, hence</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>non-linear. Its first-order Taylor expansion about the true ratio $R$ linearises the residual $y_i-Rx_i$:</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>\operatorname{Var}(\hat t_{\text{ratio}})\approx \operatorname{Var}<span class="sc">\!</span>\Big(\sum_{i\in S} w_i (y_i-\hat R x_i)\Big),</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>which is why the ratio estimator is precise exactly when $y_i\approx R x_i$ (small residuals). The same</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>linearisation trick supplies variances for GREG and other smooth functions of totals.</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>**Design effect.** For a one-stage cluster sample with equal clusters of size $m$ and intraclass correlation</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>$\rho$, $\text{deff}=1+(m-1)\rho$, so the effective sample size is $n/<span class="co">[</span><span class="ot">1+(m-1)\rho</span><span class="co">]</span>$ — the precise cost of the</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>within-cluster resemblance that makes clustering cheap.</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">Sampling &amp; survey design</span><span class="co">](sampling-and-survey-design.qmd)</span> (the designs whose selection</span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>  probabilities become these weights) and <span class="co">[</span><span class="ot">estimation</span><span class="co">](estimation.qmd)</span> (design-based vs model-based</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>  inference).</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Uses:** <span class="co">[</span><span class="ot">the bootstrap</span><span class="co">](the-bootstrap.qmd)</span> for design-consistent variance, and the same</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>  **inverse-probability weighting** idea that powers</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">propensity-score weighting</span><span class="co">](../05-causal-inference/matching-and-propensity-scores.qmd)</span> in causal inference</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>  — a survey weight and an IPW weight are the same trick aimed at different problems.</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Repairs:** the <span class="co">[</span><span class="ot">non-response and coverage bias</span><span class="co">](sampling-and-survey-design.qmd)</span> that no increase in sample</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>  size can fix, via calibration to known population totals — a design-based cousin of</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">multiple imputation</span><span class="co">](multiple-imputation.qmd)</span>.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
