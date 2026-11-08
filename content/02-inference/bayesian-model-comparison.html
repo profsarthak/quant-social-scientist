@@ -174,8 +174,8 @@ window.Quarto = {
 <meta property="og:description" content="Fitting a model is not believing it. Two questions remain — does it fit the data you have, and which model predicts the data you don’t? — and the right tools are not the famous ones.">
 <meta property="og:image" content="https://profsarthak.github.io/quant-social-scientist/content/02-inference/bayesian-model-comparison_files/figure-html/fig-ppc-output-1.png">
 <meta property="og:site_name" content="The Quantitative Social Scientist">
-<meta property="og:image:height" content="726">
-<meta property="og:image:width" content="1669">
+<meta property="og:image:height" content="722">
+<meta property="og:image:width" content="1668">
 </head>
 
 <body class="nav-sidebar docked nav-fixed quarto-light">
@@ -1350,6 +1350,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/variational-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variational Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../content/ml-track/ml-for-social-science.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ML for Social Science: Workflow &amp; the Bridge Home</span></a>
   </div>
@@ -2109,7 +2115,10 @@ window.Quarto = {
   <li><a href="#posterior-predictive-checks-your-best-friend" id="toc-posterior-predictive-checks-your-best-friend" class="nav-link" data-scroll-target="#posterior-predictive-checks-your-best-friend">Posterior predictive checks — your best friend</a></li>
   <li><a href="#bayes-factors-and-why-to-distrust-them" id="toc-bayes-factors-and-why-to-distrust-them" class="nav-link" data-scroll-target="#bayes-factors-and-why-to-distrust-them">Bayes factors — and why to distrust them</a></li>
   <li><a href="#information-criteria-estimating-out-of-sample-fit" id="toc-information-criteria-estimating-out-of-sample-fit" class="nav-link" data-scroll-target="#information-criteria-estimating-out-of-sample-fit">Information criteria: estimating out-of-sample fit</a></li>
-  <li><a href="#cross-validation-loo-and-psis-loo" id="toc-cross-validation-loo-and-psis-loo" class="nav-link" data-scroll-target="#cross-validation-loo-and-psis-loo">Cross-validation: LOO and PSIS-LOO</a></li>
+  <li><a href="#cross-validation-loo-and-psis-loo" id="toc-cross-validation-loo-and-psis-loo" class="nav-link" data-scroll-target="#cross-validation-loo-and-psis-loo">Cross-validation: LOO and PSIS-LOO</a>
+  <ul class="collapse">
+  <li><a href="#sec-why-log-score" id="toc-sec-why-log-score" class="nav-link" data-scroll-target="#sec-why-log-score">Why the <em>log</em> score?</a></li>
+  </ul></li>
   <li><a href="#occams-razor-and-the-biasvariance-balance" id="toc-occams-razor-and-the-biasvariance-balance" class="nav-link" data-scroll-target="#occams-razor-and-the-biasvariance-balance">Occam’s razor and the bias–variance balance</a></li>
   <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
   <li><a href="#from-the-sources" id="toc-from-the-sources" class="nav-link" data-scroll-target="#from-the-sources">From the sources</a></li>
@@ -2199,7 +2208,7 @@ window.Quarto = {
 <div id="fig-ppc" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ppc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="bayesian-model-comparison_files/figure-html/fig-ppc-output-1.png" width="835" height="363" class="figure-img">
+<img src="bayesian-model-comparison_files/figure-html/fig-ppc-output-1.png" width="834" height="361" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ppc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: A posterior predictive check that catches a misfit the mean would hide. Observed data: 200 counts that are zero-inflated (many structural zeros). We fit a plain Poisson matched to the observed mean, then simulate 2000 replicated datasets. Left: the test statistic ‘proportion of zeros’ — the observed value (red) sits far in the tail of the replicated distribution (Bayesian p ≈ 0): the Poisson cannot make enough zeros, so it’s badly misspecified. Right: the test statistic ‘mean’ — observed sits dead-centre (p ≈ 0.5), because we matched it by construction. Lesson: a model can nail the mean and still be wrong — PPCs on the right statistic reveal it.
@@ -2235,6 +2244,10 @@ Figure&nbsp;1: A posterior predictive check that catches a misfit the mean would
 <section id="cross-validation-loo-and-psis-loo" class="level2">
 <h2 class="anchored" data-anchor-id="cross-validation-loo-and-psis-loo">Cross-validation: LOO and PSIS-LOO</h2>
 <p>Cross-validation is the <strong>“ideal measure”</strong> of predictive accuracy — it uses a genuinely held-out point <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span>. <strong>Leave-one-out (LOO-CV)</strong> trains on <span class="math inline">n-1</span> points and tests on the one left out, repeated for all <span class="math inline">n</span> <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span>. The target is the <strong>elpd</strong> — the <strong>expected log pointwise predictive density</strong>, the distance between the model’s predictions and the true data-generating distribution <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span>. Refitting <span class="math inline">n</span> times is expensive, so Lambert recommends <strong>PSIS-LOO</strong> (Pareto-Smoothed Importance Sampling), which approximates LOO from a <strong>single</strong> posterior fit using importance weights <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span>. (Its Pareto-<span class="math inline">k</span> diagnostic flags points where the approximation is unreliable.)</p>
+<section id="sec-why-log-score" class="level3">
+<h3 class="anchored" data-anchor-id="sec-why-log-score">Why the <em>log</em> score?</h3>
+<p>Why score a model by the <em>log</em> of its predictive density rather than the density itself? Lambert’s answer is the <strong>Kullback–Leibler divergence</strong>, an asymmetric measure of how far one distribution is from another <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span>. His picture is Morse code: it was tuned to English, giving the common <em>e</em> the shortest symbol, so sending Spanish with it wastes length; the KL divergence is that <strong>informational penalty</strong> for coding one distribution with a scheme built for another, and the penalty from English to Spanish is not the penalty from Spanish to English <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span>. Write out the divergence between the true data-generating distribution and a model’s posterior predictive distribution and it splits into two terms: one fixed by nature, which no model can change, and the elpd with a minus sign. <strong>Maximising the elpd is therefore the same as choosing the model whose predictions are KL-closest to the truth</strong> <span class="citation" data-cites="lambert_bayes">(<a href="#ref-lambert_bayes" role="doc-biblioref">Lambert 2018</a>)</span>. The same divergence, pointed the other way, is what <a href="../../content/ml-track/variational-inference.html">variational inference</a> minimises when it approximates a posterior.</p>
+</section>
 </section>
 <section id="occams-razor-and-the-biasvariance-balance" class="level2">
 <h2 class="anchored" data-anchor-id="occams-razor-and-the-biasvariance-balance">Occam’s razor and the bias–variance balance</h2>
@@ -2295,7 +2308,7 @@ Figure&nbsp;1: A posterior predictive check that catches a misfit the mean would
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Lambert, <em>A Student’s Guide to Bayesian Statistics</em></strong> — <strong>posterior predictive checks</strong> (the two-step simulation, graphical and test-statistic comparison with min/max/proportion-of-zeros, the <strong>Bayesian <span class="math inline">p</span>-value</strong> ≈ 0.5 ideal, PPCs as “best friend”) and the <strong>prior predictive</strong>; <strong>Bayes factors</strong> as the marginal-likelihood ratio, <strong>Jeffreys’ scale</strong>, and the three weaknesses (intractability, <strong>prior sensitivity / Jeffreys–Lindley</strong>, undefined under improper priors); <strong>deviance</strong>, <strong>DIC</strong> with <span class="math inline">p_D=2\operatorname{Var}_{\text{post}}(\ln p)</span>, and <strong>WAIC</strong> (pointwise, fully Bayesian); <strong>LOO-CV</strong>, the <strong>elpd</strong>, and <strong>PSIS-LOO</strong>; <strong>Bayesian Occam’s razor</strong> (complex models spread mass thin and get punished), the bias–variance balance, and overfitting as “cheating on a test.”</li>
+<li><strong>Lambert, <em>A Student’s Guide to Bayesian Statistics</em></strong> — <strong>posterior predictive checks</strong> (the two-step simulation, graphical and test-statistic comparison with min/max/proportion-of-zeros, the <strong>Bayesian <span class="math inline">p</span>-value</strong> ≈ 0.5 ideal, PPCs as “best friend”) and the <strong>prior predictive</strong>; <strong>Bayes factors</strong> as the marginal-likelihood ratio, <strong>Jeffreys’ scale</strong>, and the three weaknesses (intractability, <strong>prior sensitivity / Jeffreys–Lindley</strong>, undefined under improper priors); <strong>deviance</strong>, <strong>DIC</strong> with <span class="math inline">p_D=2\operatorname{Var}_{\text{post}}(\ln p)</span>, and <strong>WAIC</strong> (pointwise, fully Bayesian); <strong>LOO-CV</strong>, the <strong>elpd</strong>, and <strong>PSIS-LOO</strong>; the <strong>KL divergence</strong> (§10.5.3: Morse code, Scrabble, the urn game) and why maximising elpd minimises KL to the true distribution; <strong>Bayesian Occam’s razor</strong> (complex models spread mass thin and get punished), the bias–variance balance, and overfitting as “cheating on a test.”</li>
 </ul>
 </div>
 </div>
@@ -2315,6 +2328,7 @@ Figure&nbsp;1: A posterior predictive check that catches a misfit the mean would
 <ul>
 <li><strong>Builds on:</strong> <a href="../../content/02-inference/bayesian-machinery.html">the Bayesian machinery</a> (the marginal likelihood / evidence), <a href="../../content/02-inference/mcmc-in-depth.html">MCMC in depth</a> and <a href="../../content/02-inference/hierarchical-bayesian-models.html">hierarchical models</a> (the models being compared), and <a href="../../content/04-predictive/bias-variance-tradeoff.html">the bias–variance trade-off</a>.</li>
 <li><strong>Mirrors:</strong> <a href="../../content/04-predictive/cross-validation.html">cross-validation</a> and <a href="../../content/04-predictive/explaining-vs-predicting.html">AIC/BIC</a> on the predictive side — WAIC/LOO are their fully-Bayesian counterparts.</li>
+<li><strong>Shares a yardstick with:</strong> <a href="../../content/ml-track/variational-inference.html">variational inference</a>, which minimises a KL divergence to approximate the posterior and bounds the evidence from below.</li>
 <li><strong>Closes:</strong> the Bayesian Inference sub-track of Part II.</li>
 </ul>
 
@@ -2924,90 +2938,107 @@ Lambert, Ben. 2018. <em>A Student’s Guide to Bayesian Statistics</em>. SAGE Pu
 <span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>Importance Sampling), which approximates LOO from a **single** posterior fit using importance weights</span>
 <span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. (Its Pareto-$k$ diagnostic flags points where the approximation is unreliable.)</span>
 <span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="fu">## Occam's razor and the bias–variance balance</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why the *log* score? {#sec-why-log-score}</span></span>
 <span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>Model comparison is a **balance between fitting this sample and generalising to the next** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>:</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bayesian Occam's razor.** A complex model must **spread its probability mass thinly** over many possible</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>  datasets, so it is **"punished" for wasting probability on outcomes that don't occur** — simpler models</span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>  that concentrate mass on what *did* happen are automatically favoured <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bias–variance.** Complex models can **eliminate bias but inflate variance**, making predictions</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>  hypersensitive to the training sample <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> — the</span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">bias–variance trade-off</span><span class="co">](../04-predictive/bias-variance-tradeoff.qmd)</span> in Bayesian dress.</span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Overfitting = cheating.** Lambert's image: overfitting is **"stealing the answers before a test"** — it</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>  performs perfectly on old data and **"fails miserably on new data"** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="A practical hierarchy"}</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>**Always** run posterior predictive checks — they catch misfit no number can. For **comparing** models,</span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>prefer **LOO-CV / WAIC** (predictive accuracy). Treat **Bayes factors** with suspicion unless your priors</span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>are proper and meaningful. And let **Occam** break ties toward the simpler model. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping PPCs.** A converged chain on a misspecified model gives precise, confident, wrong answers — the</span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>  check is non-optional. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Selecting by Bayes factor under vague priors.** Jeffreys–Lindley means the diffuse prior decides; you'll</span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>  systematically over-favour the null/simple model. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Computing a Bayes factor with improper priors.** The result is arbitrary — don't report it.</span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading WAIC/LOO differences without their standard error.** Small elpd gaps are within noise; compare</span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>  the difference to its SE before declaring a winner. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Choosing the model with the best *in-sample* fit.** That rewards overfitting; judge by out-of-sample</span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>  prediction. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Lambert, *A Student's Guide to Bayesian Statistics*** — **posterior predictive checks** (the two-step</span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>  simulation, graphical and test-statistic comparison with min/max/proportion-of-zeros, the **Bayesian</span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>  $p$-value** ≈ 0.5 ideal, PPCs as "best friend") and the **prior predictive**; **Bayes factors** as the</span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>  marginal-likelihood ratio, **Jeffreys' scale**, and the three weaknesses (intractability, **prior</span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>  sensitivity / Jeffreys–Lindley**, undefined under improper priors); **deviance**, **DIC** with</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>  $p_D=2\operatorname{Var}_{\text{post}}(\ln p)$, and **WAIC** (pointwise, fully Bayesian); **LOO-CV**, the</span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>  **elpd**, and **PSIS-LOO**; **Bayesian Occam's razor** (complex models spread mass thin and get punished),</span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>  the bias–variance balance, and overfitting as "cheating on a test."</span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>**Bayesian $p$-value, defined.** For a test statistic $T$,</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>$p_B = \Pr<span class="sc">\!</span>\big(T(y^{\text{rep}},\theta) \ge T(y,\theta)\mid y\big)$, averaged over the posterior of</span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>$\theta$ and the replicated $y^{\text{rep}}$. Unlike a frequentist $p$-value it is *not* uniform under the</span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>null — but extreme values (≈0 or 1) still flag the statistics the model fails to reproduce.</span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>**WAIC.** With pointwise log predictive density</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>$\text{lppd} = \sum_i \log \mathbb{E}_{\text{post}}<span class="co">[</span><span class="ot">p(y_i\mid\theta)</span><span class="co">]</span>$ and penalty</span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>$p_{\text{WAIC}} = \sum_i \operatorname{Var}_{\text{post}}(\log p(y_i\mid\theta))$,</span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>$\text{WAIC} = -2(\text{lppd} - p_{\text{WAIC}})$. Both terms are computed directly from posterior draws —</span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>no point estimate, no plug-in — which is what makes it "fully Bayesian."</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>Why score a model by the *log* of its predictive density rather than the density itself? Lambert's answer</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>is the **Kullback–Leibler divergence**, an asymmetric measure of how far one distribution is from another</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. His picture is Morse code: it was tuned to English, giving the common *e* the shortest</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>symbol, so sending Spanish with it wastes length; the KL divergence is that **informational penalty** for</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>coding one distribution with a scheme built for another, and the penalty from English to Spanish is not the</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>penalty from Spanish to English <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. Write out the divergence between the true data-generating</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>distribution and a model's posterior predictive distribution and it splits into two terms: one fixed by</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>nature, which no model can change, and the elpd with a minus sign. **Maximising the elpd is therefore the same</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>as choosing the model whose predictions are KL-closest to the truth** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>. The same divergence,</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>pointed the other way, is what <span class="co">[</span><span class="ot">variational inference</span><span class="co">](../ml-track/variational-inference.qmd)</span> minimises when</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>it approximates a posterior.</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a><span class="fu">## Occam's razor and the bias–variance balance</span></span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>Model comparison is a **balance between fitting this sample and generalising to the next** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>:</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bayesian Occam's razor.** A complex model must **spread its probability mass thinly** over many possible</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>  datasets, so it is **"punished" for wasting probability on outcomes that don't occur** — simpler models</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>  that concentrate mass on what *did* happen are automatically favoured <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bias–variance.** Complex models can **eliminate bias but inflate variance**, making predictions</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>  hypersensitive to the training sample <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span> — the</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">bias–variance trade-off</span><span class="co">](../04-predictive/bias-variance-tradeoff.qmd)</span> in Bayesian dress.</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Overfitting = cheating.** Lambert's image: overfitting is **"stealing the answers before a test"** — it</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>  performs perfectly on old data and **"fails miserably on new data"** <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span>.</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip title="A practical hierarchy"}</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>**Always** run posterior predictive checks — they catch misfit no number can. For **comparing** models,</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>prefer **LOO-CV / WAIC** (predictive accuracy). Treat **Bayes factors** with suspicion unless your priors</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>are proper and meaningful. And let **Occam** break ties toward the simpler model. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping PPCs.** A converged chain on a misspecified model gives precise, confident, wrong answers — the</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>  check is non-optional. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Selecting by Bayes factor under vague priors.** Jeffreys–Lindley means the diffuse prior decides; you'll</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>  systematically over-favour the null/simple model. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Computing a Bayes factor with improper priors.** The result is arbitrary — don't report it.</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading WAIC/LOO differences without their standard error.** Small elpd gaps are within noise; compare</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>  the difference to its SE before declaring a winner. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Choosing the model with the best *in-sample* fit.** That rewards overfitting; judge by out-of-sample</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>  prediction. <span class="co">[</span><span class="ot">@lambert_bayes</span><span class="co">]</span></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Lambert, *A Student's Guide to Bayesian Statistics*** — **posterior predictive checks** (the two-step</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  simulation, graphical and test-statistic comparison with min/max/proportion-of-zeros, the **Bayesian</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>  $p$-value** ≈ 0.5 ideal, PPCs as "best friend") and the **prior predictive**; **Bayes factors** as the</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  marginal-likelihood ratio, **Jeffreys' scale**, and the three weaknesses (intractability, **prior</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>  sensitivity / Jeffreys–Lindley**, undefined under improper priors); **deviance**, **DIC** with</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>  $p_D=2\operatorname{Var}_{\text{post}}(\ln p)$, and **WAIC** (pointwise, fully Bayesian); **LOO-CV**, the</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>  **elpd**, and **PSIS-LOO**; the **KL divergence** (§10.5.3: Morse code, Scrabble, the urn game) and why</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>  maximising elpd minimises KL to the true distribution; **Bayesian Occam's razor** (complex models spread mass thin and get punished),</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>  the bias–variance balance, and overfitting as "cheating on a test."</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>**elpd and LOO.** The leave-one-out estimate is</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>$\text{elpd}_{\text{loo}} = \sum_i \log p(y_i\mid y_{-i})$, where $p(y_i\mid y_{-i})$ is the predictive</span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>density for point $i$ from a fit *excluding* it. PSIS approximates each $p(y_i\mid y_{-i})$ by reweighting</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>the full-fit posterior draws with importance weights $\propto 1/p(y_i\mid\theta^{(s)})$, Pareto-smoothed for</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>stability.</span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>**The Bayesian Occam factor.** The evidence factorises as (best-fit likelihood) × (Occam factor), where the</span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>Occam factor $\approx$ posterior width / prior width $&lt; 1$ — a model with many parameters or wide priors</span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>pays a larger penalty because it spread its prior predictive mass over more datasets. This is the *automatic*</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>parsimony Bayes factors encode (and also why they depend so heavily on prior width).</span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>**Bayesian $p$-value, defined.** For a test statistic $T$,</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>$p_B = \Pr<span class="sc">\!</span>\big(T(y^{\text{rep}},\theta) \ge T(y,\theta)\mid y\big)$, averaged over the posterior of</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>$\theta$ and the replicated $y^{\text{rep}}$. Unlike a frequentist $p$-value it is *not* uniform under the</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>null — but extreme values (≈0 or 1) still flag the statistics the model fails to reproduce.</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>**WAIC.** With pointwise log predictive density</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>$\text{lppd} = \sum_i \log \mathbb{E}_{\text{post}}<span class="co">[</span><span class="ot">p(y_i\mid\theta)</span><span class="co">]</span>$ and penalty</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>$p_{\text{WAIC}} = \sum_i \operatorname{Var}_{\text{post}}(\log p(y_i\mid\theta))$,</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>$\text{WAIC} = -2(\text{lppd} - p_{\text{WAIC}})$. Both terms are computed directly from posterior draws —</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>no point estimate, no plug-in — which is what makes it "fully Bayesian."</span>
 <span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Bayesian machinery</span><span class="co">](bayesian-machinery.qmd)</span> (the marginal likelihood / evidence),</span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">MCMC in depth</span><span class="co">](mcmc-in-depth.qmd)</span> and <span class="co">[</span><span class="ot">hierarchical models</span><span class="co">](hierarchical-bayesian-models.qmd)</span> (the models</span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>  being compared), and <span class="co">[</span><span class="ot">the bias–variance trade-off</span><span class="co">](../04-predictive/bias-variance-tradeoff.qmd)</span>.</span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Mirrors:** <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](../04-predictive/cross-validation.qmd)</span> and</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">AIC/BIC</span><span class="co">](../04-predictive/explaining-vs-predicting.qmd)</span> on the predictive side — WAIC/LOO are their</span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>  fully-Bayesian counterparts.</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Closes:** the Bayesian Inference sub-track of Part II.</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>**elpd and LOO.** The leave-one-out estimate is</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>$\text{elpd}_{\text{loo}} = \sum_i \log p(y_i\mid y_{-i})$, where $p(y_i\mid y_{-i})$ is the predictive</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>density for point $i$ from a fit *excluding* it. PSIS approximates each $p(y_i\mid y_{-i})$ by reweighting</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>the full-fit posterior draws with importance weights $\propto 1/p(y_i\mid\theta^{(s)})$, Pareto-smoothed for</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>stability.</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>**The Bayesian Occam factor.** The evidence factorises as (best-fit likelihood) × (Occam factor), where the</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>Occam factor $\approx$ posterior width / prior width $&lt; 1$ — a model with many parameters or wide priors</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>pays a larger penalty because it spread its prior predictive mass over more datasets. This is the *automatic*</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>parsimony Bayes factors encode (and also why they depend so heavily on prior width).</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the Bayesian machinery</span><span class="co">](bayesian-machinery.qmd)</span> (the marginal likelihood / evidence),</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">MCMC in depth</span><span class="co">](mcmc-in-depth.qmd)</span> and <span class="co">[</span><span class="ot">hierarchical models</span><span class="co">](hierarchical-bayesian-models.qmd)</span> (the models</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>  being compared), and <span class="co">[</span><span class="ot">the bias–variance trade-off</span><span class="co">](../04-predictive/bias-variance-tradeoff.qmd)</span>.</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Mirrors:** <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](../04-predictive/cross-validation.qmd)</span> and</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">AIC/BIC</span><span class="co">](../04-predictive/explaining-vs-predicting.qmd)</span> on the predictive side — WAIC/LOO are their</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>  fully-Bayesian counterparts.</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Shares a yardstick with:** <span class="co">[</span><span class="ot">variational inference</span><span class="co">](../ml-track/variational-inference.qmd)</span>, which</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>  minimises a KL divergence to approximate the posterior and bounds the evidence from below.</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Closes:** the Bayesian Inference sub-track of Part II.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

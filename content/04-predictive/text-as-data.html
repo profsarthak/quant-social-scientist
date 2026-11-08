@@ -1350,6 +1350,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../content/ml-track/variational-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variational Inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../content/ml-track/ml-for-social-science.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ML for Social Science: Workflow &amp; the Bridge Home</span></a>
   </div>
@@ -2327,7 +2333,7 @@ window.Quarto = {
 <li>each <strong>document</strong> is a mixture of a small number of topics, with its own proportions <span class="math inline">\theta</span>. A 100-word comment with 70 effectiveness words and 30 personality words has <span class="math inline">\theta = (0.7, 0.3)</span>.</li>
 <li>each word is produced by first picking a topic using the document’s <span class="math inline">\theta</span>, then picking a word using that topic’s distribution.</li>
 </ul>
-<p>Only the words are observed. Estimation recovers the topics and every document’s <span class="math inline">\theta</span> from the counts alone, which the book calls “a reverse-engineering process”. The original paper, Blei, Ng and Jordan (2003), used a variational EM algorithm <span class="citation" data-cites="jacobucci_ml">(<a href="#ref-jacobucci_ml" role="doc-biblioref">Jacobucci et al. 2023</a>)</span>.</p>
+<p>Only the words are observed. Estimation recovers the topics and every document’s <span class="math inline">\theta</span> from the counts alone, which the book calls “a reverse-engineering process”. The original paper, Blei, Ng and Jordan (2003), used a variational EM algorithm <span class="citation" data-cites="jacobucci_ml">(<a href="#ref-jacobucci_ml" role="doc-biblioref">Jacobucci et al. 2023</a>)</span> (see <a href="../../content/ml-track/variational-inference.html">variational inference</a> for what that means).</p>
 <p>The figure fits LDA to a corpus whose true topics we know, because we generated it.</p>
 <div id="cell-fig-lda" class="cell" data-execution_count="1">
 <details class="code-fold">
@@ -3223,272 +3229,273 @@ Jacobucci, Ross, Kevin J. Grimm, and Zhiyong Zhang. 2023. <em>Machine Learning f
 <span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>Only the words are observed. Estimation recovers the topics and every document's $\theta$ from the</span>
 <span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>counts alone, which the book calls "a reverse-engineering process". The original paper, Blei, Ng</span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>and Jordan (2003), used a variational EM algorithm <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>.</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>The figure fits LDA to a corpus whose true topics we know, because we generated it.</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-lda</span></span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "LDA recovering hidden topics (our simulation, not data from the sources). We generated 300 'evaluations' of 40 words each from two known topics: teaching effectiveness and personality. The word 'class' is common in both, as it is in the book's data. Each document's topic mix was drawn at random. Left: the two true topic-word distributions (light bars) and LDA's estimates (dark bars), recovered from the word counts alone. Right: each document's true share of 'teaching' words against LDA's estimate (correlation ≈ 0.97). The orange point is the document closest to the book's example mix of 0.7/0.3. Its estimate is noticeably off: 40 words carry limited information about a mixture."</span></span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">11</span>)</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>vocab <span class="op">=</span> [<span class="st">"class"</span>, <span class="st">"lectur"</span>, <span class="st">"clear"</span>, <span class="st">"organ"</span>, <span class="st">"prepar"</span>, <span class="st">"exam"</span>,</span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>         <span class="st">"nice"</span>, <span class="st">"funni"</span>, <span class="st">"warm"</span>, <span class="st">"open"</span>, <span class="st">"care"</span>, <span class="st">"help"</span>]</span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>V, K, M, N <span class="op">=</span> <span class="bu">len</span>(vocab), <span class="dv">2</span>, <span class="dv">300</span>, <span class="dv">40</span></span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>beta_true <span class="op">=</span> np.array([</span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">.16</span>, <span class="fl">.16</span>, <span class="fl">.14</span>, <span class="fl">.14</span>, <span class="fl">.12</span>, <span class="fl">.14</span>, <span class="fl">.01</span>, <span class="fl">.01</span>, <span class="fl">.01</span>, <span class="fl">.01</span>, <span class="fl">.02</span>, <span class="fl">.08</span>],   <span class="co"># teaching effectiveness</span></span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">.16</span>, <span class="fl">.01</span>, <span class="fl">.02</span>, <span class="fl">.01</span>, <span class="fl">.01</span>, <span class="fl">.01</span>, <span class="fl">.16</span>, <span class="fl">.14</span>, <span class="fl">.14</span>, <span class="fl">.12</span>, <span class="fl">.12</span>, <span class="fl">.10</span>],   <span class="co"># personality</span></span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>beta_true <span class="op">/=</span> beta_true.<span class="bu">sum</span>(<span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>theta_true <span class="op">=</span> rng.dirichlet([<span class="fl">0.6</span>, <span class="fl">0.6</span>], M)                 <span class="co"># each document's topic mix</span></span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> (rng.random((M, N)) <span class="op">&gt;</span> theta_true[:, [<span class="dv">0</span>]]).astype(<span class="bu">int</span>)  <span class="co"># topic of each word slot</span></span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([[rng.choice(V, p<span class="op">=</span>beta_true[k]) <span class="cf">for</span> k <span class="kw">in</span> row] <span class="cf">for</span> row <span class="kw">in</span> z])</span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit LDA by Gibbs sampling: alternate topic labels | (theta, beta) and (theta, beta) | labels</span></span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>alpha, delta, iters, burn <span class="op">=</span> <span class="fl">0.5</span>, <span class="fl">0.1</span>, <span class="dv">400</span>, <span class="dv">200</span></span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> rng.dirichlet([alpha] <span class="op">*</span> K, M)</span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> rng.dirichlet([delta <span class="op">*</span> <span class="dv">10</span>] <span class="op">*</span> V, K)</span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>th_sum, be_sum <span class="op">=</span> np.zeros_like(theta), np.zeros_like(beta)</span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>docs, wf <span class="op">=</span> np.repeat(np.arange(M), N), w.ravel()</span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> it <span class="kw">in</span> <span class="bu">range</span>(iters):</span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> theta[docs] <span class="op">*</span> beta[:, wf].T</span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>    p <span class="op">/=</span> p.<span class="bu">sum</span>(<span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>    zk <span class="op">=</span> (rng.random(<span class="bu">len</span>(wf)) <span class="op">&gt;</span> p[:, <span class="dv">0</span>]).astype(<span class="bu">int</span>)</span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>    ndk <span class="op">=</span> np.zeros((M, K))<span class="op">;</span> np.add.at(ndk, (docs, zk), <span class="dv">1</span>)</span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>    nkw <span class="op">=</span> np.zeros((K, V))<span class="op">;</span> np.add.at(nkw, (zk, wf), <span class="dv">1</span>)</span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>    theta <span class="op">=</span> np.array([rng.dirichlet(alpha <span class="op">+</span> r) <span class="cf">for</span> r <span class="kw">in</span> ndk])</span>
-<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>    beta <span class="op">=</span> np.array([rng.dirichlet(delta <span class="op">+</span> r) <span class="cf">for</span> r <span class="kw">in</span> nkw])</span>
-<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> it <span class="op">&gt;=</span> burn:</span>
-<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>        th_sum <span class="op">+=</span> theta<span class="op">;</span> be_sum <span class="op">+=</span> beta</span>
-<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>theta_hat, beta_hat <span class="op">=</span> th_sum <span class="op">/</span> (iters <span class="op">-</span> burn), be_sum <span class="op">/</span> (iters <span class="op">-</span> burn)</span>
-<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> beta_hat[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">&lt;</span> beta_hat[<span class="dv">1</span>, <span class="dv">1</span>]:                        <span class="co"># topics are unlabelled: align them</span></span>
-<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>    theta_hat, beta_hat <span class="op">=</span> theta_hat[:, ::<span class="op">-</span><span class="dv">1</span>], beta_hat[::<span class="op">-</span><span class="dv">1</span>]</span>
-<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.corrcoef(theta_true[:, <span class="dv">0</span>], theta_hat[:, <span class="dv">0</span>])[<span class="dv">0</span>, <span class="dv">1</span>]</span>
-<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>j <span class="op">=</span> np.argmin(np.<span class="bu">abs</span>(theta_true[:, <span class="dv">0</span>] <span class="op">-</span> <span class="fl">0.7</span>))</span>
-<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="fl">4.2</span>), gridspec_kw<span class="op">=</span>{<span class="st">"width_ratios"</span>: [<span class="fl">1.6</span>, <span class="dv">1</span>]})</span>
-<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>]</span>
-<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.arange(V)</span>
-<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, (off, name) <span class="kw">in</span> <span class="bu">enumerate</span>([(<span class="op">-</span><span class="fl">0.2</span>, <span class="st">"teaching"</span>), (<span class="fl">0.2</span>, <span class="st">"personality"</span>)]):</span>
-<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>    sign <span class="op">=</span> <span class="dv">1</span> <span class="cf">if</span> k <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="op">-</span><span class="dv">1</span>                             <span class="co"># teaching up, personality down</span></span>
-<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>    ax.bar(x <span class="op">+</span> off, sign <span class="op">*</span> beta_true[k], width<span class="op">=</span><span class="fl">0.38</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>,</span>
-<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"true"</span> <span class="cf">if</span> k <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="va">None</span>)</span>
-<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>    ax.bar(x <span class="op">+</span> off, sign <span class="op">*</span> beta_hat[k], width<span class="op">=</span><span class="fl">0.18</span>, color<span class="op">=</span><span class="st">"#161613"</span>,</span>
-<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"LDA estimate"</span> <span class="cf">if</span> k <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="va">None</span>)</span>
-<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(x)<span class="op">;</span> ax.set_xticklabels(vocab, rotation<span class="op">=</span><span class="dv">45</span>, ha<span class="op">=</span><span class="st">"right"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
-<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"P(word | topic)</span><span class="ch">\n</span><span class="st">↑ teaching   ↓ personality"</span>)</span>
-<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>yt <span class="op">=</span> ax.get_yticks()<span class="op">;</span> ax.set_yticks(yt)<span class="op">;</span> ax.set_yticklabels([<span class="ss">f"</span><span class="sc">{</span><span class="bu">abs</span>(t)<span class="sc">:.2f}</span><span class="ss">"</span> <span class="cf">for</span> t <span class="kw">in</span> yt])</span>
-<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>, fontsize<span class="op">=</span><span class="dv">9</span>, loc<span class="op">=</span><span class="st">"upper center"</span>, bbox_to_anchor<span class="op">=</span>(<span class="fl">0.66</span>, <span class="fl">0.98</span>))</span>
-<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Topics: what each theme talks about"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
-<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">1</span>]</span>
-<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="dv">1</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
-<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>ax.scatter(theta_true[:, <span class="dv">0</span>], theta_hat[:, <span class="dv">0</span>], s<span class="op">=</span><span class="dv">14</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
-<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>ax.scatter(theta_true[j, <span class="dv">0</span>], theta_hat[j, <span class="dv">0</span>], s<span class="op">=</span><span class="dv">70</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, zorder<span class="op">=</span><span class="dv">3</span>)</span>
-<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="ss">f"true </span><span class="sc">{</span>theta_true[j, <span class="dv">0</span>]<span class="sc">:.2f}</span><span class="ch">\n</span><span class="ss">estimated </span><span class="sc">{</span>theta_hat[j, <span class="dv">0</span>]<span class="sc">:.2f}</span><span class="ss">"</span>,</span>
-<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>            (theta_true[j, <span class="dv">0</span>], theta_hat[j, <span class="dv">0</span>]), xytext<span class="op">=</span>(<span class="fl">0.62</span>, <span class="fl">0.12</span>),</span>
-<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>            fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>))</span>
-<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.03</span>, <span class="fl">0.92</span>, <span class="ss">f"r = </span><span class="sc">{</span>r<span class="sc">:.2f}</span><span class="ss">"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"true share of 'teaching' words, θ"</span>)</span>
-<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"LDA estimate of θ"</span>)</span>
-<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="dv">0</span>, <span class="dv">1</span>)<span class="op">;</span> ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Documents: what mix each one is"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
-<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a>The topics come back almost exactly, including the shared word *class*. The model learns that</span>
-<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>*class* belongs to both topics rather than labelling it as one. Each document's mixture is</span>
-<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>recovered well on average. For any single 40-word document, though, the estimate is</span>
-<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>noisy, so per-document topic shares come with real uncertainty.</span>
-<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a><span class="fu">### LDA on the professor data</span></span>
-<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>For the real analysis, each professor's comments were pooled into one document, giving 999</span>
-<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>documents. After removing stop words, stemming, and dropping words seen fewer than five times,</span>
-<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>499,836 words remained, 3,064 of them distinct <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>. The analysis then had three steps.</span>
-<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>**1. Choose the number of topics.** The authors fitted models with 2 to 9 topics, using 5-fold</span>
-<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>cross-validation and **perplexity**, a measure of how well the model predicts held-out words. Lower</span>
-<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>is better. Perplexity **kept falling** as topics were added. The authors chose **six topics**</span>
-<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a>because the improvement slowed down between six and seven <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>. This is an elbow</span>
-<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a>judgement, the same kind as a scree plot. It is not a test, and the cross-validated criterion does</span>
-<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>not settle the choice by itself. See <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](cross-validation.qmd)</span>.</span>
-<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>**2. Read the topics.** A topic is just a ranked list of words with probabilities. To judge whether</span>
-<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>a word stands out, compare it with the uniform baseline. If every word were equally likely, each</span>
-<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>would have probability 1/3,064, about 0.03%. The stem *lectur* has 3.29% in topic 3, more than 100</span>
-<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>times the baseline. Meanwhile *class* is the top word in five of the six topics <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>,</span>
-<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>so a frequent word can lead a topic's list without telling you what the topic is about.</span>
-<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a>**3. Name the topics.** This step is human work. The authors named only two:</span>
-<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**topic 3**, about lecturing, from *lectur*, *test*, *exam*, *materi*;</span>
-<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**topic 5**, about how students perceived the teaching, since *great*, *best*, *interest* and</span>
-<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a>  *funni* appear only there.</span>
-<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a>They leave the other four as an exercise, and say that meaningful names require "a thorough</span>
-<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>understanding of the problem under investigation" <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>.</span>
-<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a>**4. Use the output.** Each professor now has a vector of topic proportions. For example,</span>
-<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>Professor 1's comments are 55% topic 2. These proportions are new variables. They can be used to</span>
-<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>group professors by teaching style or entered into a regression <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>.</span>
-<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a>**How LDA relates to older methods.** The book compares LDA with **latent semantic analysis</span>
-<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>(LSA)**, an older method. LSA factorises the DTM, like <span class="co">[</span><span class="ot">principal components</span><span class="co">](../ml-track/unsupervised-learning.qmd)</span>.</span>
-<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a>LDA is a generative **mixture model**, like latent class analysis. The difference "can be boiled</span>
-<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a>down to PCA versus LCA" <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>. LDA has also been extended in several directions:</span>
-<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>correlated topic models;</span>
-<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**supervised** topic models, in which an outcome helps shape the topics;</span>
-<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>supervised models that also take covariates.</span>
-<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a>The <span class="co">[</span><span class="ot">mixture-models</span><span class="co">](../ml-track/mixture-models-and-em.qmd)</span> entry explains the EM machinery behind</span>
-<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a>these models.</span>
-<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a><span class="fu">## What counting leaves out {#what-counting-leaves-out}</span></span>
-<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a>Everything above treats a document as a **bag of words**, a set of counts with the word order</span>
-<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>thrown away. n-grams and valence shifters only patch the problem locally. Neural language models</span>
-<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a>handle word order properly. The book deliberately leaves them out, because many social-science</span>
-<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a>studies "do not have the amount of text necessary" to train them <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>.</span>
-<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a>The authors also make a practical point about small samples and short responses. In that setting,</span>
-<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a>a validated dictionary such as **LIWC**, with about 6,400 words and stems scored on 90 components,</span>
-<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a>will probably predict better than more complex algorithms <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>. This fits the theme of</span>
-<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a>the <span class="co">[</span><span class="ot">bias–variance</span><span class="co">](bias-variance-tradeoff.qmd)</span> entry. A fixed dictionary has no parameters to</span>
-<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a>overfit, and with little data that matters more than flexibility.</span>
-<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using a stop list without reading it.** Standard lists remove words that carry meaning in your</span>
-<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a>  domain, such as *least* and *best* in teaching evaluations, and *not* almost everywhere.</span>
-<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a>  Read the list before you use it.</span>
-<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating a sentiment score as meaningful on its own.** "This comment scores 6" means nothing</span>
-<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a>  without a norm. Scores from different lexicons are not comparable. Validate against an outcome</span>
-<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a>  you trust, as the authors did with the ratings.</span>
-<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Scoring words without context.** Negators, amplifiers and "but" clauses are common. Ignoring</span>
-<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a>  them weakens the measure: the correlation with the rating was 0.576 without shifters and 0.655</span>
-<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a>  with them.</span>
-<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using a lexicon built for other text.** syuzhet was built from contemporary novels and "may</span>
-<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a>  work best for such text". Check that a lexicon's source resembles your documents.</span>
-<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating the number of topics as discovered.** Perplexity usually keeps improving as topics</span>
-<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a>  are added. The final number is a judgement. Report the curve and show that your conclusions</span>
-<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a>  hold with neighbouring choices.</span>
-<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Overreading topic labels.** A topic is a word distribution. Its name is the researcher's</span>
-<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a>  interpretation, and frequent words such as *class* can top several topics. Name topics from</span>
-<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a>  the distinctive words, and say which topics you could not name.</span>
-<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting that text-derived variables are measured with error.** Inferred gender, sentiment</span>
-<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a>  scores and topic shares are all estimates. When they enter a regression, the errors-in-variables</span>
-<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a>  problems in <span class="co">[</span><span class="ot">measurement &amp; ML</span><span class="co">](measurement-and-ml.qmd)</span> apply. A gap in ratings by inferred gender</span>
-<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>  is a description, not a causal finding; see <span class="co">[</span><span class="ot">regression &amp; causality</span><span class="co">](../03-regression/regression-and-causality.qmd)</span>.</span>
-<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Jacobucci, Grimm &amp; Zhang, *Machine Learning for Social and Behavioral Research*** (Ch 11,</span>
-<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a>  "Introduction to Text Mining"): this entry is based on the whole chapter.</span>
-<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Terminology, the preprocessing pipeline (extraction, anonymisation, special characters and</span>
-<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a>    emoji, abbreviations, spell-checking, stemming), and the verdict that preprocessing "is much</span>
-<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a>    more critical than in quantitative data cleaning".</span>
-<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Tokenization levels, n-grams, the DTM and sparse storage (27,939 × 18,216, under 0.2% non-zero,</span>
-<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a>    3.8 GB versus 18.1 MB).</span>
-<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>The professor-ratings data: 999 professors, rating mean 3.85, difficulty mean 2.88, 1,223,454</span>
-<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a>    words.</span>
-<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Building the stop list: SMART, snowball and onix (1,149 words) reduced to a 619-word list, with</span>
-<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a>    *least* and *best* kept.</span>
-<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Pronoun-count gender inference: 415 female and 584 male professors; rating 3.92 versus 3.76,</span>
-<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a>    *d* = 0.11.</span>
-<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>The four lexicons: AFINN, nrc, bing and syuzhet.</span>
-<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Sentiment validity (r = 0.576 / −0.323; bing–syuzhet r = 0.852) and valence shifters</span>
-<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a>    (0.576 → 0.655).</span>
-<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>The LDA writing analogy and generative model with Dirichlet priors.</span>
-<span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Choosing K by 5-fold CV perplexity (K = 6), the 1/3,064 baseline, naming topics 3 and 5, and</span>
-<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a>    per-professor topic proportions.</span>
-<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>LSA versus LDA as "PCA versus LCA", and the topic-model extensions.</span>
-<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Why neural NLP is left out, and why LIWC can beat complex models on small samples.</span>
-<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Slips in the source:**</span>
-<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>One sentence names Professors "27 and 79" as having zero male words. In the table it is</span>
-<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a>    professors 27 and 28.</span>
-<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>The toy DTM's zero count (61 + 196 ≠ 255 cells) does not add up.</span>
-<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>The text describes Professor 5's 39% share of topic 3 as "the majority".</span>
-<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Perplexity is called "the geometric mean of word likelihood". The standard definition is the</span>
-<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a>    *inverse* of that; see the appendix.</span>
-<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>This entry follows the tables wherever the prose disagrees with them.</span>
-<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Our additions:** the simulated two-topic corpus and the Gibbs-sampling fit in the figure are our</span>
-<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a>  own illustration, not an example from the book. The book's software estimates LDA by variational</span>
-<span id="cb2-413"><a href="#cb2-413" aria-hidden="true" tabindex="-1"></a>  EM.</span>
-<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
-<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a>**LDA's generative model** (in the book's notation). There are $K$ topics, $M$ documents and $V$</span>
-<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a>distinct words. For each document $m$ and each word position $n$:</span>
-<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a>\theta_m \sim \text{Dirichlet}(\alpha), \qquad \beta_k \sim \text{Dirichlet}(\delta),</span>
-<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>and Jordan (2003), used a variational EM algorithm <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span> (see</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">variational inference</span><span class="co">](../ml-track/variational-inference.qmd)</span> for what that means).</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>The figure fits LDA to a corpus whose true topics we know, because we generated it.</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-lda</span></span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "LDA recovering hidden topics (our simulation, not data from the sources). We generated 300 'evaluations' of 40 words each from two known topics: teaching effectiveness and personality. The word 'class' is common in both, as it is in the book's data. Each document's topic mix was drawn at random. Left: the two true topic-word distributions (light bars) and LDA's estimates (dark bars), recovered from the word counts alone. Right: each document's true share of 'teaching' words against LDA's estimate (correlation ≈ 0.97). The orange point is the document closest to the book's example mix of 0.7/0.3. Its estimate is noticeably off: 40 words carry limited information about a mixture."</span></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code"</span></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">11</span>)</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>vocab <span class="op">=</span> [<span class="st">"class"</span>, <span class="st">"lectur"</span>, <span class="st">"clear"</span>, <span class="st">"organ"</span>, <span class="st">"prepar"</span>, <span class="st">"exam"</span>,</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>         <span class="st">"nice"</span>, <span class="st">"funni"</span>, <span class="st">"warm"</span>, <span class="st">"open"</span>, <span class="st">"care"</span>, <span class="st">"help"</span>]</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>V, K, M, N <span class="op">=</span> <span class="bu">len</span>(vocab), <span class="dv">2</span>, <span class="dv">300</span>, <span class="dv">40</span></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>beta_true <span class="op">=</span> np.array([</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">.16</span>, <span class="fl">.16</span>, <span class="fl">.14</span>, <span class="fl">.14</span>, <span class="fl">.12</span>, <span class="fl">.14</span>, <span class="fl">.01</span>, <span class="fl">.01</span>, <span class="fl">.01</span>, <span class="fl">.01</span>, <span class="fl">.02</span>, <span class="fl">.08</span>],   <span class="co"># teaching effectiveness</span></span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">.16</span>, <span class="fl">.01</span>, <span class="fl">.02</span>, <span class="fl">.01</span>, <span class="fl">.01</span>, <span class="fl">.01</span>, <span class="fl">.16</span>, <span class="fl">.14</span>, <span class="fl">.14</span>, <span class="fl">.12</span>, <span class="fl">.12</span>, <span class="fl">.10</span>],   <span class="co"># personality</span></span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>beta_true <span class="op">/=</span> beta_true.<span class="bu">sum</span>(<span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>theta_true <span class="op">=</span> rng.dirichlet([<span class="fl">0.6</span>, <span class="fl">0.6</span>], M)                 <span class="co"># each document's topic mix</span></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> (rng.random((M, N)) <span class="op">&gt;</span> theta_true[:, [<span class="dv">0</span>]]).astype(<span class="bu">int</span>)  <span class="co"># topic of each word slot</span></span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([[rng.choice(V, p<span class="op">=</span>beta_true[k]) <span class="cf">for</span> k <span class="kw">in</span> row] <span class="cf">for</span> row <span class="kw">in</span> z])</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit LDA by Gibbs sampling: alternate topic labels | (theta, beta) and (theta, beta) | labels</span></span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>alpha, delta, iters, burn <span class="op">=</span> <span class="fl">0.5</span>, <span class="fl">0.1</span>, <span class="dv">400</span>, <span class="dv">200</span></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> rng.dirichlet([alpha] <span class="op">*</span> K, M)</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> rng.dirichlet([delta <span class="op">*</span> <span class="dv">10</span>] <span class="op">*</span> V, K)</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>th_sum, be_sum <span class="op">=</span> np.zeros_like(theta), np.zeros_like(beta)</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>docs, wf <span class="op">=</span> np.repeat(np.arange(M), N), w.ravel()</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> it <span class="kw">in</span> <span class="bu">range</span>(iters):</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> theta[docs] <span class="op">*</span> beta[:, wf].T</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>    p <span class="op">/=</span> p.<span class="bu">sum</span>(<span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>    zk <span class="op">=</span> (rng.random(<span class="bu">len</span>(wf)) <span class="op">&gt;</span> p[:, <span class="dv">0</span>]).astype(<span class="bu">int</span>)</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>    ndk <span class="op">=</span> np.zeros((M, K))<span class="op">;</span> np.add.at(ndk, (docs, zk), <span class="dv">1</span>)</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>    nkw <span class="op">=</span> np.zeros((K, V))<span class="op">;</span> np.add.at(nkw, (zk, wf), <span class="dv">1</span>)</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>    theta <span class="op">=</span> np.array([rng.dirichlet(alpha <span class="op">+</span> r) <span class="cf">for</span> r <span class="kw">in</span> ndk])</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>    beta <span class="op">=</span> np.array([rng.dirichlet(delta <span class="op">+</span> r) <span class="cf">for</span> r <span class="kw">in</span> nkw])</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> it <span class="op">&gt;=</span> burn:</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>        th_sum <span class="op">+=</span> theta<span class="op">;</span> be_sum <span class="op">+=</span> beta</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>theta_hat, beta_hat <span class="op">=</span> th_sum <span class="op">/</span> (iters <span class="op">-</span> burn), be_sum <span class="op">/</span> (iters <span class="op">-</span> burn)</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> beta_hat[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">&lt;</span> beta_hat[<span class="dv">1</span>, <span class="dv">1</span>]:                        <span class="co"># topics are unlabelled: align them</span></span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>    theta_hat, beta_hat <span class="op">=</span> theta_hat[:, ::<span class="op">-</span><span class="dv">1</span>], beta_hat[::<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.corrcoef(theta_true[:, <span class="dv">0</span>], theta_hat[:, <span class="dv">0</span>])[<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>j <span class="op">=</span> np.argmin(np.<span class="bu">abs</span>(theta_true[:, <span class="dv">0</span>] <span class="op">-</span> <span class="fl">0.7</span>))</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="fl">4.2</span>), gridspec_kw<span class="op">=</span>{<span class="st">"width_ratios"</span>: [<span class="fl">1.6</span>, <span class="dv">1</span>]})</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>]</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.arange(V)</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, (off, name) <span class="kw">in</span> <span class="bu">enumerate</span>([(<span class="op">-</span><span class="fl">0.2</span>, <span class="st">"teaching"</span>), (<span class="fl">0.2</span>, <span class="st">"personality"</span>)]):</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>    sign <span class="op">=</span> <span class="dv">1</span> <span class="cf">if</span> k <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="op">-</span><span class="dv">1</span>                             <span class="co"># teaching up, personality down</span></span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>    ax.bar(x <span class="op">+</span> off, sign <span class="op">*</span> beta_true[k], width<span class="op">=</span><span class="fl">0.38</span>, color<span class="op">=</span><span class="st">"#b7b6a8"</span>,</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"true"</span> <span class="cf">if</span> k <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="va">None</span>)</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>    ax.bar(x <span class="op">+</span> off, sign <span class="op">*</span> beta_hat[k], width<span class="op">=</span><span class="fl">0.18</span>, color<span class="op">=</span><span class="st">"#161613"</span>,</span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"LDA estimate"</span> <span class="cf">if</span> k <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="va">None</span>)</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(x)<span class="op">;</span> ax.set_xticklabels(vocab, rotation<span class="op">=</span><span class="dv">45</span>, ha<span class="op">=</span><span class="st">"right"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"P(word | topic)</span><span class="ch">\n</span><span class="st">↑ teaching   ↓ personality"</span>)</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>yt <span class="op">=</span> ax.get_yticks()<span class="op">;</span> ax.set_yticks(yt)<span class="op">;</span> ax.set_yticklabels([<span class="ss">f"</span><span class="sc">{</span><span class="bu">abs</span>(t)<span class="sc">:.2f}</span><span class="ss">"</span> <span class="cf">for</span> t <span class="kw">in</span> yt])</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>, fontsize<span class="op">=</span><span class="dv">9</span>, loc<span class="op">=</span><span class="st">"upper center"</span>, bbox_to_anchor<span class="op">=</span>(<span class="fl">0.66</span>, <span class="fl">0.98</span>))</span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Topics: what each theme talks about"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">1</span>]</span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], color<span class="op">=</span><span class="st">"#161613"</span>, lw<span class="op">=</span><span class="dv">1</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>ax.scatter(theta_true[:, <span class="dv">0</span>], theta_hat[:, <span class="dv">0</span>], s<span class="op">=</span><span class="dv">14</span>, color<span class="op">=</span><span class="st">"#5e5e54"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>ax.scatter(theta_true[j, <span class="dv">0</span>], theta_hat[j, <span class="dv">0</span>], s<span class="op">=</span><span class="dv">70</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, zorder<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="ss">f"true </span><span class="sc">{</span>theta_true[j, <span class="dv">0</span>]<span class="sc">:.2f}</span><span class="ch">\n</span><span class="ss">estimated </span><span class="sc">{</span>theta_hat[j, <span class="dv">0</span>]<span class="sc">:.2f}</span><span class="ss">"</span>,</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>            (theta_true[j, <span class="dv">0</span>], theta_hat[j, <span class="dv">0</span>]), xytext<span class="op">=</span>(<span class="fl">0.62</span>, <span class="fl">0.12</span>),</span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>            fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>, arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-"</span>, color<span class="op">=</span><span class="st">"#e8531d"</span>))</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">0.03</span>, <span class="fl">0.92</span>, <span class="ss">f"r = </span><span class="sc">{</span>r<span class="sc">:.2f}</span><span class="ss">"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"true share of 'teaching' words, θ"</span>)</span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"LDA estimate of θ"</span>)</span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="dv">0</span>, <span class="dv">1</span>)<span class="op">;</span> ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Documents: what mix each one is"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>The topics come back almost exactly, including the shared word *class*. The model learns that</span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>*class* belongs to both topics rather than labelling it as one. Each document's mixture is</span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>recovered well on average. For any single 40-word document, though, the estimate is</span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a>noisy, so per-document topic shares come with real uncertainty.</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a><span class="fu">### LDA on the professor data</span></span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>For the real analysis, each professor's comments were pooled into one document, giving 999</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>documents. After removing stop words, stemming, and dropping words seen fewer than five times,</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>499,836 words remained, 3,064 of them distinct <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>. The analysis then had three steps.</span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>**1. Choose the number of topics.** The authors fitted models with 2 to 9 topics, using 5-fold</span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>cross-validation and **perplexity**, a measure of how well the model predicts held-out words. Lower</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a>is better. Perplexity **kept falling** as topics were added. The authors chose **six topics**</span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a>because the improvement slowed down between six and seven <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>. This is an elbow</span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>judgement, the same kind as a scree plot. It is not a test, and the cross-validated criterion does</span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>not settle the choice by itself. See <span class="co">[</span><span class="ot">cross-validation</span><span class="co">](cross-validation.qmd)</span>.</span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>**2. Read the topics.** A topic is just a ranked list of words with probabilities. To judge whether</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>a word stands out, compare it with the uniform baseline. If every word were equally likely, each</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>would have probability 1/3,064, about 0.03%. The stem *lectur* has 3.29% in topic 3, more than 100</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>times the baseline. Meanwhile *class* is the top word in five of the six topics <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>,</span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>so a frequent word can lead a topic's list without telling you what the topic is about.</span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a>**3. Name the topics.** This step is human work. The authors named only two:</span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**topic 3**, about lecturing, from *lectur*, *test*, *exam*, *materi*;</span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**topic 5**, about how students perceived the teaching, since *great*, *best*, *interest* and</span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>  *funni* appear only there.</span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>They leave the other four as an exercise, and say that meaningful names require "a thorough</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>understanding of the problem under investigation" <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>.</span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>**4. Use the output.** Each professor now has a vector of topic proportions. For example,</span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>Professor 1's comments are 55% topic 2. These proportions are new variables. They can be used to</span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>group professors by teaching style or entered into a regression <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>.</span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>**How LDA relates to older methods.** The book compares LDA with **latent semantic analysis</span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a>(LSA)**, an older method. LSA factorises the DTM, like <span class="co">[</span><span class="ot">principal components</span><span class="co">](../ml-track/unsupervised-learning.qmd)</span>.</span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a>LDA is a generative **mixture model**, like latent class analysis. The difference "can be boiled</span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a>down to PCA versus LCA" <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>. LDA has also been extended in several directions:</span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>correlated topic models;</span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**supervised** topic models, in which an outcome helps shape the topics;</span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>supervised models that also take covariates.</span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a>The <span class="co">[</span><span class="ot">mixture-models</span><span class="co">](../ml-track/mixture-models-and-em.qmd)</span> entry explains the EM machinery behind</span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a>these models.</span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a><span class="fu">## What counting leaves out {#what-counting-leaves-out}</span></span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>Everything above treats a document as a **bag of words**, a set of counts with the word order</span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a>thrown away. n-grams and valence shifters only patch the problem locally. Neural language models</span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a>handle word order properly. The book deliberately leaves them out, because many social-science</span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a>studies "do not have the amount of text necessary" to train them <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>.</span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a>The authors also make a practical point about small samples and short responses. In that setting,</span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a>a validated dictionary such as **LIWC**, with about 6,400 words and stems scored on 90 components,</span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a>will probably predict better than more complex algorithms <span class="co">[</span><span class="ot">@jacobucci_ml</span><span class="co">]</span>. This fits the theme of</span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a>the <span class="co">[</span><span class="ot">bias–variance</span><span class="co">](bias-variance-tradeoff.qmd)</span> entry. A fixed dictionary has no parameters to</span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a>overfit, and with little data that matters more than flexibility.</span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using a stop list without reading it.** Standard lists remove words that carry meaning in your</span>
+<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a>  domain, such as *least* and *best* in teaching evaluations, and *not* almost everywhere.</span>
+<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a>  Read the list before you use it.</span>
+<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating a sentiment score as meaningful on its own.** "This comment scores 6" means nothing</span>
+<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a>  without a norm. Scores from different lexicons are not comparable. Validate against an outcome</span>
+<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a>  you trust, as the authors did with the ratings.</span>
+<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Scoring words without context.** Negators, amplifiers and "but" clauses are common. Ignoring</span>
+<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a>  them weakens the measure: the correlation with the rating was 0.576 without shifters and 0.655</span>
+<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a>  with them.</span>
+<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using a lexicon built for other text.** syuzhet was built from contemporary novels and "may</span>
+<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a>  work best for such text". Check that a lexicon's source resembles your documents.</span>
+<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating the number of topics as discovered.** Perplexity usually keeps improving as topics</span>
+<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a>  are added. The final number is a judgement. Report the curve and show that your conclusions</span>
+<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a>  hold with neighbouring choices.</span>
+<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Overreading topic labels.** A topic is a word distribution. Its name is the researcher's</span>
+<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a>  interpretation, and frequent words such as *class* can top several topics. Name topics from</span>
+<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a>  the distinctive words, and say which topics you could not name.</span>
+<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forgetting that text-derived variables are measured with error.** Inferred gender, sentiment</span>
+<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a>  scores and topic shares are all estimates. When they enter a regression, the errors-in-variables</span>
+<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>  problems in <span class="co">[</span><span class="ot">measurement &amp; ML</span><span class="co">](measurement-and-ml.qmd)</span> apply. A gap in ratings by inferred gender</span>
+<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a>  is a description, not a causal finding; see <span class="co">[</span><span class="ot">regression &amp; causality</span><span class="co">](../03-regression/regression-and-causality.qmd)</span>.</span>
+<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Jacobucci, Grimm &amp; Zhang, *Machine Learning for Social and Behavioral Research*** (Ch 11,</span>
+<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a>  "Introduction to Text Mining"): this entry is based on the whole chapter.</span>
+<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Terminology, the preprocessing pipeline (extraction, anonymisation, special characters and</span>
+<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a>    emoji, abbreviations, spell-checking, stemming), and the verdict that preprocessing "is much</span>
+<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a>    more critical than in quantitative data cleaning".</span>
+<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Tokenization levels, n-grams, the DTM and sparse storage (27,939 × 18,216, under 0.2% non-zero,</span>
+<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a>    3.8 GB versus 18.1 MB).</span>
+<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>The professor-ratings data: 999 professors, rating mean 3.85, difficulty mean 2.88, 1,223,454</span>
+<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a>    words.</span>
+<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Building the stop list: SMART, snowball and onix (1,149 words) reduced to a 619-word list, with</span>
+<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a>    *least* and *best* kept.</span>
+<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Pronoun-count gender inference: 415 female and 584 male professors; rating 3.92 versus 3.76,</span>
+<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a>    *d* = 0.11.</span>
+<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>The four lexicons: AFINN, nrc, bing and syuzhet.</span>
+<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Sentiment validity (r = 0.576 / −0.323; bing–syuzhet r = 0.852) and valence shifters</span>
+<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a>    (0.576 → 0.655).</span>
+<span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>The LDA writing analogy and generative model with Dirichlet priors.</span>
+<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Choosing K by 5-fold CV perplexity (K = 6), the 1/3,064 baseline, naming topics 3 and 5, and</span>
+<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a>    per-professor topic proportions.</span>
+<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>LSA versus LDA as "PCA versus LCA", and the topic-model extensions.</span>
+<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Why neural NLP is left out, and why LIWC can beat complex models on small samples.</span>
+<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Slips in the source:**</span>
+<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>One sentence names Professors "27 and 79" as having zero male words. In the table it is</span>
+<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a>    professors 27 and 28.</span>
+<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>The toy DTM's zero count (61 + 196 ≠ 255 cells) does not add up.</span>
+<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>The text describes Professor 5's 39% share of topic 3 as "the majority".</span>
+<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Perplexity is called "the geometric mean of word likelihood". The standard definition is the</span>
+<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a>    *inverse* of that; see the appendix.</span>
+<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>This entry follows the tables wherever the prose disagrees with them.</span>
+<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Our additions:** the simulated two-topic corpus and the Gibbs-sampling fit in the figure are our</span>
+<span id="cb2-413"><a href="#cb2-413" aria-hidden="true" tabindex="-1"></a>  own illustration, not an example from the book. The book's software estimates LDA by variational</span>
+<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a>  EM.</span>
+<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a>**LDA's generative model** (in the book's notation). There are $K$ topics, $M$ documents and $V$</span>
+<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a>distinct words. For each document $m$ and each word position $n$:</span>
+<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a>\theta_m \sim \text{Dirichlet}(\alpha), \qquad \beta_k \sim \text{Dirichlet}(\delta),</span>
 <span id="cb2-424"><a href="#cb2-424" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a>z_{mn} \sim \text{Multinomial}(\theta_m), \qquad w_{mn} \mid z_{mn}=k \sim \text{Multinomial}(\beta_k).</span>
-<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a>Here $\theta_m=(\theta_{m1},\dots,\theta_{mK})$ sums to one; it is the document's topic mix.</span>
-<span id="cb2-428"><a href="#cb2-428" aria-hidden="true" tabindex="-1"></a>$\beta_k=(\beta_{k1},\dots,\beta_{kV})$ is topic $k$'s distribution over words. The **Dirichlet** is</span>
-<span id="cb2-429"><a href="#cb2-429" aria-hidden="true" tabindex="-1"></a>a distribution over probability vectors, the multi-category version of the beta distribution.</span>
-<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a>Small $\alpha$ favours documents dominated by one or two topics. Small $\delta$ favours topics</span>
-<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a>concentrated on a few words. Summing out the topic labels, each document's word probabilities are a</span>
-<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a>mixture:</span>
-<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a>P(w_{mn}=v \mid \theta_m, \beta) = \sum_{k=1}^{K} \theta_{mk}\,\beta_{kv}.</span>
-<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-436"><a href="#cb2-436" aria-hidden="true" tabindex="-1"></a>This is the low-rank structure that LDA shares with LSA's matrix factorisation: the</span>
-<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a>$M \times V$ matrix of expected word shares equals $\Theta B$, where $\Theta$ is $M\times K$ and $B$</span>
-<span id="cb2-438"><a href="#cb2-438" aria-hidden="true" tabindex="-1"></a>is $K \times V$.</span>
-<span id="cb2-439"><a href="#cb2-439" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-440"><a href="#cb2-440" aria-hidden="true" tabindex="-1"></a>**The sampler in the figure** (our illustration). Given $\theta$ and $\beta$, each word's topic is</span>
-<span id="cb2-441"><a href="#cb2-441" aria-hidden="true" tabindex="-1"></a>drawn with probability</span>
-<span id="cb2-442"><a href="#cb2-442" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-443"><a href="#cb2-443" aria-hidden="true" tabindex="-1"></a>P(z_{mn}=k \mid w_{mn}=v) = \frac{\theta_{mk}\,\beta_{kv}}{\sum_j \theta_{mj}\,\beta_{jv}} .</span>
-<span id="cb2-444"><a href="#cb2-444" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-445"><a href="#cb2-445" aria-hidden="true" tabindex="-1"></a>Then, by Dirichlet–multinomial conjugacy, $\theta_m \mid z \sim \text{Dirichlet}(\alpha + n_{m\cdot})$</span>
-<span id="cb2-446"><a href="#cb2-446" aria-hidden="true" tabindex="-1"></a>and $\beta_k \mid z, w \sim \text{Dirichlet}(\delta + n_{k\cdot})$. Here $n_{m\cdot}$ counts document</span>
-<span id="cb2-447"><a href="#cb2-447" aria-hidden="true" tabindex="-1"></a>$m$'s words assigned to each topic, and $n_{k\cdot}$ counts each word's assignments to topic $k$.</span>
-<span id="cb2-448"><a href="#cb2-448" aria-hidden="true" tabindex="-1"></a>Alternating these steps is a Gibbs sampler; see <span class="co">[</span><span class="ot">MCMC in depth</span><span class="co">](../02-inference/mcmc-in-depth.qmd)</span>.</span>
-<span id="cb2-449"><a href="#cb2-449" aria-hidden="true" tabindex="-1"></a>The topics come out unlabelled, so "topic 1" in one run can be "topic 2" in the next. That is why</span>
-<span id="cb2-450"><a href="#cb2-450" aria-hidden="true" tabindex="-1"></a>the code aligns them at the end.</span>
-<span id="cb2-451"><a href="#cb2-451" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-452"><a href="#cb2-452" aria-hidden="true" tabindex="-1"></a>**Perplexity.** For held-out documents with $N$ words in total and log-likelihood</span>
-<span id="cb2-453"><a href="#cb2-453" aria-hidden="true" tabindex="-1"></a>$\log p(\mathbf{w})$,</span>
-<span id="cb2-454"><a href="#cb2-454" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-455"><a href="#cb2-455" aria-hidden="true" tabindex="-1"></a>\text{perplexity} = \exp<span class="sc">\!</span>\Big(-\tfrac{1}{N}\log p(\mathbf{w})\Big),</span>
-<span id="cb2-456"><a href="#cb2-456" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-457"><a href="#cb2-457" aria-hidden="true" tabindex="-1"></a>the **inverse** geometric mean of the per-word likelihood. A model that guessed uniformly over $V$</span>
-<span id="cb2-458"><a href="#cb2-458" aria-hidden="true" tabindex="-1"></a>words would have perplexity $V$. The book's cross-validated curve sits at roughly 2,000 to 2,150</span>
-<span id="cb2-459"><a href="#cb2-459" aria-hidden="true" tabindex="-1"></a>(read from its Figure 11.23), below the uniform baseline of $V = 3{,}064$.</span>
-<span id="cb2-460"><a href="#cb2-460" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-461"><a href="#cb2-461" aria-hidden="true" tabindex="-1"></a>**Why sparse storage matters.** $27{,}939 \times 18{,}216 \approx 5.09\times10^{8}$ cells at 8 bytes</span>
-<span id="cb2-462"><a href="#cb2-462" aria-hidden="true" tabindex="-1"></a>each is about 4.07 GB (3.8 GiB), the book's figure. At under 0.2% density, storing only the non-zero</span>
-<span id="cb2-463"><a href="#cb2-463" aria-hidden="true" tabindex="-1"></a>values with their row indices and column pointers takes tens of megabytes.</span>
-<span id="cb2-464"><a href="#cb2-464" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-465"><a href="#cb2-465" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-466"><a href="#cb2-466" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-467"><a href="#cb2-467" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-468"><a href="#cb2-468" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">Concepts &amp; measurement</span><span class="co">](../00-overture/concepts-and-measurement.qmd)</span>, since a</span>
-<span id="cb2-469"><a href="#cb2-469" aria-hidden="true" tabindex="-1"></a>  sentiment score is an instrument that needs validating, and</span>
-<span id="cb2-470"><a href="#cb2-470" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">measurement error &amp; ML</span><span class="co">](measurement-and-ml.qmd)</span>, since text-derived variables are noisy inputs.</span>
-<span id="cb2-471"><a href="#cb2-471" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Alongside:** <span class="co">[</span><span class="ot">Unsupervised learning</span><span class="co">](../ml-track/unsupervised-learning.qmd)</span> (PCA, which</span>
-<span id="cb2-472"><a href="#cb2-472" aria-hidden="true" tabindex="-1"></a>  underlies LSA) and <span class="co">[</span><span class="ot">mixture models &amp; EM</span><span class="co">](../ml-track/mixture-models-and-em.qmd)</span>, the family LDA</span>
-<span id="cb2-473"><a href="#cb2-473" aria-hidden="true" tabindex="-1"></a>  belongs to. <span class="co">[</span><span class="ot">Cross-validation</span><span class="co">](cross-validation.qmd)</span> is used to choose the number of topics.</span>
-<span id="cb2-474"><a href="#cb2-474" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">ML for social science</span><span class="co">](../ml-track/ml-for-social-science.qmd)</span>, which uses</span>
-<span id="cb2-475"><a href="#cb2-475" aria-hidden="true" tabindex="-1"></a>  text-derived features as predictors, and</span>
-<span id="cb2-476"><a href="#cb2-476" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">deep learning</span><span class="co">](../ml-track/deep-learning-neural-networks.qmd)</span>, the word-order-aware approach</span>
-<span id="cb2-477"><a href="#cb2-477" aria-hidden="true" tabindex="-1"></a>  this entry deliberately leaves aside.</span>
+<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a>z_{mn} \sim \text{Multinomial}(\theta_m), \qquad w_{mn} \mid z_{mn}=k \sim \text{Multinomial}(\beta_k).</span>
+<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-428"><a href="#cb2-428" aria-hidden="true" tabindex="-1"></a>Here $\theta_m=(\theta_{m1},\dots,\theta_{mK})$ sums to one; it is the document's topic mix.</span>
+<span id="cb2-429"><a href="#cb2-429" aria-hidden="true" tabindex="-1"></a>$\beta_k=(\beta_{k1},\dots,\beta_{kV})$ is topic $k$'s distribution over words. The **Dirichlet** is</span>
+<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a>a distribution over probability vectors, the multi-category version of the beta distribution.</span>
+<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a>Small $\alpha$ favours documents dominated by one or two topics. Small $\delta$ favours topics</span>
+<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a>concentrated on a few words. Summing out the topic labels, each document's word probabilities are a</span>
+<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a>mixture:</span>
+<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a>P(w_{mn}=v \mid \theta_m, \beta) = \sum_{k=1}^{K} \theta_{mk}\,\beta_{kv}.</span>
+<span id="cb2-436"><a href="#cb2-436" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a>This is the low-rank structure that LDA shares with LSA's matrix factorisation: the</span>
+<span id="cb2-438"><a href="#cb2-438" aria-hidden="true" tabindex="-1"></a>$M \times V$ matrix of expected word shares equals $\Theta B$, where $\Theta$ is $M\times K$ and $B$</span>
+<span id="cb2-439"><a href="#cb2-439" aria-hidden="true" tabindex="-1"></a>is $K \times V$.</span>
+<span id="cb2-440"><a href="#cb2-440" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-441"><a href="#cb2-441" aria-hidden="true" tabindex="-1"></a>**The sampler in the figure** (our illustration). Given $\theta$ and $\beta$, each word's topic is</span>
+<span id="cb2-442"><a href="#cb2-442" aria-hidden="true" tabindex="-1"></a>drawn with probability</span>
+<span id="cb2-443"><a href="#cb2-443" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-444"><a href="#cb2-444" aria-hidden="true" tabindex="-1"></a>P(z_{mn}=k \mid w_{mn}=v) = \frac{\theta_{mk}\,\beta_{kv}}{\sum_j \theta_{mj}\,\beta_{jv}} .</span>
+<span id="cb2-445"><a href="#cb2-445" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-446"><a href="#cb2-446" aria-hidden="true" tabindex="-1"></a>Then, by Dirichlet–multinomial conjugacy, $\theta_m \mid z \sim \text{Dirichlet}(\alpha + n_{m\cdot})$</span>
+<span id="cb2-447"><a href="#cb2-447" aria-hidden="true" tabindex="-1"></a>and $\beta_k \mid z, w \sim \text{Dirichlet}(\delta + n_{k\cdot})$. Here $n_{m\cdot}$ counts document</span>
+<span id="cb2-448"><a href="#cb2-448" aria-hidden="true" tabindex="-1"></a>$m$'s words assigned to each topic, and $n_{k\cdot}$ counts each word's assignments to topic $k$.</span>
+<span id="cb2-449"><a href="#cb2-449" aria-hidden="true" tabindex="-1"></a>Alternating these steps is a Gibbs sampler; see <span class="co">[</span><span class="ot">MCMC in depth</span><span class="co">](../02-inference/mcmc-in-depth.qmd)</span>.</span>
+<span id="cb2-450"><a href="#cb2-450" aria-hidden="true" tabindex="-1"></a>The topics come out unlabelled, so "topic 1" in one run can be "topic 2" in the next. That is why</span>
+<span id="cb2-451"><a href="#cb2-451" aria-hidden="true" tabindex="-1"></a>the code aligns them at the end.</span>
+<span id="cb2-452"><a href="#cb2-452" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-453"><a href="#cb2-453" aria-hidden="true" tabindex="-1"></a>**Perplexity.** For held-out documents with $N$ words in total and log-likelihood</span>
+<span id="cb2-454"><a href="#cb2-454" aria-hidden="true" tabindex="-1"></a>$\log p(\mathbf{w})$,</span>
+<span id="cb2-455"><a href="#cb2-455" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-456"><a href="#cb2-456" aria-hidden="true" tabindex="-1"></a>\text{perplexity} = \exp<span class="sc">\!</span>\Big(-\tfrac{1}{N}\log p(\mathbf{w})\Big),</span>
+<span id="cb2-457"><a href="#cb2-457" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-458"><a href="#cb2-458" aria-hidden="true" tabindex="-1"></a>the **inverse** geometric mean of the per-word likelihood. A model that guessed uniformly over $V$</span>
+<span id="cb2-459"><a href="#cb2-459" aria-hidden="true" tabindex="-1"></a>words would have perplexity $V$. The book's cross-validated curve sits at roughly 2,000 to 2,150</span>
+<span id="cb2-460"><a href="#cb2-460" aria-hidden="true" tabindex="-1"></a>(read from its Figure 11.23), below the uniform baseline of $V = 3{,}064$.</span>
+<span id="cb2-461"><a href="#cb2-461" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-462"><a href="#cb2-462" aria-hidden="true" tabindex="-1"></a>**Why sparse storage matters.** $27{,}939 \times 18{,}216 \approx 5.09\times10^{8}$ cells at 8 bytes</span>
+<span id="cb2-463"><a href="#cb2-463" aria-hidden="true" tabindex="-1"></a>each is about 4.07 GB (3.8 GiB), the book's figure. At under 0.2% density, storing only the non-zero</span>
+<span id="cb2-464"><a href="#cb2-464" aria-hidden="true" tabindex="-1"></a>values with their row indices and column pointers takes tens of megabytes.</span>
+<span id="cb2-465"><a href="#cb2-465" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-466"><a href="#cb2-466" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-467"><a href="#cb2-467" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-468"><a href="#cb2-468" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-469"><a href="#cb2-469" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">Concepts &amp; measurement</span><span class="co">](../00-overture/concepts-and-measurement.qmd)</span>, since a</span>
+<span id="cb2-470"><a href="#cb2-470" aria-hidden="true" tabindex="-1"></a>  sentiment score is an instrument that needs validating, and</span>
+<span id="cb2-471"><a href="#cb2-471" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">measurement error &amp; ML</span><span class="co">](measurement-and-ml.qmd)</span>, since text-derived variables are noisy inputs.</span>
+<span id="cb2-472"><a href="#cb2-472" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Alongside:** <span class="co">[</span><span class="ot">Unsupervised learning</span><span class="co">](../ml-track/unsupervised-learning.qmd)</span> (PCA, which</span>
+<span id="cb2-473"><a href="#cb2-473" aria-hidden="true" tabindex="-1"></a>  underlies LSA) and <span class="co">[</span><span class="ot">mixture models &amp; EM</span><span class="co">](../ml-track/mixture-models-and-em.qmd)</span>, the family LDA</span>
+<span id="cb2-474"><a href="#cb2-474" aria-hidden="true" tabindex="-1"></a>  belongs to. <span class="co">[</span><span class="ot">Cross-validation</span><span class="co">](cross-validation.qmd)</span> is used to choose the number of topics.</span>
+<span id="cb2-475"><a href="#cb2-475" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">ML for social science</span><span class="co">](../ml-track/ml-for-social-science.qmd)</span>, which uses</span>
+<span id="cb2-476"><a href="#cb2-476" aria-hidden="true" tabindex="-1"></a>  text-derived features as predictors, and</span>
+<span id="cb2-477"><a href="#cb2-477" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">deep learning</span><span class="co">](../ml-track/deep-learning-neural-networks.qmd)</span>, the word-order-aware approach</span>
+<span id="cb2-478"><a href="#cb2-478" aria-hidden="true" tabindex="-1"></a>  this entry deliberately leaves aside.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
