@@ -2112,6 +2112,7 @@ window.Quarto = {
   <li><a href="#intervention-and-the-front-door-pearls-do-operator" id="toc-intervention-and-the-front-door-pearls-do-operator" class="nav-link" data-scroll-target="#intervention-and-the-front-door-pearls-do-operator">Intervention and the front door: Pearl’s do-operator</a>
   <ul class="collapse">
   <li><a href="#when-every-backdoor-is-blocked-for-you-the-front-door" id="toc-when-every-backdoor-is-blocked-for-you-the-front-door" class="nav-link" data-scroll-target="#when-every-backdoor-is-blocked-for-you-the-front-door">When every backdoor is blocked <em>for you</em>: the front-door</a></li>
+  <li><a href="#sec-do-calculus" id="toc-sec-do-calculus" class="nav-link" data-scroll-target="#sec-do-calculus">Beyond the two doors: the do-calculus</a></li>
   </ul></li>
   <li><a href="#sec-testing-dags" id="toc-sec-testing-dags" class="nav-link" data-scroll-target="#sec-testing-dags">A graph you can test — and graphs you can’t tell apart</a></li>
   <li><a href="#sec-z-specific" id="toc-sec-z-specific" class="nav-link" data-scroll-target="#sec-z-specific">Effects for whom, and policies that depend on who</a></li>
@@ -2326,6 +2327,23 @@ Figure&nbsp;1: Left: a DAG with both a confounder and a collider. The causal eff
 <p>Sometimes there is an <strong>incurable unobserved confounder</strong> <span class="math inline">U</span> between <span class="math inline">X</span> and <span class="math inline">Y</span> — no backdoor set exists, because the variable you’d need to adjust for is unmeasured. Pearl’s <strong>front-door criterion</strong> is the escape: if the effect of <span class="math inline">X</span> on <span class="math inline">Y</span> runs entirely through an observed <strong>mediator</strong> <span class="math inline">Z</span> that is itself <em>shielded</em> from the confounder, you can still identify the effect — <em>without any data on <span class="math inline">U</span>.</em> <span class="citation" data-cites="pearl_primer">(<a href="#ref-pearl_primer" role="doc-biblioref">Pearl et al. 2016</a>)</span></p>
 <p>His example is the 1950s smoking debate. The tobacco industry posited a <strong>“smoking gene”</strong> <span class="math inline">U</span> that caused both the craving to smoke (<span class="math inline">X</span>) <em>and</em> cancer (<span class="math inline">Y</span>), which would make the observed link spurious. Pearl’s move: measure <strong>tar deposits</strong> <span class="math inline">Z</span>, on the assumptions that smoking causes cancer <em>only through</em> tar (<span class="math inline">X\to Z\to Y</span>) and the gene does <em>not</em> affect tar. Then estimate <span class="math inline">X\to Z</span> and <span class="math inline">Z\to Y</span> (adjusting for <span class="math inline">X</span>), and <strong>chain them together</strong>. <span class="citation" data-cites="pearl_primer">(<a href="#ref-pearl_primer" role="doc-biblioref">Pearl et al. 2016</a>)</span> You have deconfounded <span class="math inline">U</span> using only observed variables — what Pearl calls an <em>“utter miracle.”</em> <span class="citation" data-cites="pearl_primer">(<a href="#ref-pearl_primer" role="doc-biblioref">Pearl et al. 2016</a>)</span> The front door is rarer in practice than the backdoor (its “effect flows <em>only</em> through <span class="math inline">Z</span>” assumption is demanding), but it is the proof that a credible <strong>mechanism</strong> can rescue identification where adjustment alone is helpless.</p>
 </section>
+<section id="sec-do-calculus" class="level3">
+<h3 class="anchored" data-anchor-id="sec-do-calculus">Beyond the two doors: the do-calculus</h3>
+<p>The backdoor and front-door criteria both do one job. They turn an expression containing <span class="math inline">do(\cdot)</span> into one that contains only ordinary conditional probabilities, which you can estimate from observational data. That raises a broader question. Are there other “doors”, and can you tell <strong>in advance</strong>, from the graph alone, whether <em>any</em> route exists? Pearl’s answer in <em>The Book of Why</em> (Ch 7) is the <strong>do-calculus</strong>. He models it on Euclid’s geometry: three rules play the part of axioms, and every step of an argument must be licensed by one of them. <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span></p>
+<p>In words, each rule grants one kind of permission, and the graph says when it applies: <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span></p>
+<ul>
+<li><strong>Rule 1: add or drop an observation.</strong> If a variable <span class="math inline">W</span> tells you nothing more about <span class="math inline">Y</span> once you know <span class="math inline">Z</span> (in the graph where the intervention has cut the arrows into <span class="math inline">X</span>), you may ignore it. In a chain Fire → Smoke → Alarm, once you know whether there is smoke, the fire adds nothing about the alarm.</li>
+<li><strong>Rule 2: swap an intervention for an observation.</strong> If <span class="math inline">Z</span> blocks every backdoor path from <span class="math inline">X</span> to <span class="math inline">Y</span>, then <em>doing</em> <span class="math inline">X</span> and <em>seeing</em> <span class="math inline">X</span> give the same answer within levels of <span class="math inline">Z</span>. This is the backdoor criterion written as a rule. (The <em>Primer</em>’s “Rule 2” for <span class="math inline">z</span>-specific effects, <a href="#sec-z-specific">below</a>, is a separate rule with the same number.)</li>
+<li><strong>Rule 3: add or drop an intervention.</strong> If there is no directed path from <span class="math inline">X</span> to <span class="math inline">Y</span>, intervening on <span class="math inline">X</span> leaves <span class="math inline">Y</span>’s distribution unchanged.</li>
+</ul>
+<p>Pearl first derived the front-door formula by chaining these rules (the derivation is in the appendix). He presented it as a challenge at a 1993 Berkeley seminar with a $100 prize; Heckman and Pinto proved it with “standard tools” in 2015, in eight pages. <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span> Two results make the calculus more than a notation:</p>
+<ul>
+<li><strong>Completeness.</strong> Shpitser, and independently Huang and Valtorta, proved in 2006 that the three rules are <em>enough</em>: if they cannot remove every <span class="math inline">do</span>, <strong>no method can</strong>. The model’s assumptions are then too weak to answer the question from observational data, and only an experiment (or stronger assumptions) will. <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span></li>
+<li><strong>An algorithm.</strong> A calculus checks a proof well but does not find one. Shpitser, building on Jin Tian’s c-decomposition, gave an efficient (polynomial-time) procedure that decides whether a route exists and finds it. <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span></li>
+</ul>
+<p>The rules also handle questions that an “is it identified?” algorithm alone does not. One is <strong>surrogate experiments</strong>. If you cannot set cholesterol <span class="math inline">X</span> directly, can randomising diet <span class="math inline">Z</span> answer the question? That means rewriting <span class="math inline">P(Y\mid do(X))</span> so that only <span class="math inline">Z</span> carries the <span class="math inline">do</span> (Bareinboim’s 2012 algorithm). Another is <strong>sequential treatments</strong>. A first treatment is randomised, and a second is given in response to the patient’s condition, which the first treatment affected. Wermuth and Cox wrote three papers on this “indirect confounding” problem and fell back on linear approximations. With do-calculus it takes a sequential version of the backdoor formula and three lines of algebra. <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span> A third is <strong>transportability</strong>: whether an effect found in one population carries over to another. That is taken up in <a href="../../content/05-causal-inference/sensitivity-and-external-validity.html#sec-transport-graphs">external validity</a>. <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span></p>
+<p><em>Where the idea came from.</em> Representing an intervention by deleting an equation goes back to Haavelmo (1943) and Strotz &amp; Wold (1960) in economics. Pearl credits Spirtes with first describing it as deleting arrows from a diagram. <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span> So the “graph surgery” above is an old econometric idea drawn as a picture.</p>
+</section>
 </section>
 <section id="sec-testing-dags" class="level2">
 <h2 class="anchored" data-anchor-id="sec-testing-dags">A graph you can test — and graphs you can’t tell apart</h2>
@@ -2415,6 +2433,7 @@ Figure&nbsp;1: Left: a DAG with both a confounder and a collider. The causal eff
 <li><p><strong>Treating a DAG as untestable.</strong> Every missing arrow implies a conditional independence you can check with a regression. Run those checks before you rely on the graph; a failed one tells you where it is wrong. <span class="citation" data-cites="pearl_primer">(<a href="#ref-pearl_primer" role="doc-biblioref">Pearl et al. 2016</a>)</span></p></li>
 <li><p><strong>Claiming an arrow’s direction from observational data alone.</strong> Chains and forks with the same links imply the same independencies. Only colliders without a link between their parents fix a direction; the rest needs an experiment or theory. <span class="citation" data-cites="pearl_primer">(<a href="#ref-pearl_primer" role="doc-biblioref">Pearl et al. 2016</a>)</span></p></li>
 <li><p><strong>Splitting by a variable you couldn’t adjust for.</strong> A subgroup effect is identified only if the grouping variable plus your controls satisfy the backdoor criterion. Split by a collider and the subgroup estimates are biased even when the overall estimate is fine. <span class="citation" data-cites="pearl_primer">(<a href="#ref-pearl_primer" role="doc-biblioref">Pearl et al. 2016</a>)</span></p></li>
+<li><p><strong>Concluding “not identified” because neither door fits.</strong> Failing the backdoor and front-door criteria does not mean the effect cannot be identified. The do-calculus, which is complete, may still find a route. Pearl himself could not find one by intuition for Bareinboim’s four-variable puzzle until he applied the rules. Only when the rules fail is an experiment, or a stronger assumption, the sole option. <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span></p></li>
 <li><p><strong>Confusing regression and path coefficients.</strong> A coefficient becomes causal only when the graph says the regression that produced it blocks the right paths. Adding a mediator turns a total effect into a direct effect, which answers a different question. <span class="citation" data-cites="pearl_primer">(<a href="#ref-pearl_primer" role="doc-biblioref">Pearl et al. 2016</a>)</span></p></li>
 </ul>
 </div>
@@ -2438,7 +2457,8 @@ Figure&nbsp;1: Left: a DAG with both a confounder and a collider. The causal eff
 <li><strong>Cunningham, <em>Causal Inference: The Mixtape</em></strong> — DAGs as a causal language bridging theory and econometrics; <strong>nodes/arrows</strong>, the meaning of a missing arrow, <strong>acyclicity</strong>, and the underlying <strong>structural causal model</strong>; the three structures — <strong>chain/mediator</strong> <span class="math inline">D\to M\to Y</span>, <strong>fork/confounder</strong> <span class="math inline">D\leftarrow Z\to Y</span>, <strong>collider</strong> <span class="math inline">D\to C\leftarrow Y</span>; <strong>paths</strong>, <strong>backdoor paths</strong>, open vs blocked and colliders as <strong>dams</strong> (d-separation); the <strong>backdoor criterion</strong>; over-control from conditioning on a <strong>mediator</strong> and selection bias from conditioning on a <strong>collider</strong>; the <strong>Google/occupation</strong> gender-gap example and the <strong>movie-star</strong> (beauty → star ← talent) collider.</li>
 <li><strong>Kaplan, <em>Lessons in Statistical Thinking</em></strong> — the intuitive on-ramp: a DAG as a <strong>network of causal influence</strong>, acyclicity as one-way deductive reasoning; a <strong>confounder</strong> as a variable that injects <strong>non-causal association</strong>; and <strong>adjustment</strong> (covariate adjustment) as the act of <strong>accounting for variation</strong> that <strong>blocks</strong> the confounding flow — the same move as regression’s “holding constant,” seen on the graph.</li>
 <li><strong>Pearl, Glymour &amp; Jewell, <em>Causal Inference in Statistics: A Primer</em></strong> — the <strong>do-operator</strong> <span class="math inline">do(x)</span> and intervention as <strong>graph surgery</strong> (erase arrows into <span class="math inline">X</span>); intervening (“changes the system”) vs conditioning (“narrows our focus”); the <strong>back-door</strong> criterion stated formally; and the <strong>front-door criterion</strong> with the <strong>smoking → tar → cancer</strong> example that deconfounds an unmeasured “smoking gene” — the “utter miracle.” <strong>§2.5 model testing and causal search:</strong> missing arrows as testable conditional independencies, checked by regression; local d-separation tests vs global likelihood tests (three weaknesses); equivalence classes (same skeleton and v-structures, after Verma &amp; Pearl 1990). <strong>§3.5:</strong> <span class="math inline">z</span>-specific effects and Rule 2 (the collider caveat); conditional policies <span class="math inline">do(X=g(Z))</span> evaluated from <span class="math inline">z</span>-specific effects (eq. 3.17). <strong>§3.6:</strong> inverse probability weighting derived from the adjustment formula, with the drug–gender worked example (weights 4.1 and 1.3, <span class="math inline">P(\text{recover}\mid do(\text{drug}))=0.833</span>), the backdoor requirement and the precision warning. <strong>§3.8:</strong> regression vs structural coefficients, path coefficients as direct effects, the sum-of-products rule for total effects (<span class="math inline">d+ec</span>), the <strong>regression rule for identification</strong>, and the instrument as a ratio of two regression slopes.</li>
-<li><strong>Pearl &amp; Mackenzie, <em>The Book of Why</em></strong> (Ch 2) — Sewall Wright’s 1920 path diagram as the first causal diagram; path coefficients read as variation explained then and as intervention effects now; the trace-and-multiply rule.</li>
+<li><strong>Pearl &amp; Mackenzie, <em>The Book of Why</em></strong> (Ch 2) — Sewall Wright’s 1920 path diagram as the first causal diagram; path coefficients read as variation explained then and as intervention effects now; the trace-and-multiply rule. <strong>Ch 7</strong> (“The do-calculus, or mind over matter”; “The tapestry of science”): the three rules (observation, action/observation exchange, action) on the Euclid model; the 1993 front-door “napkin problem” ($100 prize; Heckman &amp; Pinto’s eight-page 2015 proof); completeness (Shpitser; Huang &amp; Valtorta, UAI 2006); Tian’s c-decomposition and Shpitser’s polynomial-time algorithm; surrogate experiments (diet for cholesterol, Bareinboim 2012); Wermuth &amp; Cox’s sequential-treatment problem solved by a sequential backdoor; arrow deletion traced to Haavelmo (1943), Strotz &amp; Wold (1960) and Spirtes.</li>
+<li><strong>Our own work.</strong> The layout of the front-door derivation in the appendix (each step labelled by the rule that licenses it).</li>
 <li><strong>Our own work.</strong> The exact propensities (87/357 = 0.244, 263/343 = 0.767; the book prints 0.233 for the first), the <span class="math inline">do(\text{no drug})</span> value 0.779, and the simulation in the right panel of <a href="#fig-dag" class="quarto-xref">Figure&nbsp;1</a>.</li>
 </ul>
 </div>
@@ -2451,6 +2471,27 @@ Figure&nbsp;1: Left: a DAG with both a confounder and a collider. The causal eff
 <p><strong>The backdoor adjustment formula.</strong> If a set <span class="math inline">Z</span> satisfies the backdoor criterion for <span class="math inline">D\to Y</span>, the causal effect is identified by <em>conditioning then averaging over</em> <span class="math inline">Z</span>: <span class="math display">
 \Pr(Y\mid \operatorname{do}(D=d)) = \sum_{z}\Pr(Y\mid D=d, Z=z)\,\Pr(Z=z),
 </span> where <span class="math inline">\operatorname{do}(D=d)</span> denotes <em>setting</em> <span class="math inline">D</span> by intervention (not merely observing it). In means, <span class="math inline">\text{ATE}=\mathbb E_Z\big[\mathbb E[Y\mid D=1,Z]-\mathbb E[Y\mid D=0,Z]\big]</span> — exactly the <a href="../../content/05-causal-inference/matching-and-propensity-scores.html">subclassification estimator</a> of the next entry. The criterion is what <em>licenses</em> writing the causal <span class="math inline">\operatorname{do}</span>-probability as ordinary conditional probabilities you can estimate.</p>
+<p><strong>The three rules of the do-calculus</strong> (in the simplified form of <em>The Book of Why</em>; the full statements condition on extra variables and specify which arrows to delete): <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span> <span class="math display">
+\begin{aligned}
+\text{Rule 1:}\quad &amp; P(y\mid do(x),z,w)=P(y\mid do(x),z) &amp;&amp; \text{if } Z \text{ blocks every path } W\text{–}Y \text{ once arrows into } X \text{ are deleted;}\\
+\text{Rule 2:}\quad &amp; P(y\mid do(x),z)=P(y\mid x,z) &amp;&amp; \text{if } Z \text{ satisfies the backdoor criterion for } X\to Y;\\
+\text{Rule 3:}\quad &amp; P(y\mid do(x))=P(y) &amp;&amp; \text{if there is no directed path from } X \text{ to } Y.
+\end{aligned}
+</span></p>
+<blockquote class="blockquote">
+<p><strong>In plain words:</strong> Rule 1 lets you add or drop an observation, Rule 2 lets you swap doing for seeing, and Rule 3 lets you add or drop an intervention, each only when the graph allows it.</p>
+</blockquote>
+<p><strong>The front-door formula from the rules.</strong> In the smoking graph <span class="math inline">X\to Z\to Y</span> with <span class="math inline">X\leftarrow U\to Y</span> (the gene <span class="math inline">U</span> unobserved, tar <span class="math inline">Z</span> shielded from it): <span class="math display">
+\begin{aligned}
+P(y\mid do(x)) &amp;= \textstyle\sum_z P(y\mid do(x),z)\,P(z\mid do(x)) &amp;&amp; \text{(law of total probability)}\\
+P(z\mid do(x)) &amp;= P(z\mid x) &amp;&amp; \text{(Rule 2: no backdoor from } X \text{ to } Z)\\
+P(y\mid do(x),z) &amp;= P(y\mid do(x),do(z)) &amp;&amp; \text{(Rule 2: with } X \text{ fixed, } Z\text{'s backdoor via } X \text{ is blocked)}\\
+&amp;= P(y\mid do(z)) &amp;&amp; \text{(Rule 3: once } Z \text{ is fixed, } X \text{ has no remaining path to } Y)\\
+P(y\mid do(z)) &amp;= \textstyle\sum_{x'} P(y\mid z,x')\,P(x') &amp;&amp; \text{(backdoor adjustment for } Z\to Y \text{ via } X).
+\end{aligned}
+</span> Substituting gives the front-door adjustment formula <span class="math display">
+P(y\mid do(x))=\sum_z P(z\mid x)\sum_{x'}P(y\mid x',z)\,P(x').
+</span> Every factor on the right is an ordinary conditional probability. The book’s Figure 7.4 sets out this chain of rule applications. The layout above is ours. <span class="citation" data-cites="pearl_why">(<a href="#ref-pearl_why" role="doc-biblioref">Pearl and Mackenzie 2018</a>)</span></p>
 <p><strong>Why a collider induces dependence (algebra).</strong> Let <span class="math inline">D\perp Y</span> marginally and <span class="math inline">C=\alpha D+\beta
 Y+\varepsilon</span>. Then <span class="math inline">\operatorname{Cov}(D,Y)=0</span>, but conditional on <span class="math inline">C=c</span> we have <span class="math inline">\beta Y \approx c-\alpha D-\varepsilon</span>, so within a stratum of <span class="math inline">C</span> a higher <span class="math inline">D</span> forces a lower <span class="math inline">Y</span> — a <strong>nonzero conditional covariance</strong> created purely by conditioning. This is the same algebra as the <a href="../../content/03-regression/regression-and-causality.html">collider figure</a> in Part III, now located on the graph.</p>
 <p><strong>Acyclicity and solvability.</strong> Acyclicity guarantees the structural equations can be ordered topologically and solved recursively (each variable from its parents), so the joint distribution <strong>factorises</strong> as <span class="math inline">\prod_i \Pr(X_i\mid \text{parents}(X_i))</span> — the Markov factorisation that makes d-separation read off the graph correspond to real conditional independence in the data.</p>
@@ -3232,301 +3273,395 @@ Pearl, Judea, and Dana Mackenzie. 2018. <em>The Book of Why: The New Science of 
 <span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>"effect flows *only* through $Z$" assumption is demanding), but it is the proof that a credible **mechanism**</span>
 <span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>can rescue identification where adjustment alone is helpless.</span>
 <span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a><span class="fu">## A graph you can test — and graphs you can't tell apart {#sec-testing-dags}</span></span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a><span class="fu">### Beyond the two doors: the do-calculus {#sec-do-calculus}</span></span>
 <span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>A common complaint about DAGs is that they are "just assumptions". Half true. The arrows you draw are</span>
-<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>assumptions, but the arrows you *leave out* have consequences you can check in data. Every missing arrow</span>
-<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>implies that some pair of variables is independent once you hold the right others fixed, and d-separation</span>
-<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>tells you exactly which pairs and which others. Independence given a set is something data can contradict.</span>
-<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>Pearl's recipe is simple. List the conditional independencies the graph implies. For each one, run a</span>
-<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>regression. If the graph says $W$ and $Z_1$ are independent once you know $X$, regress $W$ on $X$ and $Z_1$.</span>
-<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>If the coefficient on $Z_1$ is clearly not zero, the graph is wrong, and you also know *where* it is wrong:</span>
-<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>there must be a path between $W$ and $Z_1$ that $X$ does not block. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> Run every such check</span>
-<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>and pass them all, and no further test of this kind can reject the model. Some set of functions and error</span>
-<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>distributions consistent with the graph could have produced exactly your data. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>**Local versus global tests.** The older approach, standard in</span>
-<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">structural equation modelling</span><span class="co">](../03-regression/structural-equation-models.qmd)</span>, fits the whole model and</span>
-<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>asks how likely the data are under it (Bollen 1989, as Pearl reports it). Pearl lists three weaknesses.</span>
-<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>If any parameter can't be estimated, nothing can be tested. A failed global test doesn't say which arrow</span>
-<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>to fix. And a test that involves many noisy variables at once is unreliable. Testing d-separations one at</span>
-<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>a time avoids all three. It makes no assumption about the functional form; it points to the faulty part</span>
-<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>of the graph; and an unidentified coefficient in one corner doesn't stop you testing the rest.</span>
-<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>**The limit: equivalence classes.** Tests can whittle down the possible graphs, but they can't always</span>
-<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>get to one. Two graphs have exactly the same testable implications when they share the same **skeleton**</span>
-<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a>(the same links, ignoring direction) and the same **v-structures** (colliders whose two parents are not</span>
-<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>linked to each other) (Verma &amp; Pearl 1990, as reported). <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> A chain $A\to B\to C$, the</span>
-<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>reversed chain $A\leftarrow B\leftarrow C$ and the fork $A\leftarrow B\to C$ all say the same thing, namely</span>
-<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>$A\perp C\mid B$, so no observational data can tell them apart. The collider $A\to B\leftarrow C$ says</span>
-<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a>something different ($A\perp C$ unconditionally, dependent given $B$), so *that* direction can be read</span>
-<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>from data. This is the starting point of **causal search**: begin with data, rule out every graph that</span>
-<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>fails a test, and keep the equivalence class that survives. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> It is also an honest statement</span>
-<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>of what observational data cannot do. Some arrows can only be oriented by an experiment or by theory.</span>
-<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a><span class="fu">## Effects for whom, and policies that depend on who {#sec-z-specific}</span></span>
-<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>Often you don't want one average effect. You want the effect of a drug *on the over-60s*, or the result of</span>
-<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>a rule that treats people *differently depending on* a characteristic. Pearl handles both with one tool,</span>
-<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>the **$z$-specific effect**: the distribution of $Y$ under $do(X=x)$ among people with $Z=z$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a>**Rule 2.** The $z$-specific effect is identified if you can find a set $S$ such that $S$ *together with*</span>
-<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>$Z$ satisfies the backdoor criterion. You then adjust for $S$ inside each $Z$ group. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> This</span>
-<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>is stricter than the ordinary criterion, and the reason is the collider lesson again. Splitting the</span>
-<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>sample by $Z$ conditions on $Z$. If $Z$ is a collider, conditioning on it opens a path that was closed,</span>
-<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>and a subgroup effect can be biased even though the overall effect was fine. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> "Break it</span>
-<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>down by subgroup" is not automatically safe. The variable you split by has to be one you could have</span>
-<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>adjusted for.</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>The backdoor and front-door criteria both do one job. They turn an expression containing $do(\cdot)$</span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>into one that contains only ordinary conditional probabilities, which you can estimate from</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>observational data. That raises a broader question. Are there other "doors", and can you tell</span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>**in advance**, from the graph alone, whether *any* route exists? Pearl's answer in *The Book of Why*</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>(Ch 7) is the **do-calculus**. He models it on Euclid's geometry: three rules play the part of axioms,</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>and every step of an argument must be licensed by one of them. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>In words, each rule grants one kind of permission, and the graph says when it applies: <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Rule 1: add or drop an observation.** If a variable $W$ tells you nothing more about $Y$ once you</span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>  know $Z$ (in the graph where the intervention has cut the arrows into $X$), you may ignore it. In a</span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>  chain Fire → Smoke → Alarm, once you know whether there is smoke, the fire adds nothing about the alarm.</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Rule 2: swap an intervention for an observation.** If $Z$ blocks every backdoor path from $X$ to</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>  $Y$, then *doing* $X$ and *seeing* $X$ give the same answer within levels of $Z$. This is the backdoor</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>  criterion written as a rule. (The *Primer*'s "Rule 2" for $z$-specific effects,</span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">below</span><span class="co">](#sec-z-specific)</span>, is a separate rule with the same number.)</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Rule 3: add or drop an intervention.** If there is no directed path from $X$ to $Y$, intervening</span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>  on $X$ leaves $Y$'s distribution unchanged.</span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>Pearl first derived the front-door formula by chaining these rules (the derivation is in the</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>appendix). He presented it as a challenge at a 1993 Berkeley seminar with a \$100 prize; Heckman and Pinto</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>proved it with "standard tools" in 2015, in eight pages. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span> Two results make the calculus more</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>than a notation:</span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Completeness.** Shpitser, and independently Huang and Valtorta, proved in 2006 that the three rules</span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>  are *enough*: if they cannot remove every $do$, **no method can**. The model's assumptions are then</span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>  too weak to answer the question from observational data, and only an experiment (or stronger</span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>  assumptions) will. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**An algorithm.** A calculus checks a proof well but does not find one. Shpitser, building on Jin</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>  Tian's c-decomposition, gave an efficient (polynomial-time) procedure that decides whether a</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>  route exists and finds it. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>The rules also handle questions that an "is it identified?" algorithm alone does not. One is **surrogate</span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>experiments**. If you cannot set cholesterol $X$ directly, can randomising diet $Z$ answer the question?</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>That means rewriting $P(Y\mid do(X))$ so that only $Z$ carries the $do$ (Bareinboim's 2012 algorithm).</span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>Another is **sequential treatments**. A first treatment is randomised, and a second is given in response to</span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>the patient's condition, which the first treatment affected. Wermuth and Cox wrote three papers on this</span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>"indirect confounding" problem and fell back on linear approximations. With do-calculus it takes a</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a>sequential version of the backdoor formula and three lines of algebra. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span> A third is</span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a>**transportability**: whether an effect found in one population carries over to another. That is taken up in</span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">external validity</span><span class="co">](sensitivity-and-external-validity.qmd#sec-transport-graphs)</span>. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>*Where the idea came from.* Representing an intervention by deleting an equation goes back to Haavelmo</span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>(1943) and Strotz &amp; Wold (1960) in economics. Pearl credits Spirtes with first describing it as</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>deleting arrows from a diagram. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span> So the "graph surgery" above is an old econometric idea</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>drawn as a picture.</span>
 <span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>**Conditional policies.** Suppose a doctor gives a drug only to patients whose temperature exceeds a</span>
-<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a>threshold, or a dose that depends on age. Write the rule as $x=g(z)$. Its effect follows from the</span>
-<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a>$z$-specific effects: for each group, plug in the treatment the rule would assign, then average over the</span>
-<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a>groups using the population's own distribution of $Z$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> This works because $Z$ is</span>
-<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a>measured *before* treatment, so the rule can't change who falls in which group. Once you can identify</span>
-<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a>effects by group, you can evaluate any rule built from them, which links this entry to the targeting</span>
-<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>questions in <span class="co">[</span><span class="ot">heterogeneous effects</span><span class="co">](heterogeneous-effects-in-experiments.qmd)</span>.</span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a><span class="fu">## A graph you can test — and graphs you can't tell apart {#sec-testing-dags}</span></span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a>A common complaint about DAGs is that they are "just assumptions". Half true. The arrows you draw are</span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a>assumptions, but the arrows you *leave out* have consequences you can check in data. Every missing arrow</span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a>implies that some pair of variables is independent once you hold the right others fixed, and d-separation</span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a>tells you exactly which pairs and which others. Independence given a set is something data can contradict.</span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
 <span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reweighting instead of stratifying {#sec-ipw-graph}</span></span>
-<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a>The adjustment formula says: split by $Z$, compare within each stratum, average. With dozens of</span>
-<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>covariates there are more strata than people, and most cells are empty. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> **Inverse</span>
-<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>probability weighting** reaches the same answer by a different route. Estimate the **propensity score**</span>
-<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>$P(X=x\mid Z=z)$, then weight each person by its inverse. People who received a treatment that was</span>
-<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a>*unlikely* for someone like them count more, because they stand in for the many similar people who</span>
-<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>didn't. The reweighted sample looks as if treatment had been assigned independently of $Z$, which is</span>
-<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a>what a randomised trial does. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a>Pearl's demonstration reuses the drug–gender–recovery data behind</span>
-<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Simpson's paradox</span><span class="co">](../01-foundations/famous-paradoxes.qmd)</span> (700 patients). Among those who took the drug, 78% recovered; among those who didn't, 83%. The drug looks</span>
-<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a>harmful. But men were much more likely to recover and much *less* likely to take the drug. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="pp">|</span> Took the drug <span class="pp">|</span> Share of the group that took it <span class="pp">|</span> Weight $1/P(X=\text{yes}\mid Z)$ <span class="pp">|</span></span>
-<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|</span></span>
-<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Men (357) <span class="pp">|</span> 87 (81 recovered) <span class="pp">|</span> 87/357 = 0.244 <span class="pp">|</span> 4.10 <span class="pp">|</span></span>
-<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Women (343) <span class="pp">|</span> 263 (192 recovered) <span class="pp">|</span> 263/343 = 0.767 <span class="pp">|</span> 1.30 <span class="pp">|</span></span>
-<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a>Weighting the treated men up by about 4.1 and the treated women by about 1.3 gives</span>
-<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a>$P(\text{recover}\mid do(\text{drug}))\approx 0.832$. The same calculation for the untreated gives about</span>
-<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>0.779. So the drug *helps*, by roughly 5 percentage points, the reverse of the raw comparison and the</span>
-<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a>same answer the stratified adjustment gives. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> (The book prints the men's propensity as</span>
-<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a>0.233. The exact value from its own table is 87/357 = 0.244, which is the value its later numbers use, so</span>
-<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a>the slip doesn't change the result. Our arithmetic.)</span>
-<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a>Two warnings come with it. IPW is only valid if the weighting set satisfies the backdoor criterion.</span>
-<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a>Weight on the wrong variables and you can do worse than the naive comparison. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> And getting</span>
-<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a>the right answer on average is not the same as getting a precise one. If most people are near the</span>
-<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a>extremes of treatment, IPW rests on the few in the middle and the estimate becomes very noisy.</span>
-<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> The estimation details, including trimming and common support, are in</span>
-<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">matching &amp; propensity scores</span><span class="co">](matching-and-propensity-scores.qmd)</span>.</span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>Pearl's recipe is simple. List the conditional independencies the graph implies. For each one, run a</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>regression. If the graph says $W$ and $Z_1$ are independent once you know $X$, regress $W$ on $X$ and $Z_1$.</span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a>If the coefficient on $Z_1$ is clearly not zero, the graph is wrong, and you also know *where* it is wrong:</span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>there must be a path between $W$ and $Z_1$ that $X$ does not block. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> Run every such check</span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>and pass them all, and no further test of this kind can reject the model. Some set of functions and error</span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>distributions consistent with the graph could have produced exactly your data. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>**Local versus global tests.** The older approach, standard in</span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">structural equation modelling</span><span class="co">](../03-regression/structural-equation-models.qmd)</span>, fits the whole model and</span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a>asks how likely the data are under it (Bollen 1989, as Pearl reports it). Pearl lists three weaknesses.</span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a>If any parameter can't be estimated, nothing can be tested. A failed global test doesn't say which arrow</span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a>to fix. And a test that involves many noisy variables at once is unreliable. Testing d-separations one at</span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a>a time avoids all three. It makes no assumption about the functional form; it points to the faulty part</span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a>of the graph; and an unidentified coefficient in one corner doesn't stop you testing the rest.</span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a>**The limit: equivalence classes.** Tests can whittle down the possible graphs, but they can't always</span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a>get to one. Two graphs have exactly the same testable implications when they share the same **skeleton**</span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a>(the same links, ignoring direction) and the same **v-structures** (colliders whose two parents are not</span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a>linked to each other) (Verma &amp; Pearl 1990, as reported). <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> A chain $A\to B\to C$, the</span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a>reversed chain $A\leftarrow B\leftarrow C$ and the fork $A\leftarrow B\to C$ all say the same thing, namely</span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a>$A\perp C\mid B$, so no observational data can tell them apart. The collider $A\to B\leftarrow C$ says</span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a>something different ($A\perp C$ unconditionally, dependent given $B$), so *that* direction can be read</span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a>from data. This is the starting point of **causal search**: begin with data, rule out every graph that</span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a>fails a test, and keep the equivalence class that survives. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> It is also an honest statement</span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a>of what observational data cannot do. Some arrows can only be oriented by an experiment or by theory.</span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a><span class="fu">## Effects for whom, and policies that depend on who {#sec-z-specific}</span></span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a>Often you don't want one average effect. You want the effect of a drug *on the over-60s*, or the result of</span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a>a rule that treats people *differently depending on* a characteristic. Pearl handles both with one tool,</span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a>the **$z$-specific effect**: the distribution of $Y$ under $do(X=x)$ among people with $Z=z$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
 <span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a><span class="fu">## Linear graphs: path coefficients and the regression rule {#sec-linear-graphs}</span></span>
-<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a>Most applied social science fits linear models, and in a linear world the graph tells you *which</span>
-<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a>regression to run*. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> Two kinds of coefficient have to be kept apart:</span>
-<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A **regression coefficient** describes the data. $y=r_1x+r_2z+\epsilon$ is just the best linear</span>
-<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a>  approximation, and says nothing about causes. Its error $\epsilon$ is whatever is left after fitting.</span>
-<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A **path (structural) coefficient** describes the mechanism. If $Y=3X+U_Y$, the arrow $X\to Y$ carries</span>
-<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a>  coefficient 3, and $U_Y$ stands for real omitted causes of $Y$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a>Three results follow, each derived on the graph. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Every path coefficient is a direct effect.** Raise $X$ by one with $Y$'s other parents held fixed</span>
-<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a>   and $Y$ moves by the coefficient on $X\to Y$. This holds whether or not the errors are correlated.</span>
-<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a>   Correlated errors make the coefficient harder to *estimate*, but they don't change what it *means*.</span>
-<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**The total effect is the sum over causal paths of the product of coefficients.** In Pearl's</span>
-<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a>   four-variable example ($X\to Z$, $X\to W$, $Z\to W$, $Z\to Y$, $W\to Y$), the total effect of $Z$ on</span>
-<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a>   $Y$ is $d+ec$: the direct arrow $d$, plus $c$ times $e$ through $W$. Tracing paths and multiplying</span>
-<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a>   coefficients goes back to Sewall Wright's path diagrams of 1920, the first causal diagrams published.</span>
-<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a>   Wright read a coefficient as variation explained; the modern reading is the result of an intervention,</span>
-<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a>   and in his simple models the two agree. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span> Path analysis is the ancestor of</span>
-<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>   <span class="co">[</span><span class="ot">structural equation models</span><span class="co">](../03-regression/structural-equation-models.qmd)</span>.</span>
-<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**The regression rule for identification.** To estimate the coefficient on $X\to Y$, delete that one</span>
-<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a>   arrow from the graph. If some set of measured variables d-separates $X$ from $Y$ in the reduced graph,</span>
-<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a>   regress $Y$ on $X$ and that set. The coefficient on $X$ is the path coefficient. For the *total*</span>
-<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a>   effect, use a backdoor set instead, and leave mediators out.</span>
-<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a>The regression rule takes the guesswork out of choosing controls. In the example, to get the total effect</span>
-<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a>of $Z$, control for $X$ (it blocks the backdoor $Z\leftarrow X\to W\to Y$) and leave $W$ out. To get the</span>
-<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a>direct effect $d$, control for $W$, which blocks both the causal route through $W$ and the backdoor.</span>
-<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a>Pearl remarks that this procedure "eluded investigators for almost a century", probably because it is</span>
-<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a>very hard to state without the graph. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a>**When no set works: the instrument.** If an unmeasured common cause links $X$ and $Y$, no set</span>
-<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a>d-separates them. But a variable $Z$ that is connected to $X$ and d-separated from $Y$ once the $X\to Y$</span>
-<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a>arrow is removed is an **instrument**. Regress $X$ on $Z$ (slope $\beta$) and $Y$ on $Z$ (slope</span>
-<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a>$\alpha\beta$, the total effect of $Z$). The ratio of the two slopes is $\alpha$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> That is</span>
-<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a>the graphical derivation of the Wald estimator in <span class="co">[</span><span class="ot">instrumental variables</span><span class="co">](instrumental-variables.qmd)</span>.</span>
-<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a>It also shows something general: you can get a direct effect from total effects, but not the other way</span>
-<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a>round.</span>
-<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a>The right panel of @fig-dag runs these regressions on simulated data from Pearl's four-variable model.</span>
-<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a>Each regression the graph recommends recovers its target. The naive regression doesn't, and the model's</span>
-<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a>testable implication ($Y\perp X$ given $Z$ and $W$) passes on data from the true graph and fails on data</span>
-<span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a>from a graph with an extra arrow.</span>
-<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
-<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
-<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**"Control for everything you have."** Each control can *close* a backdoor *or open a collider*.</span>
-<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a>  Conditioning is surgery, not insurance. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Conditioning on a collider (or its descendant).** It creates association from nothing — the</span>
-<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a>  subtlest bias in applied work, and invisible to $R^2$ or significance. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Controlling for a mediator when you want the total effect.** You block the channel you meant to</span>
-<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a>  measure and under-state the effect. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a>**Rule 2.** The $z$-specific effect is identified if you can find a set $S$ such that $S$ *together with*</span>
+<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a>$Z$ satisfies the backdoor criterion. You then adjust for $S$ inside each $Z$ group. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> This</span>
+<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a>is stricter than the ordinary criterion, and the reason is the collider lesson again. Splitting the</span>
+<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a>sample by $Z$ conditions on $Z$. If $Z$ is a collider, conditioning on it opens a path that was closed,</span>
+<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a>and a subgroup effect can be biased even though the overall effect was fine. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> "Break it</span>
+<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a>down by subgroup" is not automatically safe. The variable you split by has to be one you could have</span>
+<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a>adjusted for.</span>
+<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a>**Conditional policies.** Suppose a doctor gives a drug only to patients whose temperature exceeds a</span>
+<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a>threshold, or a dose that depends on age. Write the rule as $x=g(z)$. Its effect follows from the</span>
+<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a>$z$-specific effects: for each group, plug in the treatment the rule would assign, then average over the</span>
+<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a>groups using the population's own distribution of $Z$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> This works because $Z$ is</span>
+<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a>measured *before* treatment, so the rule can't change who falls in which group. Once you can identify</span>
+<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a>effects by group, you can evaluate any rule built from them, which links this entry to the targeting</span>
+<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a>questions in <span class="co">[</span><span class="ot">heterogeneous effects</span><span class="co">](heterogeneous-effects-in-experiments.qmd)</span>.</span>
+<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reweighting instead of stratifying {#sec-ipw-graph}</span></span>
+<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a>The adjustment formula says: split by $Z$, compare within each stratum, average. With dozens of</span>
+<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a>covariates there are more strata than people, and most cells are empty. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> **Inverse</span>
+<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a>probability weighting** reaches the same answer by a different route. Estimate the **propensity score**</span>
+<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>$P(X=x\mid Z=z)$, then weight each person by its inverse. People who received a treatment that was</span>
+<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a>*unlikely* for someone like them count more, because they stand in for the many similar people who</span>
+<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a>didn't. The reweighted sample looks as if treatment had been assigned independently of $Z$, which is</span>
+<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a>what a randomised trial does. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a>Pearl's demonstration reuses the drug–gender–recovery data behind</span>
+<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Simpson's paradox</span><span class="co">](../01-foundations/famous-paradoxes.qmd)</span> (700 patients). Among those who took the drug, 78% recovered; among those who didn't, 83%. The drug looks</span>
+<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a>harmful. But men were much more likely to recover and much *less* likely to take the drug. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="pp">|</span> Took the drug <span class="pp">|</span> Share of the group that took it <span class="pp">|</span> Weight $1/P(X=\text{yes}\mid Z)$ <span class="pp">|</span></span>
+<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|</span></span>
+<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Men (357) <span class="pp">|</span> 87 (81 recovered) <span class="pp">|</span> 87/357 = 0.244 <span class="pp">|</span> 4.10 <span class="pp">|</span></span>
+<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Women (343) <span class="pp">|</span> 263 (192 recovered) <span class="pp">|</span> 263/343 = 0.767 <span class="pp">|</span> 1.30 <span class="pp">|</span></span>
+<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a>Weighting the treated men up by about 4.1 and the treated women by about 1.3 gives</span>
+<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a>$P(\text{recover}\mid do(\text{drug}))\approx 0.832$. The same calculation for the untreated gives about</span>
+<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a>0.779. So the drug *helps*, by roughly 5 percentage points, the reverse of the raw comparison and the</span>
+<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a>same answer the stratified adjustment gives. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> (The book prints the men's propensity as</span>
+<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a>0.233. The exact value from its own table is 87/357 = 0.244, which is the value its later numbers use, so</span>
+<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a>the slip doesn't change the result. Our arithmetic.)</span>
+<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a>Two warnings come with it. IPW is only valid if the weighting set satisfies the backdoor criterion.</span>
+<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a>Weight on the wrong variables and you can do worse than the naive comparison. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> And getting</span>
+<span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a>the right answer on average is not the same as getting a precise one. If most people are near the</span>
+<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a>extremes of treatment, IPW rests on the few in the middle and the estimate becomes very noisy.</span>
+<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> The estimation details, including trimming and common support, are in</span>
+<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">matching &amp; propensity scores</span><span class="co">](matching-and-propensity-scores.qmd)</span>.</span>
+<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a><span class="fu">## Linear graphs: path coefficients and the regression rule {#sec-linear-graphs}</span></span>
+<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a>Most applied social science fits linear models, and in a linear world the graph tells you *which</span>
+<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a>regression to run*. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> Two kinds of coefficient have to be kept apart:</span>
+<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A **regression coefficient** describes the data. $y=r_1x+r_2z+\epsilon$ is just the best linear</span>
+<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a>  approximation, and says nothing about causes. Its error $\epsilon$ is whatever is left after fitting.</span>
+<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A **path (structural) coefficient** describes the mechanism. If $Y=3X+U_Y$, the arrow $X\to Y$ carries</span>
+<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a>  coefficient 3, and $U_Y$ stands for real omitted causes of $Y$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
 <span id="cb2-413"><a href="#cb2-413" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Drawing the DAG to fit the result.** The graph encodes *assumptions*; its missing arrows are</span>
-<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a>  claims. Draw it from theory, before estimation, and defend the absences. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Believing a DAG removes unobserved confounding.** It only tells you what to condition on *given*</span>
-<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a>  the assumed structure; an omitted common cause you didn't draw is still a backdoor left open.</span>
-<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
-<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating a DAG as untestable.** Every missing arrow implies a conditional independence you can check</span>
-<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a>  with a regression. Run those checks before you rely on the graph; a failed one tells you where it is</span>
-<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a>  wrong. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-424"><a href="#cb2-424" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Claiming an arrow's direction from observational data alone.** Chains and forks with the same links</span>
-<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a>  imply the same independencies. Only colliders without a link between their parents fix a direction;</span>
-<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a>  the rest needs an experiment or theory. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-428"><a href="#cb2-428" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-429"><a href="#cb2-429" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Splitting by a variable you couldn't adjust for.** A subgroup effect is identified only if the</span>
-<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a>  grouping variable plus your controls satisfy the backdoor criterion. Split by a collider and the</span>
-<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a>  subgroup estimates are biased even when the overall estimate is fine. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing regression and path coefficients.** A coefficient becomes causal only when the graph says</span>
-<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a>  the regression that produced it blocks the right paths. Adding a mediator turns a total effect into a</span>
-<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a>  direct effect, which answers a different question. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a>Three results follow, each derived on the graph. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Every path coefficient is a direct effect.** Raise $X$ by one with $Y$'s other parents held fixed</span>
+<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a>   and $Y$ moves by the coefficient on $X\to Y$. This holds whether or not the errors are correlated.</span>
+<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a>   Correlated errors make the coefficient harder to *estimate*, but they don't change what it *means*.</span>
+<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**The total effect is the sum over causal paths of the product of coefficients.** In Pearl's</span>
+<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a>   four-variable example ($X\to Z$, $X\to W$, $Z\to W$, $Z\to Y$, $W\to Y$), the total effect of $Z$ on</span>
+<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a>   $Y$ is $d+ec$: the direct arrow $d$, plus $c$ times $e$ through $W$. Tracing paths and multiplying</span>
+<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a>   coefficients goes back to Sewall Wright's path diagrams of 1920, the first causal diagrams published.</span>
+<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a>   Wright read a coefficient as variation explained; the modern reading is the result of an intervention,</span>
+<span id="cb2-424"><a href="#cb2-424" aria-hidden="true" tabindex="-1"></a>   and in his simple models the two agree. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span> Path analysis is the ancestor of</span>
+<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a>   <span class="co">[</span><span class="ot">structural equation models</span><span class="co">](../03-regression/structural-equation-models.qmd)</span>.</span>
+<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**The regression rule for identification.** To estimate the coefficient on $X\to Y$, delete that one</span>
+<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a>   arrow from the graph. If some set of measured variables d-separates $X$ from $Y$ in the reduced graph,</span>
+<span id="cb2-428"><a href="#cb2-428" aria-hidden="true" tabindex="-1"></a>   regress $Y$ on $X$ and that set. The coefficient on $X$ is the path coefficient. For the *total*</span>
+<span id="cb2-429"><a href="#cb2-429" aria-hidden="true" tabindex="-1"></a>   effect, use a backdoor set instead, and leave mediators out.</span>
+<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a>The regression rule takes the guesswork out of choosing controls. In the example, to get the total effect</span>
+<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a>of $Z$, control for $X$ (it blocks the backdoor $Z\leftarrow X\to W\to Y$) and leave $W$ out. To get the</span>
+<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a>direct effect $d$, control for $W$, which blocks both the causal route through $W$ and the backdoor.</span>
+<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a>Pearl remarks that this procedure "eluded investigators for almost a century", probably because it is</span>
+<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a>very hard to state without the graph. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
 <span id="cb2-436"><a href="#cb2-436" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-438"><a href="#cb2-438" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-439"><a href="#cb2-439" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
-<span id="cb2-440"><a href="#cb2-440" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-441"><a href="#cb2-441" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-442"><a href="#cb2-442" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *Causal Inference: The Mixtape*** — DAGs as a causal language bridging theory and</span>
-<span id="cb2-443"><a href="#cb2-443" aria-hidden="true" tabindex="-1"></a>  econometrics; **nodes/arrows**, the meaning of a missing arrow, **acyclicity**, and the underlying</span>
-<span id="cb2-444"><a href="#cb2-444" aria-hidden="true" tabindex="-1"></a>  **structural causal model**; the three structures — **chain/mediator** $D\to M\to Y$,</span>
-<span id="cb2-445"><a href="#cb2-445" aria-hidden="true" tabindex="-1"></a>  **fork/confounder** $D\leftarrow Z\to Y$, **collider** $D\to C\leftarrow Y$; **paths**, **backdoor</span>
-<span id="cb2-446"><a href="#cb2-446" aria-hidden="true" tabindex="-1"></a>  paths**, open vs blocked and colliders as **dams** (d-separation); the **backdoor criterion**;</span>
-<span id="cb2-447"><a href="#cb2-447" aria-hidden="true" tabindex="-1"></a>  over-control from conditioning on a **mediator** and selection bias from conditioning on a</span>
-<span id="cb2-448"><a href="#cb2-448" aria-hidden="true" tabindex="-1"></a>  **collider**; the **Google/occupation** gender-gap example and the **movie-star** (beauty → star ←</span>
-<span id="cb2-449"><a href="#cb2-449" aria-hidden="true" tabindex="-1"></a>  talent) collider.</span>
-<span id="cb2-450"><a href="#cb2-450" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Kaplan, *Lessons in Statistical Thinking*** — the intuitive on-ramp: a DAG as a **network of</span>
-<span id="cb2-451"><a href="#cb2-451" aria-hidden="true" tabindex="-1"></a>  causal influence**, acyclicity as one-way deductive reasoning; a **confounder** as a variable that</span>
-<span id="cb2-452"><a href="#cb2-452" aria-hidden="true" tabindex="-1"></a>  injects **non-causal association**; and **adjustment** (covariate adjustment) as the act of</span>
-<span id="cb2-453"><a href="#cb2-453" aria-hidden="true" tabindex="-1"></a>  **accounting for variation** that **blocks** the confounding flow — the same move as regression's</span>
-<span id="cb2-454"><a href="#cb2-454" aria-hidden="true" tabindex="-1"></a>  "holding constant," seen on the graph.</span>
-<span id="cb2-455"><a href="#cb2-455" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pearl, Glymour &amp; Jewell, *Causal Inference in Statistics: A Primer*** — the **do-operator**</span>
-<span id="cb2-456"><a href="#cb2-456" aria-hidden="true" tabindex="-1"></a>  $do(x)$ and intervention as **graph surgery** (erase arrows into $X$); intervening ("changes the</span>
-<span id="cb2-457"><a href="#cb2-457" aria-hidden="true" tabindex="-1"></a>  system") vs conditioning ("narrows our focus"); the **back-door** criterion stated formally; and the</span>
-<span id="cb2-458"><a href="#cb2-458" aria-hidden="true" tabindex="-1"></a>  **front-door criterion** with the **smoking → tar → cancer** example that deconfounds an unmeasured</span>
-<span id="cb2-459"><a href="#cb2-459" aria-hidden="true" tabindex="-1"></a>  "smoking gene" — the "utter miracle." **§2.5 model testing and causal search:** missing arrows as</span>
-<span id="cb2-460"><a href="#cb2-460" aria-hidden="true" tabindex="-1"></a>  testable conditional independencies, checked by regression; local d-separation tests vs global</span>
-<span id="cb2-461"><a href="#cb2-461" aria-hidden="true" tabindex="-1"></a>  likelihood tests (three weaknesses); equivalence classes (same skeleton and v-structures, after Verma &amp;</span>
-<span id="cb2-462"><a href="#cb2-462" aria-hidden="true" tabindex="-1"></a>  Pearl 1990). **§3.5:** $z$-specific effects and Rule 2 (the collider caveat); conditional policies</span>
-<span id="cb2-463"><a href="#cb2-463" aria-hidden="true" tabindex="-1"></a>  $do(X=g(Z))$ evaluated from $z$-specific effects (eq. 3.17). **§3.6:** inverse probability weighting</span>
-<span id="cb2-464"><a href="#cb2-464" aria-hidden="true" tabindex="-1"></a>  derived from the adjustment formula, with the drug–gender worked example (weights 4.1 and 1.3,</span>
-<span id="cb2-465"><a href="#cb2-465" aria-hidden="true" tabindex="-1"></a>  $P(\text{recover}\mid do(\text{drug}))=0.833$), the backdoor requirement and the precision warning.</span>
-<span id="cb2-466"><a href="#cb2-466" aria-hidden="true" tabindex="-1"></a>  **§3.8:** regression vs structural coefficients, path coefficients as direct effects, the</span>
-<span id="cb2-467"><a href="#cb2-467" aria-hidden="true" tabindex="-1"></a>  sum-of-products rule for total effects ($d+ec$), the **regression rule for identification**, and the</span>
-<span id="cb2-468"><a href="#cb2-468" aria-hidden="true" tabindex="-1"></a>  instrument as a ratio of two regression slopes.</span>
-<span id="cb2-469"><a href="#cb2-469" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pearl &amp; Mackenzie, *The Book of Why*** (Ch 2) — Sewall Wright's 1920 path diagram as the first</span>
-<span id="cb2-470"><a href="#cb2-470" aria-hidden="true" tabindex="-1"></a>  causal diagram; path coefficients read as variation explained then and as intervention effects now;</span>
-<span id="cb2-471"><a href="#cb2-471" aria-hidden="true" tabindex="-1"></a>  the trace-and-multiply rule.</span>
-<span id="cb2-472"><a href="#cb2-472" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Our own work.** The exact propensities (87/357 = 0.244, 263/343 = 0.767; the book prints 0.233 for the</span>
-<span id="cb2-473"><a href="#cb2-473" aria-hidden="true" tabindex="-1"></a>  first), the $do(\text{no drug})$ value 0.779, and the simulation in the right panel of @fig-dag.</span>
-<span id="cb2-474"><a href="#cb2-474" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-475"><a href="#cb2-475" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-476"><a href="#cb2-476" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a>**When no set works: the instrument.** If an unmeasured common cause links $X$ and $Y$, no set</span>
+<span id="cb2-438"><a href="#cb2-438" aria-hidden="true" tabindex="-1"></a>d-separates them. But a variable $Z$ that is connected to $X$ and d-separated from $Y$ once the $X\to Y$</span>
+<span id="cb2-439"><a href="#cb2-439" aria-hidden="true" tabindex="-1"></a>arrow is removed is an **instrument**. Regress $X$ on $Z$ (slope $\beta$) and $Y$ on $Z$ (slope</span>
+<span id="cb2-440"><a href="#cb2-440" aria-hidden="true" tabindex="-1"></a>$\alpha\beta$, the total effect of $Z$). The ratio of the two slopes is $\alpha$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> That is</span>
+<span id="cb2-441"><a href="#cb2-441" aria-hidden="true" tabindex="-1"></a>the graphical derivation of the Wald estimator in <span class="co">[</span><span class="ot">instrumental variables</span><span class="co">](instrumental-variables.qmd)</span>.</span>
+<span id="cb2-442"><a href="#cb2-442" aria-hidden="true" tabindex="-1"></a>It also shows something general: you can get a direct effect from total effects, but not the other way</span>
+<span id="cb2-443"><a href="#cb2-443" aria-hidden="true" tabindex="-1"></a>round.</span>
+<span id="cb2-444"><a href="#cb2-444" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-445"><a href="#cb2-445" aria-hidden="true" tabindex="-1"></a>The right panel of @fig-dag runs these regressions on simulated data from Pearl's four-variable model.</span>
+<span id="cb2-446"><a href="#cb2-446" aria-hidden="true" tabindex="-1"></a>Each regression the graph recommends recovers its target. The naive regression doesn't, and the model's</span>
+<span id="cb2-447"><a href="#cb2-447" aria-hidden="true" tabindex="-1"></a>testable implication ($Y\perp X$ given $Z$ and $W$) passes on data from the true graph and fails on data</span>
+<span id="cb2-448"><a href="#cb2-448" aria-hidden="true" tabindex="-1"></a>from a graph with an extra arrow.</span>
+<span id="cb2-449"><a href="#cb2-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-450"><a href="#cb2-450" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
+<span id="cb2-451"><a href="#cb2-451" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-452"><a href="#cb2-452" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
+<span id="cb2-453"><a href="#cb2-453" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-454"><a href="#cb2-454" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**"Control for everything you have."** Each control can *close* a backdoor *or open a collider*.</span>
+<span id="cb2-455"><a href="#cb2-455" aria-hidden="true" tabindex="-1"></a>  Conditioning is surgery, not insurance. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-456"><a href="#cb2-456" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-457"><a href="#cb2-457" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Conditioning on a collider (or its descendant).** It creates association from nothing — the</span>
+<span id="cb2-458"><a href="#cb2-458" aria-hidden="true" tabindex="-1"></a>  subtlest bias in applied work, and invisible to $R^2$ or significance. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-459"><a href="#cb2-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-460"><a href="#cb2-460" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Controlling for a mediator when you want the total effect.** You block the channel you meant to</span>
+<span id="cb2-461"><a href="#cb2-461" aria-hidden="true" tabindex="-1"></a>  measure and under-state the effect. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-462"><a href="#cb2-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-463"><a href="#cb2-463" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Drawing the DAG to fit the result.** The graph encodes *assumptions*; its missing arrows are</span>
+<span id="cb2-464"><a href="#cb2-464" aria-hidden="true" tabindex="-1"></a>  claims. Draw it from theory, before estimation, and defend the absences. <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-465"><a href="#cb2-465" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-466"><a href="#cb2-466" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Believing a DAG removes unobserved confounding.** It only tells you what to condition on *given*</span>
+<span id="cb2-467"><a href="#cb2-467" aria-hidden="true" tabindex="-1"></a>  the assumed structure; an omitted common cause you didn't draw is still a backdoor left open.</span>
+<span id="cb2-468"><a href="#cb2-468" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">@cunningham_mixtape</span><span class="co">]</span></span>
+<span id="cb2-469"><a href="#cb2-469" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-470"><a href="#cb2-470" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating a DAG as untestable.** Every missing arrow implies a conditional independence you can check</span>
+<span id="cb2-471"><a href="#cb2-471" aria-hidden="true" tabindex="-1"></a>  with a regression. Run those checks before you rely on the graph; a failed one tells you where it is</span>
+<span id="cb2-472"><a href="#cb2-472" aria-hidden="true" tabindex="-1"></a>  wrong. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-473"><a href="#cb2-473" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-474"><a href="#cb2-474" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Claiming an arrow's direction from observational data alone.** Chains and forks with the same links</span>
+<span id="cb2-475"><a href="#cb2-475" aria-hidden="true" tabindex="-1"></a>  imply the same independencies. Only colliders without a link between their parents fix a direction;</span>
+<span id="cb2-476"><a href="#cb2-476" aria-hidden="true" tabindex="-1"></a>  the rest needs an experiment or theory. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
 <span id="cb2-477"><a href="#cb2-477" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-478"><a href="#cb2-478" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
-<span id="cb2-479"><a href="#cb2-479" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-480"><a href="#cb2-480" aria-hidden="true" tabindex="-1"></a>**The backdoor adjustment formula.** If a set $Z$ satisfies the backdoor criterion for $D\to Y$, the</span>
-<span id="cb2-481"><a href="#cb2-481" aria-hidden="true" tabindex="-1"></a>causal effect is identified by *conditioning then averaging over* $Z$:</span>
-<span id="cb2-482"><a href="#cb2-482" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-483"><a href="#cb2-483" aria-hidden="true" tabindex="-1"></a>\Pr(Y\mid \operatorname{do}(D=d)) = \sum_{z}\Pr(Y\mid D=d, Z=z)\,\Pr(Z=z),</span>
-<span id="cb2-484"><a href="#cb2-484" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-485"><a href="#cb2-485" aria-hidden="true" tabindex="-1"></a>where $\operatorname{do}(D=d)$ denotes *setting* $D$ by intervention (not merely observing it). In</span>
-<span id="cb2-486"><a href="#cb2-486" aria-hidden="true" tabindex="-1"></a>means, $\text{ATE}=\mathbb E_Z\big<span class="co">[</span><span class="ot">\mathbb E[Y\mid D=1,Z]-\mathbb E[Y\mid D=0,Z]\big</span><span class="co">]</span>$ — exactly the</span>
-<span id="cb2-487"><a href="#cb2-487" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">subclassification estimator</span><span class="co">](matching-and-propensity-scores.qmd)</span> of the next entry. The criterion is</span>
-<span id="cb2-488"><a href="#cb2-488" aria-hidden="true" tabindex="-1"></a>what *licenses* writing the causal $\operatorname{do}$-probability as ordinary conditional</span>
-<span id="cb2-489"><a href="#cb2-489" aria-hidden="true" tabindex="-1"></a>probabilities you can estimate.</span>
-<span id="cb2-490"><a href="#cb2-490" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-491"><a href="#cb2-491" aria-hidden="true" tabindex="-1"></a>**Why a collider induces dependence (algebra).** Let $D\perp Y$ marginally and $C=\alpha D+\beta</span>
-<span id="cb2-492"><a href="#cb2-492" aria-hidden="true" tabindex="-1"></a>Y+\varepsilon$. Then $\operatorname{Cov}(D,Y)=0$, but conditional on $C=c$ we have</span>
-<span id="cb2-493"><a href="#cb2-493" aria-hidden="true" tabindex="-1"></a>$\beta Y \approx c-\alpha D-\varepsilon$, so within a stratum of $C$ a higher $D$ forces a lower $Y$ —</span>
-<span id="cb2-494"><a href="#cb2-494" aria-hidden="true" tabindex="-1"></a>a **nonzero conditional covariance** created purely by conditioning. This is the same algebra as the</span>
-<span id="cb2-495"><a href="#cb2-495" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">collider figure</span><span class="co">](../03-regression/regression-and-causality.qmd)</span> in Part III, now located on the graph.</span>
-<span id="cb2-496"><a href="#cb2-496" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-497"><a href="#cb2-497" aria-hidden="true" tabindex="-1"></a>**Acyclicity and solvability.** Acyclicity guarantees the structural equations can be ordered</span>
-<span id="cb2-498"><a href="#cb2-498" aria-hidden="true" tabindex="-1"></a>topologically and solved recursively (each variable from its parents), so the joint distribution</span>
-<span id="cb2-499"><a href="#cb2-499" aria-hidden="true" tabindex="-1"></a>**factorises** as $\prod_i \Pr(X_i\mid \text{parents}(X_i))$ — the Markov factorisation that makes</span>
-<span id="cb2-500"><a href="#cb2-500" aria-hidden="true" tabindex="-1"></a>d-separation read off the graph correspond to real conditional independence in the data.</span>
-<span id="cb2-501"><a href="#cb2-501" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-502"><a href="#cb2-502" aria-hidden="true" tabindex="-1"></a>**Testable implications as vanishing coefficients.** In a linear-Gaussian model, $A\perp B\mid C$ is the</span>
-<span id="cb2-503"><a href="#cb2-503" aria-hidden="true" tabindex="-1"></a>same as a zero coefficient on $B$ in the regression of $A$ on $B$ and $C$:</span>
-<span id="cb2-504"><a href="#cb2-504" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-505"><a href="#cb2-505" aria-hidden="true" tabindex="-1"></a>A\perp B\mid C \iff r_{AB\cdot C}=0 .</span>
-<span id="cb2-506"><a href="#cb2-506" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-507"><a href="#cb2-507" aria-hidden="true" tabindex="-1"></a>A complete set of such checks is the one implied by the Markov factorisation above: each variable is</span>
-<span id="cb2-508"><a href="#cb2-508" aria-hidden="true" tabindex="-1"></a>independent of its non-descendants given its parents. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-509"><a href="#cb2-509" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-510"><a href="#cb2-510" aria-hidden="true" tabindex="-1"></a>**$z$-specific effects and conditional policies.** If $S\cup Z$ satisfies the backdoor criterion,</span>
-<span id="cb2-511"><a href="#cb2-511" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-512"><a href="#cb2-512" aria-hidden="true" tabindex="-1"></a>P(y\mid do(x),z)=\sum_s P(y\mid x,s,z)\,P(s),</span>
-<span id="cb2-513"><a href="#cb2-513" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-514"><a href="#cb2-514" aria-hidden="true" tabindex="-1"></a>summing over $S$ only. For a policy $x=g(z)$, since $Z$ is pre-treatment and so $P(z\mid do(X=g(Z)))=P(z)$,</span>
-<span id="cb2-515"><a href="#cb2-515" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-516"><a href="#cb2-516" aria-hidden="true" tabindex="-1"></a>P(y\mid do(X=g(Z)))=\sum_z P(y\mid do(X=x),z)\big|_{x=g(z)}\,P(z).</span>
-<span id="cb2-517"><a href="#cb2-517" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-518"><a href="#cb2-518" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-519"><a href="#cb2-519" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-520"><a href="#cb2-520" aria-hidden="true" tabindex="-1"></a>**IPW from the adjustment formula.** Multiply and divide inside the backdoor sum by the propensity score:</span>
-<span id="cb2-521"><a href="#cb2-521" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-522"><a href="#cb2-522" aria-hidden="true" tabindex="-1"></a>P(y\mid do(x))=\sum_z \frac{P(y\mid x,z)\,P(x\mid z)\,P(z)}{P(x\mid z)}=\sum_z\frac{P(y,x,z)}{P(x\mid z)} ,</span>
-<span id="cb2-523"><a href="#cb2-523" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-524"><a href="#cb2-524" aria-hidden="true" tabindex="-1"></a>so each observed case $(x,y,z)$ gets weight $1/P(x\mid z)$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> In the drug example,</span>
-<span id="cb2-525"><a href="#cb2-525" aria-hidden="true" tabindex="-1"></a>$0.1157/0.2437+0.2743/0.7668=0.475+0.358=0.832$ (our arithmetic from the book's counts).</span>
-<span id="cb2-526"><a href="#cb2-526" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-527"><a href="#cb2-527" aria-hidden="true" tabindex="-1"></a>**Total effect as a sum of path products.** In $X=U_X$, $Z=aX+U_Z$, $W=bX+cZ+U_W$, $Y=dZ+eW+U_Y$, set</span>
-<span id="cb2-528"><a href="#cb2-528" aria-hidden="true" tabindex="-1"></a>$Z$ by intervention (delete its equation) and substitute:</span>
-<span id="cb2-529"><a href="#cb2-529" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-530"><a href="#cb2-530" aria-hidden="true" tabindex="-1"></a>Y=dZ+e(bX+cZ+U_W)+U_Y=(d+ec)Z+ebX+eU_W+U_Y ,</span>
-<span id="cb2-531"><a href="#cb2-531" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-532"><a href="#cb2-532" aria-hidden="true" tabindex="-1"></a>so a unit change in $Z$ moves $Y$ by $\tau=d+ec$, whatever the distribution of the $U$s. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-533"><a href="#cb2-533" aria-hidden="true" tabindex="-1"></a>With our values, $\tau=0.4+0.6\times0.5=0.70$. The naive slope is</span>
-<span id="cb2-534"><a href="#cb2-534" aria-hidden="true" tabindex="-1"></a>$\operatorname{Cov}(Y,Z)/\operatorname{Var}(Z)=(0.70\times1.64+0.42\times0.8)/1.64\approx0.905$ (ours),</span>
-<span id="cb2-535"><a href="#cb2-535" aria-hidden="true" tabindex="-1"></a>matching the simulation.</span>
-<span id="cb2-536"><a href="#cb2-536" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-537"><a href="#cb2-537" aria-hidden="true" tabindex="-1"></a>**The instrument as a ratio.** With $X=\beta Z+U_X$, $Y=\alpha X+U_Y$ and $U_X,U_Y$ correlated but both</span>
-<span id="cb2-538"><a href="#cb2-538" aria-hidden="true" tabindex="-1"></a>independent of $Z$: $r_{XZ}=\beta$ and $r_{YZ}=\alpha\beta$, so $\alpha=r_{YZ}/r_{XZ}$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
-<span id="cb2-539"><a href="#cb2-539" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-540"><a href="#cb2-540" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-541"><a href="#cb2-541" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-542"><a href="#cb2-542" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
-<span id="cb2-543"><a href="#cb2-543" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-544"><a href="#cb2-544" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">regression and causality</span><span class="co">](../03-regression/regression-and-causality.qmd)</span> (good/bad</span>
-<span id="cb2-545"><a href="#cb2-545" aria-hidden="true" tabindex="-1"></a>  controls and collider bias, now derived) and <span class="co">[</span><span class="ot">potential outcomes</span><span class="co">](potential-outcomes.qmd)</span> (the</span>
-<span id="cb2-546"><a href="#cb2-546" aria-hidden="true" tabindex="-1"></a>  backdoor adjustment *is* the conditional version of the selection-bias fix).</span>
-<span id="cb2-547"><a href="#cb2-547" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">counterfactuals, attribution &amp; mediation</span><span class="co">](counterfactuals-and-mediation.qmd)</span> (rung three:</span>
-<span id="cb2-548"><a href="#cb2-548" aria-hidden="true" tabindex="-1"></a>  unit-level counterfactuals and natural direct/indirect effects), <span class="co">[</span><span class="ot">matching &amp; propensity scores</span><span class="co">](matching-and-propensity-scores.qmd)</span> (estimating the</span>
-<span id="cb2-549"><a href="#cb2-549" aria-hidden="true" tabindex="-1"></a>  backdoor adjustment when the criterion holds) and the quasi-experimental designs</span>
-<span id="cb2-550"><a href="#cb2-550" aria-hidden="true" tabindex="-1"></a>  (<span class="co">[</span><span class="ot">IV</span><span class="co">](instrumental-variables.qmd)</span>, <span class="co">[</span><span class="ot">RD</span><span class="co">](regression-discontinuity.qmd)</span>,</span>
-<span id="cb2-551"><a href="#cb2-551" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">DiD</span><span class="co">](difference-in-differences.qmd)</span>) for when it *doesn't* — when an unblockable backdoor remains.</span>
-<span id="cb2-552"><a href="#cb2-552" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** the <span class="co">[</span><span class="ot">IV</span><span class="co">](instrumental-variables.qmd)</span> graph (an instrument $Z\to D\to Y$ with no</span>
-<span id="cb2-553"><a href="#cb2-553" aria-hidden="true" tabindex="-1"></a>  $Z\to Y$ arrow) and the bad-control warnings throughout Part V;</span>
-<span id="cb2-554"><a href="#cb2-554" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">structural equation models</span><span class="co">](../03-regression/structural-equation-models.qmd)</span> (path coefficients and</span>
-<span id="cb2-555"><a href="#cb2-555" aria-hidden="true" tabindex="-1"></a>  global fit, set against the <span class="co">[</span><span class="ot">local tests</span><span class="co">](#sec-testing-dags)</span> here);</span>
-<span id="cb2-556"><a href="#cb2-556" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">matching &amp; propensity scores</span><span class="co">](matching-and-propensity-scores.qmd)</span> (estimating the</span>
-<span id="cb2-557"><a href="#cb2-557" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">IPW identity</span><span class="co">](#sec-ipw-graph)</span>); <span class="co">[</span><span class="ot">heterogeneous effects</span><span class="co">](heterogeneous-effects-in-experiments.qmd)</span></span>
-<span id="cb2-558"><a href="#cb2-558" aria-hidden="true" tabindex="-1"></a>  (subgroup effects and targeting rules, <span class="co">[</span><span class="ot">identified here</span><span class="co">](#sec-z-specific)</span>); and</span>
-<span id="cb2-559"><a href="#cb2-559" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Simpson's paradox</span><span class="co">](../01-foundations/famous-paradoxes.qmd)</span>, resolved by reweighting.</span>
+<span id="cb2-478"><a href="#cb2-478" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Splitting by a variable you couldn't adjust for.** A subgroup effect is identified only if the</span>
+<span id="cb2-479"><a href="#cb2-479" aria-hidden="true" tabindex="-1"></a>  grouping variable plus your controls satisfy the backdoor criterion. Split by a collider and the</span>
+<span id="cb2-480"><a href="#cb2-480" aria-hidden="true" tabindex="-1"></a>  subgroup estimates are biased even when the overall estimate is fine. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-481"><a href="#cb2-481" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-482"><a href="#cb2-482" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Concluding "not identified" because neither door fits.** Failing the backdoor and front-door</span>
+<span id="cb2-483"><a href="#cb2-483" aria-hidden="true" tabindex="-1"></a>  criteria does not mean the effect cannot be identified. The do-calculus, which is complete, may still</span>
+<span id="cb2-484"><a href="#cb2-484" aria-hidden="true" tabindex="-1"></a>  find a route. Pearl himself could not find one by intuition for Bareinboim's four-variable puzzle until</span>
+<span id="cb2-485"><a href="#cb2-485" aria-hidden="true" tabindex="-1"></a>  he applied the rules. Only when the rules fail is an experiment, or a stronger assumption, the sole</span>
+<span id="cb2-486"><a href="#cb2-486" aria-hidden="true" tabindex="-1"></a>  option. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
+<span id="cb2-487"><a href="#cb2-487" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-488"><a href="#cb2-488" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Confusing regression and path coefficients.** A coefficient becomes causal only when the graph says</span>
+<span id="cb2-489"><a href="#cb2-489" aria-hidden="true" tabindex="-1"></a>  the regression that produced it blocks the right paths. Adding a mediator turns a total effect into a</span>
+<span id="cb2-490"><a href="#cb2-490" aria-hidden="true" tabindex="-1"></a>  direct effect, which answers a different question. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-491"><a href="#cb2-491" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-492"><a href="#cb2-492" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-493"><a href="#cb2-493" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-494"><a href="#cb2-494" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-495"><a href="#cb2-495" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-496"><a href="#cb2-496" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-497"><a href="#cb2-497" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cunningham, *Causal Inference: The Mixtape*** — DAGs as a causal language bridging theory and</span>
+<span id="cb2-498"><a href="#cb2-498" aria-hidden="true" tabindex="-1"></a>  econometrics; **nodes/arrows**, the meaning of a missing arrow, **acyclicity**, and the underlying</span>
+<span id="cb2-499"><a href="#cb2-499" aria-hidden="true" tabindex="-1"></a>  **structural causal model**; the three structures — **chain/mediator** $D\to M\to Y$,</span>
+<span id="cb2-500"><a href="#cb2-500" aria-hidden="true" tabindex="-1"></a>  **fork/confounder** $D\leftarrow Z\to Y$, **collider** $D\to C\leftarrow Y$; **paths**, **backdoor</span>
+<span id="cb2-501"><a href="#cb2-501" aria-hidden="true" tabindex="-1"></a>  paths**, open vs blocked and colliders as **dams** (d-separation); the **backdoor criterion**;</span>
+<span id="cb2-502"><a href="#cb2-502" aria-hidden="true" tabindex="-1"></a>  over-control from conditioning on a **mediator** and selection bias from conditioning on a</span>
+<span id="cb2-503"><a href="#cb2-503" aria-hidden="true" tabindex="-1"></a>  **collider**; the **Google/occupation** gender-gap example and the **movie-star** (beauty → star ←</span>
+<span id="cb2-504"><a href="#cb2-504" aria-hidden="true" tabindex="-1"></a>  talent) collider.</span>
+<span id="cb2-505"><a href="#cb2-505" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Kaplan, *Lessons in Statistical Thinking*** — the intuitive on-ramp: a DAG as a **network of</span>
+<span id="cb2-506"><a href="#cb2-506" aria-hidden="true" tabindex="-1"></a>  causal influence**, acyclicity as one-way deductive reasoning; a **confounder** as a variable that</span>
+<span id="cb2-507"><a href="#cb2-507" aria-hidden="true" tabindex="-1"></a>  injects **non-causal association**; and **adjustment** (covariate adjustment) as the act of</span>
+<span id="cb2-508"><a href="#cb2-508" aria-hidden="true" tabindex="-1"></a>  **accounting for variation** that **blocks** the confounding flow — the same move as regression's</span>
+<span id="cb2-509"><a href="#cb2-509" aria-hidden="true" tabindex="-1"></a>  "holding constant," seen on the graph.</span>
+<span id="cb2-510"><a href="#cb2-510" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pearl, Glymour &amp; Jewell, *Causal Inference in Statistics: A Primer*** — the **do-operator**</span>
+<span id="cb2-511"><a href="#cb2-511" aria-hidden="true" tabindex="-1"></a>  $do(x)$ and intervention as **graph surgery** (erase arrows into $X$); intervening ("changes the</span>
+<span id="cb2-512"><a href="#cb2-512" aria-hidden="true" tabindex="-1"></a>  system") vs conditioning ("narrows our focus"); the **back-door** criterion stated formally; and the</span>
+<span id="cb2-513"><a href="#cb2-513" aria-hidden="true" tabindex="-1"></a>  **front-door criterion** with the **smoking → tar → cancer** example that deconfounds an unmeasured</span>
+<span id="cb2-514"><a href="#cb2-514" aria-hidden="true" tabindex="-1"></a>  "smoking gene" — the "utter miracle." **§2.5 model testing and causal search:** missing arrows as</span>
+<span id="cb2-515"><a href="#cb2-515" aria-hidden="true" tabindex="-1"></a>  testable conditional independencies, checked by regression; local d-separation tests vs global</span>
+<span id="cb2-516"><a href="#cb2-516" aria-hidden="true" tabindex="-1"></a>  likelihood tests (three weaknesses); equivalence classes (same skeleton and v-structures, after Verma &amp;</span>
+<span id="cb2-517"><a href="#cb2-517" aria-hidden="true" tabindex="-1"></a>  Pearl 1990). **§3.5:** $z$-specific effects and Rule 2 (the collider caveat); conditional policies</span>
+<span id="cb2-518"><a href="#cb2-518" aria-hidden="true" tabindex="-1"></a>  $do(X=g(Z))$ evaluated from $z$-specific effects (eq. 3.17). **§3.6:** inverse probability weighting</span>
+<span id="cb2-519"><a href="#cb2-519" aria-hidden="true" tabindex="-1"></a>  derived from the adjustment formula, with the drug–gender worked example (weights 4.1 and 1.3,</span>
+<span id="cb2-520"><a href="#cb2-520" aria-hidden="true" tabindex="-1"></a>  $P(\text{recover}\mid do(\text{drug}))=0.833$), the backdoor requirement and the precision warning.</span>
+<span id="cb2-521"><a href="#cb2-521" aria-hidden="true" tabindex="-1"></a>  **§3.8:** regression vs structural coefficients, path coefficients as direct effects, the</span>
+<span id="cb2-522"><a href="#cb2-522" aria-hidden="true" tabindex="-1"></a>  sum-of-products rule for total effects ($d+ec$), the **regression rule for identification**, and the</span>
+<span id="cb2-523"><a href="#cb2-523" aria-hidden="true" tabindex="-1"></a>  instrument as a ratio of two regression slopes.</span>
+<span id="cb2-524"><a href="#cb2-524" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Pearl &amp; Mackenzie, *The Book of Why*** (Ch 2) — Sewall Wright's 1920 path diagram as the first</span>
+<span id="cb2-525"><a href="#cb2-525" aria-hidden="true" tabindex="-1"></a>  causal diagram; path coefficients read as variation explained then and as intervention effects now;</span>
+<span id="cb2-526"><a href="#cb2-526" aria-hidden="true" tabindex="-1"></a>  the trace-and-multiply rule. **Ch 7** ("The do-calculus, or mind over matter"; "The tapestry of</span>
+<span id="cb2-527"><a href="#cb2-527" aria-hidden="true" tabindex="-1"></a>  science"): the three rules (observation, action/observation exchange, action) on the Euclid model;</span>
+<span id="cb2-528"><a href="#cb2-528" aria-hidden="true" tabindex="-1"></a>  the 1993 front-door "napkin problem" (\$100 prize; Heckman &amp; Pinto's eight-page 2015 proof);</span>
+<span id="cb2-529"><a href="#cb2-529" aria-hidden="true" tabindex="-1"></a>  completeness (Shpitser; Huang &amp; Valtorta, UAI 2006); Tian's c-decomposition and Shpitser's</span>
+<span id="cb2-530"><a href="#cb2-530" aria-hidden="true" tabindex="-1"></a>  polynomial-time algorithm; surrogate experiments (diet for cholesterol, Bareinboim 2012); Wermuth &amp;</span>
+<span id="cb2-531"><a href="#cb2-531" aria-hidden="true" tabindex="-1"></a>  Cox's sequential-treatment problem solved by a sequential backdoor; arrow deletion traced to Haavelmo</span>
+<span id="cb2-532"><a href="#cb2-532" aria-hidden="true" tabindex="-1"></a>  (1943), Strotz &amp; Wold (1960) and Spirtes.</span>
+<span id="cb2-533"><a href="#cb2-533" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Our own work.** The layout of the front-door derivation in the appendix (each step labelled by the</span>
+<span id="cb2-534"><a href="#cb2-534" aria-hidden="true" tabindex="-1"></a>  rule that licenses it).</span>
+<span id="cb2-535"><a href="#cb2-535" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Our own work.** The exact propensities (87/357 = 0.244, 263/343 = 0.767; the book prints 0.233 for the</span>
+<span id="cb2-536"><a href="#cb2-536" aria-hidden="true" tabindex="-1"></a>  first), the $do(\text{no drug})$ value 0.779, and the simulation in the right panel of @fig-dag.</span>
+<span id="cb2-537"><a href="#cb2-537" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-538"><a href="#cb2-538" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-539"><a href="#cb2-539" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-540"><a href="#cb2-540" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-541"><a href="#cb2-541" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-542"><a href="#cb2-542" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-543"><a href="#cb2-543" aria-hidden="true" tabindex="-1"></a>**The backdoor adjustment formula.** If a set $Z$ satisfies the backdoor criterion for $D\to Y$, the</span>
+<span id="cb2-544"><a href="#cb2-544" aria-hidden="true" tabindex="-1"></a>causal effect is identified by *conditioning then averaging over* $Z$:</span>
+<span id="cb2-545"><a href="#cb2-545" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-546"><a href="#cb2-546" aria-hidden="true" tabindex="-1"></a>\Pr(Y\mid \operatorname{do}(D=d)) = \sum_{z}\Pr(Y\mid D=d, Z=z)\,\Pr(Z=z),</span>
+<span id="cb2-547"><a href="#cb2-547" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-548"><a href="#cb2-548" aria-hidden="true" tabindex="-1"></a>where $\operatorname{do}(D=d)$ denotes *setting* $D$ by intervention (not merely observing it). In</span>
+<span id="cb2-549"><a href="#cb2-549" aria-hidden="true" tabindex="-1"></a>means, $\text{ATE}=\mathbb E_Z\big<span class="co">[</span><span class="ot">\mathbb E[Y\mid D=1,Z]-\mathbb E[Y\mid D=0,Z]\big</span><span class="co">]</span>$ — exactly the</span>
+<span id="cb2-550"><a href="#cb2-550" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">subclassification estimator</span><span class="co">](matching-and-propensity-scores.qmd)</span> of the next entry. The criterion is</span>
+<span id="cb2-551"><a href="#cb2-551" aria-hidden="true" tabindex="-1"></a>what *licenses* writing the causal $\operatorname{do}$-probability as ordinary conditional</span>
+<span id="cb2-552"><a href="#cb2-552" aria-hidden="true" tabindex="-1"></a>probabilities you can estimate.</span>
+<span id="cb2-553"><a href="#cb2-553" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-554"><a href="#cb2-554" aria-hidden="true" tabindex="-1"></a>**The three rules of the do-calculus** (in the simplified form of *The Book of Why*; the full statements</span>
+<span id="cb2-555"><a href="#cb2-555" aria-hidden="true" tabindex="-1"></a>condition on extra variables and specify which arrows to delete): <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
+<span id="cb2-556"><a href="#cb2-556" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-557"><a href="#cb2-557" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
+<span id="cb2-558"><a href="#cb2-558" aria-hidden="true" tabindex="-1"></a>\text{Rule 1:}\quad &amp; P(y\mid do(x),z,w)=P(y\mid do(x),z) &amp;&amp; \text{if } Z \text{ blocks every path } W\text{–}Y \text{ once arrows into } X \text{ are deleted;}<span class="sc">\\</span></span>
+<span id="cb2-559"><a href="#cb2-559" aria-hidden="true" tabindex="-1"></a>\text{Rule 2:}\quad &amp; P(y\mid do(x),z)=P(y\mid x,z) &amp;&amp; \text{if } Z \text{ satisfies the backdoor criterion for } X\to Y;<span class="sc">\\</span></span>
+<span id="cb2-560"><a href="#cb2-560" aria-hidden="true" tabindex="-1"></a>\text{Rule 3:}\quad &amp; P(y\mid do(x))=P(y) &amp;&amp; \text{if there is no directed path from } X \text{ to } Y.</span>
+<span id="cb2-561"><a href="#cb2-561" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
+<span id="cb2-562"><a href="#cb2-562" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-563"><a href="#cb2-563" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-564"><a href="#cb2-564" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **In plain words:** Rule 1 lets you add or drop an observation, Rule 2 lets you swap doing for seeing,</span></span>
+<span id="cb2-565"><a href="#cb2-565" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; and Rule 3 lets you add or drop an intervention, each only when the graph allows it.</span></span>
+<span id="cb2-566"><a href="#cb2-566" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-567"><a href="#cb2-567" aria-hidden="true" tabindex="-1"></a>**The front-door formula from the rules.** In the smoking graph $X\to Z\to Y$ with $X\leftarrow U\to Y$</span>
+<span id="cb2-568"><a href="#cb2-568" aria-hidden="true" tabindex="-1"></a>(the gene $U$ unobserved, tar $Z$ shielded from it):</span>
+<span id="cb2-569"><a href="#cb2-569" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-570"><a href="#cb2-570" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
+<span id="cb2-571"><a href="#cb2-571" aria-hidden="true" tabindex="-1"></a>P(y\mid do(x)) &amp;= \textstyle\sum_z P(y\mid do(x),z)\,P(z\mid do(x)) &amp;&amp; \text{(law of total probability)}<span class="sc">\\</span></span>
+<span id="cb2-572"><a href="#cb2-572" aria-hidden="true" tabindex="-1"></a>P(z\mid do(x)) &amp;= P(z\mid x) &amp;&amp; \text{(Rule 2: no backdoor from } X \text{ to } Z)<span class="sc">\\</span></span>
+<span id="cb2-573"><a href="#cb2-573" aria-hidden="true" tabindex="-1"></a>P(y\mid do(x),z) &amp;= P(y\mid do(x),do(z)) &amp;&amp; \text{(Rule 2: with } X \text{ fixed, } Z\text{'s backdoor via } X \text{ is blocked)}<span class="sc">\\</span></span>
+<span id="cb2-574"><a href="#cb2-574" aria-hidden="true" tabindex="-1"></a>&amp;= P(y\mid do(z)) &amp;&amp; \text{(Rule 3: once } Z \text{ is fixed, } X \text{ has no remaining path to } Y)<span class="sc">\\</span></span>
+<span id="cb2-575"><a href="#cb2-575" aria-hidden="true" tabindex="-1"></a>P(y\mid do(z)) &amp;= \textstyle\sum_{x'} P(y\mid z,x')\,P(x') &amp;&amp; \text{(backdoor adjustment for } Z\to Y \text{ via } X).</span>
+<span id="cb2-576"><a href="#cb2-576" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
+<span id="cb2-577"><a href="#cb2-577" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-578"><a href="#cb2-578" aria-hidden="true" tabindex="-1"></a>Substituting gives the front-door adjustment formula</span>
+<span id="cb2-579"><a href="#cb2-579" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-580"><a href="#cb2-580" aria-hidden="true" tabindex="-1"></a>P(y\mid do(x))=\sum_z P(z\mid x)\sum_{x'}P(y\mid x',z)\,P(x').</span>
+<span id="cb2-581"><a href="#cb2-581" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-582"><a href="#cb2-582" aria-hidden="true" tabindex="-1"></a>Every factor on the right is an ordinary conditional probability. The book's Figure 7.4 sets out this</span>
+<span id="cb2-583"><a href="#cb2-583" aria-hidden="true" tabindex="-1"></a>chain of rule applications. The layout above is ours. <span class="co">[</span><span class="ot">@pearl_why</span><span class="co">]</span></span>
+<span id="cb2-584"><a href="#cb2-584" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-585"><a href="#cb2-585" aria-hidden="true" tabindex="-1"></a>**Why a collider induces dependence (algebra).** Let $D\perp Y$ marginally and $C=\alpha D+\beta</span>
+<span id="cb2-586"><a href="#cb2-586" aria-hidden="true" tabindex="-1"></a>Y+\varepsilon$. Then $\operatorname{Cov}(D,Y)=0$, but conditional on $C=c$ we have</span>
+<span id="cb2-587"><a href="#cb2-587" aria-hidden="true" tabindex="-1"></a>$\beta Y \approx c-\alpha D-\varepsilon$, so within a stratum of $C$ a higher $D$ forces a lower $Y$ —</span>
+<span id="cb2-588"><a href="#cb2-588" aria-hidden="true" tabindex="-1"></a>a **nonzero conditional covariance** created purely by conditioning. This is the same algebra as the</span>
+<span id="cb2-589"><a href="#cb2-589" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">collider figure</span><span class="co">](../03-regression/regression-and-causality.qmd)</span> in Part III, now located on the graph.</span>
+<span id="cb2-590"><a href="#cb2-590" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-591"><a href="#cb2-591" aria-hidden="true" tabindex="-1"></a>**Acyclicity and solvability.** Acyclicity guarantees the structural equations can be ordered</span>
+<span id="cb2-592"><a href="#cb2-592" aria-hidden="true" tabindex="-1"></a>topologically and solved recursively (each variable from its parents), so the joint distribution</span>
+<span id="cb2-593"><a href="#cb2-593" aria-hidden="true" tabindex="-1"></a>**factorises** as $\prod_i \Pr(X_i\mid \text{parents}(X_i))$ — the Markov factorisation that makes</span>
+<span id="cb2-594"><a href="#cb2-594" aria-hidden="true" tabindex="-1"></a>d-separation read off the graph correspond to real conditional independence in the data.</span>
+<span id="cb2-595"><a href="#cb2-595" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-596"><a href="#cb2-596" aria-hidden="true" tabindex="-1"></a>**Testable implications as vanishing coefficients.** In a linear-Gaussian model, $A\perp B\mid C$ is the</span>
+<span id="cb2-597"><a href="#cb2-597" aria-hidden="true" tabindex="-1"></a>same as a zero coefficient on $B$ in the regression of $A$ on $B$ and $C$:</span>
+<span id="cb2-598"><a href="#cb2-598" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-599"><a href="#cb2-599" aria-hidden="true" tabindex="-1"></a>A\perp B\mid C \iff r_{AB\cdot C}=0 .</span>
+<span id="cb2-600"><a href="#cb2-600" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-601"><a href="#cb2-601" aria-hidden="true" tabindex="-1"></a>A complete set of such checks is the one implied by the Markov factorisation above: each variable is</span>
+<span id="cb2-602"><a href="#cb2-602" aria-hidden="true" tabindex="-1"></a>independent of its non-descendants given its parents. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-603"><a href="#cb2-603" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-604"><a href="#cb2-604" aria-hidden="true" tabindex="-1"></a>**$z$-specific effects and conditional policies.** If $S\cup Z$ satisfies the backdoor criterion,</span>
+<span id="cb2-605"><a href="#cb2-605" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-606"><a href="#cb2-606" aria-hidden="true" tabindex="-1"></a>P(y\mid do(x),z)=\sum_s P(y\mid x,s,z)\,P(s),</span>
+<span id="cb2-607"><a href="#cb2-607" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-608"><a href="#cb2-608" aria-hidden="true" tabindex="-1"></a>summing over $S$ only. For a policy $x=g(z)$, since $Z$ is pre-treatment and so $P(z\mid do(X=g(Z)))=P(z)$,</span>
+<span id="cb2-609"><a href="#cb2-609" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-610"><a href="#cb2-610" aria-hidden="true" tabindex="-1"></a>P(y\mid do(X=g(Z)))=\sum_z P(y\mid do(X=x),z)\big|_{x=g(z)}\,P(z).</span>
+<span id="cb2-611"><a href="#cb2-611" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-612"><a href="#cb2-612" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-613"><a href="#cb2-613" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-614"><a href="#cb2-614" aria-hidden="true" tabindex="-1"></a>**IPW from the adjustment formula.** Multiply and divide inside the backdoor sum by the propensity score:</span>
+<span id="cb2-615"><a href="#cb2-615" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-616"><a href="#cb2-616" aria-hidden="true" tabindex="-1"></a>P(y\mid do(x))=\sum_z \frac{P(y\mid x,z)\,P(x\mid z)\,P(z)}{P(x\mid z)}=\sum_z\frac{P(y,x,z)}{P(x\mid z)} ,</span>
+<span id="cb2-617"><a href="#cb2-617" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-618"><a href="#cb2-618" aria-hidden="true" tabindex="-1"></a>so each observed case $(x,y,z)$ gets weight $1/P(x\mid z)$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span> In the drug example,</span>
+<span id="cb2-619"><a href="#cb2-619" aria-hidden="true" tabindex="-1"></a>$0.1157/0.2437+0.2743/0.7668=0.475+0.358=0.832$ (our arithmetic from the book's counts).</span>
+<span id="cb2-620"><a href="#cb2-620" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-621"><a href="#cb2-621" aria-hidden="true" tabindex="-1"></a>**Total effect as a sum of path products.** In $X=U_X$, $Z=aX+U_Z$, $W=bX+cZ+U_W$, $Y=dZ+eW+U_Y$, set</span>
+<span id="cb2-622"><a href="#cb2-622" aria-hidden="true" tabindex="-1"></a>$Z$ by intervention (delete its equation) and substitute:</span>
+<span id="cb2-623"><a href="#cb2-623" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-624"><a href="#cb2-624" aria-hidden="true" tabindex="-1"></a>Y=dZ+e(bX+cZ+U_W)+U_Y=(d+ec)Z+ebX+eU_W+U_Y ,</span>
+<span id="cb2-625"><a href="#cb2-625" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-626"><a href="#cb2-626" aria-hidden="true" tabindex="-1"></a>so a unit change in $Z$ moves $Y$ by $\tau=d+ec$, whatever the distribution of the $U$s. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-627"><a href="#cb2-627" aria-hidden="true" tabindex="-1"></a>With our values, $\tau=0.4+0.6\times0.5=0.70$. The naive slope is</span>
+<span id="cb2-628"><a href="#cb2-628" aria-hidden="true" tabindex="-1"></a>$\operatorname{Cov}(Y,Z)/\operatorname{Var}(Z)=(0.70\times1.64+0.42\times0.8)/1.64\approx0.905$ (ours),</span>
+<span id="cb2-629"><a href="#cb2-629" aria-hidden="true" tabindex="-1"></a>matching the simulation.</span>
+<span id="cb2-630"><a href="#cb2-630" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-631"><a href="#cb2-631" aria-hidden="true" tabindex="-1"></a>**The instrument as a ratio.** With $X=\beta Z+U_X$, $Y=\alpha X+U_Y$ and $U_X,U_Y$ correlated but both</span>
+<span id="cb2-632"><a href="#cb2-632" aria-hidden="true" tabindex="-1"></a>independent of $Z$: $r_{XZ}=\beta$ and $r_{YZ}=\alpha\beta$, so $\alpha=r_{YZ}/r_{XZ}$. <span class="co">[</span><span class="ot">@pearl_primer</span><span class="co">]</span></span>
+<span id="cb2-633"><a href="#cb2-633" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-634"><a href="#cb2-634" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-635"><a href="#cb2-635" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-636"><a href="#cb2-636" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-637"><a href="#cb2-637" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-638"><a href="#cb2-638" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">regression and causality</span><span class="co">](../03-regression/regression-and-causality.qmd)</span> (good/bad</span>
+<span id="cb2-639"><a href="#cb2-639" aria-hidden="true" tabindex="-1"></a>  controls and collider bias, now derived) and <span class="co">[</span><span class="ot">potential outcomes</span><span class="co">](potential-outcomes.qmd)</span> (the</span>
+<span id="cb2-640"><a href="#cb2-640" aria-hidden="true" tabindex="-1"></a>  backdoor adjustment *is* the conditional version of the selection-bias fix).</span>
+<span id="cb2-641"><a href="#cb2-641" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">counterfactuals, attribution &amp; mediation</span><span class="co">](counterfactuals-and-mediation.qmd)</span> (rung three:</span>
+<span id="cb2-642"><a href="#cb2-642" aria-hidden="true" tabindex="-1"></a>  unit-level counterfactuals and natural direct/indirect effects), <span class="co">[</span><span class="ot">matching &amp; propensity scores</span><span class="co">](matching-and-propensity-scores.qmd)</span> (estimating the</span>
+<span id="cb2-643"><a href="#cb2-643" aria-hidden="true" tabindex="-1"></a>  backdoor adjustment when the criterion holds) and the quasi-experimental designs</span>
+<span id="cb2-644"><a href="#cb2-644" aria-hidden="true" tabindex="-1"></a>  (<span class="co">[</span><span class="ot">IV</span><span class="co">](instrumental-variables.qmd)</span>, <span class="co">[</span><span class="ot">RD</span><span class="co">](regression-discontinuity.qmd)</span>,</span>
+<span id="cb2-645"><a href="#cb2-645" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">DiD</span><span class="co">](difference-in-differences.qmd)</span>) for when it *doesn't* — when an unblockable backdoor remains.</span>
+<span id="cb2-646"><a href="#cb2-646" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reappears in:** the <span class="co">[</span><span class="ot">IV</span><span class="co">](instrumental-variables.qmd)</span> graph (an instrument $Z\to D\to Y$ with no</span>
+<span id="cb2-647"><a href="#cb2-647" aria-hidden="true" tabindex="-1"></a>  $Z\to Y$ arrow) and the bad-control warnings throughout Part V;</span>
+<span id="cb2-648"><a href="#cb2-648" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">structural equation models</span><span class="co">](../03-regression/structural-equation-models.qmd)</span> (path coefficients and</span>
+<span id="cb2-649"><a href="#cb2-649" aria-hidden="true" tabindex="-1"></a>  global fit, set against the <span class="co">[</span><span class="ot">local tests</span><span class="co">](#sec-testing-dags)</span> here);</span>
+<span id="cb2-650"><a href="#cb2-650" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">matching &amp; propensity scores</span><span class="co">](matching-and-propensity-scores.qmd)</span> (estimating the</span>
+<span id="cb2-651"><a href="#cb2-651" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">IPW identity</span><span class="co">](#sec-ipw-graph)</span>); <span class="co">[</span><span class="ot">heterogeneous effects</span><span class="co">](heterogeneous-effects-in-experiments.qmd)</span></span>
+<span id="cb2-652"><a href="#cb2-652" aria-hidden="true" tabindex="-1"></a>  (subgroup effects and targeting rules, <span class="co">[</span><span class="ot">identified here</span><span class="co">](#sec-z-specific)</span>); and</span>
+<span id="cb2-653"><a href="#cb2-653" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Simpson's paradox</span><span class="co">](../01-foundations/famous-paradoxes.qmd)</span>, resolved by reweighting.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
