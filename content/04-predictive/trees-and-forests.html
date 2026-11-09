@@ -86,7 +86,7 @@ div.csl-indent {
 <script src="../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
-<link href="../../content/04-predictive/measurement-and-ml.html" rel="next">
+<link href="../../content/04-predictive/selection-stability.html" rel="next">
 <link href="../../content/04-predictive/double-lasso.html" rel="prev">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -918,6 +918,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../../content/04-predictive/trees-and-forests.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Trees, Forests &amp; Boosting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../content/04-predictive/selection-stability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Selection Stability: Can You Trust What the Model Picked?</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -2223,7 +2229,7 @@ window.Quarto = {
 <p>A single tree’s fatal weakness: it is <strong>high-variance and overfits easily</strong>. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span> Grow it deep enough and it carves the data into perfectly pure leaves — <strong>memorising the noise</strong> — and a slightly different sample yields a wholly different tree. <strong>Pruning</strong> (cost-complexity / weakest-link pruning) controls this: grow a large tree, then cut it back with a penalty <span class="math inline">\alpha</span> on the number of leaves, choosing <span class="math inline">\alpha</span> by <a href="../../content/04-predictive/cross-validation.html">cross-validation</a>. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span> But pruning only mitigates the variance — the real cure is to stop relying on <em>one</em> tree.</p>
 <section id="see-it-one-jagged-tree-vs-a-smooth-forest" class="level3">
 <h3 class="anchored" data-anchor-id="see-it-one-jagged-tree-vs-a-smooth-forest">See it: one jagged tree vs a smooth forest</h3>
-<p>Below, a single deep tree (orange) fits the data as a wild step function — over-reacting to every wiggle of noise. A <strong>forest</strong> of many trees, each grown on a <a href="../../content/02-inference/confidence-intervals.html">bootstrap</a> resample and then <strong>averaged</strong> (blue), smooths those steps into a stable estimate of the signal. Same data, the variance averaged away.</p>
+<p>Below, a single deep tree (thin grey line) fits the data as a wild step function — over-reacting to every wiggle of noise. A <strong>forest</strong> of many trees, each grown on a <a href="../../content/02-inference/confidence-intervals.html">bootstrap</a> resample and then <strong>averaged</strong> (thick dark line), smooths those steps into a stable estimate of the signal. Same data, the variance averaged away.</p>
 <div id="cell-fig-tree-forest" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show the figure code (a minimal regression tree + bagging)</summary>
@@ -2282,7 +2288,7 @@ window.Quarto = {
 <img src="trees-and-forests_files/figure-html/fig-tree-forest-output-1.png" width="662" height="392" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tree-forest-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: A single deep regression tree (orange) overfits — a jagged step function chasing the noise, the hallmark of high variance. A forest (blue), averaging 150 trees each grown on a bootstrap resample, smooths the steps into a stable fit close to the true signal (grey). Averaging decorrelated trees is what tames the variance.
+Figure&nbsp;1: A single deep regression tree (thin olive-grey line) overfits — a jagged step function chasing the noise, the hallmark of high variance. A forest (thick dark line), averaging 150 trees each grown on a bootstrap resample, smooths the steps into a stable fit close to the true signal (dashed). Averaging decorrelated trees is what tames the variance.
 </figcaption>
 </figure>
 </div>
@@ -2345,7 +2351,7 @@ Figure&nbsp;1: A single deep regression tree (orange) overfits — a jagged step
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li><p><strong>Trusting a single deep tree.</strong> It’s high-variance and overfit; a different sample gives a different tree. Prune it, or move to an ensemble. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p></li>
+<li><p><strong>Trusting a single deep tree.</strong> It’s high-variance and overfit; a different sample gives a different tree. Prune it, or move to an ensemble. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span> If you need one tree to interpret, bootstrap its structure and consider a conditional inference tree — see <a href="../../content/04-predictive/selection-stability.html#sec-tree-stability">selection stability</a>.</p></li>
 <li><p><strong>Expecting a forest to be interpretable.</strong> Averaging hundreds of trees destroys the flowchart. Use variable importance / <a href="../../content/04-predictive/interpretability-and-ml.html">partial dependence</a>, and accept you’ve traded transparency for accuracy. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p></li>
 <li><p><strong>Reading variable importance as a causal effect.</strong> It measures predictive contribution, not cause; a strong predictor may be a proxy or a collider. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p></li>
 <li><p><strong>Skipping tuning on boosting.</strong> Too high a learning rate or too-deep trees overfit; boosting needs CV on its knobs. <span class="citation" data-cites="islr">(<a href="#ref-islr" role="doc-biblioref">James et al. 2021</a>)</span></p></li>
@@ -2390,7 +2396,7 @@ Figure&nbsp;1: A single deep regression tree (orange) overfits — a jagged step
 <h2 class="unnumbered anchored" data-anchor-id="connections">Connections</h2>
 <ul>
 <li><strong>Builds on:</strong> <a href="../../content/04-predictive/bias-variance-tradeoff.html">the bias–variance trade-off</a> (a high-variance method tamed by averaging), <a href="../../content/02-inference/confidence-intervals.html">the bootstrap</a> (bagging’s engine), and <a href="../../content/01-foundations/law-of-large-numbers.html">the LLN</a> (why averaging many models works).</li>
-<li><strong>Leads to:</strong> <a href="../../content/04-predictive/interpretability-and-ml.html">interpretability &amp; ML for social science</a> (variable importance and partial dependence as the price of ensembles), <a href="../../content/04-predictive/measurement-and-ml.html">measurement error &amp; ML</a> (why noisy scale scores make trees unstable and hide the nonlinearity ensembles exist to find), and <a href="../../content/05-causal-inference/index.html">causal forests</a> for heterogeneous treatment effects, and <a href="../../content/ml-track/ml-with-clustered-data.html">ML with clustered data</a> (trees with a mixed-effects model in every leaf), and <a href="../../content/ml-track/latent-classes-and-sem-trees.html#sec-semtrees">SEM trees &amp; forests</a> (a whole structural equation model in every node).</li>
+<li><strong>Leads to:</strong> <a href="../../content/04-predictive/interpretability-and-ml.html">interpretability &amp; ML for social science</a> (variable importance and partial dependence as the price of ensembles), <a href="../../content/04-predictive/selection-stability.html">selection stability</a> (when one tree must be read: bootstrapped structures, conditional inference trees, surrogate splits), <a href="../../content/04-predictive/measurement-and-ml.html">measurement error &amp; ML</a> (why noisy scale scores make trees unstable and hide the nonlinearity ensembles exist to find), and <a href="../../content/05-causal-inference/index.html">causal forests</a> for heterogeneous treatment effects, and <a href="../../content/ml-track/ml-with-clustered-data.html">ML with clustered data</a> (trees with a mixed-effects model in every leaf), and <a href="../../content/ml-track/latent-classes-and-sem-trees.html#sec-semtrees">SEM trees &amp; forests</a> (a whole structural equation model in every node).</li>
 <li><strong>Contrasts with:</strong> <a href="../../content/03-regression/index.html">regression</a> — linear structure vs learned non-linear partitions; the right choice depends on the truth.</li>
 </ul>
 
@@ -2871,8 +2877,8 @@ James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2021. <em>A
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../../content/04-predictive/measurement-and-ml.html" class="pagination-link" aria-label="Measurement Error &amp; Machine Learning">
-        <span class="nav-page-text">Measurement Error &amp; Machine Learning</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../../content/04-predictive/selection-stability.html" class="pagination-link" aria-label="Selection Stability: Can You Trust What the Model Picked?">
+        <span class="nav-page-text">Selection Stability: Can You Trust What the Model Picked?</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
@@ -2927,14 +2933,14 @@ James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2021. <em>A
 <span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="fu">### See it: one jagged tree vs a smooth forest</span></span>
 <span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>Below, a single deep tree (orange) fits the data as a wild step function — over-reacting to every</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>Below, a single deep tree (thin grey line) fits the data as a wild step function — over-reacting to every</span>
 <span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>wiggle of noise. A **forest** of many trees, each grown on a <span class="co">[</span><span class="ot">bootstrap</span><span class="co">](../02-inference/confidence-intervals.qmd)</span></span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>resample and then **averaged** (blue), smooths those steps into a stable estimate of the signal. Same</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>resample and then **averaged** (thick dark line), smooths those steps into a stable estimate of the signal. Same</span>
 <span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>data, the variance averaged away.</span>
 <span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-tree-forest</span></span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "A single deep regression tree (orange) overfits — a jagged step function chasing the noise, the hallmark of high variance. A forest (blue), averaging 150 trees each grown on a bootstrap resample, smooths the steps into a stable fit close to the true signal (grey). Averaging decorrelated trees is what tames the variance."</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "A single deep regression tree (thin olive-grey line) overfits — a jagged step function chasing the noise, the hallmark of high variance. A forest (thick dark line), averaging 150 trees each grown on a bootstrap resample, smooths the steps into a stable fit close to the true signal (dashed). Averaging decorrelated trees is what tames the variance."</span></span>
 <span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
 <span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the figure code (a minimal regression tree + bagging)"</span></span>
 <span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
@@ -3051,78 +3057,82 @@ James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2021. <em>A
 <span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning title="Where this goes wrong"}</span>
 <span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Trusting a single deep tree.** It's high-variance and overfit; a different sample gives a</span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>  different tree. Prune it, or move to an ensemble. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Expecting a forest to be interpretable.** Averaging hundreds of trees destroys the flowchart.</span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>  Use variable importance / <span class="co">[</span><span class="ot">partial dependence</span><span class="co">](interpretability-and-ml.qmd)</span>, and accept you've</span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  traded transparency for accuracy. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading variable importance as a causal effect.** It measures predictive contribution, not</span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>  cause; a strong predictor may be a proxy or a collider. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping tuning on boosting.** Too high a learning rate or too-deep trees overfit; boosting needs</span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>  CV on its knobs. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using trees where a line would do.** On near-linear data, regression beats trees and stays</span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>  interpretable. Match the method to the structure. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>  different tree. Prune it, or move to an ensemble. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span> If you need one tree to interpret,</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>  bootstrap its structure and consider a conditional inference tree — see</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">selection stability</span><span class="co">](selection-stability.qmd#sec-tree-stability)</span>.</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Expecting a forest to be interpretable.** Averaging hundreds of trees destroys the flowchart.</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>  Use variable importance / <span class="co">[</span><span class="ot">partial dependence</span><span class="co">](interpretability-and-ml.qmd)</span>, and accept you've</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>  traded transparency for accuracy. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Reading variable importance as a causal effect.** It measures predictive contribution, not</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>  cause; a strong predictor may be a proxy or a collider. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skipping tuning on boosting.** Too high a learning rate or too-deep trees overfit; boosting needs</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>  CV on its knobs. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Using trees where a line would do.** On near-linear data, regression beats trees and stays</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>  interpretable. Match the method to the structure. <span class="co">[</span><span class="ot">@islr</span><span class="co">]</span></span>
 <span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**James, Witten, Hastie &amp; Tibshirani, *Introduction to Statistical Learning*** — recursive binary</span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>  splitting, leaves and the mean/majority prediction, RSS vs Gini/entropy splits; tree</span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>  interpretability; high variance and cost-complexity pruning; the Hitters salary tree</span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>  (Years/Hits; \$165,174 and \$845,346); bagging and OOB error; random forests, decorrelation, and</span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>  $m\approx\sqrt p$; boosting (sequential, residual-fitting, $B$/$\lambda$/$d$, stumps); Gini and</span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>  permutation variable importance; the Heart data (Thal, Ca, ChestPain); the trees-vs-linear verdict.</span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bruce &amp; Bruce, *Practical Statistics for Data Scientists*** — trees and ensembles in the applied</span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>  data-science idiom; single trees for communication, ensembles for predictive power.</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a><span class="fu">## From the sources {.unnumbered}</span></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true" title="Who says what"}</span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**James, Witten, Hastie &amp; Tibshirani, *Introduction to Statistical Learning*** — recursive binary</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a>  splitting, leaves and the mean/majority prediction, RSS vs Gini/entropy splits; tree</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>  interpretability; high variance and cost-complexity pruning; the Hitters salary tree</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>  (Years/Hits; \$165,174 and \$845,346); bagging and OOB error; random forests, decorrelation, and</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  $m\approx\sqrt p$; boosting (sequential, residual-fitting, $B$/$\lambda$/$d$, stumps); Gini and</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>  permutation variable importance; the Heart data (Thal, Ca, ChestPain); the trees-vs-linear verdict.</span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Bruce &amp; Bruce, *Practical Statistics for Data Scientists*** — trees and ensembles in the applied</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>  data-science idiom; single trees for communication, ensembles for predictive power.</span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
 <span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>**Split criteria.** A regression split sends the data into regions $R_1,R_2$ to minimise</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>$\sum_{i\in R_1}(y_i-\bar y_{R_1})^2 + \sum_{i\in R_2}(y_i-\bar y_{R_2})^2$. A classification split</span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>minimises a purity measure — the **Gini index** $G=\sum_k \hat p_k(1-\hat p_k)$ or **cross-entropy**</span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>$D=-\sum_k \hat p_k\log\hat p_k$ — both small when one class dominates a node.</span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>**Cost-complexity pruning.** For a large tree $T_0$, choose the subtree $T\subseteq T_0$ minimising</span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>$\sum_{m=1}^{|T|}\sum_{i\in R_m}(y_i-\bar y_{R_m})^2 + \alpha|T|$, where $|T|$ is the number of leaves</span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>and $\alpha\ge 0$ trades fit against size. Increasing $\alpha$ yields a nested sequence of subtrees;</span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>CV picks $\alpha$.</span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>**Why decorrelation reduces variance.** The average of $B$ identically-distributed trees each with</span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>variance $\sigma^2$ and pairwise correlation $\rho$ has variance</span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>\rho\,\sigma^2 + \frac{1-\rho}{B}\,\sigma^2 .</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>::: {.math-appendix}</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>**Split criteria.** A regression split sends the data into regions $R_1,R_2$ to minimise</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>$\sum_{i\in R_1}(y_i-\bar y_{R_1})^2 + \sum_{i\in R_2}(y_i-\bar y_{R_2})^2$. A classification split</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>minimises a purity measure — the **Gini index** $G=\sum_k \hat p_k(1-\hat p_k)$ or **cross-entropy**</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>$D=-\sum_k \hat p_k\log\hat p_k$ — both small when one class dominates a node.</span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>**Cost-complexity pruning.** For a large tree $T_0$, choose the subtree $T\subseteq T_0$ minimising</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>$\sum_{m=1}^{|T|}\sum_{i\in R_m}(y_i-\bar y_{R_m})^2 + \alpha|T|$, where $|T|$ is the number of leaves</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>and $\alpha\ge 0$ trades fit against size. Increasing $\alpha$ yields a nested sequence of subtrees;</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>CV picks $\alpha$.</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>**Why decorrelation reduces variance.** The average of $B$ identically-distributed trees each with</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>variance $\sigma^2$ and pairwise correlation $\rho$ has variance</span>
 <span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>As $B\to\infty$ the second term vanishes, but the first, $\rho\sigma^2$, **does not** — so bagging is</span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>capped by how correlated the trees are. Random forests shrink $\rho$ (by restricting splits to $m$</span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>random predictors), pushing the floor down — the exact mechanism behind their gain. (Same</span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>correlated-average algebra as the <span class="co">[</span><span class="ot">Moulton/clustering</span><span class="co">](../03-regression/regression-diagnostics.qmd)</span></span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>and <span class="co">[</span><span class="ot">LOOCV</span><span class="co">](cross-validation.qmd)</span> results.)</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>\rho\,\sigma^2 + \frac{1-\rho}{B}\,\sigma^2 .</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>As $B\to\infty$ the second term vanishes, but the first, $\rho\sigma^2$, **does not** — so bagging is</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>capped by how correlated the trees are. Random forests shrink $\rho$ (by restricting splits to $m$</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>random predictors), pushing the floor down — the exact mechanism behind their gain. (Same</span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>correlated-average algebra as the <span class="co">[</span><span class="ot">Moulton/clustering</span><span class="co">](../03-regression/regression-diagnostics.qmd)</span></span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>and <span class="co">[</span><span class="ot">LOOCV</span><span class="co">](cross-validation.qmd)</span> results.)</span>
 <span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the bias–variance trade-off</span><span class="co">](bias-variance-tradeoff.qmd)</span> (a high-variance method</span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>  tamed by averaging), <span class="co">[</span><span class="ot">the bootstrap</span><span class="co">](../02-inference/confidence-intervals.qmd)</span> (bagging's engine),</span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>  and <span class="co">[</span><span class="ot">the LLN</span><span class="co">](../01-foundations/law-of-large-numbers.qmd)</span> (why averaging many models works).</span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">interpretability &amp; ML for social science</span><span class="co">](interpretability-and-ml.qmd)</span> (variable</span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>  importance and partial dependence as the price of ensembles),</span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">measurement error &amp; ML</span><span class="co">](measurement-and-ml.qmd)</span> (why noisy scale scores make trees unstable and</span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>  hide the nonlinearity ensembles exist to find), and</span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">causal forests</span><span class="co">](../05-causal-inference/index.qmd)</span> for heterogeneous treatment effects, and</span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">ML with clustered data</span><span class="co">](../ml-track/ml-with-clustered-data.qmd)</span> (trees with a mixed-effects model in</span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  every leaf), and <span class="co">[</span><span class="ot">SEM trees &amp; forests</span><span class="co">](../ml-track/latent-classes-and-sem-trees.qmd#sec-semtrees)</span> (a whole</span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  structural equation model in every node).</span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Contrasts with:** <span class="co">[</span><span class="ot">regression</span><span class="co">](../03-regression/index.qmd)</span> — linear structure vs learned</span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>  non-linear partitions; the right choice depends on the truth.</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections {.unnumbered}</span></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Builds on:** <span class="co">[</span><span class="ot">the bias–variance trade-off</span><span class="co">](bias-variance-tradeoff.qmd)</span> (a high-variance method</span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>  tamed by averaging), <span class="co">[</span><span class="ot">the bootstrap</span><span class="co">](../02-inference/confidence-intervals.qmd)</span> (bagging's engine),</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>  and <span class="co">[</span><span class="ot">the LLN</span><span class="co">](../01-foundations/law-of-large-numbers.qmd)</span> (why averaging many models works).</span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Leads to:** <span class="co">[</span><span class="ot">interpretability &amp; ML for social science</span><span class="co">](interpretability-and-ml.qmd)</span> (variable</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>  importance and partial dependence as the price of ensembles),</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">selection stability</span><span class="co">](selection-stability.qmd)</span> (when one tree must be read: bootstrapped structures,</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>  conditional inference trees, surrogate splits),</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">measurement error &amp; ML</span><span class="co">](measurement-and-ml.qmd)</span> (why noisy scale scores make trees unstable and</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  hide the nonlinearity ensembles exist to find), and</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">causal forests</span><span class="co">](../05-causal-inference/index.qmd)</span> for heterogeneous treatment effects, and</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">ML with clustered data</span><span class="co">](../ml-track/ml-with-clustered-data.qmd)</span> (trees with a mixed-effects model in</span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>  every leaf), and <span class="co">[</span><span class="ot">SEM trees &amp; forests</span><span class="co">](../ml-track/latent-classes-and-sem-trees.qmd#sec-semtrees)</span> (a whole</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>  structural equation model in every node).</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Contrasts with:** <span class="co">[</span><span class="ot">regression</span><span class="co">](../03-regression/index.qmd)</span> — linear structure vs learned</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>  non-linear partitions; the right choice depends on the truth.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
