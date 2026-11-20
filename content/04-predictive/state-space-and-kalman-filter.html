@@ -174,8 +174,8 @@ window.Quarto = {
 <meta property="og:description" content="The thing you care about is hidden; what you see is a noisy reading of it. Keep a running belief, and let each new reading nudge it.">
 <meta property="og:image" content="https://profsarthak.github.io/quant-social-scientist/content/04-predictive/state-space-and-kalman-filter_files/figure-html/fig-kalman-local-level-output-1.png">
 <meta property="og:site_name" content="The Quantitative Social Scientist">
-<meta property="og:image:height" content="1054">
-<meta property="og:image:width" content="1653">
+<meta property="og:image:height" content="1057">
+<meta property="og:image:width" content="1650">
 </head>
 
 <body class="nav-sidebar docked nav-fixed quarto-light">
@@ -2247,7 +2247,7 @@ y_t = a_t + \varepsilon^{y}_t, \qquad a_t = a_{t-1} + \varepsilon^{a}_t .
 <p><span class="math display">
 \text{new belief} \;=\; \text{prediction} \;+\; K_t \times \text{surprise}.
 </span></p>
-<p>Murphy’s reading of this line is the key to the whole method. The new mean is “the old mean plus a correction factor, which is <span class="math inline">K_t</span> times the error signal”. With a strong prior or very noisy sensors, the gain is small and the correction counts for little. With a weak prior or high-precision sensors, the gain is large and the data count for a lot <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span>. In the one-dimensional local level model the gain is simply</p>
+<p>Murphy’s reading of this line is, for me, the key to the whole method. The new mean is “the old mean plus a correction factor”, and that correction is <span class="math inline">K_t</span> times the error signal. With a strong prior or very noisy sensors, the gain is small and the correction counts for little. With a weak prior or high-precision sensors, the gain is large and the data count for a lot <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span>. In the one-dimensional local level model the gain is simply</p>
 <p><span class="math display">
 K_t = \frac{P_{t\mid t-1}}{P_{t\mid t-1} + R},
 </span></p>
@@ -2302,7 +2302,7 @@ K_t = \frac{P_{t\mid t-1}}{P_{t\mid t-1} + R},
 <div id="fig-kalman-local-level" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-kalman-local-level-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="state-space-and-kalman-filter_files/figure-html/fig-kalman-local-level-output-1.png" width="827" height="527" class="figure-img">
+<img src="state-space-and-kalman-filter_files/figure-html/fig-kalman-local-level-output-1.png" width="825" height="529" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kalman-local-level-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: The Kalman filter on a simulated local level model (level variance Q = 0.15, measurement variance R = 1.5). Top: the hidden level (black), the noisy readings (grey dots), and the filtered estimate (orange) with its 95% band. The estimate follows real movement but ignores most of the scatter. Bottom: the Kalman gain. It starts near 1 because the filter knows nothing at first, falls to a steady state of about 0.27 (each new reading moves the estimate about a quarter of the way), and jumps back up after the eight-period gap with no data. During the gap the filter can only predict: the estimate stays flat and the band widens.
@@ -2311,7 +2311,7 @@ Figure&nbsp;1: The Kalman filter on a simulated local level model (level varianc
 </div>
 </div>
 </div>
-<p>The gap in the figure shows a practical strength. When a reading is missing, the filter just skips the correction and keeps predicting, so its uncertainty grows honestly until data return. Murphy uses the same move in multi-target tracking, where an object with no matching observation skips the measurement update <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span>.</p>
+<p>The gap in the figure shows a practical strength. When a reading is missing, the filter just skips the correction and keeps predicting, so its uncertainty grows honestly until data return. Murphy uses the same move when tracking several objects at once (data association), where an object with no matching observation skips the measurement update <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span>.</p>
 </section>
 <section id="filtering-vs-smoothing" class="level2">
 <h2 class="anchored" data-anchor-id="filtering-vs-smoothing">Filtering vs smoothing</h2>
@@ -2352,7 +2352,7 @@ Figure&nbsp;1: The Kalman filter on a simulated local level model (level varianc
 </tr>
 <tr class="even">
 <td><strong>ARMA</strong></td>
-<td>short-range correlation left over</td>
+<td>serial correlation left over</td>
 <td>ARMA terms written in state-space form</td>
 </tr>
 </tbody>
@@ -2361,7 +2361,7 @@ Figure&nbsp;1: The Kalman filter on a simulated local level model (level varianc
 <p>Two more uses matter here:</p>
 <ul>
 <li><strong>Regression with drifting coefficients.</strong> Make the regression coefficients the hidden state and the filter updates them one observation at a time. Holding them fixed gives <strong>recursive least squares</strong>, which reaches the batch OLS answer in one pass. Letting them drift gives a <strong>dynamic linear model</strong>, a regression whose coefficients change over time <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span>.</li>
-<li><strong>Regime switching.</strong> Add a hidden <em>discrete</em> state that selects which linear model is running, and you get a <strong>switching</strong> state-space model. Murphy’s econometric example combines two linear-trend models, one with a positive slope (a growing economy) and one with a negative slope (a shrinking economy). He notes the switching model “is widely used in econometric forecasting, where it is called a regime switching model” <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span>. The cost is that exact inference blows up: the number of Gaussian components doubles every period, so approximations are required <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span>.</li>
+<li><strong>Regime switching.</strong> Add a hidden <em>discrete</em> state that selects which linear model is running, and you get a <strong>switching</strong> state-space model. Murphy’s econometric example combines two linear-trend models, one with a positive slope (a growing economy) and one with a negative slope (a shrinking economy). He notes the switching model “is widely used in econometric forecasting, where it is called a regime switching model” <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span>. The cost is that exact inference blows up: with two regimes, the number of Gaussian components doubles every period, so approximations are required <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span>.</li>
 </ul>
 </section>
 <section id="common-pitfalls" class="level2">
@@ -2378,9 +2378,9 @@ Figure&nbsp;1: The Kalman filter on a simulated local level model (level varianc
 <div class="callout-body-container callout-body">
 <ul>
 <li><strong>Mixing up <span class="math inline">Q</span> and <span class="math inline">R</span>.</strong> The filter’s behaviour depends on their <em>ratio</em>. Too much measurement noise and it lags real turning points. Too little and it chases noise. These are modelling choices with consequences, usually estimated from the data, and should be reported. <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span></li>
-<li><strong>Treating the filtered and smoothed series as the same thing.</strong> The smoother uses the future. Using smoothed estimates to judge what a decision-maker “should have known” at the time is a look-ahead error.</li>
-<li><strong>Trusting the start.</strong> The first few estimates reflect the starting belief. A deliberately broad prior lets its effect “wash out” after a few periods, as in Murphy’s tracking example, and those early periods should be read with that in mind. <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span></li>
-<li><strong>Letting the model explode.</strong> If the transition matrix has an eigenvalue above 1, the state grows without bound. Murphy notes stable models need all eigenvalues below 1. <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span></li>
+<li><strong>Treating the filtered and smoothed series as the same thing.</strong> The smoother uses the future. Using smoothed estimates to judge what a decision-maker <em>should</em> have known at the time is a look-ahead error.</li>
+<li><strong>Trusting the start.</strong> The first few estimates reflect the starting belief. A deliberately broad prior lets the starting guess get “washed away” by the data after a few time steps, as Murphy notes, and those early periods should be read with that in mind. <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span></li>
+<li><strong>Letting the model explode.</strong> If the transition matrix has an eigenvalue above 1, the state grows without bound. Murphy suggests requiring all eigenvalues below 1 to ensure stability. <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span></li>
 <li><strong>Forcing a non-linear world into the linear filter.</strong> Most real motion is not in straight lines. The <strong>extended</strong> Kalman filter linearises and the <strong>unscented</strong> filter propagates a few “sigma points” (“it is easier to approximate a Gaussian than to approximate a function”). Both are approximations, and the EKF in particular fails when uncertainty is large or the function is sharply curved. <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span></li>
 <li><strong>Assuming parameters are identified.</strong> Different <span class="math inline">(A, C, Q, R)</span> can produce the same data. Murphy notes one can fix <span class="math inline">Q=I</span> “without loss of generality”. Interpret individual matrices only when the structure (as in the structural time-series blocks) pins them down. <span class="citation" data-cites="murphy_ml">(<a href="#ref-murphy_ml" role="doc-biblioref">Murphy 2012</a>)</span></li>
 </ul>
@@ -2402,7 +2402,7 @@ Figure&nbsp;1: The Kalman filter on a simulated local level model (level varianc
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
-<li><strong>Murphy, <em>Machine Learning: A Probabilistic Perspective</em>, Ch. 18.</strong> <strong>Definition</strong>: an SSM as an HMM with continuous hidden states; transition and observation models; the belief state <span class="math inline">p(z_t\mid y_{1:t})</span> as the main object; the <strong>LG-SSM</strong> / linear dynamical system. <strong>Applications</strong>: radar-style 2-D tracking with a random-accelerations model; robotic SLAM and “closing the loop”; <strong>recursive least squares</strong> as a Kalman filter on regression weights (vs LMS), and dynamic linear models; <strong>structural time series</strong> (local level, local linear trend, seasonal, ARMA as SSMs; “easier to understand” and adaptive to non-stationarity). <strong>Kalman filter</strong>: predict and measurement steps, innovation, <strong>Kalman gain</strong> and its strong-prior/noisy-sensor reading, prediction-error likelihood, posterior predictive for forecasting, the Riccati steady state, and data-independence of the gain. <strong>RTS smoother</strong> and its backwards gain. <strong>Learning</strong>: identifiability (<span class="math inline">Q=I</span>), stability (eigenvalues &lt; 1), EM with the smoother as E-step, subspace initialisation, Bayesian methods. <strong>Approximate filters</strong>: EKF, UKF, assumed density filtering (online logistic regression, TrueSkill). <strong>Switching LDS</strong>: exponential growth in mixture components; the <strong>regime-switching</strong> growth vs recession trend example for econometric forecasting.</li>
+<li><strong>Murphy, <em>Machine Learning: A Probabilistic Perspective</em>, Ch. 18.</strong> <strong>Definition</strong>: an SSM as an HMM with continuous hidden states; transition and observation models; the belief state <span class="math inline">p(z_t\mid y_{1:t})</span> as the main object; the <strong>LG-SSM</strong> / linear dynamical system. <strong>Applications</strong>: radar-style 2-D tracking with a random-accelerations model; robotic SLAM and “closing the loop”; <strong>recursive least squares</strong> as a Kalman filter on regression weights (vs LMS), and dynamic linear models; <strong>structural time series</strong> (local level, local linear trend, seasonal, ARMA as SSMs; “easier to understand” and adaptive to non-stationarity). <strong>Kalman filter</strong>: predict and measurement steps, innovation, <strong>Kalman gain</strong> and its strong-prior/noisy-sensor reading, prediction-error likelihood, posterior predictive for forecasting, the Riccati steady state, and data-independence of the gain. <strong>RTS smoother</strong> and its backwards gain. <strong>Learning</strong>: identifiability (<span class="math inline">Q=I</span>), stability (eigenvalues &lt; 1), EM with the smoother as E-step, subspace initialisation, Bayesian methods. <strong>Approximate filters</strong>: EKF, UKF, assumed density filtering (online logistic regression, TrueSkill). <strong>Switching LDS</strong>: exponential growth in mixture components; the <strong>regime-switching</strong> growing vs shrinking economy trend example for econometric forecasting.</li>
 </ul>
 </div>
 </div>
@@ -3000,8 +3000,8 @@ Murphy, Kevin P. 2012. <em>Machine Learning: A Probabilistic Perspective</em>. M
 <span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>\text{new belief} \;=\; \text{prediction} \;+\; K_t \times \text{surprise}.</span>
 <span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>Murphy's reading of this line is the key to the whole method. The new mean is "the old mean plus a</span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>correction factor, which is $K_t$ times the error signal". With a strong prior or very noisy sensors,</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>Murphy's reading of this line is, for me, the key to the whole method. The new mean is "the old mean</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>plus a correction factor", and that correction is $K_t$ times the error signal. With a strong prior or very noisy sensors,</span>
 <span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>the gain is small and the correction counts for little. With a weak prior or high-precision sensors,</span>
 <span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>the gain is large and the data count for a lot <span class="co">[</span><span class="ot">@murphy_ml</span><span class="co">]</span>. In the one-dimensional local level model</span>
 <span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>the gain is simply</span>
@@ -3075,8 +3075,8 @@ Murphy, Kevin P. 2012. <em>Machine Learning: A Probabilistic Perspective</em>. M
 <span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>The gap in the figure shows a practical strength. When a reading is missing, the filter just skips</span>
 <span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>the correction and keeps predicting, so its uncertainty grows honestly until data return. Murphy uses</span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>the same move in multi-target tracking, where an object with no matching observation skips the</span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>measurement update <span class="co">[</span><span class="ot">@murphy_ml</span><span class="co">]</span>.</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>the same move when tracking several objects at once (data association), where an object with no</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>matching observation skips the measurement update <span class="co">[</span><span class="ot">@murphy_ml</span><span class="co">]</span>.</span>
 <span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="fu">## Filtering vs smoothing</span></span>
 <span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a></span>
@@ -3104,7 +3104,7 @@ Murphy, Kevin P. 2012. <em>Machine Learning: A Probabilistic Perspective</em>. M
 <span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Local level** <span class="pp">|</span> a mean that drifts <span class="pp">|</span> level $a_t$ <span class="pp">|</span></span>
 <span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Local linear trend** <span class="pp">|</span> a drifting level *and* a drifting slope <span class="pp">|</span> $(a_t, b_t)$, with $a_t = a_{t-1} + b_{t-1} + \text{noise}$ <span class="pp">|</span></span>
 <span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Seasonal** <span class="pp">|</span> offsets that sum to about zero over a cycle of $S$ periods <span class="pp">|</span> $S-1$ seasonal terms <span class="pp">|</span></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **ARMA** <span class="pp">|</span> short-range correlation left over <span class="pp">|</span> ARMA terms written in state-space form <span class="pp">|</span></span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **ARMA** <span class="pp">|</span> serial correlation left over <span class="pp">|</span> ARMA terms written in state-space form <span class="pp">|</span></span>
 <span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>Set the slope's noise to zero and the local linear trend has a fixed slope. Set the level's noise to</span>
 <span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>zero as well and you are back to the classic deterministic trend $a_0 + b_0 t$, so the structural model</span>
@@ -3123,7 +3123,7 @@ Murphy, Kevin P. 2012. <em>Machine Learning: A Probabilistic Perspective</em>. M
 <span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>  get a **switching** state-space model. Murphy's econometric example combines two linear-trend models,</span>
 <span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>  one with a positive slope (a growing economy) and one with a negative slope (a shrinking economy). He</span>
 <span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>  notes the switching model "is widely used in econometric forecasting, where it is called a regime</span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>  switching model" <span class="co">[</span><span class="ot">@murphy_ml</span><span class="co">]</span>. The cost is that exact inference blows up: the number of Gaussian</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>  switching model" <span class="co">[</span><span class="ot">@murphy_ml</span><span class="co">]</span>. The cost is that exact inference blows up: with two regimes, the number of Gaussian</span>
 <span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>  components doubles every period, so approximations are required <span class="co">[</span><span class="ot">@murphy_ml</span><span class="co">]</span>.</span>
 <span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common pitfalls</span></span>
@@ -3133,13 +3133,13 @@ Murphy, Kevin P. 2012. <em>Machine Learning: A Probabilistic Perspective</em>. M
 <span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>  and it lags real turning points. Too little and it chases noise. These are modelling choices with</span>
 <span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>  consequences, usually estimated from the data, and should be reported. <span class="co">[</span><span class="ot">@murphy_ml</span><span class="co">]</span></span>
 <span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treating the filtered and smoothed series as the same thing.** The smoother uses the future. Using</span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>  smoothed estimates to judge what a decision-maker "should have known" at the time is a look-ahead</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>  smoothed estimates to judge what a decision-maker *should* have known at the time is a look-ahead</span>
 <span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>  error.</span>
 <span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Trusting the start.** The first few estimates reflect the starting belief. A deliberately broad</span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  prior lets its effect "wash out" after a few periods, as in Murphy's tracking example, and those early</span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>  periods should be read with that in mind. <span class="co">[</span><span class="ot">@murphy_ml</span><span class="co">]</span></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>  prior lets the starting guess get "washed away" by the data after a few time steps, as Murphy notes,</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>  and those early periods should be read with that in mind. <span class="co">[</span><span class="ot">@murphy_ml</span><span class="co">]</span></span>
 <span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Letting the model explode.** If the transition matrix has an eigenvalue above 1, the state grows</span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>  without bound. Murphy notes stable models need all eigenvalues below 1. <span class="co">[</span><span class="ot">@murphy_ml</span><span class="co">]</span></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>  without bound. Murphy suggests requiring all eigenvalues below 1 to ensure stability. <span class="co">[</span><span class="ot">@murphy_ml</span><span class="co">]</span></span>
 <span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Forcing a non-linear world into the linear filter.** Most real motion is not in straight lines. The</span>
 <span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>  **extended** Kalman filter linearises and the **unscented** filter propagates a few "sigma points"</span>
 <span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>  ("it is easier to approximate a Gaussian than to approximate a function"). Both are approximations,</span>
@@ -3165,8 +3165,8 @@ Murphy, Kevin P. 2012. <em>Machine Learning: A Probabilistic Perspective</em>. M
 <span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>  **RTS smoother** and its backwards gain. **Learning**: identifiability ($Q=I$), stability</span>
 <span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>  (eigenvalues &lt; 1), EM with the smoother as E-step, subspace initialisation, Bayesian methods.</span>
 <span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>  **Approximate filters**: EKF, UKF, assumed density filtering (online logistic regression, TrueSkill).</span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  **Switching LDS**: exponential growth in mixture components; the **regime-switching** growth vs</span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>  recession trend example for econometric forecasting.</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>  **Switching LDS**: exponential growth in mixture components; the **regime-switching** growing vs</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>  shrinking economy trend example for econometric forecasting.</span>
 <span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix · the mathematics {.unnumbered}</span></span>
